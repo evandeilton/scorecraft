@@ -133,7 +133,7 @@ is echoed when verbose messages are on.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">half</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "data.table" "data.frame"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">half</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2113</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 2110</span></span></code></pre></div>
 <p><code>max_rows</code> is a memory guard rather than a second sampler.
 When it binds, the function counts the table first, reduces the fraction
 on the server so that the expected number of rows fits under the cap,
@@ -143,7 +143,7 @@ and reports the reduction:</p>
 <span><span class="co">#&gt;   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.238095</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">capped</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1069</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 1010</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="several-targets-straight-from-the-connection">Several targets straight from the connection<a class="anchor" aria-label="anchor" href="#several-targets-straight-from-the-connection"></a>
@@ -503,7 +503,7 @@ script.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sql_woe</span>, <span class="fl">24</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- =============================================================</span></span>
 <span><span class="co">#&gt; -- scorecraft | target: default | 12 approved variables | dialect: ansi</span></span>
-<span><span class="co">#&gt; -- Generated on 2026-09-04 13:05:38</span></span>
+<span><span class="co">#&gt; -- Generated on 2026-09-04 13:09:48</span></span>
 <span><span class="co">#&gt; -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing</span></span>
 <span><span class="co">#&gt; --   and sentinel values by the TRAINING median, special-population flags.</span></span>
 <span><span class="co">#&gt; -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().</span></span>
@@ -556,7 +556,7 @@ configuration; the dialects available are <code>ansi</code>,
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sql_sc</span>, <span class="fl">12</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- =============================================================</span></span>
 <span><span class="co">#&gt; -- scorecraft | scorecard of target: default | 12 variables | dialect: databricks</span></span>
-<span><span class="co">#&gt; -- Generated on 2026-09-04 13:05:39</span></span>
+<span><span class="co">#&gt; -- Generated on 2026-09-04 13:09:49</span></span>
 <span><span class="co">#&gt; -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer</span></span>
 <span><span class="co">#&gt; -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538</span></span>
 <span><span class="co">#&gt; -- Block 1 (CTE base_scr): pre-processing frozen on train.</span></span>

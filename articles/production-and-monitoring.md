@@ -71,7 +71,7 @@ half <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
 class(half)
 #> [1] "data.table" "data.frame"
 nrow(half)
-#> [1] 2113
+#> [1] 2110
 ```
 
 `max_rows` is a memory guard rather than a second sampler. When it
@@ -85,7 +85,7 @@ capped <- scr_fetch(con, "dtm", max_rows = 1000)
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.238095
 nrow(capped)
-#> [1] 1069
+#> [1] 1010
 ```
 
 ### Several targets straight from the connection
@@ -462,7 +462,7 @@ sql_woe <- unlist(strsplit(scr_sql(res), "\n", fixed = TRUE))
 cat(head(sql_woe, 24), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: ansi
-#> -- Generated on 2026-09-04 13:05:38
+#> -- Generated on 2026-09-04 13:09:48
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
@@ -515,7 +515,7 @@ sql_sc <- unlist(strsplit(scr_sql(sc, table = "prd.customers", dialect = "databr
 cat(head(sql_sc, 12), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | scorecard of target: default | 12 variables | dialect: databricks
-#> -- Generated on 2026-09-04 13:05:39
+#> -- Generated on 2026-09-04 13:09:49
 #> -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer
 #> -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538
 #> -- Block 1 (CTE base_scr): pre-processing frozen on train.

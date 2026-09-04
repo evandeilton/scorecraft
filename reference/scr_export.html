@@ -130,17 +130,17 @@ is absent they carry an availability row instead of a fabricated number.</p>
 <span class="r-in"><span>                  date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-example"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">scr_export</span><span class="op">(</span><span class="va">res</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpyQTubL/scorecraft-example/selection_default.xlsx</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpyQTubL/scorecraft-example/sql_woe_default.sql</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpyQTubL/scorecraft-example/summary_default.md</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpAvZJIP/scorecraft-example/selection_default.xlsx</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpAvZJIP/scorecraft-example/sql_woe_default.sql</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpAvZJIP/scorecraft-example/summary_default.md</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "selection_default.xlsx" "sql_woe_default.sql"    "summary_default.md"    </span>
 <span class="r-in"><span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu">scr_export</span><span class="op">(</span><span class="fu"><a href="scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpyQTubL/scorecraft-example/scorecard_default.xlsx</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpyQTubL/scorecraft-example/validation_default.xlsx</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpyQTubL/scorecraft-example/strategy_default.xlsx</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpyQTubL/scorecraft-example/sql_score_default.sql</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpyQTubL/scorecraft-example/sql_woe_default.sql</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpAvZJIP/scorecraft-example/scorecard_default.xlsx</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpAvZJIP/scorecraft-example/validation_default.xlsx</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpAvZJIP/scorecraft-example/strategy_default.xlsx</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpAvZJIP/scorecraft-example/sql_score_default.sql</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   /tmp/RtmpAvZJIP/scorecraft-example/sql_woe_default.sql</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">sc</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "scorecard_default.xlsx"  "validation_default.xlsx"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3] "strategy_default.xlsx"   "sql_score_default.sql"  </span>
