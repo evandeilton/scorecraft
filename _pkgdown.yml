@@ -1,6 +1,32 @@
 url: https://evandeilton.github.io/scorecraft/
 template:
   bootstrap: 5
+  bslib:
+    primary: "#0b1220"
+    navbar-bg: "#0b1220"
+    navbar-light-color: "#f8fafc"
+    navbar-light-hover-color: "#7dd3fc"
+    navbar-light-active-color: "#38bdf8"
+
+home:
+  title: scorecraft - scorecard engine with alignment, coarse classing and production SQL
+  links:
+  - text: Binning engine (OptimalBinningWoE)
+    href: https://github.com/evandeilton/OptimalBinningWoE
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+articles:
+- title: Guides
+  navbar: ~
+  contents:
+  - scorecraft
+  - coarse-classing
+  - alignment-and-portfolio
+  - production-and-monitoring
 
 reference:
 - title: Configuration

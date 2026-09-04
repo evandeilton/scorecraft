@@ -1,7 +1,8 @@
-# scorecraft
+# scorecraft <img src="man/figures/logo.png" align="right" height="139" alt="scorecraft hex logo" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/evandeilton/scorecraft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/evandeilton/scorecraft/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/evandeilton/scorecraft/actions/workflows/pkgdown.yaml/badge.svg)](https://evandeilton.github.io/scorecraft/)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
@@ -17,6 +18,8 @@ by test.
 
 Every stage is an exported function; `scr_select()` and `scr_scorecard()`
 are the shortcuts that chain them.
+
+Documentation site: <https://evandeilton.github.io/scorecraft/>.
 
 ## Installation
 
