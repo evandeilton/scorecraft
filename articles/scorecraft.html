@@ -129,7 +129,7 @@ exported on its own (<code><a href="../reference/scr_split.html">scr_split()</a>
 <span><span class="va">res</span></span>
 <span><span class="co">#&gt; &lt;scr_result&gt; target "default"</span></span>
 <span><span class="co">#&gt;   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span></span>
-<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.5s</span></span>
+<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.9s</span></span>
 <span><span class="co">#&gt;   convention: risk (target=1 is the bad case)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Funnel</span></span>
@@ -309,7 +309,7 @@ CSI with the signed points shift and the performance by vintage on any
 new data. It never schedules itself.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_monitor.html">scr_monitor</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">scr_demo</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span>, target <span class="op">=</span> <span class="st">"default"</span>, n_boot <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;scr_monitor&gt; target "default" | 6 period(s)</span></span>
+<span><span class="co">#&gt; &lt;scr_monitor&gt; target "default" | 6 period(s) | plan: PSI 0.10/0.25, CSI 0.10/0.25, alpha 0.05, min events 100</span></span>
 <span><span class="co">#&gt;   period              n      score      PSI fixed      critical adj.    </span></span>
 <span><span class="co">#&gt;   2026-01-01        700      549.8   0.0083 stable       0.0302 stable  </span></span>
 <span><span class="co">#&gt;   2026-02-01        700      550.3   0.0071 stable       0.0302 stable  </span></span>
@@ -324,11 +324,11 @@ new data. It never schedules itself.</p>
 <span><span class="co">#&gt;     vl_score_01                  2026-06-01   CSI 0.0209  shift -0.61 pts</span></span>
 <span><span class="co">#&gt;     vl_hist_04                   2026-05-01   CSI 0.0183  shift +0.60 pts</span></span>
 <span><span class="co">#&gt;   performance by vintage:</span></span>
-<span><span class="co">#&gt;     2026-01-01   n 700     event  14.14%  AUC 0.8152 [0.7733, 0.8503]  KS 0.5069</span></span>
+<span><span class="co">#&gt;     2026-01-01   n 700     event  14.14%  AUC 0.8152 [0.7733, 0.8503]  KS 0.5069  (insufficient events)</span></span>
 <span><span class="co">#&gt;     2026-02-01   n 700     event  14.57%  AUC 0.7997 [0.7634, 0.8416]  KS 0.4708</span></span>
-<span><span class="co">#&gt;     2026-03-01   n 700     event  13.71%  AUC 0.7605 [0.7082, 0.7983]  KS 0.4487</span></span>
+<span><span class="co">#&gt;     2026-03-01   n 700     event  13.71%  AUC 0.7605 [0.7082, 0.7983]  KS 0.4487  (insufficient events)</span></span>
 <span><span class="co">#&gt;     2026-04-01   n 700     event  14.57%  AUC 0.7644 [0.7131, 0.8038]  KS 0.4094</span></span>
-<span><span class="co">#&gt;     2026-05-01   n 700     event  14.00%  AUC 0.7500 [0.6978, 0.8039]  KS 0.3904</span></span>
+<span><span class="co">#&gt;     2026-05-01   n 700     event  14.00%  AUC 0.7500 [0.6978, 0.8039]  KS 0.3904  (insufficient events)</span></span>
 <span><span class="co">#&gt;     2026-06-01   n 700     event  15.00%  AUC 0.7318 [0.6708, 0.7633]  KS 0.3950</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -340,11 +340,11 @@ and a Markdown summary.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-vignette"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/scorecard_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/validation_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/strategy_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/sql_score_default.sql</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/sql_woe_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpxRgkJm/scorecraft-vignette/scorecard_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpxRgkJm/scorecraft-vignette/validation_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpxRgkJm/scorecraft-vignette/strategy_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpxRgkJm/scorecraft-vignette/sql_score_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpxRgkJm/scorecraft-vignette/sql_woe_default.sql</span></span>
 <span><span class="co">#&gt; [1] "scorecard_default.xlsx"  "validation_default.xlsx"</span></span>
 <span><span class="co">#&gt; [3] "strategy_default.xlsx"   "sql_score_default.sql"  </span></span>
 <span><span class="co">#&gt; [5] "sql_woe_default.sql"</span></span></code></pre></div>

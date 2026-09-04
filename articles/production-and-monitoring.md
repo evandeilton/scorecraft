@@ -71,7 +71,7 @@ half <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
 class(half)
 #> [1] "data.table" "data.frame"
 nrow(half)
-#> [1] 2098
+#> [1] 2059
 ```
 
 `max_rows` is a memory guard rather than a second sampler. When it
@@ -85,7 +85,7 @@ capped <- scr_fetch(con, "dtm", max_rows = 1000)
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.238095
 nrow(capped)
-#> [1] 1021
+#> [1] 1050
 ```
 
 ### Several targets straight from the connection
@@ -462,7 +462,7 @@ sql_woe <- unlist(strsplit(scr_sql(res), "\n", fixed = TRUE))
 cat(head(sql_woe, 24), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: ansi
-#> -- Generated on 2026-09-04 13:36:33
+#> -- Generated on 2026-09-04 17:35:44
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
@@ -515,7 +515,7 @@ sql_sc <- unlist(strsplit(scr_sql(sc, table = "prd.customers", dialect = "databr
 cat(head(sql_sc, 12), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | scorecard of target: default | 12 variables | dialect: databricks
-#> -- Generated on 2026-09-04 13:36:34
+#> -- Generated on 2026-09-04 17:35:46
 #> -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer
 #> -- score = 491.19665800103655 + -26.318891476654567 * logit | base_points = 538
 #> -- Block 1 (CTE base_scr): pre-processing frozen on train.
@@ -608,7 +608,7 @@ periods are the training vintages and the last two the hold-out.
 
 mo <- scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default", n_boot = 20)
 mo
-#> <scr_monitor> target "default" | 6 period(s)
+#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.10/0.25, CSI 0.10/0.25, alpha 0.05, min events 100
 #>   period              n      score      PSI fixed      critical adj.    
 #>   2026-01-01        700      549.8   0.0083 stable       0.0302 stable  
 #>   2026-02-01        700      550.3   0.0071 stable       0.0302 stable  
@@ -623,11 +623,11 @@ mo
 #>     vl_score_01                  2026-06-01   CSI 0.0209  shift -0.61 pts
 #>     vl_hist_04                   2026-05-01   CSI 0.0183  shift +0.60 pts
 #>   performance by vintage:
-#>     2026-01-01   n 700     event  14.14%  AUC 0.8152 [0.7928, 0.8508]  KS 0.5069
+#>     2026-01-01   n 700     event  14.14%  AUC 0.8152 [0.7928, 0.8508]  KS 0.5069  (insufficient events)
 #>     2026-02-01   n 700     event  14.57%  AUC 0.7997 [0.7587, 0.8363]  KS 0.4708
-#>     2026-03-01   n 700     event  13.71%  AUC 0.7605 [0.7049, 0.7906]  KS 0.4487
+#>     2026-03-01   n 700     event  13.71%  AUC 0.7605 [0.7049, 0.7906]  KS 0.4487  (insufficient events)
 #>     2026-04-01   n 700     event  14.57%  AUC 0.7644 [0.7097, 0.8061]  KS 0.4094
-#>     2026-05-01   n 700     event  14.00%  AUC 0.7500 [0.7008, 0.7908]  KS 0.3904
+#>     2026-05-01   n 700     event  14.00%  AUC 0.7500 [0.7008, 0.7908]  KS 0.3904  (insufficient events)
 #>     2026-06-01   n 700     event  15.00%  AUC 0.7318 [0.6903, 0.7583]  KS 0.3950
 ```
 

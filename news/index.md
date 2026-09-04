@@ -71,3 +71,34 @@ deliverables.
   accepts any DBI driver next to an ODBC DSN, and
   [`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)
   samples server-side with a dialect-aware random expression.
+
+### Hardening after the first release (unreleased)
+
+- [`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md)
+  is the monitoring contract: created by
+  [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
+  written to the `Monitoring_Plan` sheet, and read back by
+  `scr_monitor(plan = )` (a table or the strategy workbook), which now
+  takes its PSI/CSI thresholds, alpha and `min_events_per_period` from
+  it.
+- The scorecard stores the hold-out bin index of every variable, so the
+  `Stability_CSI_Timeline` sheet is a real timeline by vintage without a
+  [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md)
+  object.
+- The parallel backend is selectable with
+  `options(scorecraft.parallel = "fork" | "psock" | "serial")`; the test
+  suite exercises the PSOCK path (the Windows semantics) on every
+  platform and pins serial == fork == psock.
+- The descriptive triage is parallel by column as well.
+- Workers never fail silently on any backend: a worker error is
+  re-thrown with the failing item, a worker killed by the system is
+  reported as such (instead of a `NULL` that surfaces later as a
+  subscript error), warnings raised in a worker are re-raised in the
+  parent, PSOCK workers run with a single data.table thread, and a
+  `data.table` returned by a worker is re-allocated so that `:=` works
+  on it. `R CMD check --as-cran`’s two-process limit is honoured.
+- On Linux the fork backend caps the number of workers by the memory
+  available (`options(scorecraft.fork_mem_fraction = 0.75)`, `Inf` to
+  disable): forked workers duplicate the parent heap once the garbage
+  collector runs, and twenty workers over a two-million-row table were
+  killed by the OOM daemon in under two minutes.

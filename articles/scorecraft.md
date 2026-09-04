@@ -62,7 +62,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id", date_col = "re
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.5s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.9s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -261,7 +261,7 @@ itself.
 ``` r
 
 scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default", n_boot = 30)
-#> <scr_monitor> target "default" | 6 period(s)
+#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.10/0.25, CSI 0.10/0.25, alpha 0.05, min events 100
 #>   period              n      score      PSI fixed      critical adj.    
 #>   2026-01-01        700      549.8   0.0083 stable       0.0302 stable  
 #>   2026-02-01        700      550.3   0.0071 stable       0.0302 stable  
@@ -276,11 +276,11 @@ scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default", n_boot = 30
 #>     vl_score_01                  2026-06-01   CSI 0.0209  shift -0.61 pts
 #>     vl_hist_04                   2026-05-01   CSI 0.0183  shift +0.60 pts
 #>   performance by vintage:
-#>     2026-01-01   n 700     event  14.14%  AUC 0.8152 [0.7733, 0.8503]  KS 0.5069
+#>     2026-01-01   n 700     event  14.14%  AUC 0.8152 [0.7733, 0.8503]  KS 0.5069  (insufficient events)
 #>     2026-02-01   n 700     event  14.57%  AUC 0.7997 [0.7634, 0.8416]  KS 0.4708
-#>     2026-03-01   n 700     event  13.71%  AUC 0.7605 [0.7082, 0.7983]  KS 0.4487
+#>     2026-03-01   n 700     event  13.71%  AUC 0.7605 [0.7082, 0.7983]  KS 0.4487  (insufficient events)
 #>     2026-04-01   n 700     event  14.57%  AUC 0.7644 [0.7131, 0.8038]  KS 0.4094
-#>     2026-05-01   n 700     event  14.00%  AUC 0.7500 [0.6978, 0.8039]  KS 0.3904
+#>     2026-05-01   n 700     event  14.00%  AUC 0.7500 [0.6978, 0.8039]  KS 0.3904  (insufficient events)
 #>     2026-06-01   n 700     event  15.00%  AUC 0.7318 [0.6708, 0.7633]  KS 0.3950
 ```
 
@@ -294,11 +294,11 @@ strategy), the SQL files and a Markdown summary.
 
 out <- file.path(tempdir(), "scorecraft-vignette")
 basename(unlist(scr_export(sc, out, stamp = FALSE)$files))
-#>   /tmp/Rtmph7uki3/scorecraft-vignette/scorecard_default.xlsx
-#>   /tmp/Rtmph7uki3/scorecraft-vignette/validation_default.xlsx
-#>   /tmp/Rtmph7uki3/scorecraft-vignette/strategy_default.xlsx
-#>   /tmp/Rtmph7uki3/scorecraft-vignette/sql_score_default.sql
-#>   /tmp/Rtmph7uki3/scorecraft-vignette/sql_woe_default.sql
+#>   /tmp/RtmpxRgkJm/scorecraft-vignette/scorecard_default.xlsx
+#>   /tmp/RtmpxRgkJm/scorecraft-vignette/validation_default.xlsx
+#>   /tmp/RtmpxRgkJm/scorecraft-vignette/strategy_default.xlsx
+#>   /tmp/RtmpxRgkJm/scorecraft-vignette/sql_score_default.sql
+#>   /tmp/RtmpxRgkJm/scorecraft-vignette/sql_woe_default.sql
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  
 #> [5] "sql_woe_default.sql"

@@ -55,6 +55,22 @@ with R-SQL equivalence verified by test, and four `.xlsx` workbooks.
 recomputes PSI/CSI on new data, with both the fixed and the
 sample-size-adjusted threshold, and never schedules anything by itself.
 
+## Parallelism
+
+Column-wise work (binning, hold-out revalidation, CSI) and the bootstrap
+run on `config$nthread` workers. The backend follows
+`getOption("scorecraft.parallel")`: `"fork"` on unix by default,
+`"psock"` on Windows (and selectable anywhere, e.g. for tests),
+`"serial"` to switch parallelism off. Results are identical across
+backends.
+
+Forked workers are clones of the parent and, because the garbage
+collector writes to the objects it marks, each one ends up owning a copy
+of most of the parent heap. On Linux the number of fork workers is
+therefore capped at `getOption("scorecraft.fork_mem_fraction", 0.75)` of
+the memory available divided by the resident size of the session, with a
+message when the cap applies. Set the option to `Inf` to disable it.
+
 ## Reading conventions
 
 `objective` declares the vocabulary and the direction of the scale

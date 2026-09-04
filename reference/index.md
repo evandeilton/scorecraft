@@ -29,6 +29,8 @@ them.
   : Stages 3 and 4: multi-strategy selection and consensus
 - [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md)
   : Monitor the scorecard on new data
+- [`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md)
+  : The monitoring plan: the contract scr_monitor() reads
 - [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md)
   : Stage 6: honest reject inference through a sensitivity band
 - [`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md)

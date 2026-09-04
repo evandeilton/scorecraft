@@ -62,8 +62,19 @@
 <code><a href="../reference/scr_coarse_classing.html">scr_coarse_classing()</a></code> opens a manual binning lab: <code><a href="../reference/scr_classing_view.html">scr_classing_view()</a></code>, <code><a href="../reference/scr_classing_propose.html">scr_classing_propose()</a></code> (breaks, groups, merge, split, missing_to, other_to, reset), <code><a href="../reference/scr_classing_accept.html">scr_classing_accept()</a></code>/<code><a href="../reference/scr_classing_accept.html">scr_classing_discard()</a></code> with a mandatory reason, <code><a href="../reference/scr_classing_choose.html">scr_classing_choose()</a></code> (keep/drop/force), <code><a href="../reference/scr_classing_spec.html">scr_classing_spec()</a></code>/<code><a href="../reference/scr_classing_spec.html">scr_classing_read()</a></code>/<code><a href="../reference/scr_classing_spec.html">scr_classing_import()</a></code> for a CSV/xlsx round trip, <code><a href="../reference/scr_classing_apply.html">scr_classing_apply()</a></code> to commit into a new <code>scr_result</code>, and <code><a href="../reference/scr_decisions.html">scr_decisions()</a></code> for the append-only ledger. Manual bins share the engine’s contract, so <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code>, <code><a href="../reference/scr_apply.html">scr_apply()</a></code> and <code><a href="../reference/scr_sql.html">scr_sql()</a></code> follow them unchanged; the funnel gains <code>provenance</code>.</li>
 <li>
 <code><a href="../reference/scr_connect.html">scr_connect()</a></code> accepts any DBI driver next to an ODBC DSN, and <code><a href="../reference/scr_fetch.html">scr_fetch()</a></code> samples server-side with a dialect-aware random expression.</li>
+</ul><div class="section level3">
+<h3 id="hardening-after-the-first-release-unreleased-0-1-0">Hardening after the first release (unreleased)<a class="anchor" aria-label="anchor" href="#hardening-after-the-first-release-unreleased-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/scr_monitoring_plan.html">scr_monitoring_plan()</a></code> is the monitoring contract: created by <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code>, written to the <code>Monitoring_Plan</code> sheet, and read back by <code>scr_monitor(plan = )</code> (a table or the strategy workbook), which now takes its PSI/CSI thresholds, alpha and <code>min_events_per_period</code> from it.</li>
+<li>The scorecard stores the hold-out bin index of every variable, so the <code>Stability_CSI_Timeline</code> sheet is a real timeline by vintage without a <code><a href="../reference/scr_monitor.html">scr_monitor()</a></code> object.</li>
+<li>The parallel backend is selectable with <code>options(scorecraft.parallel = "fork" | "psock" | "serial")</code>; the test suite exercises the PSOCK path (the Windows semantics) on every platform and pins serial == fork == psock.</li>
+<li>The descriptive triage is parallel by column as well.</li>
+<li>Workers never fail silently on any backend: a worker error is re-thrown with the failing item, a worker killed by the system is reported as such (instead of a <code>NULL</code> that surfaces later as a subscript error), warnings raised in a worker are re-raised in the parent, PSOCK workers run with a single data.table thread, and a <code>data.table</code> returned by a worker is re-allocated so that <code>:=</code> works on it. <code>R CMD check --as-cran</code>’s two-process limit is honoured.</li>
+<li>On Linux the fork backend caps the number of workers by the memory available (<code>options(scorecraft.fork_mem_fraction = 0.75)</code>, <code>Inf</code> to disable): forked workers duplicate the parent heap once the garbage collector runs, and twenty workers over a two-million-row table were killed by the OOM daemon in under two minutes.</li>
 </ul></div>
-  </main></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

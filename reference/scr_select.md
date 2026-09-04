@@ -102,6 +102,7 @@ Other stages:
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
 [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
+[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
 [`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
@@ -119,7 +120,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.0s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.5s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel

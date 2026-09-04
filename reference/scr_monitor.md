@@ -15,8 +15,9 @@ scr_monitor(
   newdata,
   date_col = NULL,
   target = NULL,
-  alpha = 0.05,
-  n_boot = NULL
+  alpha = NULL,
+  n_boot = NULL,
+  plan = NULL
 )
 ```
 
@@ -42,17 +43,31 @@ scr_monitor(
 
 - alpha:
 
-  Level of the adjusted threshold.
+  Level of the adjusted threshold. `NULL` (default) takes it from the
+  plan.
 
 - n_boot:
 
   CI resamples per vintage. `NULL` uses the configuration.
 
+- plan:
+
+  The monitoring contract: `NULL` (default) uses the plan stored in the
+  scorecard
+  ([`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md));
+  otherwise an `item`/`value` table, or the path of a strategy workbook
+  written by
+  [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+  whose `Monitoring_Plan` sheet is read. The fixed thresholds of the PSI
+  and CSI flags, the alpha of the adjusted threshold and
+  `min_events_per_period` come from it.
+
 ## Value
 
 An `scr_monitor` object with `psi` (score, per period), `csi` (per
-variable and period), `vintage` (or `NULL`) and `plan` (the monitoring
-contract: thresholds and frozen bands).
+variable and period), `vintage` (or `NULL`; `status` says
+`"insufficient"` when a period has fewer events than the plan requires)
+and `plan` (the contract actually used).
 
 ## See also
 
@@ -62,6 +77,7 @@ Other stages:
 [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
+[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
 [`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
@@ -80,7 +96,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 sc <- scr_scorecard(res)
 mo <- scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default")
 mo
-#> <scr_monitor> target "default" | 6 period(s)
+#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.10/0.25, CSI 0.10/0.25, alpha 0.05, min events 100
 #>   period              n      score      PSI fixed      critical adj.    
 #>   2026-01-01        700      549.8   0.0083 stable       0.0302 stable  
 #>   2026-02-01        700      550.3   0.0071 stable       0.0302 stable  
@@ -95,11 +111,11 @@ mo
 #>     vl_score_01                  2026-06-01   CSI 0.0209  shift -0.61 pts
 #>     vl_hist_04                   2026-05-01   CSI 0.0183  shift +0.60 pts
 #>   performance by vintage:
-#>     2026-01-01   n 700     event  14.14%  AUC 0.8152 [0.7928, 0.8508]  KS 0.5069
+#>     2026-01-01   n 700     event  14.14%  AUC 0.8152 [0.7928, 0.8508]  KS 0.5069  (insufficient events)
 #>     2026-02-01   n 700     event  14.57%  AUC 0.7997 [0.7587, 0.8363]  KS 0.4708
-#>     2026-03-01   n 700     event  13.71%  AUC 0.7605 [0.7049, 0.7906]  KS 0.4487
+#>     2026-03-01   n 700     event  13.71%  AUC 0.7605 [0.7049, 0.7906]  KS 0.4487  (insufficient events)
 #>     2026-04-01   n 700     event  14.57%  AUC 0.7644 [0.7097, 0.8061]  KS 0.4094
-#>     2026-05-01   n 700     event  14.00%  AUC 0.7500 [0.7008, 0.7908]  KS 0.3904
+#>     2026-05-01   n 700     event  14.00%  AUC 0.7500 [0.7008, 0.7908]  KS 0.3904  (insufficient events)
 #>     2026-06-01   n 700     event  15.00%  AUC 0.7318 [0.6903, 0.7583]  KS 0.3950
 mo$psi
 #>        period     n mean_score         psi flag_fixed   critical flag_adjusted

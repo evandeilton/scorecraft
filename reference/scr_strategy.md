@@ -67,6 +67,7 @@ Other stages:
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
 [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
+[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
 [`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
