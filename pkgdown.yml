@@ -1,0 +1,12 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  alignment-and-portfolio: alignment-and-portfolio.html
+  coarse-classing: coarse-classing.html
+  production-and-monitoring: production-and-monitoring.html
+  scorecraft: scorecraft.html
+last_built: 2026-09-04T13:04Z
+urls:
+  reference: https://evandeilton.github.io/scorecraft/reference
+  article: https://evandeilton.github.io/scorecraft/articles
