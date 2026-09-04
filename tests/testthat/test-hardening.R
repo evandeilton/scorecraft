@@ -15,7 +15,7 @@ test_that("the PSOCK backend gives results identical to serial and fork", {
     m <- scr_metrics(w_tr[[paste0(binned[1], "_woe")]], tr$clean$default[sp$train_idx], n_boot = 20, seed = 3, nthread = 2L)
     list(fit = fit, ho = ho, m = m)
   })
-  expect_identical(.scr_backend(), "fork")
+  expect_identical(.scr_backend(), if (.Platform$OS.type == "unix") "fork" else "psock")
   withr::with_options(list(scorecraft.parallel = "psock"), expect_identical(.scr_backend(), "psock"))
   a <- run("serial"); b <- run("fork"); c <- run("psock")
   for (f in names(a$fit$results)) {
@@ -125,7 +125,7 @@ test_that("scr_monitor() reads the monitoring plan: from the scorecard, a table,
   expect_true(any(mo1$csi$flag_fixed == "moderate"))
   expect_true(all(mo1$vintage$status == "insufficient"))
   expect_true(all(mo1$psi$critical < mo0$psi$critical))   # alpha 0.20 lowers the critical value
-  expect_output(print(mo1), "PSI 0.01/0.02")
+  expect_output(print(mo1), "PSI 0.005/0.02")
   expect_output(print(mo1), "insufficient events")
   # an explicit alpha still wins over the plan
   mo2 <- scr_monitor(sc, scr_demo, date_col = "ref_date", alpha = 0.01, plan = tight)

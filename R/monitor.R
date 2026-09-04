@@ -185,11 +185,16 @@ scr_monitor <- function(x, newdata, date_col = NULL, target = NULL, alpha = NULL
             class = c("scr_monitor", "list"))
 }
 
+#' Platform-stable short number (sprintf("%.2f", 0.005) differs between C libraries)
+#' @keywords internal
+#' @noRd
+.g3 <- function(v) formatC(v, digits = 3, format = "g", flag = "#") |> sub(pattern = "\\.?0+$", replacement = "") |> sub(pattern = "\\.$", replacement = "")
+
 #' @export
 print.scr_monitor <- function(x, ...) {
   th <- x$thresholds
-  cat(sprintf("<scr_monitor> target \"%s\" | %d period(s) | plan: PSI %.2f/%.2f, CSI %.2f/%.2f, alpha %.2f, min events %g\n",
-              x$target, length(x$periods), th$psi[1], th$psi[2], th$csi[1], th$csi[2], th$alpha, th$min_events))
+  cat(sprintf("<scr_monitor> target \"%s\" | %d period(s) | plan: PSI %s/%s, CSI %s/%s, alpha %s, min events %g\n",
+              x$target, length(x$periods), .g3(th$psi[1]), .g3(th$psi[2]), .g3(th$csi[1]), .g3(th$csi[2]), .g3(th$alpha), th$min_events))
   cat(sprintf("  %-12s %8s %10s %8s %-9s %9s %-8s\n", "period", "n", "score", "PSI", "fixed", "critical", "adj."))
   p <- x$psi
   for (i in seq_len(nrow(p))) cat(sprintf("  %-12s %8s %10.1f %8.4f %-9s %9.4f %-8s\n", p$period[i], n_fmt(p$n[i]), p$mean_score[i],
