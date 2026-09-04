@@ -1,0 +1,107 @@
+---
+title: "scorecraft: from raw table to aligned scorecard and production SQL"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{scorecraft: from raw table to aligned scorecard and production SQL}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This vignette walks the whole pipeline on the bundled `scr_demo` table, a
+synthetic dataset fabricated with the defects real data has: sentinel
+`-999`, missing values, constants, duplicates, a redundant pair, high
+cardinality, pure noise and a column that only degrades in the last period.
+
+```{r setup}
+library(scorecraft)
+cfg <- scr_config("moderate", objective = "risk", verbose = FALSE, nthread = 1,
+                  use_ranger = FALSE, xgb_rounds = 60, n_boot = 30)
+cfg
+```
+
+## Stages 0 to 4: selection
+
+`scr_select()` chains the split (out-of-time by whole periods), the triage,
+the optimal binning with screening and hold-out revalidation, and the
+multi-strategy consensus. Each stage is also exported on its own
+(`scr_split()`, `scr_triage()`, `scr_bin()`, `scr_model()`).
+
+```{r select}
+res <- scr_select(scr_demo, "default", config = cfg, drop = "id", date_col = "ref_date")
+res
+```
+
+The funnel is the deliverable: every input column, the stage it died at and
+why.
+
+```{r funnel}
+table(scr_funnel(res, cols = "all")$exit_stage)
+head(scr_funnel(res, only_selected = TRUE)[, .(feature, total_iv, iv_holdout, ks, psi, psi_flag_adjusted)])
+```
+
+## Stages 4 and 5: scorecard and alignment
+
+`scr_scorecard()` fits the logistic regression on the WOE columns, checks
+the signs, and aligns the logit to the declared scale by regressing
+empirical log-odds on score bands and composing with the PDO map. The
+alignment object records the odds orientation so that two scorecards
+aligned this way are comparable.
+
+```{r scorecard}
+sc <- scr_scorecard(res)
+sc
+sc$alignment
+head(sc$points[, .(variable, bin, woe, coef, points)])
+```
+
+Discrimination always comes with a bootstrap confidence interval, and the
+score PSI with both thresholds.
+
+```{r metrics}
+scr_score_metrics(sc)[, .(sample, auc, auc_lo, auc_hi, ks, gini)]
+sc$stability$score
+```
+
+## Stage 6: cut-off, strategy and reject inference
+
+```{r strategy}
+scr_cutoff(sc, n_cuts = 8)
+scr_strategy(sc, revenue_good = 1080, loss_bad = 4500)
+scr_reject(sc)
+```
+
+## Production: R and SQL agree
+
+```{r apply}
+new <- head(scr_demo, 5)
+scr_apply(sc, new)
+scr_reasons(sc, new, k = 2)
+```
+
+```{r sql}
+cat(tail(scr_sql(sc, table = "prd.customers", dialect = "databricks"), 8), sep = "\n")
+```
+
+## Monitoring
+
+`scr_monitor()` recomputes the score PSI, the per-variable CSI with the
+signed points shift and the performance by vintage on any new data. It never
+schedules itself.
+
+```{r monitor}
+scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default", n_boot = 30)
+```
+
+## Deliverables
+
+`scr_export()` writes hardened `.xlsx` workbooks (selection, scorecard,
+validation, strategy), the SQL files and a Markdown summary.
+
+```{r export, eval = requireNamespace("openxlsx", quietly = TRUE)}
+out <- file.path(tempdir(), "scorecraft-vignette")
+basename(unlist(scr_export(sc, out, stamp = FALSE)$files))
+```

@@ -1,0 +1,11 @@
+# top-level project notes are not part of the package
+/*.md
+!/README.md
+!/NEWS.md
+!/cran-comments.md
+.Rhistory
+.RData
+.Rproj.user/
+docs/
+inst/doc/
+*.tar.gz

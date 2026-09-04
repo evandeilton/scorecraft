@@ -1,0 +1,33 @@
+url: https://evandeilton.github.io/scorecraft/
+template:
+  bootstrap: 5
+
+reference:
+- title: Configuration
+  contents:
+  - has_concept("configuration")
+- title: Stages
+  desc: Every stage of the pipeline as a function, plus the shortcuts that chain them.
+  contents:
+  - has_concept("stages")
+- title: Coarse classing lab
+  desc: Manual binning, manual variable choice and the decision ledger.
+  contents:
+  - has_concept("classing")
+- title: Reading the result
+  contents:
+  - has_concept("accessors")
+- title: Production
+  desc: Scoring in R, production SQL, deliverables.
+  contents:
+  - has_concept("production")
+- title: Metrics
+  contents:
+  - has_concept("metrics")
+- title: Portfolio and database
+  contents:
+  - has_concept("portfolio")
+  - has_concept("database")
+- title: Data
+  contents:
+  - has_concept("data")

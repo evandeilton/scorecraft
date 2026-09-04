@@ -1,0 +1,52 @@
+Package: scorecraft
+Title: Scorecard Engine with Scale Alignment, Cut-Off Strategy and Production SQL
+Version: 0.1.0
+Authors@R: c(
+    person("Jose Evandeilton", "Lopes", email = "evandeilton@gmail.com",
+           role = c("aut", "cre", "cph"))
+  )
+Description: Production-grade scorecard engine for binary targets (credit risk,
+    fraud, propensity), built on 'OptimalBinningWoE'. Selects variables through
+    optimal binning, eight admission rules, hold-out revalidation with frozen
+    bins and a multi-strategy consensus ('glmnet', 'xgboost', 'lightgbm',
+    'ranger') weighted by out-of-sample performance; fits the points scorecard
+    with an explicit, auditable scale alignment (log-odds regression on the raw
+    score composed with the PDO map); sweeps cut-offs with frozen cuts; performs
+    honest reject inference through a sensitivity band; monitors PSI/CSI with
+    both the fixed and the sample-size-adjusted threshold; and emits production
+    SQL in several dialects, with R-SQL equivalence verified by test. The audit
+    funnel never drops a candidate from the report.
+License: MIT + file LICENSE
+URL: https://github.com/evandeilton/scorecraft
+BugReports: https://github.com/evandeilton/scorecraft/issues
+Encoding: UTF-8
+Language: en-GB
+Depends:
+    R (>= 4.1.0)
+Imports:
+    data.table (>= 1.14.0),
+    OptimalBinningWoE (>= 1.13.4),
+    xgboost,
+    stats,
+    utils,
+    graphics,
+    parallel
+Suggests:
+    glmnet,
+    lightgbm,
+    ranger,
+    DBI,
+    odbc,
+    RSQLite,
+    duckdb,
+    openxlsx,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+LazyData: true
+LazyDataCompression: xz
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/testthat/parallel: false
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0

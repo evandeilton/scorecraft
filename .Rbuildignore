@@ -1,0 +1,14 @@
+^LICENSE\.md$
+.Rhistory
+scorecraft.Rproj
+.Rproj.user
+^cran-comments\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
+^codecov\.yml$
+^data-raw$
+^.*\.Rproj$
+^\.Rproj\.user$
+^[DS][A-Z]{3,5}\.md$
