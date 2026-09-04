@@ -134,6 +134,10 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   gains  <- data.table::rbindlist(lapply(names(samples), function(nm)
     data.table::data.table(sample = nm, .score_gains(samples[[nm]]$score, samples[[nm]]$y, breaks, dir))))
   stability <- .scorecard_stability(samples, w_tr, w_ho, pts, breaks, cfg)
+  # integer bin index of every hold-out row, per variable: what a CSI timeline
+  # by vintage needs, at a fraction of the cost of keeping the labels
+  holdout_bins <- data.table::as.data.table(lapply(stats::setNames(features, features), function(f)
+    match(w_ho[[paste0(f, "_bin")]], pts$table[variable == f, bin])))
   calibration <- .calibration(samples$holdout, breaks, al)
   rank_order  <- .rank_order(gains[sample == "holdout"])
 
@@ -155,6 +159,7 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
     scale = list(base_score = cfg$base_score, base_odds = cfg$base_odds, pdo = cfg$pdo,
                  factor = al$factor, offset = al$offset, direction = dir, odds_orientation = al$odds_orientation),
     points = pts$table, base_points = pts$base_points, base_points_raw = pts$base_points_raw,
+    holdout_bins = holdout_bins, monitoring_plan = NULL,
     points_style = cfg$points_style, points_round = cfg$points_round,
     samples = samples, metrics = metrics, breaks = breaks, gains = gains, stability = stability,
     calibration = calibration, rank_order = rank_order, challenger = chall,
@@ -164,6 +169,7 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
     sql = NULL, model_card = NULL, files = NULL
   ), class = c("scr_scorecard", "list"))
   sc$sql <- build_sql_score(sc)
+  sc$monitoring_plan <- scr_monitoring_plan(sc)
   sc$model_card <- .model_card(sc, x)
   sc
 }

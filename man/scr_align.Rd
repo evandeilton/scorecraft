@@ -107,6 +107,7 @@ Other stages:
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
 \code{\link[=scr_monitor]{scr_monitor()}},
+\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
 \code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},

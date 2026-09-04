@@ -75,92 +75,15 @@ triage_plan <- function(dt, target, cols, train_idx, cfg) {
   n  <- length(train_idx)
   sp <- cfg$special_values
 
-  rows <- vector("list", length(cols$features))
-  ledger <- list()
-  fps <- character(length(cols$features))
-
-  for (i in seq_along(cols$features)) {
-    f   <- cols$features[i]
-    x   <- dt[[f]][train_idx]
-    num <- f %in% cols$var_num
-
-    n_miss <- sum(is.na(x))
-    n_spec <- if (num && length(sp)) sum(x %in% sp, na.rm = TRUE) else 0L
-    share  <- (n_miss + n_spec) / n
-
-    if (num) {
-      reg      <- !is.na(x) & !(x %in% sp)
-      xr       <- x[reg]
-      u        <- unique(xr)
-      n_dist   <- length(u)
-      pct_mode <- if (length(xr)) max(tabulate(match(xr, u), nbins = n_dist)) / length(xr) else 1
-      imput    <- if (length(xr)) stats::median(xr) else NA_real_
-      fps[i]   <- paste("N", n_dist, n_miss, n_spec, signif(mean(xr), 12), signif(stats::sd(xr), 12),
-                        signif(suppressWarnings(min(xr)), 12), signif(suppressWarnings(max(xr)), 12), sep = "|")
-    } else {
-      xc       <- if (n_miss) ifelse(is.na(x), "MISSING", x) else x
-      u        <- unique(xc)
-      n_dist   <- length(u)
-      cnt      <- tabulate(match(xc, u), nbins = n_dist)
-      ord      <- order(-cnt)[seq_len(min(5L, n_dist))]
-      pct_mode <- max(cnt) / n
-      imput    <- NA_real_
-      fps[i]   <- paste("C", n_dist, n_miss, paste(u[ord], collapse = ","), paste(cnt[ord], collapse = ","), sep = "|")
-    }
-
-    iv_q  <- .quick_iv(x, y, num, sp, cfg)
-    w_sp  <- if (share > 0) woe_subpop((is.na(x) | x %in% sp), y) else NA_real_
-
-    decomp <- "-"
-    if (num && share >= cfg$special_min_share && share <= 1 - cfg$special_min_share &&
-        is.finite(w_sp) && abs(w_sp) >= cfg$special_min_woe) {
-      decomp <- "flag"
-    } else if (num && (n_miss + n_spec) > 0) {
-      decomp <- "impute"
-    } else if (!num && n_miss > 0) {
-      decomp <- "coalesce"
-    }
-
-    status <- "keep"; reason <- "OK"
-    if (num) {
-      if (n_dist < 2L)                      { status <- "drop"; reason <- "CONSTANT" }
-      else if (share > cfg$max_missing)      { status <- "drop"; reason <- "TOO_MANY_MISSING" }
-      else if (pct_mode > cfg$near_constant) { status <- "drop"; reason <- "NEAR_CONSTANT" }
-      else if (iv_q < cfg$min_iv_quick)      { status <- "drop"; reason <- "NO_SIGNAL" }
-    } else {
-      if (n_dist < 2L)                        { status <- "drop"; reason <- "CONSTANT" }
-      else if (n_dist > cfg$max_cat_levels)   { status <- "drop"; reason <- "HIGH_CARDINALITY" }
-      else if (pct_mode > cfg$near_constant)  { status <- "drop"; reason <- "NEAR_CONSTANT" }
-      else if (iv_q < cfg$min_iv_quick)       { status <- "drop"; reason <- "NO_SIGNAL" }
-    }
-
-    rows[[i]] <- data.table::data.table(
-      feature = f, derived_from = NA_character_,
-      type = if (num) "numeric" else "categorical",
-      n_missing = n_miss, pct_missing = n_miss / n, n_special = n_spec, pct_special = n_spec / n,
-      n_distinct = n_dist, pct_mode = pct_mode, iv_quick = iv_q, woe_special = w_sp,
-      decomposition = decomp, triage_status = status, triage_reason = reason)
-
-    # Derivation ledger: UNCONDITIONAL for every survivor, even when training
-    # saw neither a missing value nor a sentinel. Hold-out and production may;
-    # this way R and SQL always agree.
-    make_flag <- identical(decomp, "flag")
-    if (num && status == "keep" && is.finite(imput)) {
-      ledger[[length(ledger) + 1L]] <- data.table::data.table(
-        kind = "num_impute", source = f, output = f, impute_value = imput,
-        specials = paste(sp, collapse = ","), na_fill = NA_character_)
-    }
-    if (num && make_flag) {
-      ledger[[length(ledger) + 1L]] <- data.table::data.table(
-        kind = "num_flag", source = f, output = paste0(f, cfg$flag_suffix), impute_value = NA_real_,
-        specials = paste(sp, collapse = ","), na_fill = NA_character_)
-    }
-    if (!num && status == "keep") {
-      ledger[[length(ledger) + 1L]] <- data.table::data.table(
-        kind = "cat_coalesce", source = f, output = f, impute_value = NA_real_,
-        specials = NA_character_, na_fill = "MISSING")
-    }
-  }
+  # One candidate per task, parallel by column (D12). The training slice is
+  # taken inside the worker, so under fork nothing is copied up front.
+  feats <- cols$features
+  out <- .scr_lapply(feats, function(f) {
+    .triage_one(f, dt[[f]][train_idx], y, f %in% cols$var_num, sp, cfg, n)
+  }, nthread = cfg$nthread, fork_only = TRUE)
+  rows   <- lapply(out, `[[`, "row")
+  ledger <- unlist(lapply(out, `[[`, "ledger"), recursive = FALSE)
+  fps    <- vapply(out, `[[`, character(1), "fp")
 
   profile <- data.table::rbindlist(rows)
   ledger  <- if (length(ledger)) data.table::rbindlist(ledger) else
@@ -217,6 +140,89 @@ triage_plan <- function(dt, target, cols, train_idx, cfg) {
        keep_num = intersect(keep, cols$var_num),
        keep_cat = c(intersect(keep, cols$var_cat), profile[!is.na(derived_from) & triage_status == "keep", feature]),
        derived  = profile[!is.na(derived_from) & triage_status == "keep", feature])
+}
+
+#' Profile one candidate on its training slice: verdict, ledger rows, fingerprint
+#' @keywords internal
+#' @noRd
+.triage_one <- function(f, x, y, num, sp, cfg, n) {
+  n_miss <- sum(is.na(x))
+  n_spec <- if (num && length(sp)) sum(x %in% sp, na.rm = TRUE) else 0L
+  share  <- (n_miss + n_spec) / n
+
+  if (num) {
+    reg      <- !is.na(x) & !(x %in% sp)
+    xr       <- x[reg]
+    u        <- unique(xr)
+    n_dist   <- length(u)
+    pct_mode <- if (length(xr)) max(tabulate(match(xr, u), nbins = n_dist)) / length(xr) else 1
+    imput    <- if (length(xr)) stats::median(xr) else NA_real_
+    fp       <- paste("N", n_dist, n_miss, n_spec, signif(mean(xr), 12), signif(stats::sd(xr), 12),
+                      signif(suppressWarnings(min(xr)), 12), signif(suppressWarnings(max(xr)), 12), sep = "|")
+  } else {
+    xc       <- if (n_miss) ifelse(is.na(x), "MISSING", x) else x
+    u        <- unique(xc)
+    n_dist   <- length(u)
+    cnt      <- tabulate(match(xc, u), nbins = n_dist)
+    ord      <- order(-cnt)[seq_len(min(5L, n_dist))]
+    pct_mode <- max(cnt) / n
+    imput    <- NA_real_
+    fp       <- paste("C", n_dist, n_miss, paste(u[ord], collapse = ","), paste(cnt[ord], collapse = ","), sep = "|")
+  }
+
+  iv_q  <- .quick_iv(x, y, num, sp, cfg)
+  w_sp  <- if (share > 0) woe_subpop((is.na(x) | x %in% sp), y) else NA_real_
+
+  decomp <- "-"
+  if (num && share >= cfg$special_min_share && share <= 1 - cfg$special_min_share &&
+      is.finite(w_sp) && abs(w_sp) >= cfg$special_min_woe) {
+    decomp <- "flag"
+  } else if (num && (n_miss + n_spec) > 0) {
+    decomp <- "impute"
+  } else if (!num && n_miss > 0) {
+    decomp <- "coalesce"
+  }
+
+  status <- "keep"; reason <- "OK"
+  if (num) {
+    if (n_dist < 2L)                      { status <- "drop"; reason <- "CONSTANT" }
+    else if (share > cfg$max_missing)      { status <- "drop"; reason <- "TOO_MANY_MISSING" }
+    else if (pct_mode > cfg$near_constant) { status <- "drop"; reason <- "NEAR_CONSTANT" }
+    else if (iv_q < cfg$min_iv_quick)      { status <- "drop"; reason <- "NO_SIGNAL" }
+  } else {
+    if (n_dist < 2L)                        { status <- "drop"; reason <- "CONSTANT" }
+    else if (n_dist > cfg$max_cat_levels)   { status <- "drop"; reason <- "HIGH_CARDINALITY" }
+    else if (pct_mode > cfg$near_constant)  { status <- "drop"; reason <- "NEAR_CONSTANT" }
+    else if (iv_q < cfg$min_iv_quick)       { status <- "drop"; reason <- "NO_SIGNAL" }
+  }
+
+  row <- data.table::data.table(
+    feature = f, derived_from = NA_character_,
+    type = if (num) "numeric" else "categorical",
+    n_missing = n_miss, pct_missing = n_miss / n, n_special = n_spec, pct_special = n_spec / n,
+    n_distinct = n_dist, pct_mode = pct_mode, iv_quick = iv_q, woe_special = w_sp,
+    decomposition = decomp, triage_status = status, triage_reason = reason)
+
+  # Derivation ledger: UNCONDITIONAL for every survivor, even when training
+  # saw neither a missing value nor a sentinel. Hold-out and production may;
+  # this way R and SQL always agree.
+  led <- list()
+  if (num && status == "keep" && is.finite(imput)) {
+    led[[length(led) + 1L]] <- data.table::data.table(
+      kind = "num_impute", source = f, output = f, impute_value = imput,
+      specials = paste(sp, collapse = ","), na_fill = NA_character_)
+  }
+  if (num && identical(decomp, "flag")) {
+    led[[length(led) + 1L]] <- data.table::data.table(
+      kind = "num_flag", source = f, output = paste0(f, cfg$flag_suffix), impute_value = NA_real_,
+      specials = paste(sp, collapse = ","), na_fill = NA_character_)
+  }
+  if (!num && status == "keep") {
+    led[[length(led) + 1L]] <- data.table::data.table(
+      kind = "cat_coalesce", source = f, output = f, impute_value = NA_real_,
+      specials = NA_character_, na_fill = "MISSING")
+  }
+  list(row = row, ledger = led, fp = fp)
 }
 
 #' Materialise the triage plan (same transformation on train and hold-out)

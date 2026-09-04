@@ -72,34 +72,168 @@ time_it <- function(label, expr) {
 #' Parallel lapply with a serial fallback
 #'
 #' The single real speed lever found in the research: none of the 37 binning
-#' algorithms runs in parallel, but columns are embarrassingly parallel. On
-#' unix this forks ([parallel::mclapply()]); on Windows it starts a PSOCK
-#' cluster, which requires `FUN` to reference package functions with `::`.
+#' algorithms runs in parallel, but columns are embarrassingly parallel. The
+#' backend is chosen by `getOption("scorecraft.parallel")`: `"fork"`
+#' ([parallel::mclapply()], the default on unix), `"psock"` (a
+#' [parallel::makeCluster()] cluster, the default on Windows and the path
+#' exercised by the tests on every platform, since PSOCK workers share no
+#' memory and therefore prove that every closure serialises), or `"serial"`.
 #' Serial when `nthread <= 1` or there are fewer than two items.
 #'
-#' An error in any worker is re-thrown here with the failing item, instead of
-#' becoming a silent `try-error` inside the list.
+#' Every worker returns a sealed envelope (value, error message, warnings),
+#' so that in the parent:
+#' * an error in any worker is re-thrown with the failing item, instead of
+#'   becoming a silent `try-error` inside the list;
+#' * a `NULL` can only mean that the worker died (out of memory, a signal)
+#'   and is reported as such, instead of surfacing later as a subscript
+#'   error; a worker legitimately returning `NULL` still does;
+#' * warnings raised in a worker are re-raised here, not lost in a child's
+#'   stderr;
+#' * a `data.table` returned by a worker is re-allocated
+#'   ([data.table::setalloccol()]), so that `:=` on it works without the
+#'   "invalid .internal.selfref" warning that follows serialisation.
+#'
+#' Under fork the number of workers is also capped by the memory available
+#' (see `.scr_fork_cap()`): a forked worker starts as a copy-on-write clone,
+#' but R's garbage collector writes to every object it marks, so in practice
+#' each worker ends up owning a copy of most of the parent heap. Twenty
+#' workers over a 9 GB parent exhaust a 60 GB workstation in under two
+#' minutes; the cap keeps the run alive at the cost of fewer workers.
+#' Forked children use a single data.table thread (data.table does this by
+#' itself); PSOCK workers are set to one thread explicitly, since `k`
+#' workers times the default thread count oversubscribe the machine.
+#' `R CMD check --as-cran` limits every package to two processes through
+#' `_R_CHECK_LIMIT_CORES_`, which is honoured.
 #' @keywords internal
 #' @noRd
-.scr_lapply <- function(X, FUN, nthread = 1L, ...) {
+.scr_lapply <- function(X, FUN, nthread = 1L, ..., fork_only = FALSE) {
   n <- length(X)
   k <- min(as.integer(nthread %||% 1L), n)
-  if (n < 2L || is.na(k) || k <= 1L) return(lapply(X, FUN, ...))
+  lim <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+  if (nzchar(lim) && !identical(tolower(lim), "false")) k <- min(k, 2L)
+  backend <- .scr_backend()
+  # fork_only: FUN closes over a large table; under fork it is shared
+  # copy-on-write, under PSOCK it would be serialised to every worker
+  if (n < 2L || is.na(k) || k <= 1L || identical(backend, "serial") ||
+      (isTRUE(fork_only) && !identical(backend, "fork"))) return(lapply(X, FUN, ...))
 
-  if (.Platform$OS.type == "unix") {
-    out <- suppressWarnings(parallel::mclapply(X, FUN, ..., mc.cores = k, mc.preschedule = TRUE))
+  wrap <- .scr_envelope(FUN)
+  if (identical(backend, "fork")) {
+    k <- .scr_fork_cap(k)
+    if (k <= 1L) return(lapply(X, FUN, ...))
+    out <- suppressWarnings(parallel::mclapply(X, wrap, ..., mc.cores = k, mc.preschedule = TRUE))
   } else {
     cl <- parallel::makeCluster(k)
     on.exit(parallel::stopCluster(cl), add = TRUE)
-    out <- parallel::parLapply(cl, X, FUN, ...)
+    parallel::clusterEvalQ(cl, if (requireNamespace("data.table", quietly = TRUE)) data.table::setDTthreads(1L))
+    out <- tryCatch(parallel::parLapply(cl, X, wrap, ...), error = function(e)
+      stop("parallel worker failed (PSOCK cluster): ", conditionMessage(e),
+           "; lower `nthread` or set options(scorecraft.parallel = \"serial\").", call. = FALSE))
   }
-  err <- vapply(out, inherits, logical(1), "try-error")
-  if (any(err)) {
-    i <- which(err)[1]
-    stop("parallel worker failed (item ", i, "): ",
-         conditionMessage(attr(out[[i]], "condition")), call. = FALSE)
+  .scr_unwrap(out, n)
+}
+
+#' Wrap `FUN` so that a worker always returns an envelope, never a condition
+#'
+#' The closure's environment holds only `FUN`, so a PSOCK worker receives
+#' `FUN` and nothing else from the caller's frame.
+#' @keywords internal
+#' @noRd
+.scr_envelope <- function(FUN) {
+  wrap <- function(x, ...) {
+    warns <- character()
+    val <- withCallingHandlers(
+      tryCatch(list(ok = TRUE, value = FUN(x, ...)),
+               error = function(e) list(ok = FALSE, error = conditionMessage(e))),
+      warning = function(w) {
+        warns <<- c(warns, conditionMessage(w))
+        invokeRestart("muffleWarning")
+      })
+    val$warnings <- warns
+    val
   }
-  out
+  environment(wrap) <- list2env(list(FUN = FUN), parent = environment(.scr_envelope))
+  wrap
+}
+
+#' Open the envelopes: dead workers, errors, warnings, then the values
+#' @keywords internal
+#' @noRd
+.scr_unwrap <- function(out, n) {
+  dead <- if (length(out) != n) seq_len(n) else which(vapply(out, function(o) is.null(o) || !is.list(o), logical(1)))
+  if (length(dead)) {
+    stop("parallel worker died without returning a result (item(s) ", lst(dead),
+         "): killed by the system, most likely out of memory. Lower `nthread`, or set ",
+         "options(scorecraft.parallel = \"serial\").", call. = FALSE)
+  }
+  fails <- which(!vapply(out, function(o) isTRUE(o$ok), logical(1)))
+  if (length(fails)) {
+    i <- fails[1]
+    stop("parallel worker failed (item ", i, "): ", out[[i]]$error, call. = FALSE)
+  }
+  warns <- unique(unlist(lapply(out, `[[`, "warnings")))
+  for (w in warns) warning(w, call. = FALSE)
+  lapply(out, function(o) {
+    v <- o$value
+    if (data.table::is.data.table(v)) data.table::setalloccol(v) else v
+  })
+}
+
+#' Resolve the parallel backend from the option and the platform
+#' @keywords internal
+#' @noRd
+.scr_backend <- function() {
+  b <- getOption("scorecraft.parallel", NULL)
+  if (is.null(b)) return(if (.Platform$OS.type == "unix") "fork" else "psock")
+  b <- match.arg(as.character(b), c("fork", "psock", "serial"))
+  if (identical(b, "fork") && .Platform$OS.type != "unix") "psock" else b
+}
+
+#' Cap the number of fork workers by the memory available
+#'
+#' Budget: `getOption("scorecraft.fork_mem_fraction", 0.75)` of the memory the
+#' kernel reports as available, divided by the resident size of this process
+#' (the worst case: every worker duplicating the parent). At least one worker
+#' is always returned; `Inf` (or any non-finite fraction) disables the cap.
+#' Only Linux exposes both numbers cheaply (`/proc/meminfo` and
+#' `/proc/self/statm`); elsewhere the cap is a no-op.
+#' @keywords internal
+#' @noRd
+.scr_fork_cap <- function(k) {
+  k <- as.integer(k)
+  frac <- suppressWarnings(as.numeric(getOption("scorecraft.fork_mem_fraction", 0.75)))
+  if (length(frac) != 1L || !is.finite(frac) || frac <= 0) return(k)
+  avail <- .scr_mem_available()
+  rss   <- .scr_rss()
+  if (!is.finite(avail) || !is.finite(rss) || rss <= 0) return(k)
+  cap <- max(1L, as.integer(floor(frac * avail / rss)))
+  if (cap < k) {
+    msg("  fork workers capped at %d of %d (resident %.1f GB, %.1f GB available)",
+        cap, k, rss / 1024^3, avail / 1024^3)
+  }
+  min(k, cap)
+}
+
+#' Memory available to new allocations, in bytes (Linux only, else `NA`)
+#' @keywords internal
+#' @noRd
+.scr_mem_available <- function() {
+  if (!file.exists("/proc/meminfo")) return(NA_real_)
+  ln <- tryCatch(readLines("/proc/meminfo", warn = FALSE), error = function(e) character())
+  ln <- ln[startsWith(ln, "MemAvailable:")]
+  if (!length(ln)) return(NA_real_)
+  kb <- suppressWarnings(as.numeric(regmatches(ln[1], regexpr("[0-9]+", ln[1]))))
+  if (!is.finite(kb)) NA_real_ else kb * 1024
+}
+
+#' Resident set size of this process, in bytes (Linux only, else `NA`)
+#' @keywords internal
+#' @noRd
+.scr_rss <- function() {
+  if (!file.exists("/proc/self/statm")) return(NA_real_)
+  st <- tryCatch(scan("/proc/self/statm", what = numeric(), quiet = TRUE), error = function(e) numeric())
+  if (length(st) < 2L || !is.finite(st[2])) return(NA_real_)
+  st[2] * 4096
 }
 
 #' Split a vector into `k` chunks of similar size, preserving order

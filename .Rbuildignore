@@ -13,3 +13,4 @@ scorecraft.Rproj
 ^\.Rproj\.user$
 ^[DS][A-Z]{3,5}\.md$
 ^pkgdown$
+^Rplots\.pdf$

@@ -42,7 +42,8 @@ Suggests:
     openxlsx,
     testthat (>= 3.0.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    withr
 LazyData: true
 LazyDataCompression: xz
 VignetteBuilder: knitr

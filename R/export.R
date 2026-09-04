@@ -133,7 +133,7 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
     "Cutoff_Sweep"       = ct$table,
     "Strategy_Bands"     = st$table,
     "Reject_Sensitivity" = rj$sensitivity,
-    "Monitoring_Plan"    = (mo %||% .monitor_plan_default(x))$plan
+    "Monitoring_Plan"    = as.data.frame(if (!is.null(mo)) mo$plan else x$monitoring_plan %||% scr_monitoring_plan(x))
   )
   files <- list(
     scorecard  = .scr_write_xlsx(scorecard,  file.path(out_dir, sprintf("scorecard_%s.xlsx", tag))),
@@ -159,9 +159,10 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
   s <- x$samples$holdout; tr <- x$samples$train
   periods <- sort(unique(as.character(s$date)))
   hie <- identical(x$direction, "higher_is_riskier")
+  pl <- .read_plan(x$monitoring_plan %||% scr_monitoring_plan(x))$thresholds
   psi <- data.table::rbindlist(lapply(periods, function(p) {
     i <- as.character(s$date) == p
-    r <- scr_psi(tr$score, s$score[i], breaks = x$breaks, alpha = x$config$psi_alpha)
+    r <- scr_psi(tr$score, s$score[i], breaks = x$breaks, alpha = pl$alpha, thresholds = pl$psi)
     data.table::data.table(period = p, n = sum(i), mean_score = mean(s$score[i]), psi = r$psi,
                            flag_fixed = r$flag_fixed, critical = r$critical, flag_adjusted = r$flag_adjusted)
   }))
@@ -173,19 +174,16 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
                            mean_score = mean(s$score[i]), auc = m$auc, auc_lo = m$auc_lo, auc_hi = m$auc_hi,
                            ks = m$ks, ks_lo = m$ks_lo, ks_hi = m$ks_hi, gini = m$gini)
   }))
-  csi <- data.table::copy(x$stability$variables)[, period := "holdout"]
+  csi <- if (is.null(x$holdout_bins)) data.table::copy(x$stability$variables)[, period := "holdout"] else
+    data.table::rbindlist(lapply(periods, function(p) {
+      i <- as.character(s$date) == p
+      data.table::rbindlist(lapply(x$features, function(f) {
+        pt <- x$points[variable == f]
+        cmp <- tabulate(x$holdout_bins[[f]][i], nbins = nrow(pt))
+        .csi_dt(p, f, .csi_row(pt, cmp, pl$alpha, pl$csi))
+      }))
+    }))
   list(psi = psi, csi = csi, vintage = vintage)
-}
-
-#' @keywords internal
-#' @noRd
-.monitor_plan_default <- function(x) {
-  list(plan = data.table::data.table(
-    item = c("psi_score_fixed_moderate", "psi_score_fixed_action", "psi_adjusted_alpha", "csi_variable_fixed_moderate",
-             "csi_variable_fixed_action", "score_bands", "min_events_per_period", "threshold_source"),
-    value = c("0.10", "0.25", as.character(x$config$psi_alpha), "0.10", "0.25",
-              paste(round(x$breaks[is.finite(x$breaks)], 2), collapse = " | "), "100",
-              "0.10/0.25: market convention, no published authority; adjusted: Yurdakul & Naranjo (2020)")))
 }
 
 #' @keywords internal

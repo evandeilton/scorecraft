@@ -9,8 +9,9 @@ scr_monitor(
   newdata,
   date_col = NULL,
   target = NULL,
-  alpha = 0.05,
-  n_boot = NULL
+  alpha = NULL,
+  n_boot = NULL,
+  plan = NULL
 )
 }
 \arguments{
@@ -23,14 +24,23 @@ scr_monitor(
 \item{target}{Target column in \code{newdata}, for the performance by vintage.
 \code{NULL} skips it.}
 
-\item{alpha}{Level of the adjusted threshold.}
+\item{alpha}{Level of the adjusted threshold. \code{NULL} (default) takes it
+from the plan.}
 
 \item{n_boot}{CI resamples per vintage. \code{NULL} uses the configuration.}
+
+\item{plan}{The monitoring contract: \code{NULL} (default) uses the plan stored
+in the scorecard (\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}}); otherwise an \code{item}/\code{value}
+table, or the path of a strategy workbook written by \code{\link[=scr_export]{scr_export()}},
+whose \code{Monitoring_Plan} sheet is read. The fixed thresholds of the PSI
+and CSI flags, the alpha of the adjusted threshold and
+\code{min_events_per_period} come from it.}
 }
 \value{
 An \code{scr_monitor} object with \code{psi} (score, per period), \code{csi}
-(per variable and period), \code{vintage} (or \code{NULL}) and \code{plan} (the
-monitoring contract: thresholds and frozen bands).
+(per variable and period), \code{vintage} (or \code{NULL}; \code{status} says
+\code{"insufficient"} when a period has fewer events than the plan requires)
+and \code{plan} (the contract actually used).
 }
 \description{
 Recomputes, per period of \code{date_col} (or for the whole data), the score
@@ -58,6 +68,7 @@ Other stages:
 \code{\link[=scr_bin]{scr_bin()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
+\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
 \code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},

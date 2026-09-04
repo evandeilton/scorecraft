@@ -39,6 +39,23 @@ and four \code{.xlsx} workbooks. \code{\link[=scr_monitor]{scr_monitor()}} recom
 with both the fixed and the sample-size-adjusted threshold, and never
 schedules anything by itself.
 }
+\section{Parallelism}{
+
+
+Column-wise work (binning, hold-out revalidation, CSI) and the bootstrap
+run on \code{config$nthread} workers. The backend follows
+\code{getOption("scorecraft.parallel")}: \code{"fork"} on unix by default, \code{"psock"}
+on Windows (and selectable anywhere, e.g. for tests), \code{"serial"} to switch
+parallelism off. Results are identical across backends.
+
+Forked workers are clones of the parent and, because the garbage collector
+writes to the objects it marks, each one ends up owning a copy of most of
+the parent heap. On Linux the number of fork workers is therefore capped
+at \code{getOption("scorecraft.fork_mem_fraction", 0.75)} of the memory
+available divided by the resident size of the session, with a message
+when the cap applies. Set the option to \code{Inf} to disable it.
+}
+
 \section{Reading conventions}{
 
 

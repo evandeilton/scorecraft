@@ -2,6 +2,96 @@
 # monitor.R - PSI/CSI over time (D19: exported, never runs by itself)
 # ============================================================================ #
 
+#' The monitoring plan: the contract scr_monitor() reads
+#'
+#' A small `item`/`value` table with the thresholds and the frozen score
+#' bands of a scorecard. It is created by [scr_scorecard()] from the
+#' configuration, written to the `Monitoring_Plan` sheet of the strategy
+#' workbook by [scr_export()], and **read back** by [scr_monitor()]: change a
+#' threshold in the sheet, pass the file (or the edited table) as `plan`, and
+#' the flags follow the plan, not the configuration.
+#'
+#' @param x An object from [scr_scorecard()], or a configuration from
+#'   [scr_config()] plus `breaks`.
+#' @param breaks Frozen score bands, when `x` is a configuration.
+#'
+#' @return A `data.frame` of class `scr_monitoring_plan` with the items
+#'   `psi_score_fixed_moderate`, `psi_score_fixed_action`, `psi_adjusted_alpha`,
+#'   `csi_variable_fixed_moderate`, `csi_variable_fixed_action`,
+#'   `score_bands`, `min_events_per_period` and `threshold_source`.
+#'
+#' @family stages
+#' @examples
+#' plan <- scr_monitoring_plan(scr_config(), breaks = c(-Inf, 500, 550, 600, Inf))
+#' plan
+#' @export
+scr_monitoring_plan <- function(x, breaks = NULL) {
+  if (inherits(x, "scr_scorecard")) { cfg <- x$config; breaks <- x$breaks }
+  else if (inherits(x, "scr_config")) { cfg <- x; if (is.null(breaks)) stop("`breaks` is needed with a configuration.", call. = FALSE) }
+  else stop("scr_monitoring_plan() expects an scr_scorecard or an scr_config.", call. = FALSE)
+  d <- data.frame(
+    item = c("psi_score_fixed_moderate", "psi_score_fixed_action", "psi_adjusted_alpha",
+             "csi_variable_fixed_moderate", "csi_variable_fixed_action", "score_bands",
+             "min_events_per_period", "threshold_source"),
+    value = c("0.10", "0.25", as.character(cfg$psi_alpha), "0.10", "0.25",
+              paste(round(breaks[is.finite(breaks)], 2), collapse = " | "), "100",
+              "0.10/0.25: market convention, no published authority; adjusted: Yurdakul & Naranjo (2020)"),
+    stringsAsFactors = FALSE)
+  class(d) <- c("scr_monitoring_plan", "data.frame")
+  d
+}
+
+#' Read a monitoring plan from a table or from the strategy workbook
+#' @keywords internal
+#' @noRd
+.read_plan <- function(plan) {
+  if (is.character(plan) && length(plan) == 1L && file.exists(plan)) {
+    .need_openxlsx()
+    sheets <- openxlsx::getSheetNames(plan)
+    if (!"Monitoring_Plan" %in% sheets) stop("no 'Monitoring_Plan' sheet in ", plan, call. = FALSE)
+    plan <- openxlsx::read.xlsx(plan, sheet = "Monitoring_Plan")
+  }
+  plan <- as.data.frame(plan, stringsAsFactors = FALSE)
+  if (!all(c("item", "value") %in% names(plan))) stop("a monitoring plan needs `item` and `value` columns.", call. = FALSE)
+  get <- function(nm, default) {
+    v <- plan$value[match(nm, plan$item)]
+    if (is.na(v)) return(default)
+    out <- suppressWarnings(as.numeric(v))
+    if (is.na(out)) stop("monitoring plan: item '", nm, "' is not numeric (", v, ").", call. = FALSE)
+    out
+  }
+  th <- list(psi = c(get("psi_score_fixed_moderate", 0.10), get("psi_score_fixed_action", 0.25)),
+             csi = c(get("csi_variable_fixed_moderate", 0.10), get("csi_variable_fixed_action", 0.25)),
+             alpha = get("psi_adjusted_alpha", 0.05), min_events = get("min_events_per_period", 100))
+  if (any(diff(th$psi) <= 0) || any(diff(th$csi) <= 0)) stop("monitoring plan: the action threshold must exceed the moderate one.", call. = FALSE)
+  list(table = plan, thresholds = th)
+}
+
+#' CSI of one variable against its training bin shares, with both thresholds
+#' @keywords internal
+#' @noRd
+.csi_row <- function(pt, cmp, alpha, thresholds = c(0.10, 0.25)) {
+  n_new <- sum(cmp); n_tr <- sum(pt$count_train); k <- nrow(pt)
+  csi_v <- if (n_new > 0L) {
+    sm <- if (any(pt$count_train == 0L) || any(cmp == 0L)) 0.5 else 0
+    pb <- (pt$count_train + sm) / (n_tr + sm * k); pc <- (cmp + sm) / (n_new + sm * k)
+    sum((pb - pc) * log(pb / pc))
+  } else NA_real_
+  crit <- (1 / n_tr + 1 / max(1L, n_new)) * stats::qchisq(1 - alpha, df = max(1L, k - 1L))
+  list(n = n_new, csi = csi_v,
+       flag_fixed = if (is.na(csi_v)) NA_character_ else if (csi_v < thresholds[1]) "stable" else if (csi_v < thresholds[2]) "moderate" else "shift",
+       critical = crit,
+       flag_adjusted = if (is.na(csi_v)) NA_character_ else if (csi_v < crit) "stable" else "shift",
+       points_shift = if (n_new > 0L) .points_shift(pt$count_train / n_tr, cmp / n_new, pt$points) else NA_real_)
+}
+
+#' @keywords internal
+#' @noRd
+.csi_dt <- function(period, variable, r) {
+  data.table::data.table(period = period, variable = variable, n = r$n, csi = r$csi, flag_fixed = r$flag_fixed,
+                         critical = r$critical, flag_adjusted = r$flag_adjusted, points_shift = r$points_shift)
+}
+
 #' Monitor the scorecard on new data
 #'
 #' Recomputes, per period of `date_col` (or for the whole data), the score
@@ -16,12 +106,20 @@
 #' @param date_col Period column. `NULL` treats `newdata` as a single period.
 #' @param target Target column in `newdata`, for the performance by vintage.
 #'   `NULL` skips it.
-#' @param alpha Level of the adjusted threshold.
+#' @param alpha Level of the adjusted threshold. `NULL` (default) takes it
+#'   from the plan.
 #' @param n_boot CI resamples per vintage. `NULL` uses the configuration.
+#' @param plan The monitoring contract: `NULL` (default) uses the plan stored
+#'   in the scorecard ([scr_monitoring_plan()]); otherwise an `item`/`value`
+#'   table, or the path of a strategy workbook written by [scr_export()],
+#'   whose `Monitoring_Plan` sheet is read. The fixed thresholds of the PSI
+#'   and CSI flags, the alpha of the adjusted threshold and
+#'   `min_events_per_period` come from it.
 #'
 #' @return An `scr_monitor` object with `psi` (score, per period), `csi`
-#'   (per variable and period), `vintage` (or `NULL`) and `plan` (the
-#'   monitoring contract: thresholds and frozen bands).
+#'   (per variable and period), `vintage` (or `NULL`; `status` says
+#'   `"insufficient"` when a period has fewer events than the plan requires)
+#'   and `plan` (the contract actually used).
 #'
 #' @family stages
 #' @examples
@@ -35,9 +133,12 @@
 #' mo$psi
 #' head(mo$csi)
 #' @export
-scr_monitor <- function(x, newdata, date_col = NULL, target = NULL, alpha = 0.05, n_boot = NULL) {
+scr_monitor <- function(x, newdata, date_col = NULL, target = NULL, alpha = NULL, n_boot = NULL, plan = NULL) {
   check_scorecard(x, "scr_monitor")
   n_boot <- n_boot %||% x$config$n_boot
+  pl <- .read_plan(plan %||% x$monitoring_plan %||% scr_monitoring_plan(x))
+  th <- pl$thresholds
+  alpha <- alpha %||% th$alpha
   dt <- data.table::as.data.table(newdata)
   if (!is.null(date_col) && !date_col %in% names(dt)) stop("`date_col` does not exist in newdata.", call. = FALSE)
   if (!is.null(target) && !target %in% names(dt)) stop("`target` does not exist in newdata.", call. = FALSE)
@@ -51,7 +152,7 @@ scr_monitor <- function(x, newdata, date_col = NULL, target = NULL, alpha = 0.05
 
   psi <- data.table::rbindlist(lapply(periods, function(p) {
     i <- period == p
-    r <- scr_psi(tr_score, score[i], breaks = x$breaks, alpha = alpha)
+    r <- scr_psi(tr_score, score[i], breaks = x$breaks, alpha = alpha, thresholds = th$psi)
     data.table::data.table(period = p, n = sum(i), mean_score = mean(score[i]), psi = r$psi,
                            flag_fixed = r$flag_fixed, critical = r$critical, flag_adjusted = r$flag_adjusted)
   }))
@@ -59,23 +160,10 @@ scr_monitor <- function(x, newdata, date_col = NULL, target = NULL, alpha = 0.05
     i <- period == p
     data.table::rbindlist(lapply(x$features, function(f) {
       pt <- x$points[variable == f]
-      cb <- paste0(f, "_bin")
       # the base distribution is the training bin share stored in the points
       # table; the adjusted critical value uses the real training size
-      cmp <- tabulate(match(w[[cb]][i], pt$bin), nbins = nrow(pt))
-      n_new <- sum(cmp); n_tr <- sum(pt$count_train)
-      csi_v <- if (n_new > 0L) {
-        sm <- if (any(pt$count_train == 0L) || any(cmp == 0L)) 0.5 else 0
-        pb <- (pt$count_train + sm) / (n_tr + sm * nrow(pt)); pc <- (cmp + sm) / (n_new + sm * nrow(pt))
-        sum((pb - pc) * log(pb / pc))
-      } else NA_real_
-      crit <- (1 / n_tr + 1 / max(1L, n_new)) * stats::qchisq(1 - alpha, df = max(1L, nrow(pt) - 1L))
-      data.table::data.table(
-        period = p, variable = f, n = n_new, csi = csi_v,
-        flag_fixed = if (is.na(csi_v)) NA_character_ else if (csi_v < 0.10) "stable" else if (csi_v < 0.25) "moderate" else "shift",
-        critical = crit,
-        flag_adjusted = if (is.na(csi_v)) NA_character_ else if (csi_v < crit) "stable" else "shift",
-        points_shift = if (n_new > 0L) .points_shift(pt$count_train / n_tr, cmp / n_new, pt$points) else NA_real_)
+      cmp <- tabulate(match(w[[paste0(f, "_bin")]][i], pt$bin), nbins = nrow(pt))
+      .csi_dt(p, f, .csi_row(pt, cmp, alpha, th$csi))
     }))
   }))
   vintage <- NULL
@@ -88,21 +176,20 @@ scr_monitor <- function(x, newdata, date_col = NULL, target = NULL, alpha = 0.05
                        level = x$config$ci_level, seed = x$config$seed, nthread = x$config$nthread)
       data.table::data.table(period = p, n = sum(i), events = sum(y[i]), event_rate = mean(y[i]),
                              mean_score = mean(score[i]), auc = m$auc, auc_lo = m$auc_lo, auc_hi = m$auc_hi,
-                             ks = m$ks, ks_lo = m$ks_lo, ks_hi = m$ks_hi, gini = m$gini)
+                             ks = m$ks, ks_lo = m$ks_lo, ks_hi = m$ks_hi, gini = m$gini,
+                             status = if (sum(y[i]) < th$min_events) "insufficient" else "ok")
     }))
   }
-  plan <- data.table::data.table(
-    item = c("psi_score_fixed_moderate", "psi_score_fixed_action", "psi_adjusted_alpha", "csi_variable_fixed_moderate",
-             "csi_variable_fixed_action", "score_bands", "min_events_per_period", "threshold_source"),
-    value = c("0.10", "0.25", as.character(alpha), "0.10", "0.25", paste(round(x$breaks[is.finite(x$breaks)], 2), collapse = " | "),
-              "100", "0.10/0.25: market convention, no published authority; adjusted: Yurdakul & Naranjo (2020)"))
-  structure(list(psi = psi[], csi = csi[], vintage = vintage, plan = plan, periods = periods, target = x$target),
+  structure(list(psi = psi[], csi = csi[], vintage = vintage, plan = pl$table, thresholds = th,
+                 periods = periods, target = x$target),
             class = c("scr_monitor", "list"))
 }
 
 #' @export
 print.scr_monitor <- function(x, ...) {
-  cat(sprintf("<scr_monitor> target \"%s\" | %d period(s)\n", x$target, length(x$periods)))
+  th <- x$thresholds
+  cat(sprintf("<scr_monitor> target \"%s\" | %d period(s) | plan: PSI %.2f/%.2f, CSI %.2f/%.2f, alpha %.2f, min events %g\n",
+              x$target, length(x$periods), th$psi[1], th$psi[2], th$csi[1], th$csi[2], th$alpha, th$min_events))
   cat(sprintf("  %-12s %8s %10s %8s %-9s %9s %-8s\n", "period", "n", "score", "PSI", "fixed", "critical", "adj."))
   p <- x$psi
   for (i in seq_len(nrow(p))) cat(sprintf("  %-12s %8s %10.1f %8.4f %-9s %9.4f %-8s\n", p$period[i], n_fmt(p$n[i]), p$mean_score[i],
@@ -115,8 +202,9 @@ print.scr_monitor <- function(x, ...) {
   if (!is.null(x$vintage)) {
     v <- x$vintage
     cat("  performance by vintage:\n")
-    for (i in seq_len(nrow(v))) cat(sprintf("    %-12s n %-7s event %6.2f%%  AUC %.4f [%.4f, %.4f]  KS %.4f\n", v$period[i], n_fmt(v$n[i]),
-                                            100 * v$event_rate[i], v$auc[i], v$auc_lo[i], v$auc_hi[i], v$ks[i]))
+    for (i in seq_len(nrow(v))) cat(sprintf("    %-12s n %-7s event %6.2f%%  AUC %.4f [%.4f, %.4f]  KS %.4f%s\n", v$period[i], n_fmt(v$n[i]),
+                                            100 * v$event_rate[i], v$auc[i], v$auc_lo[i], v$auc_hi[i], v$ks[i],
+                                            if (identical(v$status[i], "insufficient")) "  (insufficient events)" else ""))
   }
   invisible(x)
 }
