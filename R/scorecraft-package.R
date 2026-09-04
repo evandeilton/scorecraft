@@ -32,6 +32,28 @@
 #' with both the fixed and the sample-size-adjusted threshold, and never
 #' schedules anything by itself.
 #'
+#' @section IRB risk parameters:
+#'
+#' The IRB layer turns the scorecard into regulatory parameters and keeps
+#' the same contracts (one configuration, ledgers, hold-out revalidation,
+#' workbooks, production SQL). [scr_irb_params()] holds every regime-specific
+#' number as a table selected by preset (`"bcb"`, `"basel3_final"`,
+#' `"crr3"`); [scr_default()] builds the default flag from a monthly panel and
+#' [scr_default_rate()] the default rates by cohort with the long-run average.
+#' PD: [scr_calibrate()] anchors the scorecard to a central tendency,
+#' [scr_grades()] cuts the score into rating grades, [scr_moc()] and
+#' [scr_pd()] add the margin of conservatism and the floor, and
+#' [scr_pd_validate()] runs the calibration, discrimination and stability
+#' tests with traffic lights. LGD: [scr_workout()] discounts recovery cash
+#' flows into realised LGD, [scr_lgd()] fits the cure and severity stages
+#' and the pools, [scr_lgd_downturn()], [scr_lgd_floor()] and [scr_elbe()]
+#' complete the estimate. EAD: [scr_ead_data()] builds the realised
+#' conversion factors from facility snapshots and [scr_ead()] the pools.
+#' [scr_el()], [scr_irb_rw()], [scr_capital()] and [scr_ecl()] compute
+#' expected loss, risk weights, capital and expected credit loss. Binning
+#' against a continuous target goes through [scr_bin_continuous()], whose
+#' result the engine reproduces in R and in SQL.
+#'
 #' @section Parallelism:
 #'
 #' Column-wise work (binning, hold-out revalidation, CSI) and the bootstrap

@@ -1,0 +1,324 @@
+---
+title: "Expected loss and regulatory capital"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Expected loss and regulatory capital}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5)
+```
+
+```{r setup, message = FALSE}
+library(scorecraft)
+library(data.table)
+cfg <- scr_config(verbose = FALSE, nthread = 1)
+```
+
+## 1. Expected and unexpected loss
+
+The loss a portfolio produces in an average year is its **expected loss**,
+`EL = PD * LGD * EAD`; it is a cost of doing business and is covered by
+provisions and pricing. The loss in a bad year exceeds that average, and
+the gap between a high quantile of the loss distribution and its mean is
+the **unexpected loss** that capital must absorb. The IRB risk-weight
+function turns a through-the-cycle PD into the PD of a year at the 99.9th
+percentile of a one-factor model, and charges capital for the difference
+between the loss at that quantile and the expected loss. Every number that
+a regime fixes in that calculation (PD and LGD floors, asset correlations,
+the maturity rule, the confidence level, the standardised risk weights
+that the output floor compares against) lives in a table returned by
+`scr_irb_params()` and selected by a preset; nothing is hard-coded in the
+functions that consume it, and an edited table is recorded as such on
+every object built from it.
+
+## 2. The parameter tables
+
+```{r params}
+p <- scr_irb_params("bcb")
+p
+p$pd_floor
+```
+
+The presets differ in a handful of cells (`"bcb"` takes its values from
+Resolução BCB 303/2023, `"basel3_final"` from the consolidated Basel
+Framework, whose CRE31 chapter is the risk-weight function). The visible
+differences are the supervisory LGD table of the foundation approach and
+the firm-size bounds of the SME correlation adjustment.
+
+```{r params-diff}
+p_b3 <- scr_irb_params("basel3_final")
+rbind(cbind(framework = "bcb", p$lgd_firb), cbind(framework = "basel3_final", p_b3$lgd_firb))
+rbindlist(list(c(framework = "bcb", p$correlation$sme), c(framework = "basel3_final", p_b3$correlation$sme)))
+```
+
+Any cell can be edited and the object passed back through `params`; the
+function that receives it flags `params_modified` in its model card.
+
+## 3. One exposure: `scr_el()` and `scr_irb_rw()`
+
+Expected loss is the primitive. Defaulted exposures replace `PD * LGD`
+with the best estimate of expected loss, `ELBE`.
+
+```{r el}
+scr_el(c(0.01, 0.02), 0.45, c(1000, 2000))
+scr_el(0.02, 0.45, 1000, defaulted = TRUE, elbe = 0.6)
+```
+
+`scr_irb_rw()` returns the intermediate quantities of the risk-weight
+function, not only the answer: the PD and LGD after floors, the maturity
+after clipping, the correlation `r`, the maturity adjustment `ma` and the
+capital requirement `k`. A corporate exposure at PD 1 %, LGD 45 % and
+maturity 2.5 years carries a risk weight of 92.32 %.
+
+```{r rw-examples}
+scr_irb_rw(0.01, 0.45, m = 2.5, asset_class = "corporate", params = p)
+rbind(
+  mortgage     = scr_irb_rw(0.01, 0.20, asset_class = "retail_mortgage", params = p),
+  qrre         = scr_irb_rw(0.02, 0.80, asset_class = "qrre_revolver", params = p),
+  retail_other = scr_irb_rw(0.02, 0.50, asset_class = "retail_other", params = p)
+)[, .(pd_used, lgd_used, r, k, rw)]
+```
+
+Retail classes have no maturity adjustment (`b` is `NA`, `ma` is one), so
+for them `K` is exactly `LGD` times the distance between the stressed and
+the unconditional PD. `scr_pd_stress()` is that stressed PD, and at
+`q = 0.999` with the regulatory correlation it reproduces `k` to machine
+precision.
+
+```{r stress}
+o <- scr_irb_rw(0.02, 0.50, asset_class = "retail_other", params = p)
+c(k = o$k, by_hand = 0.5 * (scr_pd_stress(0.02, o$r, 0.999) - 0.02))
+scr_pd_stress(0.02, rho = 0.15, q = c(0.5, 0.95, 0.99, 0.999))
+```
+
+The shape of the function differs by asset class because the correlation
+does: fixed for mortgages (0.15) and revolving retail (0.04), decreasing
+in PD for corporates and other retail. Plotted at a common LGD of 45 %:
+
+```{r rw-curve}
+grid <- exp(seq(log(1e-4), log(0.3), length.out = 80))
+classes <- c("corporate", "retail_mortgage", "qrre_revolver", "retail_other")
+curves <- lapply(classes, function(a) scr_irb_rw(grid, 0.45, asset_class = a, params = p)$rw)
+plot(grid, curves[[1]], type = "n", log = "x", ylim = c(0, max(unlist(curves))),
+     xlab = "PD (log scale)", ylab = "risk weight", main = "IRB risk weight by PD, LGD 45 %")
+for (i in seq_along(classes)) lines(grid, curves[[i]], lwd = 2, col = i)
+legend("topleft", classes, col = seq_along(classes), lwd = 2, bty = "n")
+```
+
+The flat start of every curve is the PD floor: below it the risk weight no
+longer falls with the PD. The `floors_hit` attribute counts the rows where
+each floor was binding, and `apply_floors = FALSE` shows what the function
+would return without them.
+
+```{r floors}
+r_floored <- scr_irb_rw(grid, 0.45, asset_class = "retail_other", params = p)
+attr(r_floored, "floors_hit")
+r_raw <- scr_irb_rw(grid, 0.45, asset_class = "retail_other", params = p, apply_floors = FALSE)
+data.table(pd = grid, rw_floored = r_floored$rw, rw_no_floor = r_raw$rw)[pd < 6e-4][c(1, 5, 10, 15)]
+# LGD floors by collateral class: an own estimate of 10 % is lifted to the unsecured floor
+scr_irb_rw(0.01, 0.10, asset_class = c("retail_other", "qrre_revolver", "corporate", "retail_mortgage"), params = p)$lgd_used
+```
+
+## 4. The standardised comparison
+
+The output floor compares the IRB result with a fraction of what the
+standardised approach would require, so the same book needs a standardised
+risk weight per exposure. `scr_sa_rw()` looks it up in `params$sa_rw`:
+regulatory retail, mortgages by loan-to-value band, corporates by rating
+bucket or the SME weight, defaulted exposures by provision ratio.
+
+```{r sa}
+scr_sa_rw(c("retail_other", "retail_mortgage", "retail_mortgage", "corporate", "corporate", "corporate_sme"),
+          ltv = c(NA, 0.55, 0.95, NA, NA, NA), rating = c(NA, NA, NA, "A+", NA, NA))
+scr_sa_rw("retail_other", defaulted = TRUE, provision_ratio = c(0.1, 0.3))
+p$sa_rw[asset_class == "retail_mortgage" & sub_class == "standard"]
+```
+
+## 5. The portfolio: `scr_capital()`
+
+`scr_demo_portfolio` holds 5,000 exposures in six segments that map one to
+one onto the asset classes; PD is a grade PD and LGD a pool value, so
+segment by grade is a homogeneous pool. About 3 % of the rows are in
+default with an `elbe` and a provision.
+
+```{r capital}
+d <- scr_demo_portfolio
+table(d$segment, d$asset_class)
+cap <- scr_capital(d, segment = "segment", asset_class = "asset_class", m = "m",
+                   defaulted = "defaulted", elbe = "elbe", provisions = "provision",
+                   ltv = "ltv", rating = "rating", sales = "sales", transactor = "transactor",
+                   grade = "grade", id = "id", config = cfg, keep_rows = TRUE)
+cap
+```
+
+### Totals and the reconciliation by segment
+
+Every figure on the print is in `cap$totals`, and `cap$segments` breaks it
+down: EAD-weighted inputs, the IRB and standardised risk-weighted assets
+side by side, expected loss and provisions.
+
+```{r totals}
+with(cap$totals, data.table(ead, el, el_rate, rwa_irb, rwa_sa, irb_sa_ratio, density, capital))
+cap$segments[, .(segment, n, ead, pd_mean, lgd_mean, rw, rwa_irb, irb_sa_ratio, el, provisions, shortfall_excess)]
+```
+
+The `irb_sa_ratio` column says where the IRB approach saves the most
+against the standardised one; mortgages sit far below the 72.5 % line on
+their own, the corporate book far above it, and the output floor is
+applied to the total, not by segment.
+
+### Floors and the output-floor bridge
+
+`cap$floors` measures each input floor by the rows it binds, their EAD
+and the risk-weighted assets it adds. Here only the PD floor bites (the
+two safest grades start below it on purpose), and the bridge from the
+unfloored IRB figure to the reported one reads:
+
+```{r floors-bridge}
+cap$floors
+with(cap$totals, data.table(
+  step  = c("rwa_irb_no_floors", "input_floors", "rwa_irb", "rwa_sa", "output_floor_rwa", "rwa_reported"),
+  value = c(rwa_irb_no_floors, rwa_irb - rwa_irb_no_floors, rwa_irb, rwa_sa, rwa_floor, rwa_reported)))
+with(cap$totals, data.table(floor_binding, headroom))
+```
+
+`rwa_reported` is the larger of the IRB figure and `output_floor * rwa_sa`;
+`headroom` is the distance to the floor, negative when it binds.
+
+### Expected loss against provisions
+
+Regulatory EL is compared with the provision stock. A shortfall is deducted
+from capital; an excess counts as tier 2 up to 0.6 % of the IRB
+risk-weighted assets, which is why `tier2_addback` can be smaller than
+`excess`.
+
+```{r provisions}
+with(cap$totals, data.table(el, provisions, shortfall, excess, tier2_cap, tier2_addback))
+```
+
+### Sensitivity
+
+The grid re-runs the whole function under fixed shocks. The two Vasicek
+rows stress every performing PD with `scr_pd_stress()` at the exposure's
+own correlation and feed the stressed PD back into the function, so that
+the correlation follows the PD; they are the closest the grid comes to a
+bad-year capital figure.
+
+```{r sensitivity}
+cap$sensitivity
+```
+
+## 6. The same numbers in SQL
+
+The production query does not need a normal quantile: the constants of
+every pool (PD, LGD, correlation, `K`, `RW`, all after floors) are computed
+in R and emitted as a `pool_params` CTE, and the exposure table is joined
+to it on segment and grade. Defaulted rows use `ELBE * EAD` and
+`K = max(0, LGD - ELBE)` from their own columns.
+
+```{r sql}
+sql <- scr_sql(cap, table = "portfolio", dialect = "duckdb")
+cat(sql[c(4:9, 12:15)], sep = "\n")
+cat(tail(sql, 21), sep = "\n")
+```
+
+The retail pools are homogeneous, so the query reproduces R row by row;
+the corporate pools carry a maturity that varies inside the pool, so their
+constants are EAD-weighted and the match is exact at pool level (the
+header of the SQL says so). Both facts can be checked on DuckDB.
+
+```{r duckdb, eval = requireNamespace("duckdb", quietly = TRUE) && requireNamespace("DBI", quietly = TRUE), message = FALSE}
+con <- DBI::dbConnect(duckdb::duckdb(), config = list(threads = "1"))
+DBI::dbWriteTable(con, "portfolio", d)
+got <- DBI::dbGetQuery(con, paste(sql, collapse = "\n"))
+got <- got[match(d$id, got$id), ]
+ex <- cap$exposures
+retail <- !d$segment %in% c("corporate_large", "corporate_sme")
+data.table(id = d$id, segment = d$segment, el_r = ex$el, el_sql = got$el, rwa_r = ex$rwa, rwa_sql = got$rwa)[retail][1:4]
+c(el = all.equal(got$el[retail], ex$el[retail]), rwa = all.equal(got$rwa[retail], ex$rwa[retail]))
+agg <- DBI::dbGetQuery(con, paste(scr_sql(cap, table = "portfolio", dialect = "duckdb", level = "portfolio"), collapse = "\n"))
+agg <- agg[match(cap$segments$segment, agg$segment), ]
+c(rwa = all.equal(agg$rwa, cap$segments$rwa_irb), el = all.equal(agg$el, cap$segments$el))
+DBI::dbDisconnect(con, shutdown = TRUE)
+```
+
+## 7. Accounting expected credit loss: `scr_ecl()`
+
+`scr_ecl()` computes the discrete-time expected credit loss: a
+survival-weighted sum of marginal monthly hazards times LGD and EAD,
+discounted at the effective interest rate. With a flat hazard, no
+discounting and no prepayment the sum collapses to the closed form
+`LGD * EAD * (1 - (1 - h)^T)`.
+
+```{r ecl-flat}
+cfg_none <- scr_config(verbose = FALSE, nthread = 1, ecl_discount = "none")
+h <- 0.01; lgd <- 0.4; ead <- 1000
+e1 <- scr_ecl(h, lgd, ead, t_max = 36L, config = cfg_none)
+c(ecl_12m = e1$totals$ecl_12m, closed_form = lgd * ead * (1 - (1 - h)^12),
+  ecl_life = e1$totals$ecl_life, closed_form = lgd * ead * (1 - (1 - h)^36))
+```
+
+On the portfolio, the annual grade PD becomes a flat monthly hazard, the
+stage is allocated by the rule (days past due, or a doubling of the PD
+since origination), and three scenarios are weighted. The `z` shock moves
+every hazard through the one-factor model; `lgd_add` and `ead_mult` do
+what their names say.
+
+```{r ecl-portfolio}
+hz <- 1 - (1 - d$pd)^(1 / 12)
+ecl <- scr_ecl(hz, d$lgd, d$ead, eir = d$eir, dpd = d$dpd, pd_orig = d$pd_orig, t_max = 36L,
+               segment = d$segment, id = d$id,
+               scenarios = list(base = list(), downturn = list(z = -1, lgd_add = 0.05), upturn = list(z = 1)),
+               weights = c(0.5, 0.3, 0.2), config = cfg)
+ecl
+ecl$scenarios
+ecl$stages
+```
+
+Accounting ECL and regulatory EL measure different things and are not
+expected to agree: the ECL of stage 2 is a lifetime figure, the ECL of
+stage 3 is `LGD * EAD` rather than `ELBE * EAD`, and the scenario weights
+tilt the accounting number. Laying the two side by side per segment is
+nevertheless the first table a reconciliation asks for.
+
+```{r ecl-vs-el}
+merge(cap$segments[, .(segment, ead, el_regulatory = el, provisions)],
+      ecl$segments[, .(segment, ecl_accounting = ecl, share_stage2, share_stage3)], by = "segment")[order(-ead)]
+c(el_regulatory = cap$totals$el, ecl_accounting = ecl$totals$ecl, provisions = cap$totals$provisions)
+```
+
+## 8. Deliverables
+
+`scr_export()` writes one workbook with the summary, the configuration and
+every table of the object, plus the SQL file.
+
+```{r export, eval = requireNamespace("openxlsx", quietly = TRUE), message = FALSE}
+out <- file.path(tempdir(), "scorecraft-capital")
+cap <- scr_export(cap, out, stamp = FALSE)
+basename(unlist(cap$files))
+openxlsx::getSheetNames(cap$files$xlsx)
+```
+
+## 9. The ledger and the model card
+
+Every choice the function made on the caller's behalf is a row of the
+ledger: the preset and approach, where the inputs came from, how many rows
+each floor touched, whether the output floor binds, and the provision
+comparison. The model card carries the numbers a validator needs to
+reproduce the run, including whether the parameter tables were edited.
+
+```{r ledger}
+cap$ledger[, .(action, detail)]
+mc <- cap$model_card
+keys <- c("framework", "approach", "params_modified", "pd_source", "n_exposures", "n_defaulted",
+          "n_pools", "rwa_irb", "rwa_sa", "output_floor_binding", "density", "capital",
+          "shortfall", "excess", "scaling_factor", "confidence")
+data.table(field = keys, value = vapply(mc[keys], function(v) format(v, digits = 6), character(1)))
+```
+
+Two runs with the same framework, approach, `params_modified = FALSE` and
+the same input sources are comparable; a run with `params_modified = TRUE`
+is a different regime and must say which cells changed.

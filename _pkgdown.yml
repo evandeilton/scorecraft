@@ -5,7 +5,7 @@ template:
     primary: "#0b1220"
 
 home:
-  title: scorecraft - scorecard engine with alignment, coarse classing and production SQL
+  title: scorecraft - scorecard engine with alignment, coarse classing, IRB risk parameters and production SQL
   links:
   - text: Binning engine (OptimalBinningWoE)
     href: https://github.com/evandeilton/OptimalBinningWoE
@@ -24,6 +24,12 @@ articles:
   - coarse-classing
   - alignment-and-portfolio
   - production-and-monitoring
+- title: IRB risk parameters
+  navbar: IRB
+  contents:
+  - pd-calibration-and-grades
+  - lgd-and-ead-under-irb
+  - expected-loss-and-capital
 
 reference:
 - title: Configuration
@@ -51,6 +57,23 @@ reference:
   contents:
   - has_concept("portfolio")
   - has_concept("database")
+- title: IRB parameters and the default definition
+  desc: Parameter tables by framework preset, the default engine and default rates by cohort.
+  contents:
+  - has_concept("irb-parameters")
+- title: PD calibration and rating grades
+  contents:
+  - has_concept("irb-pd")
+- title: LGD
+  desc: Workout loss given default, two-stage model, pools, downturn, floors and in-default estimates.
+  contents:
+  - has_concept("irb-lgd")
+- title: EAD and credit conversion factors
+  contents:
+  - has_concept("irb-ead")
+- title: Expected loss, capital and ECL
+  contents:
+  - has_concept("irb-capital")
 - title: Data
   contents:
   - has_concept("data")

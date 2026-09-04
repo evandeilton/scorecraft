@@ -1,3 +1,65 @@
+# scorecraft 0.2.0 (unreleased)
+
+The IRB layer: from the scorecard to regulatory risk parameters, with the
+same contracts as the scorecard pipeline (one configuration, ledgers with
+mandatory reasons, hold-out revalidation with frozen bins, hardened
+workbooks, production SQL verified against DuckDB and SQLite). Regimes are
+parameter tables selected by a preset, never prose.
+
+* `scr_irb_params()` ships the numbers of three presets (`"bcb"`,
+  `"basel3_final"`, `"crr3"`): PD floors, LGD input floors, foundation LGD,
+  standardised CCFs, asset correlations, maturity rules, output floor and
+  standardised risk weights; the tables are editable and edits are recorded.
+* `scr_default()` builds the default flag from a monthly panel (days past
+  due with absolute and relative materiality, unlikeliness to pay,
+  probation, restructuring, obligor-level pulling effect);
+  `scr_default_rate()` gives the default rates by cohort, grade, segment
+  and exposure, with the long-run average and its benchmark.
+* `scr_bin_continuous()` bins drivers against a bounded continuous target
+  (LGD, CCF) and returns an object with the shape of the engine's, so
+  `OptimalBinningWoE::obwoe_apply()` and `obwoe_sql()` reproduce the bin
+  means in R and in every SQL dialect; hold-out revalidation with frozen
+  cut points and PSI.
+* Configuration gains the keys of stages 8 to 12 (`default_*`, `pd_*`,
+  `lgd_*`, `ccf_*`, `framework`, `capital_*`, `ecl_*`), all registered in
+  `scr_config_keys()` and validated.
+* New demonstration data: `scr_demo_panel`, `scr_demo_lgd`,
+  `scr_demo_lgd_cashflows`, `scr_demo_rates`, `scr_demo_ead`,
+  `scr_demo_portfolio`.
+* PD: `scr_master_scale()`, `scr_calibrate()` (intercept shift, log-odds
+  `(a, b)`, scaling, quasi-moment matching; a new alignment, the scorecard
+  untouched), `scr_grades()` (geometric, quantile or supplied grades, merges
+  below the minimum counts, monotone repair recorded), `scr_moc()`
+  (estimation error computed; other categories with a mandatory reason),
+  `scr_pd()` (floors from the preset), `scr_migration()`,
+  `scr_pd_validate()` (Jeffreys, binomial, normal, Hosmer-Lemeshow,
+  multi-period, AUC against the initial value, PSI, migration bandwidths,
+  concentration; traffic lights), `scr_pd_pit_ttc()`, with `predict()`,
+  `scr_apply()`, `scr_sql()` (grade and PD as a `CASE` on the score) and
+  `scr_export()` methods.
+* LGD: `scr_workout()` (discounted recoveries and costs, cures, merged
+  re-defaults, extrapolated incomplete workouts, named funnel rules),
+  `scr_lgd()` (cure stage on the binary engine, severity stage on the
+  continuous binner with a fractional logit or a beta regression, hold-out
+  revalidation, pools), `scr_lgd_downturn()`, `scr_lgd_floor()`,
+  `scr_elbe()`, `scr_lgd_validate()`, with `scr_apply()`, `scr_sql()` (both
+  stages, pool `CASE`, floored result) and `scr_export()` methods.
+* EAD: `scr_ead_data()` (realised conversion factors under a fixed, cohort
+  or variable horizon; conversion factor below and limit factor above a
+  utilisation threshold; named funnel rules), `scr_ead()` (driver bins with
+  admission rules, pools, estimation-error margin, standardised floor),
+  `scr_ead_downturn()`, `scr_ead_validate()`, with `scr_apply()`,
+  `scr_sql()` and `scr_export()` methods.
+* Expected loss and capital: `scr_el()`, `scr_irb_rw()` (the risk-weight
+  function with correlations, size adjustment, maturity, floors and the
+  defaulted case), `scr_sa_rw()`, `scr_capital()` (reconciliation by
+  segment, output floor, provisions shortfall and excess, floors impact,
+  sensitivity grid, concentration), `scr_pd_stress()`, `scr_ecl()`
+  (survival-weighted 12-month and lifetime expected credit loss with
+  stages and scenarios), with `scr_sql()` (constants per pool, no normal
+  quantile at run time) and `scr_export()` methods.
+* `betareg` joins Suggests for the beta severity engine of the LGD model.
+
 # scorecraft 0.1.0
 
 First release. A production-grade scorecard engine for binary targets, built

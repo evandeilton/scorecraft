@@ -1,0 +1,350 @@
+# ============================================================================ #
+# default.R - default definition engine and default rates by cohort (IRB)
+# ============================================================================ #
+# The default flag is the target of every IRB model. It is built from a
+# monthly panel with a small state machine: a trigger (days past due above a
+# threshold with material arrears, or an unlikeliness-to-pay flag) opens an
+# event; the event closes after a probation of consecutive months without a
+# trigger. Obligor-level flags propagate to every facility of the obligor.
+# scr_default_rate() then turns any flagged panel into one-year default
+# rates by cohort, the long-run average and its benchmark.
+# ============================================================================ #
+
+#' Build the default flag from a monthly panel
+#'
+#' Applies the standard definition of default to a panel with one row per
+#' unit (`id`) and month (`date`): a unit enters default when `dpd` reaches
+#' `default_days` and the arrears are material (both `default_abs` in
+#' currency units and `default_rel` as a share of `exposure`, when arrears
+#' and exposure are supplied), or when `utp` (unlikeliness to pay) is `TRUE`.
+#' It leaves default after `default_probation` consecutive months without a
+#' trigger (`default_probation_restructured` when `restructured` was `TRUE`
+#' at any point of the event). With `obligor` supplied and
+#' `default_level = "obligor"`, a unit whose obligor has more than
+#' `default_pulling` of its exposure in default is pulled into default too,
+#' and a defaulted obligor defaults all its units.
+#'
+#' Rows must be monthly; gaps are tolerated (the probation counts observed
+#' months). The result keeps the row-level flags: they are the product.
+#'
+#' @param data A `data.frame` or `data.table`, one row per `id` and `date`.
+#' @param id,date Column names of the unit identifier and the month.
+#' @param dpd Column name of days past due (integer). Optional when `utp`
+#'   is given.
+#' @param arrears,exposure Column names of the overdue amount and the total
+#'   exposure, both optional; when given, the materiality test applies.
+#' @param utp Column name of a logical unlikeliness-to-pay flag, optional.
+#' @param restructured Column name of a logical distressed-restructuring
+#'   flag, optional.
+#' @param obligor Column name of the obligor when `id` is a facility,
+#'   optional; enables the pulling effect.
+#' @param config A [scr_config()]; keys `default_*`.
+#'
+#' @return An object of class `scr_default`: `flags` (`id`, `date`,
+#'   `default` 0/1, `event_id`, `trigger`, `months_in_default`, `cured`),
+#'   `events` (one row per event: `event_id`, `id`, `start`, `end`,
+#'   `trigger`, `cured`, `months`), `summary`, `ledger` and `config`.
+#'
+#' @family irb-parameters
+#' @examples
+#' d <- scr_default(scr_demo_panel, id = "id", date = "ref_date", dpd = "dpd",
+#'                  arrears = "arrears", exposure = "exposure",
+#'                  restructured = "restructured",
+#'                  config = scr_config(verbose = FALSE))
+#' d
+#' head(d$events)
+#' @export
+scr_default <- function(data, id, date, dpd = NULL, arrears = NULL, exposure = NULL, utp = NULL,
+                        restructured = NULL, obligor = NULL, config = scr_config()) {
+  check_config(config, "scr_default")
+  cfg <- config
+  old <- scr_verbose(isTRUE(cfg$verbose)); on.exit(scr_verbose(old), add = TRUE)
+  dt <- data.table::as.data.table(data)
+  need <- c(id, date, dpd, arrears, exposure, utp, restructured, obligor)
+  miss <- setdiff(need, names(dt))
+  if (length(miss)) stop("scr_default(): column(s) not found: ", lst(miss), call. = FALSE)
+  if (is.null(dpd) && is.null(utp)) stop("scr_default(): give `dpd`, `utp` or both.", call. = FALSE)
+  t0 <- Sys.time()
+
+  p <- data.table::data.table(id = as.character(dt[[id]]), date = as.Date(dt[[date]]))
+  p[, dpd := if (is.null(dpd)) 0L else as.integer(dt[[dpd]])]
+  p[, utp := if (is.null(utp)) FALSE else isTRUE_vec(dt[[utp]])]
+  p[, restr := if (is.null(restructured)) FALSE else isTRUE_vec(dt[[restructured]])]
+  p[, expo := if (is.null(exposure)) NA_real_ else as.double(dt[[exposure]])]
+  p[, arr := if (is.null(arrears)) NA_real_ else as.double(dt[[arrears]])]
+  p[, obligor := if (is.null(obligor)) id else as.character(dt[[obligor]])]
+  if (anyNA(p$id) || anyNA(p$date)) stop("scr_default(): `id` and `date` cannot be missing.", call. = FALSE)
+  if (anyDuplicated(p, by = c("id", "date"))) stop("scr_default(): duplicated (id, date) rows.", call. = FALSE)
+  data.table::setorder(p, id, date)
+
+  # -- row triggers ------------------------------------------------------- #
+  material <- if (!is.null(arrears) && !is.null(exposure)) {
+    (p$arr >= cfg$default_abs) & (p$arr / pmax(p$expo, .Machine$double.eps) > cfg$default_rel)
+  } else if (!is.null(arrears)) {
+    p$arr >= cfg$default_abs
+  } else TRUE
+  p[, trig_dpd := !is.na(dpd) & dpd >= cfg$default_days & material %in% TRUE]
+  p[, trig := trig_dpd | utp %in% TRUE]
+
+  # -- state machine per unit ------------------------------------------- #
+  ids <- split(seq_len(nrow(p)), p$id)
+  runs <- .scr_lapply(ids, function(ix) .default_run(p$trig[ix], p$utp[ix], p$restr[ix],
+                                                     cfg$default_probation, cfg$default_probation_restructured),
+                      nthread = cfg$nthread, fork_only = TRUE)
+  p[, c("default", "ev", "trigger", "months", "cured") := {
+    r <- data.table::rbindlist(runs)
+    list(r$default, r$ev, r$trigger, r$months, r$cured)
+  }]
+
+  # -- pulling effect at obligor level ------------------------------------ #
+  pulled <- 0L
+  if (!is.null(obligor) && identical(cfg$default_level, "obligor")) {
+    p[, share := {
+      e <- if (all(is.na(expo))) rep(1, .N) else data.table::fifelse(is.na(expo), 0, expo)
+      s <- sum(e); if (s > 0) sum(e[default == 1L]) / s else mean(default == 1L)
+    }, by = c("obligor", "date")]
+    pull <- p$share > cfg$default_pulling & p$default == 0L
+    pulled <- sum(pull)
+    if (pulled) {
+      p[pull, `:=`(default = 1L, trigger = "pulling")]
+      # re-run the probation with the pulled months as triggers
+      p[, trig := trig | trigger %in% "pulling"]
+      runs <- .scr_lapply(ids, function(ix) .default_run(p$trig[ix], p$utp[ix], p$restr[ix],
+                                                         cfg$default_probation, cfg$default_probation_restructured),
+                          nthread = cfg$nthread, fork_only = TRUE)
+      p[, c("default", "ev", "trigger2", "months", "cured") := {
+        r <- data.table::rbindlist(runs)
+        list(r$default, r$ev, r$trigger, r$months, r$cured)
+      }]
+      p[trigger2 != "" & !(trigger %in% "pulling"), trigger := trigger2]
+      p[, trigger2 := NULL]
+    }
+    p[, share := NULL]
+  }
+
+  p[, event_id := data.table::fifelse(ev > 0L, paste0(id, "#", ev), NA_character_)]
+  events <- p[default == 1L, list(id = id[1], start = min(date), end = max(date),
+                                  trigger = trigger[trigger != ""][1], months = .N,
+                                  cured = as.integer(any(cured == 1L))), by = "event_id"]
+  data.table::setorder(events, id, start)
+
+  flags <- p[, list(id, date, default, event_id, trigger, months_in_default = months, cured)]
+  n_ev <- nrow(events)
+  by_trig <- if (n_ev) prop.table(table(events$trigger)) else numeric()
+  summary <- list(
+    n_ids = length(ids), n_rows = nrow(p), n_events = n_ev,
+    share_by_trigger = as.list(by_trig),
+    median_months_in_default = if (n_ev) stats::median(events$months) else NA_real_,
+    share_cured = if (n_ev) mean(events$cured == 1L) else NA_real_,
+    n_pulled_rows = pulled,
+    rules = list(days = cfg$default_days, abs = cfg$default_abs, rel = cfg$default_rel, level = cfg$default_level,
+                 probation = cfg$default_probation, probation_restructured = cfg$default_probation_restructured,
+                 pulling = cfg$default_pulling, materiality = !is.null(arrears)))
+  ledger <- data.table::data.table(
+    action = "default_definition",
+    detail = sprintf("dpd >= %d%s%s; probation %d (%d after restructuring); level %s%s",
+                     cfg$default_days,
+                     if (!is.null(arrears)) sprintf(" and arrears >= %s", format(cfg$default_abs)) else "",
+                     if (!is.null(arrears) && !is.null(exposure)) sprintf(" and arrears/exposure > %s", format(cfg$default_rel)) else "",
+                     cfg$default_probation, cfg$default_probation_restructured, cfg$default_level,
+                     if (!is.null(obligor)) sprintf("; pulling > %s", format(cfg$default_pulling)) else ""),
+    date = format(Sys.Date()))
+  msg("  default flag: %s units, %s events, %s cured (%.2fs)", n_fmt(length(ids)), n_fmt(n_ev),
+      if (n_ev) fmt_pct(summary$share_cured) else "-", as.numeric(difftime(Sys.time(), t0, units = "secs")))
+  structure(list(flags = flags, events = events, summary = summary, ledger = ledger, config = cfg),
+            class = c("scr_default", "list"))
+}
+
+#' @keywords internal
+#' @noRd
+isTRUE_vec <- function(x) {
+  if (is.logical(x)) x %in% TRUE else as.integer(x) %in% 1L
+}
+
+#' State machine of one unit: default rows, event numbers, trigger, months, cure
+#' @keywords internal
+#' @noRd
+.default_run <- function(trig, utp, restr, probation, probation_restr) {
+  n <- length(trig)
+  default <- integer(n); ev <- integer(n); trigger <- character(n); months <- integer(n); cured <- integer(n)
+  in_def <- FALSE; quiet <- 0L; k <- 0L; m <- 0L; ev_restr <- FALSE
+  for (i in seq_len(n)) {
+    if (!in_def) {
+      if (isTRUE(trig[i])) {
+        in_def <- TRUE; k <- k + 1L; m <- 0L; quiet <- 0L; ev_restr <- isTRUE(restr[i])
+        trigger[i] <- if (isTRUE(utp[i])) "utp" else "dpd"
+      }
+    }
+    if (in_def) {
+      m <- m + 1L
+      ev_restr <- ev_restr || isTRUE(restr[i])
+      default[i] <- 1L; ev[i] <- k; months[i] <- m
+      if (isTRUE(trig[i])) quiet <- 0L else quiet <- quiet + 1L
+      need <- if (ev_restr) probation_restr else probation
+      if (quiet >= need) { cured[i] <- 1L; in_def <- FALSE; quiet <- 0L }
+    }
+  }
+  list(default = default, ev = ev, trigger = trigger, months = months, cured = cured)
+}
+
+#' @export
+print.scr_default <- function(x, ...) {
+  s <- x$summary
+  cat(sprintf("<scr_default> %s units x %s rows | %s events | level %s\n",
+              n_fmt(s$n_ids), n_fmt(s$n_rows), n_fmt(s$n_events), s$rules$level))
+  cat(sprintf("  rule: dpd >= %d%s | probation %d months (%d after restructuring)%s\n",
+              s$rules$days, if (isTRUE(s$rules$materiality)) " with material arrears" else "",
+              s$rules$probation, s$rules$probation_restructured,
+              if (s$n_pulled_rows > 0) sprintf(" | %s rows pulled by the obligor", n_fmt(s$n_pulled_rows)) else ""))
+  if (s$n_events) {
+    cat(sprintf("  triggers: %s | median %s months in default | cured %s\n",
+                paste(sprintf("%s %s", names(s$share_by_trigger), fmt_pct(unlist(s$share_by_trigger))), collapse = ", "),
+                format(s$median_months_in_default), fmt_pct(s$share_cured)))
+  }
+  invisible(x)
+}
+
+# -- default rates by cohort -------------------------------------------------- #
+
+#' One-year default rates by cohort and the long-run average
+#'
+#' From a flagged panel (an [scr_default()] object or any table with a 0/1
+#' default column by unit and month), computes for every cohort start the
+#' population of non-defaulted units, the share that defaults within
+#' `horizon` months, optionally by `grade` or `segment` (as observed at the
+#' cohort start) and exposure-weighted when `exposure` is given. The long-run
+#' average is the arithmetic mean of the cohort rates; the benchmark is the
+#' larger of the last five years' mean and the whole period's mean, and a
+#' flag records when the average sits below it.
+#'
+#' @param x An `scr_default` or a `data.frame`/`data.table`.
+#' @param id,date,default Column names (ignored for an `scr_default`).
+#' @param horizon Months of the default window after the cohort start.
+#' @param by Cohort frequency: `"month"`, `"quarter"` or `"year"`.
+#' @param grade,segment Optional column names observed at the cohort start.
+#' @param exposure Optional column name; adds exposure-weighted rates.
+#' @param config A [scr_config()] (only `pd_dr_by` and `verbose` are read).
+#'
+#' @return An object of class `scr_dr`: `table` (cohort rates), `lra`
+#'   (`mean`, `weighted_mean`, `recent5_mean`, `all_mean`, `benchmark`,
+#'   `n_cohorts`, `years`, `flag_below_benchmark`), `horizon`, `by`.
+#'
+#' @family irb-parameters
+#' @examples
+#' d <- scr_default(scr_demo_panel, id = "id", date = "ref_date", dpd = "dpd",
+#'                  config = scr_config(verbose = FALSE))
+#' dr <- scr_default_rate(d, by = "quarter")
+#' dr
+#' dr$table
+#' @export
+scr_default_rate <- function(x, id = "id", date = "date", default = "default", horizon = 12L,
+                             by = NULL, grade = NULL, segment = NULL, exposure = NULL, config = scr_config()) {
+  check_config(config, "scr_default_rate")
+  by <- by %||% config$pd_dr_by
+  by <- match.arg(by, c("month", "quarter", "year"))
+  horizon <- as.integer(horizon)
+  if (inherits(x, "scr_default")) {
+    dt <- x$flags[, list(id, date, default)]
+    if (!is.null(grade) || !is.null(segment) || !is.null(exposure)) {
+      stop("scr_default_rate(): pass a table (not an scr_default) to use `grade`, `segment` or `exposure`.", call. = FALSE)
+    }
+  } else {
+    dt <- data.table::as.data.table(x)
+    need <- c(id, date, default, grade, segment, exposure)
+    miss <- setdiff(need, names(dt))
+    if (length(miss)) stop("scr_default_rate(): column(s) not found: ", lst(miss), call. = FALSE)
+    dt <- data.table::data.table(id = as.character(dt[[id]]), date = as.Date(dt[[date]]),
+                                 default = as.integer(dt[[default]]),
+                                 grade = if (is.null(grade)) NA_character_ else as.character(dt[[grade]]),
+                                 segment = if (is.null(segment)) NA_character_ else as.character(dt[[segment]]),
+                                 exposure = if (is.null(exposure)) NA_real_ else as.double(dt[[exposure]]))
+  }
+  if (!"grade" %in% names(dt)) dt[, grade := NA_character_]
+  if (!"segment" %in% names(dt)) dt[, segment := NA_character_]
+  if (!"exposure" %in% names(dt)) dt[, exposure := NA_real_]
+  data.table::setorder(dt, id, date)
+  dates <- sort(unique(dt$date))
+  mth <- as.integer(format(dates, "%m"))
+  starts <- switch(by, month = dates, quarter = dates[mth %in% c(1L, 4L, 7L, 10L)], year = dates[mth == 1L])
+  last_ok <- max(dates)
+  starts <- starts[.add_months(starts, horizon) <= last_ok]
+  if (!length(starts)) stop("scr_default_rate(): no cohort has a complete ", horizon, "-month window.", call. = FALSE)
+
+  def_rows <- dt[default == 1L, list(id, date)]
+  keys <- c("grade", "segment")
+  rows <- lapply(starts, function(t0) {
+    t1 <- .add_months(t0, horizon)
+    pop <- dt[date == t0 & default == 0L, list(id, grade, segment, exposure)]
+    if (!nrow(pop)) return(NULL)
+    d_ids <- unique(def_rows[date > t0 & date <= t1, id])
+    pop[, d := as.integer(id %in% d_ids)]
+    out <- pop[, list(n = .N, defaults = sum(d), dr = mean(d),
+                      ead = if (all(is.na(exposure))) NA_real_ else sum(exposure, na.rm = TRUE),
+                      dr_weighted = if (all(is.na(exposure))) NA_real_ else sum(exposure * d, na.rm = TRUE) / sum(exposure, na.rm = TRUE)),
+               by = keys]
+    out[, cohort := t0]
+    out
+  })
+  tab <- data.table::rbindlist(rows, use.names = TRUE)
+  data.table::setcolorder(tab, c("cohort", keys))
+  if (all(is.na(tab$grade))) tab[, grade := NULL]
+  if (all(is.na(tab$segment))) tab[, segment := NULL]
+  if (all(is.na(tab$ead))) tab[, c("ead", "dr_weighted") := NULL]
+  data.table::setorderv(tab, c("cohort", intersect(keys, names(tab))))
+
+  # long-run average on the whole population (grade/segment rows collapsed)
+  port <- tab[, list(n = sum(n), defaults = sum(defaults)), by = "cohort"][, dr := defaults / n]
+  yrs <- as.numeric(difftime(max(port$cohort), min(port$cohort), units = "days")) / 365.25
+  recent <- port[cohort > .add_months(max(cohort), -60L)]
+  lra <- list(mean = mean(port$dr), weighted_mean = sum(port$defaults) / sum(port$n),
+              recent5_mean = mean(recent$dr), all_mean = mean(port$dr),
+              n_cohorts = nrow(port), years = yrs)
+  lra$benchmark <- max(lra$recent5_mean, lra$all_mean)
+  lra$flag_below_benchmark <- lra$mean < lra$benchmark - 1e-12
+  lra$min <- min(port$dr); lra$max <- max(port$dr); lra$sd <- stats::sd(port$dr)
+  structure(list(table = tab, portfolio = port, lra = lra, horizon = horizon, by = by),
+            class = c("scr_dr", "list"))
+}
+
+#' Shift a Date by whole months (same day when it exists, else month end)
+#' @keywords internal
+#' @noRd
+.add_months <- function(d, k) {
+  lt <- as.POSIXlt(d)
+  lt$mon <- lt$mon + as.integer(k)
+  out <- as.Date(lt)
+  # roll back overflowed days (e.g. 31 Jan + 1 month) to the month end
+  bad <- as.integer(format(out, "%d")) < as.integer(format(d, "%d")) & !is.na(out)
+  if (any(bad)) out[bad] <- out[bad] - as.integer(format(out[bad], "%d"))
+  out
+}
+
+#' @export
+print.scr_dr <- function(x, ...) {
+  l <- x$lra
+  cat(sprintf("<scr_dr> %d %sly cohorts over %.1f years | horizon %d months\n", l$n_cohorts, x$by, l$years, x$horizon))
+  cat(sprintf("  default rate: mean %s | weighted %s | min %s | max %s | sd %s\n",
+              fmt_pct(l$mean, 2), fmt_pct(l$weighted_mean, 2), fmt_pct(l$min, 2), fmt_pct(l$max, 2), fmt_pct(l$sd, 2)))
+  cat(sprintf("  long-run average %s vs benchmark %s (max of last-5-years %s and all-years %s)%s\n",
+              fmt_pct(l$mean, 2), fmt_pct(l$benchmark, 2), fmt_pct(l$recent5_mean, 2), fmt_pct(l$all_mean, 2),
+              if (isTRUE(l$flag_below_benchmark)) " - BELOW the benchmark" else ""))
+  if (l$years < 5) cat("  note: fewer than five years of cohorts; the average is not a long-run one yet\n")
+  invisible(x)
+}
+
+# NSE column names used in data.table expressions of this file
+utils::globalVariables(c(
+  "arr",
+  "cured",
+  "default",
+  "defaults",
+  "ev",
+  "event_id",
+  "expo",
+  "restr",
+  "start",
+  "trig",
+  "trig_dpd",
+  "trigger",
+  "trigger2"
+))

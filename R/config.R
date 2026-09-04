@@ -224,7 +224,70 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
     sql_table        = "your_table",
     sql_dialect      = "ansi",
     sql_output       = "both",
-    sql_keep_columns = character()
+    sql_keep_columns = character(),
+
+    # ---- Stage 8: default definition (IRB) ------------------------------- #
+    default_days       = 90L,
+    default_abs        = 100,
+    default_rel        = 0.01,
+    default_level      = "obligor",
+    default_probation  = 3L,
+    default_probation_restructured = 12L,
+    default_pulling    = 0.20,
+
+    # ---- Stage 9: PD calibration and grades (IRB) ------------------------ #
+    pd_calibration  = "intercept",
+    pd_n_grades     = 10L,
+    pd_grade_method = "geometric",
+    pd_min_obligors = 30L,
+    pd_min_defaults = 20L,
+    pd_source       = "lra",
+    pd_moc_method   = "ci_timeseries",
+    pd_moc_level    = 0.95,
+    pd_asset_class  = "retail_other",
+    pd_lights       = c(0.01, 0.05),
+    pd_dr_by        = "quarter",
+
+    # ---- Stage 10: LGD (IRB) --------------------------------------------- #
+    lgd_discount_add_on  = 0.05,
+    lgd_discount_rate    = NA_real_,
+    lgd_cap_at_one       = FALSE,
+    lgd_floor_at_zero    = TRUE,
+    lgd_t_max            = 60L,
+    lgd_cure_window      = 9L,
+    lgd_min_defaults_bin = 100L,
+    lgd_cost_allocation  = "ead",
+    lgd_downturn         = "type1",
+    lgd_downturn_add_on  = 0.15,
+    lgd_n_pools          = 7L,
+    lgd_severity         = "fractional_logit",
+    lgd_elbe_grid        = c(0L, 6L, 12L, 24L, 36L),
+
+    # ---- Stage 11: EAD / CCF (IRB) --------------------------------------- #
+    ccf_horizon        = "fixed",
+    ccf_horizon_months = 12L,
+    ccf_measure        = "auto",
+    ccf_u_star         = 0.95,
+    ccf_floor_realised = 0,
+    ccf_cap_realised   = NA_real_,
+    ccf_min_defaults   = 30L,
+    ccf_n_pools        = 5L,
+    ccf_moc_alpha      = 0.05,
+    ccf_downturn       = "type1",
+    ccf_sa_ccf         = 0.40,
+    post_default_drawings_in = "lgd",
+
+    # ---- Stage 12: expected loss, capital, ECL (IRB) --------------------- #
+    framework            = "bcb",
+    capital_approach     = "airb",
+    capital_asset_class  = "retail_other",
+    capital_target_ratio = 0.08,
+    capital_output_floor = TRUE,
+    capital_sensitivity  = TRUE,
+    ecl_discount         = "eir",
+    ecl_stage_dpd        = c(30L, 90L),
+    ecl_sicr_ratio       = 2.0,
+    ecl_horizon_months   = 12L
   )
 
   tight <- switch(preset,
@@ -284,6 +347,41 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
     stop("`sql_output` must be \"woe\", \"bin\" or \"both\".", call. = FALSE)
   }
   cfg$nthread <- max(1L, as.integer(cfg$nthread))
+
+  # ---- IRB keys ------------------------------------------------------------ #
+  .enum <- function(key, allowed) {
+    if (!cfg[[key]] %in% allowed) {
+      stop("`", key, "` must be one of ", paste0("\"", allowed, "\"", collapse = ", "),
+           " (got \"", cfg[[key]], "\").", call. = FALSE)
+    }
+  }
+  .enum("default_level", c("obligor", "facility"))
+  .enum("pd_calibration", c("intercept", "logodds_ab", "scaling", "qmm"))
+  .enum("pd_grade_method", c("geometric", "quantile", "supplied"))
+  .enum("pd_source", c("lra", "mean_pd"))
+  .enum("pd_moc_method", c("ci_timeseries", "ci_binomial", "bootstrap"))
+  .enum("pd_dr_by", c("month", "quarter", "year"))
+  .enum("lgd_cost_allocation", c("ead", "count", "duration"))
+  .enum("lgd_downturn", c("type1", "type3", "none"))
+  .enum("lgd_severity", c("fractional_logit", "beta"))
+  .enum("ccf_horizon", c("fixed", "cohort", "variable"))
+  .enum("ccf_measure", c("auto", "ulf", "lf", "eadf"))
+  .enum("ccf_downturn", c("type1", "type3", "none"))
+  .enum("post_default_drawings_in", c("lgd", "ccf"))
+  .enum("framework", c("bcb", "basel3_final", "crr3"))
+  .enum("capital_approach", c("airb", "firb"))
+  .enum("ecl_discount", c("eir", "none"))
+  .scr_num1(cfg$default_rel, "default_rel", lower = 0, upper = 1)
+  .scr_num1(cfg$default_pulling, "default_pulling", lower = 0, upper = 1)
+  .scr_num1(cfg$pd_moc_level, "pd_moc_level", lower = 0, upper = 1, open_lower = TRUE)
+  .scr_num1(cfg$lgd_discount_add_on, "lgd_discount_add_on", lower = 0)
+  .scr_num1(cfg$lgd_downturn_add_on, "lgd_downturn_add_on", lower = 0, upper = 1)
+  .scr_num1(cfg$ccf_u_star, "ccf_u_star", lower = 0, upper = 1)
+  .scr_num1(cfg$ccf_sa_ccf, "ccf_sa_ccf", lower = 0, upper = 1)
+  .scr_num1(cfg$capital_target_ratio, "capital_target_ratio", lower = 0, upper = 1)
+  if (length(cfg$pd_lights) != 2L || any(!is.finite(cfg$pd_lights)) || cfg$pd_lights[1] >= cfg$pd_lights[2]) {
+    stop("`pd_lights` must be two increasing p-value thresholds (red below the first, amber below the second).", call. = FALSE)
+  }
   structure(cfg, class = c("scr_config", "list"))
 }
 
@@ -371,7 +469,7 @@ scr_presets <- function() {
 #' One row per [scr_config()] key, with the stage it acts on, the default
 #' value and what it controls.
 #'
-#' @param stage Optional filter by stage (`0` to `7`). `NULL` returns everything.
+#' @param stage Optional filter by stage (`0` to `7` for the scorecard pipeline, `8` to `12` for the IRB models). `NULL` returns everything.
 #'
 #' @return A `data.frame` with `key`, `stage`, `default` and `description`.
 #'
@@ -463,7 +561,60 @@ scr_config_keys <- function(stage = NULL) {
     .ck("sql_table", 7, "your_table", "Source table in the generated SQL"),
     .ck("sql_dialect", 7, "ansi", "Dialect of the generated SQL"),
     .ck("sql_output", 7, "both", "Emit WOE, BIN or both"),
-    .ck("sql_keep_columns", 7, "character(0)", "Key columns carried untransformed")
+    .ck("sql_keep_columns", 7, "character(0)", "Key columns carried untransformed"),
+    .ck("default_days", 8, "90", "Days past due that trigger a default"),
+    .ck("default_abs", 8, "100", "Absolute materiality threshold on arrears (currency units)"),
+    .ck("default_rel", 8, "0.01", "Relative materiality threshold: arrears over exposure"),
+    .ck("default_level", 8, "obligor", "Level of the default flag: obligor or facility"),
+    .ck("default_probation", 8, "3", "Months without a trigger before leaving default"),
+    .ck("default_probation_restructured", 8, "12", "Probation after a distressed restructuring"),
+    .ck("default_pulling", 8, "0.20", "Share of defaulted exposure that pulls the whole obligor into default"),
+    .ck("pd_calibration", 9, "intercept", "Calibration to the central tendency: intercept, logodds_ab, scaling, qmm"),
+    .ck("pd_n_grades", 9, "10", "Number of rating grades when derived"),
+    .ck("pd_grade_method", 9, "geometric", "Grade construction: geometric, quantile, supplied"),
+    .ck("pd_min_obligors", 9, "30", "Minimum obligors per grade before merging"),
+    .ck("pd_min_defaults", 9, "20", "Minimum defaults per grade before merging"),
+    .ck("pd_source", 9, "lra", "Grade PD: long-run default rate or mean of individual PDs"),
+    .ck("pd_moc_method", 9, "ci_timeseries", "Estimation-error margin of conservatism: ci_timeseries, ci_binomial, bootstrap"),
+    .ck("pd_moc_level", 9, "0.95", "One-sided confidence level of the estimation-error margin"),
+    .ck("pd_asset_class", 9, "retail_other", "Asset class for the PD floor"),
+    .ck("pd_lights", 9, "0.01, 0.05", "Traffic-light p-value thresholds (red, amber)"),
+    .ck("pd_dr_by", 9, "quarter", "Cohort frequency of the default-rate series"),
+    .ck("lgd_discount_add_on", 10, "0.05", "Add-on over the reference rate in the workout discount rate"),
+    .ck("lgd_discount_rate", 10, "NA", "Flat annual discount rate when no rates table is given"),
+    .ck("lgd_cap_at_one", 10, "FALSE", "Cap realised LGD at 1"),
+    .ck("lgd_floor_at_zero", 10, "TRUE", "Floor realised LGD at 0 for the averages (raw value kept)"),
+    .ck("lgd_t_max", 10, "60", "Maximum workout period in months; older open defaults close with no further recovery"),
+    .ck("lgd_cure_window", 10, "9", "Months within which two defaults of one facility are one event"),
+    .ck("lgd_min_defaults_bin", 10, "100", "Minimum defaults per LGD bin or pool"),
+    .ck("lgd_cost_allocation", 10, "ead", "Allocation key of indirect costs: ead, count, duration"),
+    .ck("lgd_downturn", 10, "type1", "Downturn quantification: type1 (observed), type3 (add-on), none"),
+    .ck("lgd_downturn_add_on", 10, "0.15", "Type-3 downturn add-on"),
+    .ck("lgd_n_pools", 10, "7", "Target number of LGD pools"),
+    .ck("lgd_severity", 10, "fractional_logit", "Severity engine: fractional_logit or beta"),
+    .ck("lgd_elbe_grid", 10, "0, 6, 12, 24, 36", "Months since default of the in-default grid"),
+    .ck("ccf_horizon", 11, "fixed", "Reference-date approach: fixed, cohort, variable"),
+    .ck("ccf_horizon_months", 11, "12", "Months between reference date and default under the fixed horizon"),
+    .ck("ccf_measure", 11, "auto", "Realised measure: auto (ULF below u_star, LF above), ulf, lf, eadf"),
+    .ck("ccf_u_star", 11, "0.95", "Utilisation above which the limit factor replaces the CCF"),
+    .ck("ccf_floor_realised", 11, "0", "Floor on the realised CCF (NA keeps the raw value)"),
+    .ck("ccf_cap_realised", 11, "NA", "Cap on the realised CCF (NA: none)"),
+    .ck("ccf_min_defaults", 11, "30", "Minimum defaults per CCF bin or pool"),
+    .ck("ccf_n_pools", 11, "5", "Target number of CCF pools"),
+    .ck("ccf_moc_alpha", 11, "0.05", "One-sided alpha of the estimation-error margin on the CCF"),
+    .ck("ccf_downturn", 11, "type1", "Downturn quantification of the CCF: type1, type3, none"),
+    .ck("ccf_sa_ccf", 11, "0.40", "Standardised CCF used for the own-estimate floor"),
+    .ck("post_default_drawings_in", 11, "lgd", "Where drawings after default are booked: lgd or ccf"),
+    .ck("framework", 12, "bcb", "Parameter preset: bcb, basel3_final, crr3"),
+    .ck("capital_approach", 12, "airb", "airb or firb"),
+    .ck("capital_asset_class", 12, "retail_other", "Default asset class of the risk-weight function"),
+    .ck("capital_target_ratio", 12, "0.08", "Capital ratio applied to the reported RWA"),
+    .ck("capital_output_floor", 12, "TRUE", "Compute the standardised comparison and the output floor"),
+    .ck("capital_sensitivity", 12, "TRUE", "Run the fixed sensitivity grid"),
+    .ck("ecl_discount", 12, "eir", "Discount the expected credit loss at the effective interest rate, or not"),
+    .ck("ecl_stage_dpd", 12, "30, 90", "Days past due that move an exposure to stage 2 and stage 3"),
+    .ck("ecl_sicr_ratio", 12, "2", "PD deterioration ratio (now over origination) that signals stage 2"),
+    .ck("ecl_horizon_months", 12, "12", "Horizon of the 12-month expected credit loss")
   )
   if (!is.null(stage)) d <- d[d$stage %in% stage, , drop = FALSE]
   rownames(d) <- NULL

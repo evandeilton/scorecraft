@@ -41,7 +41,7 @@ scr_reasons(sc, head(scr_demo, 5), k = 3)
 \seealso{
 Other production:
 \code{\link[=scr_apply]{scr_apply()}},
-\code{\link[=scr_export]{scr_export()}},
-\code{\link[=scr_sql]{scr_sql()}}
+\code{\link[=scr_export.scr_capital]{scr_export.scr_capital()}},
+\code{\link[=scr_sql.scr_capital]{scr_sql.scr_capital()}}
 }
 \concept{production}

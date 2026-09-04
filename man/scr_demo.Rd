@@ -43,5 +43,14 @@ pure noise. Without them, the audit funnel would have nothing to show.
 str(scr_demo[, 1:6])
 mean(scr_demo$default)
 }
+\seealso{
+Other data:
+\code{\link{scr_demo_ead}},
+\code{\link{scr_demo_lgd}},
+\code{\link{scr_demo_lgd_cashflows}},
+\code{\link{scr_demo_panel}},
+\code{\link{scr_demo_portfolio}},
+\code{\link{scr_demo_rates}}
+}
 \concept{data}
 \keyword{datasets}

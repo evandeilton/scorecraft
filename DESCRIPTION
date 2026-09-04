@@ -1,6 +1,6 @@
 Package: scorecraft
-Title: Scorecard Engine with Scale Alignment, Cut-Off Strategy and Production SQL
-Version: 0.1.0
+Title: Scorecard Engine with Scale Alignment, Cut-Off Strategy, IRB Risk Parameters and Production SQL
+Version: 0.2.0
 Authors@R: c(
     person("Jose Evandeilton", "Lopes", email = "evandeilton@gmail.com",
            role = c("aut", "cre", "cph"))
@@ -15,7 +15,13 @@ Description: Production-grade scorecard engine for binary targets (credit risk,
     honest reject inference through a sensitivity band; monitors PSI/CSI with
     both the fixed and the sample-size-adjusted threshold; and emits production
     SQL in several dialects, with R-SQL equivalence verified by test. The audit
-    funnel never drops a candidate from the report.
+    funnel never drops a candidate from the report. The IRB layer builds the
+    default flag, calibrates the scorecard to a long-run default rate with
+    rating grades, margins of conservatism and floors (PD), models workout
+    loss given default in two stages with downturn and in-default estimates
+    (LGD), models credit conversion factors from facility snapshots (EAD),
+    and computes expected loss, risk weights, capital and expected credit
+    loss from parameter tables selected by framework preset.
 License: MIT + file LICENSE
 URL: https://github.com/evandeilton/scorecraft
 BugReports: https://github.com/evandeilton/scorecraft/issues
@@ -40,6 +46,7 @@ Suggests:
     RSQLite,
     duckdb,
     openxlsx,
+    betareg,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,

@@ -1,0 +1,389 @@
+---
+title: "PD calibration and rating grades"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PD calibration and rating grades}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+The introductory vignette ends with a scorecard whose alignment turns a
+score into a probability. That probability is a good ranking device and a
+fair estimate of the event rate **of the development sample**; it is not
+yet a probability of default (PD) in the sense a capital or provisioning
+model needs. Four things separate the two:
+
+* the **default definition**: the target must be a default event built by a
+  stated rule (days past due with material arrears, unlikeliness to pay, a
+  probation before cure), not whatever flag happened to be in the table;
+* the **long-run average**: the level of the PD must be anchored to the
+  average one-year default rate observed over many cohorts, not to the
+  event rate of one sample, which is a single draw of the cycle;
+* **grades**: obligors are pooled into rating grades with a monotone PD,
+  enough obligors and defaults to estimate it, and a stable distribution;
+* the **margin of conservatism** and the **floor**: the grade PD carries
+  an explicit add-on for estimation error and for known deficiencies, and
+  it is never reported below the floor of its asset class.
+
+Every step below leaves a record: the merges and repairs of the grades, the
+entries of the margin ledger, the parameter table used for the floor. The
+names follow the public frameworks (the Basel Framework of the BCBS, the
+EBA guidelines on PD and LGD estimation, Resolução BCB 303/2023) only where
+they explain a name; the package is a technical tool and the frameworks
+are tables of numbers it reads, not prose it interprets.
+
+```{r setup, message = FALSE}
+library(scorecraft)
+library(data.table)
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+                  use_lightgbm = FALSE, n_boot = 20)
+```
+
+## 1. The default flag and the default-rate series
+
+`scr_demo_panel` is a monthly panel: 600 obligors over 36 months with days
+past due, arrears, exposure, a restructuring flag and a behavioural score.
+`scr_default()` runs the definition of default over it as a small state
+machine per obligor: a trigger (`dpd >= 90` with arrears above both the
+absolute and the relative materiality thresholds) opens an event, the event
+closes after three consecutive months without a trigger (twelve when the
+obligor was restructured during the event). The row-level flags are the
+product; the events table and the ledger document what the rule did.
+
+```{r default}
+d <- scr_default(scr_demo_panel, id = "id", date = "ref_date", dpd = "dpd",
+                 arrears = "arrears", exposure = "exposure",
+                 restructured = "restructured", config = cfg)
+d
+head(d$events, 4)
+d$ledger$detail
+```
+
+`scr_default_rate()` turns the flagged panel into one-year default rates by
+cohort: at every cohort start the non-defaulted obligors form the
+population and the outcome is a default within the next twelve months. The
+long-run average is the arithmetic mean of the cohort rates; the benchmark
+is the larger of the last five years' mean and the whole period's mean,
+and a flag is raised when the average sits below it. The panel covers less
+than two years of complete windows, so the print says plainly that the
+average is not a long-run one yet.
+
+```{r default-rate}
+dr <- scr_default_rate(d, by = "quarter", config = cfg)
+dr
+dr$table
+```
+
+## 2. Calibrating the scorecard to the central tendency
+
+The scorecard comes from `scr_demo` with the fast configuration. Its
+hold-out event rate is 14.5 %, well above the 9.6 % long-run average of the
+panel: a sample of the development window, not the cycle.
+
+```{r scorecard}
+res <- scr_select(scr_demo, "default", config = cfg, drop = c("id", "churn"),
+                  date_col = "ref_date")
+sc <- scr_scorecard(res)
+sc
+```
+
+`scr_calibrate()` re-anchors the probability to the central tendency (CT)
+without touching the points: it returns a **new** alignment
+`(I*, S*)` whose `predict(..., type = "prob")` is the calibrated PD, while
+the scorecard keeps its own alignment for the score. Passing the `scr_dr`
+as the target uses its long-run average and records where the CT came from.
+
+```{r calibrate}
+cal <- scr_calibrate(sc, target = dr)
+cal
+```
+
+Four methods are available. `"intercept"` is the prior-correction shift of
+King and Zeng, refined by a one-dimensional root so that the mean PD equals
+the CT exactly; the slope is untouched, so every rank statistic is
+untouched. `"logodds_ab"` and `"qmm"` fit both intercept and slope of
+`ln(odds*) = a + b ln(odds)`, the first to a target accuracy ratio, the
+second to the accuracy ratio implied by the PDs themselves. `"scaling"` is
+the proportional rescaling `PD * CT / ybar`, projected back onto a logit
+map. All four hit the CT; only the slope differs, and a monotone map of the
+ln(odds) never changes the AUC of the hold-out.
+
+```{r calibrate-compare}
+ho <- sc$samples$holdout
+auc_score <- sc$metrics[sample == "holdout", auc]
+compare <- rbindlist(lapply(c("intercept", "logodds_ab", "qmm", "scaling"), function(m) {
+  cm <- scr_calibrate(sc, target = dr, method = m)
+  p  <- predict(cm$alignment, ho$link, type = "prob")
+  data.table(method = m, mean_pd_before = cm$mean_pd_before, mean_pd_after = cm$mean_pd_after,
+             slope_ratio = cm$slope_ratio, auc_before = auc_score,
+             auc_after = scr_metrics(p, ho$y, ci = FALSE)$auc)
+}))
+compare
+```
+
+## 3. Rating grades
+
+`scr_grades()` cuts the production score into grades whose PD is monotone.
+The default construction is `"geometric"`: a master scale is built between
+the 1st and the 99th percentile of the calibrated PD, every grade doubling
+(or multiplying by the ratio) the PD of the one before, and its PD
+boundaries are converted into score cut points through the calibrated
+alignment. Grade 1 is the safest, the highest scores under
+`higher_is_safer`. Grades with fewer than `min_obligors` obligors or
+`min_defaults` defaults are merged with the neighbour of closer default
+rate; the sequence of grade PDs is then repaired by pool-adjacent-violators
+when it is not monotone. Every merge is recorded in `repairs`.
+
+```{r grades}
+gr <- scr_grades(sc, cal, n_grades = 7, min_obligors = 30, min_defaults = 10)
+gr
+gr$master_scale
+gr$repairs
+```
+
+Seven grades were asked for and five survive: the two safest grades of the
+scale hold too few defaults on the hold-out and are folded into the third.
+Concentration is reported as the Herfindahl index of the grade shares, the
+coefficient of variation of the shares and the Herfindahl-based `hi`
+index, the three numbers the stability test of section 6 compares against.
+
+```{r concentration}
+unlist(gr$concentration)
+```
+
+A master scale can also be supplied, when the institution already has one.
+`scr_master_scale()` builds it from the first and last midpoints (or from
+supplied midpoints or bands); `method = "supplied"` grades by its PD bands
+and keeps its labels through the merges.
+
+```{r grades-supplied}
+ms <- scr_master_scale(0.005, 0.40, n_grades = 8)
+ms
+gs <- scr_grades(sc, cal, method = "supplied", master_scale = ms, min_defaults = 10)
+gs$table[, .(grade, label, score_lo, score_hi, n, defaults, dr, pd_be)]
+gs$repairs
+```
+
+### The two-pass path: grade PDs from the cohort series
+
+So far `pd_be` is the default rate of the grade on the hold-out, one
+sample again. The grade PD should be the long-run average of the grade's
+own cohort default rates, and that series can only be built once the
+grades exist. Hence two passes: grade the cohort panel with the cut points
+of the first call, build the series by grade with `scr_default_rate()`,
+and pass it as `dr` to a second call with identical arguments. The cut
+points are the same; only the source of `pd_be` changes, and the ledger
+says so.
+
+```{r two-pass}
+pnl <- merge(d$flags, as.data.table(scr_demo_panel)[, .(id, date = ref_date, score)],
+             by = c("id", "date"))
+pnl[, grade := predict(gr, score = score)]
+drg <- scr_default_rate(pnl, id = "id", date = "date", default = "default",
+                        grade = "grade", by = "quarter", config = cfg)
+head(drg$table, 5)
+gr2 <- scr_grades(sc, cal, n_grades = 7, min_obligors = 30, min_defaults = 10, dr = drg)
+identical(gr2$breaks, gr$breaks)
+gr2$table[, .(grade, label, n, dr, pd_mean, pd_be, n_series, t_series)]
+gr2$ledger[action == "grade_pd_source", detail]
+```
+
+## 4. Margin of conservatism, floor and the PD model
+
+`scr_moc()` appends entries to the margin-of-conservatism ledger of the
+grades. Category `C`, the general estimation error, is quantified from the
+data: `"ci_timeseries"` takes the one-sided `t` interval of the long-run
+average over the cohort series, per grade; `"ci_binomial"` and
+`"bootstrap"` work on the obligors when no series exists. Categories `A`
+(data and methodological deficiencies) and `B` (changes in standards or
+environment) are expert quantities: a value in PD units and a non-empty
+reason are both mandatory. The ledger is append-only: `A` and `B` entries
+accumulate, a new `C` supersedes the previous one, which stays in the
+ledger with `active = FALSE`.
+
+```{r moc}
+gm <- scr_moc(gr2, "C", method = "ci_timeseries", dr = drg)
+gm <- scr_moc(gm, "A", value = 0.001,
+              reason = "unlikeliness-to-pay trigger not available before 2024")
+gm
+```
+
+`scr_pd()` assembles the PD model: `pd_moc = pd_be + A + B + C`, then the
+floor of the asset class under the framework of `params`, and
+`pd_final = max(pd_moc, floor)`. `scr_irb_params()` is a table of numbers
+selected by a preset; the floors are one of its tables, editable, and an
+edited table is flagged in the ledger.
+
+```{r pd}
+prm <- scr_irb_params("bcb")
+prm$pd_floor
+pd <- scr_pd(gm, params = prm, asset_class = "retail_other")
+pd
+```
+
+The floor does not bind on this portfolio, whose safest grade sits above
+5 %. The table carries every intermediate column, so a validator can
+follow the number from the sample default rate to the final PD:
+
+```{r pd-table}
+pd$table[, .(grade, label, n, dr, pd_be, moc_a, moc_c, pd_moc, floor, pd_final, floor_applied)]
+```
+
+## 5. Production: R and SQL agree
+
+`scr_apply()` scores new rows with the scorecard and adds the grade, the
+calibrated individual PD and the grade PD; `predict()` does the same from
+a vector of scores. The production SQL of the PD model is the SQL of the
+scorecard plus one block: a `CASE` over the score cut points for the grade
+and another for the final PD.
+
+```{r apply}
+new <- head(scr_demo, 5)
+scr_apply(pd, new)
+predict(pd, score = c(480, 560, 640), type = "pd_final")
+```
+
+```{r sql}
+sql <- scr_sql(pd, table = "customers", dialect = "duckdb")
+cat(tail(sql, 6), sep = "\n")
+```
+
+When DuckDB is installed the SQL is run on a few hundred rows and compared
+with `scr_apply()`: the score, the grade and the final PD are the same
+numbers.
+
+```{r sql-duckdb, eval = requireNamespace("duckdb", quietly = TRUE) && requireNamespace("DBI", quietly = TRUE), message = FALSE}
+con <- DBI::dbConnect(duckdb::duckdb(), config = list(threads = "1"))
+DBI::dbWriteTable(con, "customers", head(scr_demo, 300))
+got <- DBI::dbGetQuery(con, paste(sql, collapse = "\n"))
+DBI::dbDisconnect(con, shutdown = TRUE)
+exp <- scr_apply(pd, head(scr_demo, 300))
+head(got[, c("score", "grade", "pd_final")], 3)
+all.equal(got$score, exp$score)
+identical(as.integer(got$grade), exp$grade)
+all.equal(got$pd_final, exp$pd_final)
+```
+
+## 6. Validation on the cohort panel
+
+`scr_pd_validate()` runs the standard battery on a monthly panel with the
+default flag and the grade at every month, building the cohorts exactly as
+`scr_default_rate()` does. The panel is graded with the cut points of the
+PD model through `predict()`, the same path the production SQL follows.
+
+* **Calibration**, per grade pooled over cohorts and per cohort: the
+  Jeffreys test, the binomial test with its critical count, the normal `z`,
+  the traffic light on the Jeffreys p-value; for the portfolio, the same
+  tests on the totals, Hosmer-Lemeshow over the grades, the multi-period
+  test over the cohort default rates and the Brier score.
+* **Discrimination**: AUC, Gini and KS with a bootstrap interval on the
+  score, and the `S` statistic against the development AUC.
+* **Stability**: the PSI of the grade distribution per cohort against the
+  development sample, the migration matrix pooled over the cohorts, and
+  the concentration test on the coefficient of variation.
+
+```{r validate}
+pnl[, grade := predict(pd, score = score)]
+v <- scr_pd_validate(pd, pnl, id = "id", date = "date", default = "default",
+                     grade = "grade", score = "score", by = "quarter")
+v
+```
+
+The summary is one row per test with its statistic, p-value and light; the
+overall light is the worst of them.
+
+```{r validate-summary}
+v$summary
+```
+
+Two reds, and both are readable. The one-sided tests are green on every
+grade because the tested PD is `pd_final`, which carries the margin of
+conservatism: the observed default rates sit below it, as they should.
+Hosmer-Lemeshow is two-sided and charges that same conservatism as
+miscalibration, which is why it is reported next to the one-sided tests
+and not instead of them. The grade PSI is large because the panel is a
+different population from the development sample: its behavioural score
+puts two thirds of the obligors in grade 1 where the hold-out had a
+quarter. That is exactly what the PSI is there to flag; a validator would
+now ask whether the cut points belong on that population at all.
+
+```{r validate-cohorts}
+v$portfolio[, .(cohort, n, d, pd, dr, p_jeffreys, light)]
+head(v$stability$psi, 3)
+```
+
+### Migration
+
+`scr_migration()` counts the obligors in grade `i` at the cohort start and
+grade `j` twelve months later, with defaults and closed accounts in their
+own columns, and reports the upper and lower matrix-weighted bandwidths,
+the `z` of every off-diagonal cell against its neighbour closer to the
+diagonal, and the mobility summary. The validation pools it over the
+cohorts whose end date is observed. On this panel the matrix is diagonal:
+the behavioural score of `scr_demo_panel` is constant per obligor, so an
+obligor either stays in its grade or defaults, and the bandwidths are
+undefined for want of a single move.
+
+```{r migration}
+v$stability$migration
+```
+
+On a panel where grades move, the same function on two grade vectors gives
+the full reading:
+
+```{r migration-demo}
+set.seed(2)
+g0 <- pnl[date == as.Date("2023-01-01"), grade]
+g1 <- pmin(5L, pmax(1L, g0 + sample(c(-1L, 0L, 0L, 0L, 1L), length(g0), TRUE)))
+g1[sample(length(g1), 25)] <- NA
+scr_migration(g0, g1, K = 5)
+```
+
+### The point-in-time view
+
+The grade PDs above are through-the-cycle: the long-run average with a
+margin. `scr_pd_pit_ttc()` is Vasicek's one-factor bridge between that PD
+and the conditional PD of a given state of the systematic factor `z`
+(negative for a stressed year, positive for a benign one), with the asset
+correlation `rho`; the map is invertible. `scr_pd(philosophy = "pit")`
+applies it before the floor.
+
+```{r pit}
+rho <- scr_irb_params("bcb")$correlation$retail_other[["lo"]]
+pit <- scr_pd_pit_ttc(pd$table$pd_final, z = -1, rho = rho)
+data.table(grade = pd$table$grade, pd_ttc = pd$table$pd_final, pd_pit_stressed = pit,
+           back_to_ttc = scr_pd_pit_ttc(pit, z = -1, rho = rho, to = "ttc"))
+pd_pit <- scr_pd(gm, params = prm, philosophy = "pit", rho = rho, z = -1)
+pd_pit$table[, .(grade, pd_ttc, pd_pit, pd_final)]
+```
+
+## 7. Deliverables
+
+`scr_export()` writes the PD workbook and the SQL file. With the
+validation supplied the workbook carries the test sheets; without it the
+sheets exist with an availability row, never a fabricated number.
+
+```{r export, eval = requireNamespace("openxlsx", quietly = TRUE)}
+out <- file.path(tempdir(), "scorecraft-pd-vignette")
+ex <- scr_export(pd, out, stamp = FALSE, validation = v)
+basename(unlist(ex$files))
+openxlsx::getSheetNames(ex$files$pd)
+```
+
+## 8. What the ledger recorded
+
+Nothing in the PD model depends on a number that was typed into a script
+and forgotten. The margin ledger keeps every entry with its category,
+method, value and reason, active or superseded; the grade repairs keep
+every merge with the count that forced it; the decision ledger of the
+model strings the stages together.
+
+```{r ledger}
+pd$moc_ledger[, .(id, category, method, level, grade, value, reason, active)]
+pd$repairs
+pd$ledger[, .(action, detail)]
+```
