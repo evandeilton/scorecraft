@@ -63,7 +63,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 res                      # print: the funnel in one screen
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
+#>   event: 14.25% on train, 14.50% on hold-out | 0.9s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel

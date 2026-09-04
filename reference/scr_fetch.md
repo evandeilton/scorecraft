@@ -66,10 +66,10 @@ d <- scr_demo; d$ref_date <- as.character(d$ref_date)
 DBI::dbWriteTable(con, "dtm", d)
 nrow(scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42))
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.500000
-#> [1] 2049
+#> [1] 2100
 nrow(scr_fetch(con, "dtm", max_rows = 1000))
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.238095
-#> [1] 999
+#> [1] 1026
 DBI::dbDisconnect(con)
 ```

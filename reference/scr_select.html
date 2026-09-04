@@ -11,7 +11,7 @@ its own for whoever wants more control (hybrid interface, decision D13)."><meta 
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-dark" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
@@ -27,7 +27,9 @@ its own for whoever wants more control (hybrid interface, decision D13)."><meta 
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
     <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
     <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
   </ul></li>
@@ -154,7 +156,7 @@ and the bootstrap, and the binning is deterministic per column.</p>
 <span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_result&gt; target "default"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   event: 14.25% on train, 14.50% on hold-out | 1.5s</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   event: 14.25% on train, 14.50% on hold-out | 1.0s</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   convention: risk (target=1 is the bad case)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Funnel</span>

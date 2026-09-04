@@ -136,7 +136,7 @@ scr_compare(rs)
 #> 2:         10     8        8           0.378            0     glmnet 0.7046
 #>    auc_lo auc_hi     ks seconds             relaxation
 #>     <num>  <num>  <num>   <num>                 <char>
-#> 1: 0.7218 0.7852 0.3891       2                   none
+#> 1: 0.7218 0.7852 0.3891       1                   none
 #> 2: 0.6710 0.7259 0.3048       1 min_votes reduced to 1
 DBI::dbDisconnect(con)
 ```

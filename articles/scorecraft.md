@@ -62,7 +62,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id", date_col = "re
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.8s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.5s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -294,11 +294,11 @@ strategy), the SQL files and a Markdown summary.
 
 out <- file.path(tempdir(), "scorecraft-vignette")
 basename(unlist(scr_export(sc, out, stamp = FALSE)$files))
-#>   /tmp/RtmpaFtz34/scorecraft-vignette/scorecard_default.xlsx
-#>   /tmp/RtmpaFtz34/scorecraft-vignette/validation_default.xlsx
-#>   /tmp/RtmpaFtz34/scorecraft-vignette/strategy_default.xlsx
-#>   /tmp/RtmpaFtz34/scorecraft-vignette/sql_score_default.sql
-#>   /tmp/RtmpaFtz34/scorecraft-vignette/sql_woe_default.sql
+#>   /tmp/Rtmph7uki3/scorecraft-vignette/scorecard_default.xlsx
+#>   /tmp/Rtmph7uki3/scorecraft-vignette/validation_default.xlsx
+#>   /tmp/Rtmph7uki3/scorecraft-vignette/strategy_default.xlsx
+#>   /tmp/Rtmph7uki3/scorecraft-vignette/sql_score_default.sql
+#>   /tmp/Rtmph7uki3/scorecraft-vignette/sql_woe_default.sql
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  
 #> [5] "sql_woe_default.sql"

@@ -21,7 +21,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-dark" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
@@ -39,7 +39,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
     <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
     <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
   </ul>
@@ -127,7 +129,7 @@ exported on its own (<code><a href="../reference/scr_split.html">scr_split()</a>
 <span><span class="va">res</span></span>
 <span><span class="co">#&gt; &lt;scr_result&gt; target "default"</span></span>
 <span><span class="co">#&gt;   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span></span>
-<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.8s</span></span>
+<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.5s</span></span>
 <span><span class="co">#&gt;   convention: risk (target=1 is the bad case)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Funnel</span></span>
@@ -338,11 +340,11 @@ and a Markdown summary.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-vignette"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpaFtz34/scorecraft-vignette/scorecard_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpaFtz34/scorecraft-vignette/validation_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpaFtz34/scorecraft-vignette/strategy_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpaFtz34/scorecraft-vignette/sql_score_default.sql</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpaFtz34/scorecraft-vignette/sql_woe_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/scorecard_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/validation_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/strategy_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/sql_score_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmph7uki3/scorecraft-vignette/sql_woe_default.sql</span></span>
 <span><span class="co">#&gt; [1] "scorecard_default.xlsx"  "validation_default.xlsx"</span></span>
 <span><span class="co">#&gt; [3] "strategy_default.xlsx"   "sql_score_default.sql"  </span></span>
 <span><span class="co">#&gt; [5] "sql_woe_default.sql"</span></span></code></pre></div>
