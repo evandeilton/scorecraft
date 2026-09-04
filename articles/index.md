@@ -12,3 +12,12 @@
 - [From database to production: fetching, cut-off strategy, SQL
   equivalence, monitoring and
   deliverables](https://evandeilton.github.io/scorecraft/articles/production-and-monitoring.md):
+
+### IRB risk parameters
+
+- [PD calibration and rating
+  grades](https://evandeilton.github.io/scorecraft/articles/pd-calibration-and-grades.md):
+- [LGD and EAD under
+  IRB](https://evandeilton.github.io/scorecraft/articles/lgd-and-ead-under-irb.md):
+- [Expected loss and regulatory
+  capital](https://evandeilton.github.io/scorecraft/articles/expected-loss-and-capital.md):

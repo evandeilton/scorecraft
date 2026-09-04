@@ -79,6 +79,51 @@ scr_monitor(sc, newdata, date_col = "ref_date", target = "default")
 scr_export(sc, "output")
 ```
 
+## From the scorecard to IRB risk parameters
+
+Every regime-specific number is a table selected by a preset; the
+functions read the tables, never the law.
+
+``` r
+
+params <- scr_irb_params("bcb")          # or "basel3_final", "crr3"; editable tables
+
+# Default flag from a monthly panel, then one-year default rates by cohort
+d  <- scr_default(scr_demo_panel, id = "id", date = "ref_date", dpd = "dpd",
+                  arrears = "arrears", exposure = "exposure", config = cfg)
+dr <- scr_default_rate(d, by = "quarter")        # long-run average and its benchmark
+
+# PD: calibrate the scorecard to the central tendency, cut grades, add MoC and the floor
+cal <- scr_calibrate(sc, target = dr)             # a new alignment; the scorecard is untouched
+gr  <- scr_grades(sc, calibration = cal, n_grades = 8)
+gr  <- scr_moc(gr, category = "C", dr = dr)      # estimation error, computed
+pd  <- scr_pd(gr, params = params, asset_class = "retail_other")
+scr_pd_validate(pd, panel, id = "id", date = "ref_date", default = "default")
+
+# LGD: workout cash flows -> realised LGD -> cure x severity -> pools -> downturn -> floor
+wo  <- scr_workout(scr_demo_lgd, scr_demo_lgd_cashflows, rates = scr_demo_rates, config = cfg)
+lgd <- scr_lgd(wo, drivers = c("product", "ltv", "months_on_book", "prior_dpd_max"), config = cfg)
+lgd <- scr_lgd_downturn(lgd, periods = data.frame(start = "2020-03-01", end = "2021-02-01"),
+                        reason = "stress window of the reference data set")
+lgd <- scr_lgd_floor(lgd, params = params, asset_class = "retail_other")
+
+# EAD: facility snapshots -> realised conversion factors -> pools with the standardised floor
+rds <- scr_ead_data(scr_demo_ead, facility_id = "facility_id", date_col = "ref_date",
+                    limit = "limit", drawn = "drawn", defaulted = "defaulted", config = cfg)
+ead <- scr_ead(rds, drivers = c("product", "utilisation_ref", "months_on_book"), config = cfg)
+
+# Expected loss, risk weights, capital, expected credit loss
+cap <- scr_capital(scr_demo_portfolio, segment = "segment", asset_class = "asset_class",
+                   provisions = "provision", params = params, config = cfg)
+cap$totals; cap$segments
+scr_ecl(pd_term, lgd = lgd_vec, ead = ead_vec, eir = 0.12)
+
+# The same contracts as the scorecard: scoring, SQL, workbooks
+scr_apply(pd, newdata); scr_apply(lgd, newdata); scr_apply(ead, newdata)
+scr_sql(pd, table = "prd.customers", dialect = "databricks")
+scr_export(pd, "output"); scr_export(lgd, "output"); scr_export(ead, "output"); scr_export(cap, "output")
+```
+
 ## Why another scorecard package
 
 - **Alignment is a stage, not a footnote.**

@@ -59,6 +59,6 @@ DBI::dbWriteTable(con, "dtm", d)
 dt <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.500000
 nrow(dt)
-#> [1] 2090
+#> [1] 2094
 DBI::dbDisconnect(con)
 ```

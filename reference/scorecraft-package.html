@@ -11,7 +11,7 @@ scr_select() that chains them for the common case:"><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,11 @@ scr_select() that chains them for the common case:"><meta property="og:image" co
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
     <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
     <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
+    <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
+    <li><a class="dropdown-item" href="../articles/lgd-and-ead-under-irb.html">LGD and EAD under IRB</a></li>
+    <li><a class="dropdown-item" href="../articles/expected-loss-and-capital.html">Expected loss and regulatory capital</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -79,6 +84,31 @@ the production SQL (<code><a href="scr_sql.html">scr_sql()</a></code>) with R-SQ
 and four <code>.xlsx</code> workbooks. <code><a href="scr_monitor.html">scr_monitor()</a></code> recomputes PSI/CSI on new data,
 with both the fixed and the sample-size-adjusted threshold, and never
 schedules anything by itself.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="irb-risk-parameters">IRB risk parameters<a class="anchor" aria-label="anchor" href="#irb-risk-parameters"></a></h2>
+
+
+
+<p>The IRB layer turns the scorecard into regulatory parameters and keeps
+the same contracts (one configuration, ledgers, hold-out revalidation,
+workbooks, production SQL). <code><a href="scr_irb_params.html">scr_irb_params()</a></code> holds every regime-specific
+number as a table selected by preset (<code>"bcb"</code>, <code>"basel3_final"</code>,
+<code>"crr3"</code>); <code><a href="scr_default.html">scr_default()</a></code> builds the default flag from a monthly panel and
+<code><a href="scr_default_rate.html">scr_default_rate()</a></code> the default rates by cohort with the long-run average.
+PD: <code><a href="scr_calibrate.html">scr_calibrate()</a></code> anchors the scorecard to a central tendency,
+<code><a href="scr_grades.html">scr_grades()</a></code> cuts the score into rating grades, <code><a href="scr_moc.html">scr_moc()</a></code> and
+<code><a href="scr_pd.html">scr_pd()</a></code> add the margin of conservatism and the floor, and
+<code><a href="scr_pd_validate.html">scr_pd_validate()</a></code> runs the calibration, discrimination and stability
+tests with traffic lights. LGD: <code><a href="scr_workout.html">scr_workout()</a></code> discounts recovery cash
+flows into realised LGD, <code><a href="scr_lgd.html">scr_lgd()</a></code> fits the cure and severity stages
+and the pools, <code><a href="scr_lgd_downturn.html">scr_lgd_downturn()</a></code>, <code><a href="scr_lgd_floor.html">scr_lgd_floor()</a></code> and <code><a href="scr_elbe.html">scr_elbe()</a></code>
+complete the estimate. EAD: <code><a href="scr_ead_data.html">scr_ead_data()</a></code> builds the realised
+conversion factors from facility snapshots and <code><a href="scr_ead.html">scr_ead()</a></code> the pools.
+<code><a href="scr_el.html">scr_el()</a></code>, <code><a href="scr_irb_rw.html">scr_irb_rw()</a></code>, <code><a href="scr_capital.html">scr_capital()</a></code> and <code><a href="scr_ecl.html">scr_ecl()</a></code> compute
+expected loss, risk weights, capital and expected credit loss. Binning
+against a continuous target goes through <code><a href="scr_bin_continuous.html">scr_bin_continuous()</a></code>, whose
+result the engine reproduces in R and in SQL.</p>
     </div>
     <div class="section level2">
     <h2 id="parallelism">Parallelism<a class="anchor" aria-label="anchor" href="#parallelism"></a></h2>

@@ -4,9 +4,12 @@ pkgdown_sha: ~
 articles:
   alignment-and-portfolio: alignment-and-portfolio.html
   coarse-classing: coarse-classing.html
+  expected-loss-and-capital: expected-loss-and-capital.html
+  lgd-and-ead-under-irb: lgd-and-ead-under-irb.html
+  pd-calibration-and-grades: pd-calibration-and-grades.html
   production-and-monitoring: production-and-monitoring.html
   scorecraft: scorecraft.html
-last_built: 2026-09-04T17:34Z
+last_built: 2026-09-04T23:09Z
 urls:
   reference: https://evandeilton.github.io/scorecraft/reference
   article: https://evandeilton.github.io/scorecraft/articles

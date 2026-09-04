@@ -22,6 +22,15 @@ scr_apply(
 
 # S3 method for class 'scr_scorecard'
 scr_apply(x, newdata, what = c("score", "points", "woe", "all"), ...)
+
+# S3 method for class 'scr_ead'
+scr_apply(x, newdata, ...)
+
+# S3 method for class 'scr_lgd'
+scr_apply(x, newdata, what = c("pool", "lgd", "all"), ...)
+
+# S3 method for class 'scr_pd'
+scr_apply(x, newdata, ...)
 ```
 
 ## Arguments
@@ -68,9 +77,9 @@ and `score_points` (the sum of the whole points per bin plus the base).
 ## See also
 
 Other production:
-[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+[`scr_export.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
 [`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md),
-[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+[`scr_sql.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
 
 ## Examples
 
@@ -85,7 +94,7 @@ str(scr_apply(res, new)[, 1:3])
 #>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...
 #>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...
 #>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...
-#>  - attr(*, ".internal.selfref")=<pointer: 0x55d50a4dda30> 
+#>  - attr(*, ".internal.selfref")=<pointer: 0x55cc06ce9a30> 
 sc <- scr_scorecard(res)
 head(scr_apply(sc, new))
 #>         link       prob    score score_points

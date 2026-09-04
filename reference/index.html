@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,11 @@
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
     <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
     <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
+    <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
+    <li><a class="dropdown-item" href="../articles/lgd-and-ead-under-irb.html">LGD and EAD under IRB</a></li>
+    <li><a class="dropdown-item" href="../articles/expected-loss-and-capital.html">Expected loss and regulatory capital</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -418,6 +423,268 @@
         </dt>
         <dd>Fetch a table with reproducible server-side sampling</dd>
       </dl></div><div class="section level2">
+      <h2 id="irb-parameters-and-the-default-definition">IRB parameters and the default definition<a class="anchor" aria-label="anchor" href="#irb-parameters-and-the-default-definition"></a></h2>
+
+      <div class="section-desc"><p>Parameter tables by framework preset, the default engine and default rates by cohort.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="scr_default.html">scr_default()</a></code>
+
+        </dt>
+        <dd>Build the default flag from a monthly panel</dd>
+
+        <dt>
+
+          <code><a href="scr_default_rate.html">scr_default_rate()</a></code>
+
+        </dt>
+        <dd>One-year default rates by cohort and the long-run average</dd>
+
+        <dt>
+
+          <code><a href="scr_irb_params.html">scr_irb_params()</a></code>
+
+        </dt>
+        <dd>IRB parameter tables by framework preset</dd>
+      </dl></div><div class="section level2">
+      <h2 id="pd-calibration-and-rating-grades">PD calibration and rating grades<a class="anchor" aria-label="anchor" href="#pd-calibration-and-rating-grades"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="predict.scr_grades.html">predict(<i>&lt;scr_grades&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Grade a score vector with the cut points of an scr_grades object</dd>
+
+        <dt>
+
+          <code><a href="predict.scr_pd.html">predict(<i>&lt;scr_pd&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predict grade and PD from an scr_pd object</dd>
+
+        <dt>
+
+          <code><a href="scr_calibrate.html">scr_calibrate()</a></code>
+
+        </dt>
+        <dd>Calibrate the alignment to a central tendency</dd>
+
+        <dt>
+
+          <code><a href="scr_grades.html">scr_grades()</a></code>
+
+        </dt>
+        <dd>Rating grades on the score</dd>
+
+        <dt>
+
+          <code><a href="scr_master_scale.html">scr_master_scale()</a></code>
+
+        </dt>
+        <dd>Master scale of PD grades</dd>
+
+        <dt>
+
+          <code><a href="scr_migration.html">scr_migration()</a></code>
+
+        </dt>
+        <dd>Migration matrix between two rating dates</dd>
+
+        <dt>
+
+          <code><a href="scr_moc.html">scr_moc()</a></code>
+
+        </dt>
+        <dd>Margin of conservatism, by category</dd>
+
+        <dt>
+
+          <code><a href="scr_pd.html">scr_pd()</a></code>
+
+        </dt>
+        <dd>The PD model: grades, margin of conservatism and the floor</dd>
+
+        <dt>
+
+          <code><a href="scr_pd_pit_ttc.html">scr_pd_pit_ttc()</a></code>
+
+        </dt>
+        <dd>One-factor bridge between point-in-time and through-the-cycle PD</dd>
+
+        <dt>
+
+          <code><a href="scr_pd_validate.html">scr_pd_validate()</a></code>
+
+        </dt>
+        <dd>Validate a PD model on a cohort panel</dd>
+      </dl></div><div class="section level2">
+      <h2 id="lgd">LGD<a class="anchor" aria-label="anchor" href="#lgd"></a></h2>
+
+      <div class="section-desc"><p>Workout loss given default, two-stage model, pools, downturn, floors and in-default estimates.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="scr_elbe.html">scr_elbe()</a></code>
+
+        </dt>
+        <dd>ELBE and in-default LGD on a grid of months since default</dd>
+
+        <dt>
+
+          <code><a href="scr_lgd.html">scr_lgd()</a></code>
+
+        </dt>
+        <dd>Two-stage LGD model and pools on the reference data set</dd>
+
+        <dt>
+
+          <code><a href="scr_lgd_downturn.html">scr_lgd_downturn()</a></code>
+
+        </dt>
+        <dd>Downturn LGD per pool</dd>
+
+        <dt>
+
+          <code><a href="scr_lgd_floor.html">scr_lgd_floor()</a></code>
+
+        </dt>
+        <dd>Input floor on the downturn LGD per pool</dd>
+
+        <dt>
+
+          <code><a href="scr_lgd_pools.html">scr_lgd_pools()</a></code>
+
+        </dt>
+        <dd>LGD pools from the predicted LGD</dd>
+
+        <dt>
+
+          <code><a href="scr_lgd_validate.html">scr_lgd_validate()</a></code>
+
+        </dt>
+        <dd>Validation battery of an LGD model</dd>
+
+        <dt>
+
+          <code><a href="scr_workout.html">scr_workout()</a></code>
+
+        </dt>
+        <dd>Workout LGD: the reference data set from default events and cash flows</dd>
+      </dl></div><div class="section level2">
+      <h2 id="ead-and-credit-conversion-factors">EAD and credit conversion factors<a class="anchor" aria-label="anchor" href="#ead-and-credit-conversion-factors"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="scr_bin_continuous.html">scr_bin_continuous()</a></code>
+
+        </dt>
+        <dd>Bin drivers against a continuous target (LGD, CCF)</dd>
+
+        <dt>
+
+          <code><a href="scr_ead.html">scr_ead()</a></code>
+
+        </dt>
+        <dd>Estimate CCF pools from the reference data set</dd>
+
+        <dt>
+
+          <code><a href="scr_ead_data.html">scr_ead_data()</a></code>
+
+        </dt>
+        <dd>Build the realised-CCF reference data set from facility snapshots</dd>
+
+        <dt>
+
+          <code><a href="scr_ead_downturn.html">scr_ead_downturn()</a></code>
+
+        </dt>
+        <dd>Downturn CCF per pool</dd>
+
+        <dt>
+
+          <code><a href="scr_ead_validate.html">scr_ead_validate()</a></code>
+
+        </dt>
+        <dd>Validate CCF pools: calibration, discrimination, back-testing and stability</dd>
+      </dl></div><div class="section level2">
+      <h2 id="expected-loss-capital-and-ecl">Expected loss, capital and ECL<a class="anchor" aria-label="anchor" href="#expected-loss-capital-and-ecl"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="scr_capital.html">scr_capital()</a></code>
+
+        </dt>
+        <dd>Expected loss, risk-weighted assets and capital of a portfolio</dd>
+
+        <dt>
+
+          <code><a href="scr_ecl.html">scr_ecl()</a></code>
+
+        </dt>
+        <dd>Expected credit loss with stage allocation</dd>
+
+        <dt>
+
+          <code><a href="scr_el.html">scr_el()</a></code>
+
+        </dt>
+        <dd>Expected loss per exposure</dd>
+
+        <dt>
+
+          <code><a href="scr_irb_rw.html">scr_irb_rw()</a></code>
+
+        </dt>
+        <dd>IRB risk weight of one or many exposures</dd>
+
+        <dt>
+
+          <code><a href="scr_pd_stress.html">scr_pd_stress()</a></code>
+
+        </dt>
+        <dd>Stressed PD of the one-factor model</dd>
+
+        <dt>
+
+          <code><a href="scr_sa_rw.html">scr_sa_rw()</a></code>
+
+        </dt>
+        <dd>Standardised risk weight of an exposure</dd>
+      </dl></div><div class="section level2">
       <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
 
@@ -433,6 +700,48 @@
 
         </dt>
         <dd>Synthetic example data</dd>
+
+        <dt>
+
+          <code><a href="scr_demo_ead.html">scr_demo_ead</a></code>
+
+        </dt>
+        <dd>Synthetic monthly facility snapshots for the EAD/CCF module</dd>
+
+        <dt>
+
+          <code><a href="scr_demo_lgd.html">scr_demo_lgd</a></code>
+
+        </dt>
+        <dd>Synthetic default events for the workout LGD examples</dd>
+
+        <dt>
+
+          <code><a href="scr_demo_lgd_cashflows.html">scr_demo_lgd_cashflows</a></code>
+
+        </dt>
+        <dd>Synthetic post-default cash flows of <code>scr_demo_lgd</code></dd>
+
+        <dt>
+
+          <code><a href="scr_demo_panel.html">scr_demo_panel</a></code>
+
+        </dt>
+        <dd>Synthetic monthly panel for the default engine and PD calibration</dd>
+
+        <dt>
+
+          <code><a href="scr_demo_portfolio.html">scr_demo_portfolio</a></code>
+
+        </dt>
+        <dd>Synthetic exposure snapshot for expected loss, capital and ECL</dd>
+
+        <dt>
+
+          <code><a href="scr_demo_rates.html">scr_demo_rates</a></code>
+
+        </dt>
+        <dd>Synthetic monthly reference rate series</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

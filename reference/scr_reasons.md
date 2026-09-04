@@ -45,8 +45,8 @@ A `data.table` with `reason_1` ... `reason_k` (variable names) and
 
 Other production:
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
-[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
-[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+[`scr_export.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+[`scr_sql.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
 
 ## Examples
 

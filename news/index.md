@@ -1,5 +1,118 @@
 # Changelog
 
+## scorecraft 0.2.0 (unreleased)
+
+The IRB layer: from the scorecard to regulatory risk parameters, with
+the same contracts as the scorecard pipeline (one configuration, ledgers
+with mandatory reasons, hold-out revalidation with frozen bins, hardened
+workbooks, production SQL verified against DuckDB and SQLite). Regimes
+are parameter tables selected by a preset, never prose.
+
+- [`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md)
+  ships the numbers of three presets (`"bcb"`, `"basel3_final"`,
+  `"crr3"`): PD floors, LGD input floors, foundation LGD, standardised
+  CCFs, asset correlations, maturity rules, output floor and
+  standardised risk weights; the tables are editable and edits are
+  recorded.
+- [`scr_default()`](https://evandeilton.github.io/scorecraft/reference/scr_default.md)
+  builds the default flag from a monthly panel (days past due with
+  absolute and relative materiality, unlikeliness to pay, probation,
+  restructuring, obligor-level pulling effect);
+  [`scr_default_rate()`](https://evandeilton.github.io/scorecraft/reference/scr_default_rate.md)
+  gives the default rates by cohort, grade, segment and exposure, with
+  the long-run average and its benchmark.
+- [`scr_bin_continuous()`](https://evandeilton.github.io/scorecraft/reference/scr_bin_continuous.md)
+  bins drivers against a bounded continuous target (LGD, CCF) and
+  returns an object with the shape of the engine’s, so
+  [`OptimalBinningWoE::obwoe_apply()`](https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_apply.html)
+  and `obwoe_sql()` reproduce the bin means in R and in every SQL
+  dialect; hold-out revalidation with frozen cut points and PSI.
+- Configuration gains the keys of stages 8 to 12 (`default_*`, `pd_*`,
+  `lgd_*`, `ccf_*`, `framework`, `capital_*`, `ecl_*`), all registered
+  in
+  [`scr_config_keys()`](https://evandeilton.github.io/scorecraft/reference/scr_config_keys.md)
+  and validated.
+- New demonstration data: `scr_demo_panel`, `scr_demo_lgd`,
+  `scr_demo_lgd_cashflows`, `scr_demo_rates`, `scr_demo_ead`,
+  `scr_demo_portfolio`.
+- PD:
+  [`scr_master_scale()`](https://evandeilton.github.io/scorecraft/reference/scr_master_scale.md),
+  [`scr_calibrate()`](https://evandeilton.github.io/scorecraft/reference/scr_calibrate.md)
+  (intercept shift, log-odds `(a, b)`, scaling, quasi-moment matching; a
+  new alignment, the scorecard untouched),
+  [`scr_grades()`](https://evandeilton.github.io/scorecraft/reference/scr_grades.md)
+  (geometric, quantile or supplied grades, merges below the minimum
+  counts, monotone repair recorded),
+  [`scr_moc()`](https://evandeilton.github.io/scorecraft/reference/scr_moc.md)
+  (estimation error computed; other categories with a mandatory reason),
+  [`scr_pd()`](https://evandeilton.github.io/scorecraft/reference/scr_pd.md)
+  (floors from the preset),
+  [`scr_migration()`](https://evandeilton.github.io/scorecraft/reference/scr_migration.md),
+  [`scr_pd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_validate.md)
+  (Jeffreys, binomial, normal, Hosmer-Lemeshow, multi-period, AUC
+  against the initial value, PSI, migration bandwidths, concentration;
+  traffic lights),
+  [`scr_pd_pit_ttc()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_pit_ttc.md),
+  with [`predict()`](https://rdrr.io/r/stats/predict.html),
+  [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+  [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+  (grade and PD as a `CASE` on the score) and
+  [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
+  methods.
+- LGD:
+  [`scr_workout()`](https://evandeilton.github.io/scorecraft/reference/scr_workout.md)
+  (discounted recoveries and costs, cures, merged re-defaults,
+  extrapolated incomplete workouts, named funnel rules),
+  [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md)
+  (cure stage on the binary engine, severity stage on the continuous
+  binner with a fractional logit or a beta regression, hold-out
+  revalidation, pools),
+  [`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md),
+  [`scr_lgd_floor()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_floor.md),
+  [`scr_elbe()`](https://evandeilton.github.io/scorecraft/reference/scr_elbe.md),
+  [`scr_lgd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_validate.md),
+  with
+  [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+  [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+  (both stages, pool `CASE`, floored result) and
+  [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
+  methods.
+- EAD:
+  [`scr_ead_data()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_data.md)
+  (realised conversion factors under a fixed, cohort or variable
+  horizon; conversion factor below and limit factor above a utilisation
+  threshold; named funnel rules),
+  [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
+  (driver bins with admission rules, pools, estimation-error margin,
+  standardised floor),
+  [`scr_ead_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_downturn.md),
+  [`scr_ead_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_validate.md),
+  with
+  [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+  [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+  and
+  [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
+  methods.
+- Expected loss and capital:
+  [`scr_el()`](https://evandeilton.github.io/scorecraft/reference/scr_el.md),
+  [`scr_irb_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_rw.md)
+  (the risk-weight function with correlations, size adjustment,
+  maturity, floors and the defaulted case),
+  [`scr_sa_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_sa_rw.md),
+  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md)
+  (reconciliation by segment, output floor, provisions shortfall and
+  excess, floors impact, sensitivity grid, concentration),
+  [`scr_pd_stress()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_stress.md),
+  [`scr_ecl()`](https://evandeilton.github.io/scorecraft/reference/scr_ecl.md)
+  (survival-weighted 12-month and lifetime expected credit loss with
+  stages and scenarios), with
+  [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+  (constants per pool, no normal quantile at run time) and
+  [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
+  methods.
+- `betareg` joins Suggests for the beta severity engine of the LGD
+  model.
+
 ## scorecraft 0.1.0
 
 First release. A production-grade scorecard engine for binary targets,

@@ -15,7 +15,7 @@ same numbers, and a test guarantees it.'><meta property="og:image" content="http
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,11 @@ same numbers, and a test guarantees it.'><meta property="og:image" content="http
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
     <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
     <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
+    <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
+    <li><a class="dropdown-item" href="../articles/lgd-and-ead-under-irb.html">LGD and EAD under IRB</a></li>
+    <li><a class="dropdown-item" href="../articles/expected-loss-and-capital.html">Expected loss and regulatory capital</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -45,7 +50,7 @@ same numbers, and a test guarantees it.'><meta property="og:image" content="http
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Apply the WOE transformation or the scorecard to new data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/apply.R" class="external-link"><code>R/apply.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/apply.R" class="external-link"><code>R/apply.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/ead.R" class="external-link"><code>R/ead.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/lgd.R" class="external-link"><code>R/lgd.R</code></a>, and 1 more</small>
       <div class="d-none name"><code>scr_apply.Rd</code></div>
     </div>
 
@@ -71,7 +76,16 @@ same numbers, and a test guarantees it.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'scr_scorecard'</span></span>
-<span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">x</span>, <span class="va">newdata</span>, what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"score"</span>, <span class="st">"points"</span>, <span class="st">"woe"</span>, <span class="st">"all"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">x</span>, <span class="va">newdata</span>, what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"score"</span>, <span class="st">"points"</span>, <span class="st">"woe"</span>, <span class="st">"all"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'scr_ead'</span></span>
+<span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">x</span>, <span class="va">newdata</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'scr_lgd'</span></span>
+<span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">x</span>, <span class="va">newdata</span>, what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pool"</span>, <span class="st">"lgd"</span>, <span class="st">"all"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'scr_pd'</span></span>
+<span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">x</span>, <span class="va">newdata</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -120,9 +134,9 @@ the approved ones.</p></dd>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other production:
-<code><a href="scr_export.html">scr_export()</a></code>,
+<code><a href="scr_export.html">scr_export.scr_capital()</a></code>,
 <code><a href="scr_reasons.html">scr_reasons()</a></code>,
-<code><a href="scr_sql.html">scr_sql()</a></code></p></div>
+<code><a href="scr_sql.html">scr_sql.scr_capital()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -137,7 +151,7 @@ the approved ones.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, ".internal.selfref")=&lt;pointer: 0x55d50a4dda30&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, ".internal.selfref")=&lt;pointer: 0x55cc06ce9a30&gt; </span>
 <span class="r-in"><span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">sc</span>, <span class="va">new</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         link       prob    score score_points</span>

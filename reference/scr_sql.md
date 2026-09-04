@@ -6,6 +6,25 @@ variables (or those of the scorecard), in blocks in this order:
 ## Usage
 
 ``` r
+# S3 method for class 'scr_capital'
+scr_sql(
+  x,
+  table = NULL,
+  dialect = NULL,
+  file = NULL,
+  level = c("exposure", "portfolio"),
+  ...
+)
+
+# S3 method for class 'scr_ead'
+scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
+
+# S3 method for class 'scr_lgd'
+scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
+
+# S3 method for class 'scr_pd'
+scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
+
 scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
 
 # S3 method for class 'scr_result'
@@ -45,6 +64,11 @@ scr_sql(
 - file:
 
   Path to write to. `NULL` (default) returns the lines.
+
+- level:
+
+  For `scr_capital`: `"exposure"` (default, one row per exposure with
+  `el`, `k`, `rw`, `rwa`) or `"portfolio"` (the aggregate by segment).
 
 - ...:
 
@@ -88,7 +112,7 @@ numerically, by an automated test that runs both paths.
 
 Other production:
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
-[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+[`scr_export.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
 [`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md)
 
 ## Examples
@@ -101,7 +125,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-09-04 17:35:11
+#> -- Generated on 2026-09-04 23:10:32
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
