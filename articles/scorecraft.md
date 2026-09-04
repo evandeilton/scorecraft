@@ -261,7 +261,7 @@ itself.
 ``` r
 
 scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default", n_boot = 30)
-#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.10/0.25, CSI 0.10/0.25, alpha 0.05, min events 100
+#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.1/0.25, CSI 0.1/0.25, alpha 0.05, min events 100
 #>   period              n      score      PSI fixed      critical adj.    
 #>   2026-01-01        700      549.8   0.0083 stable       0.0302 stable  
 #>   2026-02-01        700      550.3   0.0071 stable       0.0302 stable  
@@ -294,11 +294,11 @@ strategy), the SQL files and a Markdown summary.
 
 out <- file.path(tempdir(), "scorecraft-vignette")
 basename(unlist(scr_export(sc, out, stamp = FALSE)$files))
-#>   /tmp/RtmpZT16A7/scorecraft-vignette/scorecard_default.xlsx
-#>   /tmp/RtmpZT16A7/scorecraft-vignette/validation_default.xlsx
-#>   /tmp/RtmpZT16A7/scorecraft-vignette/strategy_default.xlsx
-#>   /tmp/RtmpZT16A7/scorecraft-vignette/sql_score_default.sql
-#>   /tmp/RtmpZT16A7/scorecraft-vignette/sql_woe_default.sql
+#>   /tmp/RtmpuZX6WE/scorecraft-vignette/scorecard_default.xlsx
+#>   /tmp/RtmpuZX6WE/scorecraft-vignette/validation_default.xlsx
+#>   /tmp/RtmpuZX6WE/scorecraft-vignette/strategy_default.xlsx
+#>   /tmp/RtmpuZX6WE/scorecraft-vignette/sql_score_default.sql
+#>   /tmp/RtmpuZX6WE/scorecraft-vignette/sql_woe_default.sql
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  
 #> [5] "sql_woe_default.sql"

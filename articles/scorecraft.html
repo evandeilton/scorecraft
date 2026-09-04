@@ -314,7 +314,7 @@ CSI with the signed points shift and the performance by vintage on any
 new data. It never schedules itself.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_monitor.html">scr_monitor</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">scr_demo</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span>, target <span class="op">=</span> <span class="st">"default"</span>, n_boot <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;scr_monitor&gt; target "default" | 6 period(s) | plan: PSI 0.10/0.25, CSI 0.10/0.25, alpha 0.05, min events 100</span></span>
+<span><span class="co">#&gt; &lt;scr_monitor&gt; target "default" | 6 period(s) | plan: PSI 0.1/0.25, CSI 0.1/0.25, alpha 0.05, min events 100</span></span>
 <span><span class="co">#&gt;   period              n      score      PSI fixed      critical adj.    </span></span>
 <span><span class="co">#&gt;   2026-01-01        700      549.8   0.0083 stable       0.0302 stable  </span></span>
 <span><span class="co">#&gt;   2026-02-01        700      550.3   0.0071 stable       0.0302 stable  </span></span>
@@ -345,11 +345,11 @@ and a Markdown summary.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-vignette"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpZT16A7/scorecraft-vignette/scorecard_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpZT16A7/scorecraft-vignette/validation_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpZT16A7/scorecraft-vignette/strategy_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpZT16A7/scorecraft-vignette/sql_score_default.sql</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpZT16A7/scorecraft-vignette/sql_woe_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpuZX6WE/scorecraft-vignette/scorecard_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpuZX6WE/scorecraft-vignette/validation_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpuZX6WE/scorecraft-vignette/strategy_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpuZX6WE/scorecraft-vignette/sql_score_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/RtmpuZX6WE/scorecraft-vignette/sql_woe_default.sql</span></span>
 <span><span class="co">#&gt; [1] "scorecard_default.xlsx"  "validation_default.xlsx"</span></span>
 <span><span class="co">#&gt; [3] "strategy_default.xlsx"   "sql_score_default.sql"  </span></span>
 <span><span class="co">#&gt; [5] "sql_woe_default.sql"</span></span></code></pre></div>

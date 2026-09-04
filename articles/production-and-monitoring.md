@@ -71,7 +71,7 @@ half <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
 class(half)
 #> [1] "data.table" "data.frame"
 nrow(half)
-#> [1] 2167
+#> [1] 2063
 ```
 
 `max_rows` is a memory guard rather than a second sampler. When it
@@ -85,7 +85,7 @@ capped <- scr_fetch(con, "dtm", max_rows = 1000)
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.238095
 nrow(capped)
-#> [1] 1007
+#> [1] 1006
 ```
 
 ### Several targets straight from the connection
@@ -462,7 +462,7 @@ sql_woe <- unlist(strsplit(scr_sql(res), "\n", fixed = TRUE))
 cat(head(sql_woe, 24), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: ansi
-#> -- Generated on 2026-09-04 23:11:31
+#> -- Generated on 2026-09-04 23:22:34
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
@@ -515,7 +515,7 @@ sql_sc <- unlist(strsplit(scr_sql(sc, table = "prd.customers", dialect = "databr
 cat(head(sql_sc, 12), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | scorecard of target: default | 12 variables | dialect: databricks
-#> -- Generated on 2026-09-04 23:11:32
+#> -- Generated on 2026-09-04 23:22:35
 #> -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer
 #> -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538
 #> -- Block 1 (CTE base_scr): pre-processing frozen on train.
@@ -608,7 +608,7 @@ periods are the training vintages and the last two the hold-out.
 
 mo <- scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default", n_boot = 20)
 mo
-#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.10/0.25, CSI 0.10/0.25, alpha 0.05, min events 100
+#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.1/0.25, CSI 0.1/0.25, alpha 0.05, min events 100
 #>   period              n      score      PSI fixed      critical adj.    
 #>   2026-01-01        700      549.8   0.0083 stable       0.0302 stable  
 #>   2026-02-01        700      550.3   0.0071 stable       0.0302 stable  

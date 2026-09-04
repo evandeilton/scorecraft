@@ -96,7 +96,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 sc <- scr_scorecard(res)
 mo <- scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default")
 mo
-#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.10/0.25, CSI 0.10/0.25, alpha 0.05, min events 100
+#> <scr_monitor> target "default" | 6 period(s) | plan: PSI 0.1/0.25, CSI 0.1/0.25, alpha 0.05, min events 100
 #>   period              n      score      PSI fixed      critical adj.    
 #>   2026-01-01        700      549.8   0.0083 stable       0.0302 stable  
 #>   2026-02-01        700      550.3   0.0071 stable       0.0302 stable  
