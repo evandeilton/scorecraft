@@ -55,8 +55,15 @@
 #' @param ... Passed on to the methods.
 #' @param output For `scr_result`: `"woe"`, `"bin"` or `"both"`. `NULL` uses
 #'   `config$sql_output`.
-#' @param what For `scr_scorecard`: `"score"` (default, the three blocks) or
-#'   `"woe"` (the WOE/BIN SQL of the scorecard variables only).
+#' @param what For `scr_scorecard`: `"score"` (default: the three blocks, with
+#'   the points per variable, the exact score and the whole-points score),
+#'   `"woe"` (the WOE/BIN SQL of the scorecard variables only) or `"all"`
+#'   (the three blocks plus, for every variable, its bin label, WOE and
+#'   points side by side: the deployment layout that reports the band of
+#'   each variable next to the score).
+#' @param keep_columns For `scr_scorecard`: key columns carried untransformed
+#'   into the output (for example the customer identifier and the reference
+#'   date); `NULL` uses `config$sql_keep_columns`.
 #'
 #' @return A character vector with the SQL (invisibly, when `file` is given).
 #'
@@ -87,14 +94,23 @@ scr_sql.scr_result <- function(x, table = NULL, dialect = NULL, file = NULL, out
 
 #' @rdname scr_sql
 #' @export
-scr_sql.scr_scorecard <- function(x, table = NULL, dialect = NULL, file = NULL, what = c("score", "woe"), ...) {
+scr_sql.scr_scorecard <- function(x, table = NULL, dialect = NULL, file = NULL, what = c("score", "woe", "all"),
+                                  keep_columns = NULL, ...) {
   what <- match.arg(what)
   cfg <- x$config
   if (!is.null(table)) cfg$sql_table <- table
   if (!is.null(dialect)) cfg$sql_dialect <- dialect
-  out <- if (identical(what, "woe")) build_sql_woe(x$fit, x$ledger, x$features, cfg, x$target, provenance = .provenance_line(x$lab))
-         else if (is.null(table) && is.null(dialect)) x$sql
-         else { y <- x; y$config <- cfg; build_sql_score(y) }
+  if (!is.null(keep_columns)) {
+    if (!is.character(keep_columns) || anyNA(keep_columns) || any(!nzchar(keep_columns))) {
+      stop("scr_sql(): `keep_columns` must be a character vector of column names.", call. = FALSE)
+    }
+    cfg$sql_keep_columns <- keep_columns
+  }
+  cached <- is.null(table) && is.null(dialect) && is.null(keep_columns)
+  out <- switch(what,
+    woe   = build_sql_woe(x$fit, x$ledger, x$features, cfg, x$target, provenance = .provenance_line(x$lab)),
+    score = if (cached) x$sql else { y <- x; y$config <- cfg; build_sql_score(y) },
+    all   = { y <- x; y$config <- cfg; build_sql_score(y, what = "all") })
   .sql_out(out, file)
 }
 
@@ -188,7 +204,8 @@ build_sql_woe <- function(fit, ledger, features, cfg, target = NULL, provenance 
 #' Scorecard SQL: pre-processing CTE + WOE/index CTE + score
 #' @keywords internal
 #' @noRd
-build_sql_score <- function(sc) {
+build_sql_score <- function(sc, what = c("score", "all")) {
+  what <- match.arg(what)
   cfg <- sc$config
   feats <- sc$features
   keep <- cfg$sql_keep_columns
@@ -202,6 +219,14 @@ build_sql_score <- function(sc) {
   exprs <- c(if (length(keep)) paste0(keep, ","), .sql_select_exprs(woe_x))
   exprs[length(exprs)] <- paste0(exprs[length(exprs)], ",")
   exprs <- c(exprs, .sql_select_exprs(idx_x))
+  if (identical(what, "all")) {
+    # the bin labels, for a deployment that reports the band of every variable
+    bin_x <- OptimalBinningWoE::obwoe_sql(obj = sc$fit, table = "base_scr", features = feats, output = "bin",
+                                          style = "select", dialect = cfg$sql_dialect, digits = NULL,
+                                          comment = FALSE, bin_separator = cfg$bin_separator)
+    exprs[length(exprs)] <- paste0(exprs[length(exprs)], ",")
+    exprs <- c(exprs, .sql_select_exprs(bin_x))
+  }
 
   al <- sc$alignment
   base_raw <- al$a + al$b * unname(sc$coef["(Intercept)"])
@@ -214,11 +239,17 @@ build_sql_score <- function(sc) {
   }, character(1))
   # the subselect computes the points columns once; the outer SELECT exposes
   # them by name and sums them into score_points
+  per_feature <- if (identical(what, "all")) {
+    # bin label, WOE and points of every variable, side by side
+    paste0(unlist(lapply(feats, function(f) sprintf("    %s_%s", f, c("bin", "woe", "points")))), ",")
+  } else {
+    paste0(vapply(feats, function(f) sprintf("    %s_points", f), character(1)), ",")
+  }
   final <- c(
     "SELECT",
     if (length(keep)) sprintf("    %s,", keep),
     sprintf("    %s AS score,", paste(score_terms, collapse = "\n      + ")),
-    paste0(vapply(feats, function(f) sprintf("    %s_points", f), character(1)), ","),
+    per_feature,
     sprintf("    %s AS score_points", paste(c(.sql_num(sc$base_points), paste0(feats, "_points")), collapse = " + ")),
     "FROM (", "  SELECT", "    *,", paste0("  ", pts_cases, collapse = ",\n"), "  FROM woe_scr", ") pts;")
 
@@ -229,8 +260,10 @@ build_sql_score <- function(sc) {
             sc$odds_orientation, format(sc$scale$pdo), sc$direction),
     sprintf("-- score = %s + %s * logit | base_points = %s", .sql_num(al$a), .sql_num(al$b), format(sc$base_points)),
     "-- Block 1 (CTE base_scr): pre-processing frozen on train.",
-    "-- Block 2 (CTE woe_scr): WOE and bin index, emitted by OptimalBinningWoE::obwoe_sql().",
-    "-- Block 3: exact score (from the WOE) and whole points (from the bin index).",
+    if (identical(what, "all")) "-- Block 2 (CTE woe_scr): WOE, bin index and bin label, emitted by OptimalBinningWoE::obwoe_sql()."
+    else "-- Block 2 (CTE woe_scr): WOE and bin index, emitted by OptimalBinningWoE::obwoe_sql().",
+    if (identical(what, "all")) "-- Block 3: bin label, WOE and points of every variable, exact score (from the WOE) and whole points (from the bin index)."
+    else "-- Block 3: exact score (from the WOE) and whole points (from the bin index).",
     if (!is.null(sc$lab)) paste0("-- ", .provenance_line(sc$lab)),
     "-- =============================================================", "",
     "WITH base_scr AS (", "  SELECT", paste(lines, collapse = ",\n"), sprintf("  FROM %s", cfg$sql_table), "),",

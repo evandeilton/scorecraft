@@ -65,6 +65,10 @@ parameter tables selected by a preset, never prose.
   `scr_pd_validate()` is green when every grade sits on the conservative
   side (the PD above the observed rate), since the statistic is two-sided.
 * `betareg` (Suggests) powers the beta severity engine of `scr_lgd()`.
+* `scr_sql()` on a scorecard gains `what = "all"` (bin label, WOE and
+  points of every variable next to the exact score and the whole-points
+  score) and `keep_columns` (key columns carried into the output), for a
+  deployment that reports the band of each variable with the score.
 * After the documentation audit: `scr_iv()` ignores `NA` for every group
   type; `scr_classing_read()` validates the separator and the spec carries
   it into `scr_classing_import()`; the `TOO_MANY_BINS` screening rule can

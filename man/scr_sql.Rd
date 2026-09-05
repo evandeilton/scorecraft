@@ -34,7 +34,8 @@ scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
   table = NULL,
   dialect = NULL,
   file = NULL,
-  what = c("score", "woe"),
+  what = c("score", "woe", "all"),
+  keep_columns = NULL,
   ...
 )
 }
@@ -60,8 +61,16 @@ by segment).}
 \item{output}{For \code{scr_result}: \code{"woe"}, \code{"bin"} or \code{"both"}. \code{NULL} uses
 \code{config$sql_output}.}
 
-\item{what}{For \code{scr_scorecard}: \code{"score"} (default, the three blocks) or
-\code{"woe"} (the WOE/BIN SQL of the scorecard variables only).}
+\item{what}{For \code{scr_scorecard}: \code{"score"} (default: the three blocks, with
+the points per variable, the exact score and the whole-points score),
+\code{"woe"} (the WOE/BIN SQL of the scorecard variables only) or \code{"all"}
+(the three blocks plus, for every variable, its bin label, WOE and
+points side by side: the deployment layout that reports the band of
+each variable next to the score).}
+
+\item{keep_columns}{For \code{scr_scorecard}: key columns carried untransformed
+into the output (for example the customer identifier and the reference
+date); \code{NULL} uses \code{config$sql_keep_columns}.}
 }
 \value{
 A character vector with the SQL (invisibly, when \code{file} is given).

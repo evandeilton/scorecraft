@@ -58,3 +58,36 @@ test_that("keep columns and the WOE-only scorecard SQL work", {
   expect_false(any(grepl("score_points", w)))
   expect_true(any(grepl("score_points", scr_sql(sc))))
 })
+
+test_that("the deployment SQL (what = \"all\") carries keys, bin labels, WOE, points and the score, equal to R", {
+  skip_if_not_installed("DBI")
+  sc <- sc_demo(); res <- res_demo()
+  sql <- scr_sql(sc, table = "t", dialect = "duckdb", what = "all", keep_columns = c("id", "ref_date"))
+  expect_true(any(grepl("bin label", sql)))
+  feats <- sc$features
+  for (f in feats) expect_true(any(grepl(sprintf("%s_bin,", f), sql, fixed = TRUE)))
+  expect_error(scr_sql(sc, what = "all", keep_columns = c("id", NA)), "keep_columns")
+  # the cached score SQL is untouched by keep_columns / what = "all"
+  expect_identical(scr_sql(sc), sc$sql)
+  exp_bin <- scr_apply(res, scr_demo, features = feats, what = "bin")
+  exp_all <- scr_apply(sc, scr_demo, what = "all")
+  run <- function(con) {
+    DBI::dbWriteTable(con, "t", as.data.frame(scr_demo))
+    got <- DBI::dbGetQuery(con, paste(sql, collapse = "\n"))
+    expect_equal(got$id, scr_demo$id)
+    for (f in feats) {
+      expect_identical(got[[paste0(f, "_bin")]], exp_bin[[paste0(f, "_bin")]])
+      expect_equal(got[[paste0(f, "_woe")]], exp_all[[paste0(f, "_woe")]], tolerance = 1e-12)
+      expect_equal(got[[paste0(f, "_points")]], exp_all[[paste0(f, "_points")]])
+    }
+    expect_equal(got$score, exp_all$score, tolerance = 1e-9)
+    expect_equal(got$score_points, exp_all$score_points)
+  }
+  if (requireNamespace("duckdb", quietly = TRUE)) {
+    con <- DBI::dbConnect(duckdb::duckdb()); run(con); DBI::dbDisconnect(con, shutdown = TRUE)
+  }
+  if (requireNamespace("RSQLite", quietly = TRUE)) {
+    sql <<- scr_sql(sc, table = "t", dialect = "sqlite", what = "all", keep_columns = c("id", "ref_date"))
+    con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:"); run(con); DBI::dbDisconnect(con)
+  }
+})
