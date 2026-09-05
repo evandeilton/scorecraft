@@ -4,8 +4,9 @@ validation rows (the hold-out of the model by default): simple and
 exposure-weighted averages, the one-sided t-test of realised above
 predicted (under-estimation) with its p-value, the EAD adequacy ratio
 (sum of realised EAD over sum of predicted EAD) and traffic lights
-(green when p &amp;gt; 0.05, amber when 0.01 &amp;lt; p &amp;lt;= 0.05, red when p &amp;lt;= 0.01;
-adequacy green at or below 1, amber up to 1.05, red above). Adds the
+(red at or below lights[1], amber at or below lights[2], green above;
+adequacy green at or below adequacy_lights[1], amber up to
+adequacy_lights[2], red above). Adds the
 discrimination block (gAUC with a bootstrap interval against the
 development value, Spearman correlation, cumulative EAD accuracy
 ratio), the back-test by cohort and the stability of the pool
@@ -16,8 +17,9 @@ validation rows (the hold-out of the model by default): simple and
 exposure-weighted averages, the one-sided t-test of realised above
 predicted (under-estimation) with its p-value, the EAD adequacy ratio
 (sum of realised EAD over sum of predicted EAD) and traffic lights
-(green when p &amp;gt; 0.05, amber when 0.01 &amp;lt; p &amp;lt;= 0.05, red when p &amp;lt;= 0.01;
-adequacy green at or below 1, amber up to 1.05, red above). Adds the
+(red at or below lights[1], amber at or below lights[2], green above;
+adequacy green at or below adequacy_lights[1], amber up to
+adequacy_lights[2], red above). Adds the
 discrimination block (gAUC with a bootstrap interval against the
 development value, Spearman correlation, cumulative EAD accuracy
 ratio), the back-test by cohort and the stability of the pool
@@ -45,9 +47,9 @@ a convention of the package, stated as such in the output."><meta property="og:i
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -76,8 +78,9 @@ validation rows (the hold-out of the model by default): simple and
 exposure-weighted averages, the one-sided t-test of realised above
 predicted (under-estimation) with its p-value, the EAD adequacy ratio
 (sum of realised EAD over sum of predicted EAD) and traffic lights
-(green when p &gt; 0.05, amber when 0.01 &lt; p &lt;= 0.05, red when p &lt;= 0.01;
-adequacy green at or below 1, amber up to 1.05, red above). Adds the
+(red at or below <code>lights[1]</code>, amber at or below <code>lights[2]</code>, green above;
+adequacy green at or below <code>adequacy_lights[1]</code>, amber up to
+<code>adequacy_lights[2]</code>, red above). Adds the
 discrimination block (gAUC with a bootstrap interval against the
 development value, Spearman correlation, cumulative EAD accuracy
 ratio), the back-test by cohort and the stability of the pool

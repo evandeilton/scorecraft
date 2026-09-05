@@ -3,11 +3,11 @@
 scr_model() on a table and a binary target, and returns an object with
 the shortlist, the complete audit funnel, the gains table and the
 production SQL of the approved variables. Every stage remains callable on
-its own for whoever wants more control (hybrid interface, decision D13)."><meta property="og:description" content="Shortcut that chains scr_split(), scr_triage(), scr_bin() and
+its own for whoever wants more control (hybrid interface)."><meta property="og:description" content="Shortcut that chains scr_split(), scr_triage(), scr_bin() and
 scr_model() on a table and a binary target, and returns an object with
 the shortlist, the complete audit funnel, the gains table and the
 production SQL of the approved variables. Every stage remains callable on
-its own for whoever wants more control (hybrid interface, decision D13)."><meta property="og:image" content="https://evandeilton.github.io/scorecraft/logo.png"></head><body>
+its own for whoever wants more control (hybrid interface)."><meta property="og:image" content="https://evandeilton.github.io/scorecraft/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -29,9 +29,9 @@ its own for whoever wants more control (hybrid interface, decision D13)."><meta 
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -59,7 +59,7 @@ its own for whoever wants more control (hybrid interface, decision D13)."><meta 
 <code><a href="scr_model.html">scr_model()</a></code> on a table and a binary target, and returns an object with
 the shortlist, the complete audit funnel, the gains table and the
 production SQL of the approved variables. Every stage remains callable on
-its own for whoever wants more control (hybrid interface, decision D13).</p>
+its own for whoever wants more control (hybrid interface).</p>
     </div>
 
     <div class="section level2">
@@ -138,15 +138,11 @@ and the bootstrap, and the binning is deterministic per column.</p>
     <div class="dont-index"><p><code><a href="scr_run.html">scr_run()</a></code> for several targets straight from the database,
 <code><a href="scr_scorecard.html">scr_scorecard()</a></code> for the next step.</p>
 <p>Other stages:
-<code><a href="predict.scr_align.html">predict.scr_align()</a></code>,
 <code><a href="scr_align.html">scr_align()</a></code>,
 <code><a href="scr_bin.html">scr_bin()</a></code>,
 <code><a href="scr_cutoff.html">scr_cutoff()</a></code>,
 <code><a href="scr_model.html">scr_model()</a></code>,
-<code><a href="scr_monitor.html">scr_monitor()</a></code>,
-<code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>,
 <code><a href="scr_reject.html">scr_reject()</a></code>,
-<code><a href="scr_run.html">scr_run()</a></code>,
 <code><a href="scr_scorecard.html">scr_scorecard()</a></code>,
 <code><a href="scr_split.html">scr_split()</a></code>,
 <code><a href="scr_strategy.html">scr_strategy()</a></code>,
@@ -162,7 +158,7 @@ and the bootstrap, and the binning is deterministic per column.</p>
 <span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_result&gt; target "default"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   event: 14.25% on train, 14.50% on hold-out | 0.8s</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   event: 14.25% on train, 14.50% on hold-out | 1.3s</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   convention: risk (target=1 is the bad case)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Funnel</span>

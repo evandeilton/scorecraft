@@ -3,19 +3,21 @@
 For an `scr_result`: the selection workbook (`selection_<target>.xlsx`:
 funnel, gains, screening, hold-out, models, votes, consensus, ledger,
 redundancy), the WOE SQL and the executive summary in Markdown. For an
-`scr_scorecard`: three workbooks (the detailing decision of SPEC section
-7 resolved as separate files) plus the score SQL:
+`scr_scorecard`: three workbooks, as separate files, plus the score SQL:
 
 ## Usage
 
 ``` r
+scr_export(x, dir, stamp = TRUE, ...)
+
 # S3 method for class 'scr_capital'
+scr_export(x, dir, stamp = TRUE, ...)
+
+# S3 method for class 'scr_classing'
 scr_export(x, dir, stamp = TRUE, ...)
 
 # S3 method for class 'scr_ead'
 scr_export(x, dir, stamp = TRUE, validation = NULL, tag = "ccf", ...)
-
-scr_export(x, dir, stamp = TRUE, ...)
 
 # S3 method for class 'scr_result'
 scr_export(x, dir, stamp = TRUE, ...)
@@ -43,9 +45,14 @@ scr_export(x, dir, stamp = TRUE, validation = NULL, ...)
 - x:
 
   An object from
-  [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
+  [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
+  [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
+  [`scr_coarse_classing()`](https://evandeilton.github.io/scorecraft/reference/scr_coarse_classing.md),
+  [`scr_pd()`](https://evandeilton.github.io/scorecraft/reference/scr_pd.md),
+  [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md),
+  [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
   or
-  [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md).
+  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md).
 
 - dir:
 
@@ -73,8 +80,10 @@ scr_export(x, dir, stamp = TRUE, validation = NULL, ...)
 
 - tag:
 
-  For the IRB models: the file tag (`pd_<tag>.xlsx`, `lgd_<tag>.xlsx`,
-  `ead_<tag>.xlsx`, `capital_<tag>.xlsx`).
+  For `scr_lgd` and `scr_ead`: the file tag (`lgd_<tag>.xlsx`,
+  `ead_<tag>.xlsx`). `scr_pd` names its files after the target
+  (`pd_<target>.xlsx`) and `scr_capital` after the framework
+  (`capital_<framework>.xlsx`).
 
 - elbe:
 
@@ -91,19 +100,27 @@ The object `x`, with `$files` filled, invisibly.
 - `scorecard_<target>.xlsx`:
 
   `Score_Summary` (with `odds_orientation`), `Final_Scorecard`,
-  `Coefficients`, `Sign_Check`, `Alignment`, `Model_Card`, `Challenger`
-  and `Swap_Set` (when a challenger exists).
+  `Coefficients`, `Sign_Check`, `Alignment`, `Alignment_Bands`,
+  `Model_Card`, `Challenger` and `Swap_Set` (when a challenger exists),
+  `Coarse_Classing` and `Decision_Ledger` (after a lab commit).
 
 - `validation_<target>.xlsx`:
 
   `Score_Gains_Frozen`, `Variable_Gains_IV`, `Discrimination_CI`,
-  `Stability_PSI_Timeline`, `Stability_CSI_Timeline`, `Calibration`,
+  `Stability_PSI_Timeline`, `Stability_CSI_Timeline`,
+  `Stability_Variables`, `Calibration`, `Calibration_Bands`,
   `Performance_By_Vintage`, `Rank_Order_Diagnostics`.
 
 - `strategy_<target>.xlsx`:
 
-  `Population_Scope`, `Cutoff_Sweep`, `Strategy_Bands`,
+  `Population_Scope`, `Band_Coverage`, `Cutoff_Sweep`, `Strategy_Bands`,
   `Reject_Sensitivity`, `Monitoring_Plan`.
+
+For an `scr_classing` lab: one workbook (`classing_<target>.xlsx`) with
+the specification, the bins, the checks and the decision ledger. The IRB
+models write one workbook and one SQL file each (`pd_<target>.xlsx`,
+`lgd_<tag>.xlsx`, `ead_<tag>.xlsx`, `capital_<framework>.xlsx`), with
+the validation, the ledger and the model card as sheets.
 
 The timeline and vintage sheets need the date column of the split; when
 it is absent they carry an availability row instead of a fabricated
@@ -112,9 +129,12 @@ number.
 ## See also
 
 Other production:
+[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
+[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md),
-[`scr_sql.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
 
 ## Examples
 
@@ -125,17 +145,17 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
                   date_col = "ref_date")
 out <- file.path(tempdir(), "scorecraft-example")
 res <- scr_export(res, out, stamp = FALSE)
-#>   /tmp/RtmpKY4Qvj/scorecraft-example/selection_default.xlsx
-#>   /tmp/RtmpKY4Qvj/scorecraft-example/sql_woe_default.sql
-#>   /tmp/RtmpKY4Qvj/scorecraft-example/summary_default.md
+#>   /tmp/RtmpB2VpQX/scorecraft-example/selection_default.xlsx
+#>   /tmp/RtmpB2VpQX/scorecraft-example/sql_woe_default.sql
+#>   /tmp/RtmpB2VpQX/scorecraft-example/summary_default.md
 basename(unlist(res$files))
 #> [1] "selection_default.xlsx" "sql_woe_default.sql"    "summary_default.md"    
 sc <- scr_export(scr_scorecard(res), out, stamp = FALSE)
-#>   /tmp/RtmpKY4Qvj/scorecraft-example/scorecard_default.xlsx
-#>   /tmp/RtmpKY4Qvj/scorecraft-example/validation_default.xlsx
-#>   /tmp/RtmpKY4Qvj/scorecraft-example/strategy_default.xlsx
-#>   /tmp/RtmpKY4Qvj/scorecraft-example/sql_score_default.sql
-#>   /tmp/RtmpKY4Qvj/scorecraft-example/sql_woe_default.sql
+#>   /tmp/RtmpB2VpQX/scorecraft-example/scorecard_default.xlsx
+#>   /tmp/RtmpB2VpQX/scorecraft-example/validation_default.xlsx
+#>   /tmp/RtmpB2VpQX/scorecraft-example/strategy_default.xlsx
+#>   /tmp/RtmpB2VpQX/scorecraft-example/sql_score_default.sql
+#>   /tmp/RtmpB2VpQX/scorecraft-example/sql_woe_default.sql
 basename(unlist(sc$files))
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  

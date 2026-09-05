@@ -45,9 +45,9 @@ previous one (kept with active = FALSE).'><meta property="og:image" content="htt
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -132,7 +132,8 @@ previous one (kept with <code>active = FALSE</code>).</p>
 
 <dt id="arg-dr">dr<a class="anchor" aria-label="anchor" href="#arg-dr"></a></dt>
 <dd><p>Optional <code>scr_dr</code> by grade for <code>"ci_timeseries"</code>, keyed by the
-final grades of <code>x</code> (stored in <code>x$dr</code> when absent).</p></dd>
+final grades of <code>x</code>; <code>NULL</code> uses the series already stored in <code>x$dr</code> by
+<code><a href="scr_grades.html">scr_grades()</a></code>.</p></dd>
 
 
 <dt id="arg-n-boot-seed">n_boot, seed<a class="anchor" aria-label="anchor" href="#arg-n-boot-seed"></a></dt>

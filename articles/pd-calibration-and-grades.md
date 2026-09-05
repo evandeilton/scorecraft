@@ -135,8 +135,8 @@ sc
 re-anchors the probability to the central tendency (CT) without touching
 the points: it returns a **new** alignment `(I*, S*)` whose
 `predict(..., type = "prob")` is the calibrated PD, while the scorecard
-keeps its own alignment for the score. Passing the `scr_dr` as the
-target uses its long-run average and records where the CT came from.
+keeps its own alignment for the score. Passing an `scr_dr` object as
+`target` uses its long-run average and records where the CT came from.
 
 ``` r
 
@@ -182,8 +182,8 @@ compare
 
 [`scr_grades()`](https://evandeilton.github.io/scorecraft/reference/scr_grades.md)
 cuts the production score into grades whose PD is monotone. The default
-construction is `"geometric"`: a master scale is built between the 1st
-and the 99th percentile of the calibrated PD, every grade doubling (or
+construction is `"geometric"`: a master scale is built between
+percentiles 1 and 99 of the calibrated PD, every grade doubling (or
 multiplying by the ratio) the PD of the one before, and its PD
 boundaries are converted into score cut points through the calibrated
 alignment. Grade 1 is the safest, the highest scores under
@@ -440,8 +440,8 @@ cat(tail(sql, 6), sep = "\n")
 #> -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)
 #> SELECT
 #>     s.*,
-#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947994 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
-#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947994 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
+#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947983 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
+#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947983 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
 #> FROM score_scr s;
 ```
 
@@ -529,16 +529,18 @@ v$summary
 #> 10:    concentration_cv portfolio   1.24524312 0.186941092  green
 ```
 
-Two reds, and both are readable. The one-sided tests are green on every
+One red, and it is readable. The one-sided tests are green on every
 grade because the tested PD is `pd_final`, which carries the margin of
 conservatism: the observed default rates sit below it, as they should.
-Hosmer-Lemeshow is two-sided and charges that same conservatism as
-miscalibration, which is why it is reported next to the one-sided tests
-and not instead of them. The grade PSI is large because the panel is a
-different population from the development sample: its behavioural score
-puts two thirds of the obligors in grade 1 where the hold-out had a
-quarter. That is exactly what the PSI is there to flag; a validator
-would now ask whether the cut points belong on that population at all.
+Hosmer-Lemeshow is two-sided and its p-value would charge that same
+conservatism as miscalibration; its light is green because every grade
+sits on the conservative side, and the statistic stays in the table so
+that a validator sees both readings. The grade PSI is large because the
+panel is a different population from the development sample: its
+behavioural score puts two thirds of the obligors in grade 1 where the
+hold-out had a quarter. That is exactly what the PSI is there to flag; a
+validator would now ask whether the cut points belong on that population
+at all.
 
 ``` r
 
@@ -653,8 +655,8 @@ an availability row, never a fabricated number.
 
 out <- file.path(tempdir(), "scorecraft-pd-vignette")
 ex <- scr_export(pd, out, stamp = FALSE, validation = v)
-#>   /tmp/Rtmp1ezfsQ/scorecraft-pd-vignette/pd_default.xlsx
-#>   /tmp/Rtmp1ezfsQ/scorecraft-pd-vignette/sql_pd_default.sql
+#>   /tmp/RtmpCfvzvV/scorecraft-pd-vignette/pd_default.xlsx
+#>   /tmp/RtmpCfvzvV/scorecraft-pd-vignette/sql_pd_default.sql
 basename(unlist(ex$files))
 #> [1] "pd_default.xlsx"    "sql_pd_default.sql"
 openxlsx::getSheetNames(ex$files$pd)

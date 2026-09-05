@@ -60,26 +60,45 @@ scr_apply(x, newdata, ...)
 - what:
 
   For `scr_result`: `"woe"`, `"bin"` or `"both"`. For `scr_scorecard`:
-  `"score"`, `"points"`, `"woe"` or `"all"`.
+  `"score"`, `"points"`, `"woe"` or `"all"`. For `scr_lgd`: `"pool"`
+  (pool and pool LGDs), `"lgd"` (adds the predicted LGD) or `"all"`
+  (adds the cure probability and the severity).
 
 ## Value
 
 A `data.table` with one row per row of `newdata`.
 
-## Method arguments
+## Output columns
 
-For `scr_result`: `features` (default: the approved ones) and `what`
-(`"woe"`, `"bin"` or `"both"`). For `scr_scorecard`: `what` (`"score"`,
-`"points"`, `"woe"` or `"all"`). The score output carries `link`
-(logit), `prob` (model probability), `score` (exact, `a + b * logit`)
-and `score_points` (the sum of the whole points per bin plus the base).
+For `scr_result`: `<f>_woe` and/or `<f>_bin` per variable. For
+`scr_scorecard`, `"score"` gives `link` (logit), `prob` (model
+probability), `score` (exact, `a + b * logit`) and `score_points` (base
+plus the whole points per bin); `"points"` gives `score`, `score_points`
+and `<f>_points`; `"woe"` gives `link`, `score` and `<f>_woe`; `"all"`
+gives everything.
+
+## IRB models
+
+`scr_pd` returns `score`, `score_points`, `grade`, `pd` (calibrated
+individual PD), `pd_be` and `pd_final` of the grade. `scr_lgd` returns
+`pool`, `lgd_lra`, `lgd_dt`, `lgd_final` and, with `what`, `p_cure`,
+`severity` and `lgd_pred`. `scr_ead` returns `pool`, `measure`,
+`utilisation`, `undrawn`, `ccf_applied`, `ead_model`, `ead_floor`,
+`ead_predicted` and `ead_floor_binding`; the predicted EAD is never
+below the drawn amount.
+[`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md)
+reads `pd_final`, `lgd_final` and `ead_predicted` from these outputs in
+its list form.
 
 ## See also
 
 Other production:
-[`scr_export.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
+[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
+[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md),
-[`scr_sql.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
 
 ## Examples
 
@@ -94,7 +113,7 @@ str(scr_apply(res, new)[, 1:3])
 #>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...
 #>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...
 #>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...
-#>  - attr(*, ".internal.selfref")=<pointer: 0x55dbed8aca30> 
+#>  - attr(*, ".internal.selfref")=<pointer: 0x558901f14a30> 
 sc <- scr_scorecard(res)
 head(scr_apply(sc, new))
 #>         link       prob    score score_points

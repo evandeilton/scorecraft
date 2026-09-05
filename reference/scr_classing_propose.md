@@ -69,11 +69,15 @@ scr_classing_propose(
 
 ## Value
 
-An `scr_classing_proposal` with `id`, `variable`, `spec`, `entry`,
-`checks`, `compare`, `verdict` (`ACCEPTABLE`, `REVIEW` or `BLOCKED`) and
-`warnings`.
+An `scr_classing_proposal` with `id`, `variable`, `instruction` (the
+resolved instruction as text), `entry` (the hand-built bins), `checks`,
+`optimal` (the checks of the optimal bins), `compare`, `verdict`
+(`ACCEPTABLE`, `REVIEW` or `BLOCKED`), `warnings` and `blocking`.
 
 ## See also
+
+[`scr_coarse_classing()`](https://evandeilton.github.io/scorecraft/reference/scr_coarse_classing.md)
+for a complete session, from lab to scorecard.
 
 Other classing:
 [`scr_classing_accept()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_accept.md),

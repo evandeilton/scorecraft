@@ -33,9 +33,9 @@ scr_pd_pit_ttc() before the floor (rho and z required).'><meta property="og:imag
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -119,7 +119,10 @@ through-the-cycle <code>pd_moc</code> is converted with the one-factor bridge of
 <code>framework</code>, <code>floor</code>, <code>philosophy</code>, <code>rho</code>, <code>z</code>, <code>moc_ledger</code>,
 <code>calibration</code>, <code>concentration</code>, <code>portfolio</code> (weighted <code>pd_be</code>,
 <code>pd_moc</code>, <code>pd_final</code>, <code>moc_bp</code>, <code>share_at_floor</code>), <code>scorecard</code>,
-<code>ledger</code>, <code>model_card</code>.</p>
+<code>ledger</code>, <code>model_card</code>.
+Also <code>params_modified</code>, <code>repairs</code>, <code>dr</code>, <code>rows</code>, <code>pd_source</code>,
+<code>grade_method</code>, <code>sample</code>, <code>target</code>, <code>config</code> and, after <code><a href="scr_export.html">scr_export()</a></code>,
+<code>files</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -176,8 +179,8 @@ through-the-cycle <code>pd_moc</code> is converted with the one-factor bridge of
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- Block 4: rating grade and final PD from the score cut points (4 grades, higher_is_safer)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SELECT</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     s.*,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN score &lt;= 503.11688107909117 THEN 4 WHEN score &lt;= 535.6113744573629 THEN 3 WHEN score &lt;= 562.84746952244961 THEN 2 ELSE 1 END AS grade,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN score &lt;= 503.11688107909117 THEN 0.45234017577521279 WHEN score &lt;= 535.6113744573629 THEN 0.3053654350250784 WHEN score &lt;= 562.84746952244961 THEN 0.15257567651855442 ELSE 0.04749931808441589 END AS pd_final</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN score &lt;= 503.11688107909112 THEN 4 WHEN score &lt;= 535.6113744573629 THEN 3 WHEN score &lt;= 562.8474695224495 THEN 2 ELSE 1 END AS grade,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN score &lt;= 503.11688107909112 THEN 0.45234017577521279 WHEN score &lt;= 535.6113744573629 THEN 0.3053654350250784 WHEN score &lt;= 562.8474695224495 THEN 0.15257567651855442 ELSE 0.04749931808441589 END AS pd_final</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> FROM score_scr s;</span>
 </code></pre></div>
     </div>

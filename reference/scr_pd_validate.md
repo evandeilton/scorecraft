@@ -100,7 +100,9 @@ cohort), `portfolio_tests` (list: `n`, `d`, `dr`, `pd`, `p_jeffreys`,
 `multi_period_p`, `brier`), `discrimination`, `stability` (`psi` table,
 `migration`, `concentration`), `summary` (one row per test with
 `statistic`, `p_value`, `light`), `light` (the worst light of the
-summary), `n_cohorts`, `alpha`, `lights`.
+summary), `n_cohorts`, `alpha`, `lights`. `portfolio_tests` also carries
+`critical`, `z`, `p_normal`, `n_cohorts` and `pd_column`; the object
+also has `horizon`, `by`, `pd_column` and `target`.
 
 ## Details
 

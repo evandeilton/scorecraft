@@ -51,7 +51,8 @@ scr_ead_downturn(
 The `scr_ead` object with `downturn` (a list with `method`, `periods`,
 `add_on` and the per-pool `table`: `pool`, `lra`, `n_downturn`,
 `dt_observed`, `dt_type3`, `ccf_dt`), the updated `pools` and a new
-ledger row.
+ledger row. The table also carries `ccf_final` and `ccf_applied`; the
+object `n_rows_in_periods` and `reason`.
 
 ## See also
 

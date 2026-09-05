@@ -102,7 +102,9 @@ scr_irb_rw(
   Under `"firb"`, an optional claim type per exposure naming a row of
   `params$lgd_firb` (for example `"senior_unsecured"` or
   `"subordinated"`); the supervisory LGD of that row replaces `lgd`.
-  `NULL` keeps the caller's `lgd`.
+  `NULL` keeps the caller's `lgd`. The row names differ by preset
+  (`"senior_unsecured"` under `"bcb"`, `"senior_unsecured_corporate"`
+  and `"senior_unsecured_fi"` otherwise); see `params$lgd_firb`.
 
 ## Value
 

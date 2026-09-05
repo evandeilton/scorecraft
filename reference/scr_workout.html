@@ -43,9 +43,9 @@ lgd_cost_allocation."><meta property="og:image" content="https://evandeilton.git
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -146,7 +146,11 @@ event: identifiers, <code>default_date</code>, <code>ead</code>, <code>product</
 (per open event), <code>funnel</code> (rule, n, action), <code>summary</code> (<code>n</code>,
 <code>cure_rate</code>, <code>lra_default_weighted</code>, <code>lra_exposure_weighted</code>,
 <code>share_incomplete</code>, <code>discount_rate_mean</code>, <code>by_product</code>, <code>by_year</code>),
-<code>ledger</code>, <code>config</code>, <code>obs_date</code>, and <code>cashflows</code> with <code>keep_rows</code>.</p>
+<code>ledger</code>, <code>config</code>, <code>obs_date</code>, and <code>cashflows</code> with <code>keep_rows</code>.
+<code>rds</code> also carries <code>year</code>, <code>close_date</code>, <code>recovery_nominal</code>,
+<code>recovery_artificial</code>, <code>cost_nominal</code>, <code>drawing_nominal</code>,
+<code>closed_at_t_max</code>, <code>absorbed</code>, <code>n_cashflows</code> and <code>last_month</code>; <code>funnel</code>
+has <code>kept</code>; <code>summary</code> has <code>n_cure</code>, <code>lra_raw</code>, <code>ead_total</code> and <code>years</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="rules">Rules<a class="anchor" aria-label="anchor" href="#rules"></a></h2>

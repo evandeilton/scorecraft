@@ -21,9 +21,9 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -54,8 +54,10 @@
 <code><a href="../reference/scr_default.html">scr_default()</a></code> builds the default flag from a monthly panel (days past due with absolute and relative materiality, unlikeliness to pay, probation, restructuring, obligor-level pulling effect); <code><a href="../reference/scr_default_rate.html">scr_default_rate()</a></code> gives the default rates by cohort, grade, segment and exposure, with the long-run average and its benchmark.</li>
 <li>
 <code><a href="../reference/scr_bin_continuous.html">scr_bin_continuous()</a></code> bins drivers against a bounded continuous target (LGD, CCF) and returns an object with the shape of the engine’s, so <code><a href="https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_apply.html" class="external-link">OptimalBinningWoE::obwoe_apply()</a></code> and <code>obwoe_sql()</code> reproduce the bin means in R and in every SQL dialect; hold-out revalidation with frozen cut points and PSI.</li>
-<li>Configuration gains the keys of stages 8 to 12 (<code>default_*</code>, <code>pd_*</code>, <code>lgd_*</code>, <code>ccf_*</code>, <code>framework</code>, <code>capital_*</code>, <code>ecl_*</code>), all registered in <code><a href="../reference/scr_config_keys.html">scr_config_keys()</a></code> and validated.</li>
-<li>New demonstration data: <code>scr_demo_panel</code>, <code>scr_demo_lgd</code>, <code>scr_demo_lgd_cashflows</code>, <code>scr_demo_rates</code>, <code>scr_demo_ead</code>, <code>scr_demo_portfolio</code>.</li>
+<li>
+<code><a href="../reference/scr_config.html">scr_config()</a></code> gains the keys of stages 8 to 12 (<code>default_*</code>, <code>pd_*</code>, <code>lgd_*</code>, <code>ccf_*</code>, <code>framework</code>, <code>capital_*</code>, <code>ecl_*</code>), all registered in <code><a href="../reference/scr_config_keys.html">scr_config_keys()</a></code> and validated.</li>
+<li>
+<code>scr_demo_panel</code>, <code>scr_demo_lgd</code>, <code>scr_demo_lgd_cashflows</code>, <code>scr_demo_rates</code>, <code>scr_demo_ead</code> and <code>scr_demo_portfolio</code> are new demonstration data.</li>
 <li>PD: <code><a href="../reference/scr_master_scale.html">scr_master_scale()</a></code>, <code><a href="../reference/scr_calibrate.html">scr_calibrate()</a></code> (intercept shift, log-odds <code>(a, b)</code>, scaling, quasi-moment matching; a new alignment, the scorecard untouched), <code><a href="../reference/scr_grades.html">scr_grades()</a></code> (geometric, quantile or supplied grades, merges below the minimum counts, monotone repair recorded), <code><a href="../reference/scr_moc.html">scr_moc()</a></code> (estimation error computed; other categories with a mandatory reason), <code><a href="../reference/scr_pd.html">scr_pd()</a></code> (floors from the preset), <code><a href="../reference/scr_migration.html">scr_migration()</a></code>, <code><a href="../reference/scr_pd_validate.html">scr_pd_validate()</a></code> (Jeffreys, binomial, normal, Hosmer-Lemeshow, multi-period, AUC against the initial value, PSI, migration bandwidths, concentration; traffic lights), <code><a href="../reference/scr_pd_pit_ttc.html">scr_pd_pit_ttc()</a></code>, with <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, <code><a href="../reference/scr_apply.html">scr_apply()</a></code>, <code><a href="../reference/scr_sql.html">scr_sql()</a></code> (grade and PD as a <code>CASE</code> on the score) and <code><a href="../reference/scr_export.html">scr_export()</a></code> methods.</li>
 <li>LGD: <code><a href="../reference/scr_workout.html">scr_workout()</a></code> (discounted recoveries and costs, cures, merged re-defaults, extrapolated incomplete workouts, named funnel rules), <code><a href="../reference/scr_lgd.html">scr_lgd()</a></code> (cure stage on the binary engine, severity stage on the continuous binner with a fractional logit or a beta regression, hold-out revalidation, pools), <code><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn()</a></code>, <code><a href="../reference/scr_lgd_floor.html">scr_lgd_floor()</a></code>, <code><a href="../reference/scr_elbe.html">scr_elbe()</a></code>, <code><a href="../reference/scr_lgd_validate.html">scr_lgd_validate()</a></code>, with <code><a href="../reference/scr_apply.html">scr_apply()</a></code>, <code><a href="../reference/scr_sql.html">scr_sql()</a></code> (both stages, pool <code>CASE</code>, floored result) and <code><a href="../reference/scr_export.html">scr_export()</a></code> methods.</li>
 <li>EAD: <code><a href="../reference/scr_ead_data.html">scr_ead_data()</a></code> (realised conversion factors under a fixed, cohort or variable horizon; conversion factor below and limit factor above a utilisation threshold; named funnel rules), <code><a href="../reference/scr_ead.html">scr_ead()</a></code> (driver bins with admission rules, pools, estimation-error margin, standardised floor), <code><a href="../reference/scr_ead_downturn.html">scr_ead_downturn()</a></code>, <code><a href="../reference/scr_ead_validate.html">scr_ead_validate()</a></code>, with <code><a href="../reference/scr_apply.html">scr_apply()</a></code>, <code><a href="../reference/scr_sql.html">scr_sql()</a></code> and <code><a href="../reference/scr_export.html">scr_export()</a></code> methods.</li>
@@ -63,8 +65,22 @@
 <li>
 <code><a href="../reference/scr_irb_rw.html">scr_irb_rw()</a></code> and <code><a href="../reference/scr_capital.html">scr_capital()</a></code> read the supervisory LGD of the foundation approach from <code>params$lgd_firb</code> through a <code>claim</code> type; <code><a href="../reference/scr_sa_rw.html">scr_sa_rw()</a></code> and <code><a href="../reference/scr_capital.html">scr_capital()</a></code> apply the non-granular retail weight with <code>granular = FALSE</code>; the Hosmer-Lemeshow light of <code><a href="../reference/scr_pd_validate.html">scr_pd_validate()</a></code> is green when every grade sits on the conservative side (the PD above the observed rate), since the statistic is two-sided.</li>
 <li>
-<code>betareg</code> joins Suggests for the beta severity engine of the LGD model.</li>
+<code>betareg</code> (Suggests) powers the beta severity engine of <code><a href="../reference/scr_lgd.html">scr_lgd()</a></code>.</li>
+</ul><div class="section level3">
+<h3 id="scorecard-pipeline-hardening-0-2-0">Scorecard pipeline hardening<a class="anchor" aria-label="anchor" href="#scorecard-pipeline-hardening-0-2-0"></a></h3>
+<ul><li>
+<code><a href="../reference/scr_monitoring_plan.html">scr_monitoring_plan()</a></code> is the monitoring contract: created by <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code>, written to the <code>Monitoring_Plan</code> sheet, and read back by <code>scr_monitor(plan = )</code> (a table or the strategy workbook), which now takes its PSI/CSI thresholds, alpha and <code>min_events_per_period</code> from it.</li>
+<li>
+<code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code> stores the hold-out bin index of every variable, so the <code>Stability_CSI_Timeline</code> sheet is a real timeline by vintage without a <code><a href="../reference/scr_monitor.html">scr_monitor()</a></code> object.</li>
+<li>
+<code>options(scorecraft.parallel = "fork" | "psock" | "serial")</code> selects the parallel backend; the test suite exercises the PSOCK path (the Windows semantics) on every platform and pins serial == fork == psock.</li>
+<li>
+<code><a href="../reference/scr_triage.html">scr_triage()</a></code> is parallel by column as well.</li>
+<li>Workers never fail silently on any backend: a worker error is re-thrown with the failing item, a worker killed by the system is reported as such (instead of a <code>NULL</code> that surfaces later as a subscript error), warnings raised in a worker are re-raised in the parent, PSOCK workers run with a single data.table thread, and a <code>data.table</code> returned by a worker is re-allocated so that <code>:=</code> works on it. <code>R CMD check --as-cran</code>’s two-process limit is honoured.</li>
+<li>
+<code>options(scorecraft.fork_mem_fraction = 0.75)</code> caps the fork workers by the memory available on Linux (<code>Inf</code> to disable): forked workers duplicate the parent heap once the garbage collector runs, and twenty workers over a two-million-row table were killed by the OOM daemon in under two minutes.</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="scorecraft-010">scorecraft 0.1.0<a class="anchor" aria-label="anchor" href="#scorecraft-010"></a></h2>
 <p>First release. A production-grade scorecard engine for binary targets, built on ‘OptimalBinningWoE’: audit funnel, single configuration, named relaxation, first-class scale alignment, cut-off strategy and hardened deliverables.</p>
@@ -73,10 +89,12 @@
 <code><a href="../reference/scr_align.html">scr_align()</a></code> is a first-class stage: banded log-odds regression on the raw score composed with the PDO map, <code>odds_orientation</code> recorded, applied to any engine. It runs automatically inside <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code>.</li>
 <li>
 <code><a href="../reference/scr_sql.html">scr_sql()</a></code> emits production SQL in fourteen dialects: a pre-processing CTE, the WOE/BIN transformation from the authoritative cut points and, for a scorecard, the exact score plus whole points from the bin index. R-SQL equivalence is verified by test against DuckDB and SQLite.</li>
-<li>Binning is parallelised by column (<code>nthread</code>), with the fits merged; the result is identical to the serial one.</li>
+<li>
+<code><a href="../reference/scr_bin.html">scr_bin()</a></code> is parallelised by column (<code>nthread</code>), with the fits merged; the result is identical to the serial one.</li>
 <li>
 <code><a href="../reference/scr_metrics.html">scr_metrics()</a></code> always reports a bootstrap confidence interval for AUC/KS/Gini; <code><a href="../reference/scr_psi.html">scr_psi()</a></code> reports the fixed threshold next to the sample-size-adjusted critical value of Yurdakul and Naranjo (2020).</li>
-<li>A tree challenger (<code>xgboost</code> or <code>lightgbm</code>) can be fitted on the same WOE columns and aligned to the same scale, with <code>supports_scorecard = FALSE</code>.</li>
+<li>
+<code>scr_scorecard(challenger = )</code> fits a tree challenger (<code>xgboost</code> or <code>lightgbm</code>) on the same WOE columns, aligned to the same scale, with <code>supports_scorecard = FALSE</code>.</li>
 <li>
 <code><a href="../reference/scr_reject.html">scr_reject()</a></code> implements honest reject inference: population scope, band coverage and a 2x/4x/8x sensitivity band, never parcelling by default.</li>
 <li>
@@ -87,17 +105,7 @@
 <code><a href="../reference/scr_coarse_classing.html">scr_coarse_classing()</a></code> opens a manual binning lab: <code><a href="../reference/scr_classing_view.html">scr_classing_view()</a></code>, <code><a href="../reference/scr_classing_propose.html">scr_classing_propose()</a></code> (breaks, groups, merge, split, missing_to, other_to, reset), <code><a href="../reference/scr_classing_accept.html">scr_classing_accept()</a></code>/<code><a href="../reference/scr_classing_accept.html">scr_classing_discard()</a></code> with a mandatory reason, <code><a href="../reference/scr_classing_choose.html">scr_classing_choose()</a></code> (keep/drop/force), <code><a href="../reference/scr_classing_spec.html">scr_classing_spec()</a></code>/<code><a href="../reference/scr_classing_spec.html">scr_classing_read()</a></code>/<code><a href="../reference/scr_classing_spec.html">scr_classing_import()</a></code> for a CSV/xlsx round trip, <code><a href="../reference/scr_classing_apply.html">scr_classing_apply()</a></code> to commit into a new <code>scr_result</code>, and <code><a href="../reference/scr_decisions.html">scr_decisions()</a></code> for the append-only ledger. Manual bins share the engine’s contract, so <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code>, <code><a href="../reference/scr_apply.html">scr_apply()</a></code> and <code><a href="../reference/scr_sql.html">scr_sql()</a></code> follow them unchanged; the funnel gains <code>provenance</code>.</li>
 <li>
 <code><a href="../reference/scr_connect.html">scr_connect()</a></code> accepts any DBI driver next to an ODBC DSN, and <code><a href="../reference/scr_fetch.html">scr_fetch()</a></code> samples server-side with a dialect-aware random expression.</li>
-</ul><div class="section level3">
-<h3 id="hardening-after-the-first-release-unreleased-0-1-0">Hardening after the first release (unreleased)<a class="anchor" aria-label="anchor" href="#hardening-after-the-first-release-unreleased-0-1-0"></a></h3>
-<ul><li>
-<code><a href="../reference/scr_monitoring_plan.html">scr_monitoring_plan()</a></code> is the monitoring contract: created by <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code>, written to the <code>Monitoring_Plan</code> sheet, and read back by <code>scr_monitor(plan = )</code> (a table or the strategy workbook), which now takes its PSI/CSI thresholds, alpha and <code>min_events_per_period</code> from it.</li>
-<li>The scorecard stores the hold-out bin index of every variable, so the <code>Stability_CSI_Timeline</code> sheet is a real timeline by vintage without a <code><a href="../reference/scr_monitor.html">scr_monitor()</a></code> object.</li>
-<li>The parallel backend is selectable with <code>options(scorecraft.parallel = "fork" | "psock" | "serial")</code>; the test suite exercises the PSOCK path (the Windows semantics) on every platform and pins serial == fork == psock.</li>
-<li>The descriptive triage is parallel by column as well.</li>
-<li>Workers never fail silently on any backend: a worker error is re-thrown with the failing item, a worker killed by the system is reported as such (instead of a <code>NULL</code> that surfaces later as a subscript error), warnings raised in a worker are re-raised in the parent, PSOCK workers run with a single data.table thread, and a <code>data.table</code> returned by a worker is re-allocated so that <code>:=</code> works on it. <code>R CMD check --as-cran</code>’s two-process limit is honoured.</li>
-<li>On Linux the fork backend caps the number of workers by the memory available (<code>options(scorecraft.fork_mem_fraction = 0.75)</code>, <code>Inf</code> to disable): forked workers duplicate the parent heap once the garbage collector runs, and twenty workers over a two-million-row table were killed by the OOM daemon in under two minutes.</li>
 </ul></div>
-</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

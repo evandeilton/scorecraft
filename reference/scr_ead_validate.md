@@ -4,13 +4,13 @@ Per pool and in total, compares realised and predicted values on the
 validation rows (the hold-out of the model by default): simple and
 exposure-weighted averages, the one-sided t-test of realised above
 predicted (under-estimation) with its p-value, the EAD adequacy ratio
-(sum of realised EAD over sum of predicted EAD) and traffic lights
-(green when p \> 0.05, amber when 0.01 \< p \<= 0.05, red when p \<=
-0.01; adequacy green at or below 1, amber up to 1.05, red above). Adds
-the discrimination block (gAUC with a bootstrap interval against the
-development value, Spearman correlation, cumulative EAD accuracy ratio),
-the back-test by cohort and the stability of the pool distribution and
-of the driver bins
+(sum of realised EAD over sum of predicted EAD) and traffic lights (red
+at or below `lights[1]`, amber at or below `lights[2]`, green above;
+adequacy green at or below `adequacy_lights[1]`, amber up to
+`adequacy_lights[2]`, red above). Adds the discrimination block (gAUC
+with a bootstrap interval against the development value, Spearman
+correlation, cumulative EAD accuracy ratio), the back-test by cohort and
+the stability of the pool distribution and of the driver bins
 ([`scr_psi()`](https://evandeilton.github.io/scorecraft/reference/scr_psi.md),
 fixed and sample-size-adjusted thresholds). The numeric limits of the
 lights are a convention of the package, stated as such in the output.

@@ -30,7 +30,7 @@ A `data.frame` with 21,600 rows and 7 columns:
 
 - `dpd`:
 
-  Days past due at the month end (multiples of 30).
+  Days past due at the snapshot (multiples of 30).
 
 - `arrears`:
 

@@ -65,13 +65,16 @@ A list of class `scr_metrics` with `auc`, `ks`, `gini`, the bounds
 `ci = FALSE`), `n`, `events`, `n_boot` and `level`. Everything is
 `NA_real_` when only one class is present or no valid case exists.
 
+DeLong's analytic variance is not used: the interval is a stratified
+percentile bootstrap, which also covers KS.
+
 ## Details
 
-The confidence interval is **always** computed by default (project
-decision D18): a bootstrap stratified by outcome, percentile method,
-with `n_boot` resamples. Gini is derived from AUC (`2 * AUC - 1`) inside
-each resample, never bootstrapped separately. The cost is absorbed by
-`nthread` (parallelism by resample).
+The confidence interval is **always** computed by default: a bootstrap
+stratified by outcome, percentile method, with `n_boot` resamples. Gini
+is derived from AUC (`2 * AUC - 1`) inside each resample, never
+bootstrapped separately. The cost is absorbed by `nthread` (parallelism
+by resample).
 
 ## References
 

@@ -34,4 +34,5 @@ print(x, ...)
 
 Other portfolio:
 [`scr_compare()`](https://evandeilton.github.io/scorecraft/reference/scr_compare.md),
-[`scr_core()`](https://evandeilton.github.io/scorecraft/reference/scr_core.md)
+[`scr_core()`](https://evandeilton.github.io/scorecraft/reference/scr_core.md),
+[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md)

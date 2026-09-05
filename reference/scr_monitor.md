@@ -4,8 +4,8 @@ Recomputes, per period of `date_col` (or for the whole data), the score
 PSI against train with frozen bands, the CSI of every variable with
 frozen bins plus the signed points shift and, when the target is
 present, the performance by vintage (event rate, AUC/KS/Gini with CI).
-Always reports both thresholds (fixed and n-adjusted, D17). Schedules
-nothing: the analyst calls it when needed (D19).
+Always reports both thresholds (fixed and n-adjusted). Schedules
+nothing: the analyst calls it when needed.
 
 ## Usage
 
@@ -71,20 +71,13 @@ and `plan` (the contract actually used).
 
 ## See also
 
-Other stages:
+Other production:
 [`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
-[`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
-[`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
-[`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
-[`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
+[`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
 [`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
-[`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
-[`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
-[`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
-[`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),
-[`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md),
-[`scr_triage()`](https://evandeilton.github.io/scorecraft/reference/scr_triage.md)
+[`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md),
+[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
 
 ## Examples
 

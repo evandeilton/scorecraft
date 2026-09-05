@@ -5,11 +5,11 @@ boundaries are score cut points, direction-aware: grade 1 is the safest
 (the highest scores under `higher_is_safer`). Three constructions:
 `"geometric"` builds a
 [`scr_master_scale()`](https://evandeilton.github.io/scorecraft/reference/scr_master_scale.md)
-between the 1st and 99th percentiles of the calibrated PD and converts
-its PD bounds into scores through the calibrated alignment; `"quantile"`
-cuts equal-count score bands (cut points moved half-way between
-neighbouring scores, so a boundary never sits on an observed value);
-`"supplied"` grades by the PD bands of a given master scale.
+between percentiles 1 and 99 of the calibrated PD and converts its PD
+bounds into scores through the calibrated alignment; `"quantile"` cuts
+equal-count score bands (cut points moved half-way between neighbouring
+scores, so a boundary never sits on an observed value); `"supplied"`
+grades by the PD bands of a given master scale.
 
 ## Usage
 
@@ -78,7 +78,9 @@ scorecard's), `concentration` (`hhi`, `cv`, `hi`, `k`), `repairs`,
 `ledger`, `moc` (empty, filled by
 [`scr_moc()`](https://evandeilton.github.io/scorecraft/reference/scr_moc.md)),
 `dr` (the pooled series), `rows` (score, outcome and grade of the
-sample), `scorecard`, `sample`, `ct`, `sample_rate`.
+sample), `scorecard`, `sample`, `ct`, `sample_rate`. Also `calibration`
+(the `scr_pd_calibration` when one was given), `n_grades_requested`,
+`min_obligors`, `min_defaults`, `target` and `config`.
 
 ## Details
 
@@ -149,7 +151,8 @@ gr$table[, c("grade", "score_lo", "score_hi", "n", "dr", "pd_be")]
 #> 3:     3 522.0009 545.9895   390 0.19487179 0.19487179
 #> 4:     4 495.7314 522.0009   174 0.31609195 0.31609195
 #> 5:     5     -Inf 495.7314    57 0.35087719 0.35087719
-# grade a cohort panel with the score cut points
+# grade a cohort panel with the score cut points (the panel score is a
+# different scale; the demo only shows the mechanics)
 head(predict(gr, score = scr_demo_panel$score))
 #> [1] 1 1 1 1 1 1
 ```

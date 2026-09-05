@@ -2,8 +2,9 @@
 
 One row per default event (or per event and reference date under the
 variable-horizon comparison), with the facility as it stood at the
-reference date and the realised exposure at the default date. The
-reference date follows `config$ccf_horizon`: `"fixed"` takes the
+reference date and the realised exposure at default (EAD) at the default
+date, from which the realised credit conversion factor (CCF) follows.
+The reference date follows `config$ccf_horizon`: `"fixed"` takes the
 snapshot `ccf_horizon_months` before the default month (the nearest
 earlier snapshot when that month is missing; the first snapshot for a
 facility younger than the horizon, flagged `FAST_DEFAULT`); `"cohort"`

@@ -5,8 +5,8 @@ of a tree challenger, a legacy score) to the scale defined by
 `base_score`, `base_odds` and `pdo`, recording `odds_orientation` on the
 object. This is what makes two scorecards directly comparable. It runs
 automatically inside
-[`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
-(decision D9); it is exposed to align other scores to the same scale.
+[`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md);
+it is exposed to align other scores to the same scale.
 
 ## Usage
 
@@ -112,14 +112,10 @@ Siddiqi, N. (2006). *Credit Risk Scorecards*. Wiley, chapter 6.
 ## See also
 
 Other stages:
-[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
-[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
-[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
 [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
 [`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),

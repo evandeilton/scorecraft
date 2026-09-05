@@ -52,8 +52,9 @@ An object of class `scr_lgd_validation`: `calibration` (per pool),
   that still discriminates) and heterogeneity between adjacent pools
   (Welch test; a large p-value means pools that do not differ).
 
-Traffic lights use the p-value thresholds of `pd_lights` (red below the
-first, amber below the second) and the fixed PSI thresholds.
+Traffic lights use the p-value thresholds of `config$pd_lights` (shared
+with the PD validation) (red below the first, amber below the second)
+and the fixed PSI thresholds.
 
 ## See also
 

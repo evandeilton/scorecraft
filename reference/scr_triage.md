@@ -36,20 +36,17 @@ with no `NA`) and the originating `split`.
 
 Failures at this stage: `CONSTANT`, `NEAR_CONSTANT`, `TOO_MANY_MISSING`,
 `HIGH_CARDINALITY`, `NO_SIGNAL` (coarse IV below `min_iv_quick`) and
-`DUPLICATE_OF:<column>`.
+`DUPLICATE_OF:<column>`. A failed numeric whose special-population flag
+survives carries the suffix `;RESCUED_AS_FLAG`.
 
 ## See also
 
 Other stages:
-[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
 [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
-[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
-[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
 [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
 [`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),

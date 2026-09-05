@@ -54,7 +54,10 @@ admitted drivers), `bins_all` (the fit of every driver), `drivers`
 reference rows with `sample` and `pool`), `metrics` (per sample: `rmse`,
 `mae`, `gauc` with a bootstrap interval, `spearman`, `ead_rmse`,
 `ead_mae`, `adequacy`, `cear`), `split`, `funnel`, `data_summary`,
-`downturn`, `ledger`, `model_card`, `params`, `config`, `meta`.
+`downturn`, `ledger`, `model_card`, `params`, `config`, `meta`. Also
+`survivors` (the admitted drivers) and `lra` (the long-run averages of
+the data set); `metrics` also carries `n`, `n_main`, `gauc_se`,
+`somers_d` and `share_floor_binding`.
 
 ## Details
 

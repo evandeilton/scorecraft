@@ -77,7 +77,11 @@ identifiers, `default_date`, `ead`, `product`, drivers, `status`,
 `funnel` (rule, n, action), `summary` (`n`, `cure_rate`,
 `lra_default_weighted`, `lra_exposure_weighted`, `share_incomplete`,
 `discount_rate_mean`, `by_product`, `by_year`), `ledger`, `config`,
-`obs_date`, and `cashflows` with `keep_rows`.
+`obs_date`, and `cashflows` with `keep_rows`. `rds` also carries `year`,
+`close_date`, `recovery_nominal`, `recovery_artificial`, `cost_nominal`,
+`drawing_nominal`, `closed_at_t_max`, `absorbed`, `n_cashflows` and
+`last_month`; `funnel` has `kept`; `summary` has `n_cure`, `lra_raw`,
+`ead_total` and `years`.
 
 ## Rules
 

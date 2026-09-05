@@ -33,7 +33,7 @@ An object of class `scr_migration`: `matrix` (counts, `K` rows, `K + 2`
 columns), `p` (row probabilities), `n` (row totals), `mwb_upper`,
 `mwb_lower`, `z` (`K x K`), `n_significant` (cells with `z > 1.645`),
 `mobility` (`share_stable`, `share_up`, `share_down`, `mean_distance`,
-`share_default`, `share_closed`).
+`share_default`, `share_closed`). Also `K`, the number of grades.
 
 ## See also
 

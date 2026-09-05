@@ -29,9 +29,9 @@ class and returns NA."><meta property="og:image" content="https://evandeilton.gi
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -121,11 +121,13 @@ reported above 0.5 when the score ranks correctly.</p></dd>
 bounds <code>auc_lo</code>/<code>auc_hi</code>, <code>ks_lo</code>/<code>ks_hi</code>, <code>gini_lo</code>/<code>gini_hi</code> (<code>NA</code>
 when <code>ci = FALSE</code>), <code>n</code>, <code>events</code>, <code>n_boot</code> and <code>level</code>. Everything is
 <code>NA_real_</code> when only one class is present or no valid case exists.</p>
+<p>DeLong's analytic variance is not used: the interval is a stratified
+percentile bootstrap, which also covers KS.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The confidence interval is <strong>always</strong> computed by default (project
-decision D18): a bootstrap stratified by outcome, percentile method, with
+    <p>The confidence interval is <strong>always</strong> computed by default: a bootstrap
+stratified by outcome, percentile method, with
 <code>n_boot</code> resamples. Gini is derived from AUC (<code>2 * AUC - 1</code>) inside each
 resample, never bootstrapped separately. The cost is absorbed by
 <code>nthread</code> (parallelism by resample).</p>

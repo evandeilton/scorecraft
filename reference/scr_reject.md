@@ -1,11 +1,11 @@
 # Stage 6: honest reject inference through a sensitivity band
 
-Does not ship parcelling as the default behaviour (decision D16):
-instead of inventing a single multiplier and reweighting, it declares
-the **population scope** of the scorecard, measures the **coverage per
-band** (where an observed outcome exists, and in what volume) and
-presents a **sensitivity band**: the event rate each band would have if
-the population without an outcome were 2, 4 or 8 times worse than the
+Does not ship parcelling as the default behaviour: instead of inventing
+a single multiplier and reweighting, it declares the **population
+scope** of the scorecard, measures the **coverage per band** (where an
+observed outcome exists, and in what volume) and presents a
+**sensitivity band**: the event rate each band would have if the
+population without an outcome were 2, 4 or 8 times worse than the
 observed one, with the effect on the total. The analyst reads the band;
 no single number is fabricated.
 
@@ -57,14 +57,10 @@ An `scr_reject` object with `scope`, `coverage` (per band) and
 ## See also
 
 Other stages:
-[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
 [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
-[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
-[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
 [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
 [`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),

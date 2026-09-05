@@ -27,14 +27,14 @@ are parameter tables selected by a preset, never prose.
   [`OptimalBinningWoE::obwoe_apply()`](https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_apply.html)
   and `obwoe_sql()` reproduce the bin means in R and in every SQL
   dialect; hold-out revalidation with frozen cut points and PSI.
-- Configuration gains the keys of stages 8 to 12 (`default_*`, `pd_*`,
-  `lgd_*`, `ccf_*`, `framework`, `capital_*`, `ecl_*`), all registered
-  in
+- [`scr_config()`](https://evandeilton.github.io/scorecraft/reference/scr_config.md)
+  gains the keys of stages 8 to 12 (`default_*`, `pd_*`, `lgd_*`,
+  `ccf_*`, `framework`, `capital_*`, `ecl_*`), all registered in
   [`scr_config_keys()`](https://evandeilton.github.io/scorecraft/reference/scr_config_keys.md)
   and validated.
-- New demonstration data: `scr_demo_panel`, `scr_demo_lgd`,
-  `scr_demo_lgd_cashflows`, `scr_demo_rates`, `scr_demo_ead`,
-  `scr_demo_portfolio`.
+- `scr_demo_panel`, `scr_demo_lgd`, `scr_demo_lgd_cashflows`,
+  `scr_demo_rates`, `scr_demo_ead` and `scr_demo_portfolio` are new
+  demonstration data.
 - PD:
   [`scr_master_scale()`](https://evandeilton.github.io/scorecraft/reference/scr_master_scale.md),
   [`scr_calibrate()`](https://evandeilton.github.io/scorecraft/reference/scr_calibrate.md)
@@ -123,8 +123,40 @@ are parameter tables selected by a preset, never prose.
   [`scr_pd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_validate.md)
   is green when every grade sits on the conservative side (the PD above
   the observed rate), since the statistic is two-sided.
-- `betareg` joins Suggests for the beta severity engine of the LGD
-  model.
+- `betareg` (Suggests) powers the beta severity engine of
+  [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md).
+
+### Scorecard pipeline hardening
+
+- [`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md)
+  is the monitoring contract: created by
+  [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
+  written to the `Monitoring_Plan` sheet, and read back by
+  `scr_monitor(plan = )` (a table or the strategy workbook), which now
+  takes its PSI/CSI thresholds, alpha and `min_events_per_period` from
+  it.
+- [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
+  stores the hold-out bin index of every variable, so the
+  `Stability_CSI_Timeline` sheet is a real timeline by vintage without a
+  [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md)
+  object.
+- `options(scorecraft.parallel = "fork" | "psock" | "serial")` selects
+  the parallel backend; the test suite exercises the PSOCK path (the
+  Windows semantics) on every platform and pins serial == fork == psock.
+- [`scr_triage()`](https://evandeilton.github.io/scorecraft/reference/scr_triage.md)
+  is parallel by column as well.
+- Workers never fail silently on any backend: a worker error is
+  re-thrown with the failing item, a worker killed by the system is
+  reported as such (instead of a `NULL` that surfaces later as a
+  subscript error), warnings raised in a worker are re-raised in the
+  parent, PSOCK workers run with a single data.table thread, and a
+  `data.table` returned by a worker is re-allocated so that `:=` works
+  on it. `R CMD check --as-cran`’s two-process limit is honoured.
+- `options(scorecraft.fork_mem_fraction = 0.75)` caps the fork workers
+  by the memory available on Linux (`Inf` to disable): forked workers
+  duplicate the parent heap once the garbage collector runs, and twenty
+  workers over a two-million-row table were killed by the OOM daemon in
+  under two minutes.
 
 ## scorecraft 0.1.0
 
@@ -153,15 +185,16 @@ deliverables.
   WOE/BIN transformation from the authoritative cut points and, for a
   scorecard, the exact score plus whole points from the bin index. R-SQL
   equivalence is verified by test against DuckDB and SQLite.
-- Binning is parallelised by column (`nthread`), with the fits merged;
-  the result is identical to the serial one.
+- [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md)
+  is parallelised by column (`nthread`), with the fits merged; the
+  result is identical to the serial one.
 - [`scr_metrics()`](https://evandeilton.github.io/scorecraft/reference/scr_metrics.md)
   always reports a bootstrap confidence interval for AUC/KS/Gini;
   [`scr_psi()`](https://evandeilton.github.io/scorecraft/reference/scr_psi.md)
   reports the fixed threshold next to the sample-size-adjusted critical
   value of Yurdakul and Naranjo (2020).
-- A tree challenger (`xgboost` or `lightgbm`) can be fitted on the same
-  WOE columns and aligned to the same scale, with
+- `scr_scorecard(challenger = )` fits a tree challenger (`xgboost` or
+  `lightgbm`) on the same WOE columns, aligned to the same scale, with
   `supports_scorecard = FALSE`.
 - [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md)
   implements honest reject inference: population scope, band coverage
@@ -197,34 +230,3 @@ deliverables.
   accepts any DBI driver next to an ODBC DSN, and
   [`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)
   samples server-side with a dialect-aware random expression.
-
-### Hardening after the first release (unreleased)
-
-- [`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md)
-  is the monitoring contract: created by
-  [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
-  written to the `Monitoring_Plan` sheet, and read back by
-  `scr_monitor(plan = )` (a table or the strategy workbook), which now
-  takes its PSI/CSI thresholds, alpha and `min_events_per_period` from
-  it.
-- The scorecard stores the hold-out bin index of every variable, so the
-  `Stability_CSI_Timeline` sheet is a real timeline by vintage without a
-  [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md)
-  object.
-- The parallel backend is selectable with
-  `options(scorecraft.parallel = "fork" | "psock" | "serial")`; the test
-  suite exercises the PSOCK path (the Windows semantics) on every
-  platform and pins serial == fork == psock.
-- The descriptive triage is parallel by column as well.
-- Workers never fail silently on any backend: a worker error is
-  re-thrown with the failing item, a worker killed by the system is
-  reported as such (instead of a `NULL` that surfaces later as a
-  subscript error), warnings raised in a worker are re-raised in the
-  parent, PSOCK workers run with a single data.table thread, and a
-  `data.table` returned by a worker is re-allocated so that `:=` works
-  on it. `R CMD check --as-cran`’s two-process limit is honoured.
-- On Linux the fork backend caps the number of workers by the memory
-  available (`options(scorecraft.fork_mem_fraction = 0.75)`, `Inf` to
-  disable): forked workers duplicate the parent heap once the garbage
-  collector runs, and twenty workers over a two-million-row table were
-  killed by the OOM daemon in under two minutes.

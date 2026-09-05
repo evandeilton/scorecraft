@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Scale alignment: making scorecards comparable across targets, engines and conventions • scorecraft</title>
+<title>Scale alignment across targets, engines and conventions • scorecraft</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Scale alignment: making scorecards comparable across targets, engines and conventions">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Scale alignment across targets, engines and conventions">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -41,9 +41,9 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -70,7 +70,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Scale alignment: making scorecards comparable across targets, engines and conventions</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Scale alignment across targets, engines and conventions</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/alignment-and-portfolio.Rmd" class="external-link"><code>vignettes/alignment-and-portfolio.Rmd</code></a></small>
@@ -312,7 +312,7 @@ and
 attenuated by the banding as above but in the right place, and its mean
 predicted probability matches the observed event rate; the direct map
 reports whatever the raw score claims, here a third too low. This is why
-<code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code> always aligns (decision D9) and defaults to
+<code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code> always aligns and defaults to
 <code>"regression"</code>.</p>
 </div>
 <div class="section level2">
@@ -400,8 +400,7 @@ error in reverse: <code><a href="../reference/scr_metrics.html">scr_metrics()</a
 scorecard and aligned to the same scale by the same regression. That
 makes its output comparable point for point with the champion; it does
 <strong>not</strong> make it a scorecard. The object says so explicitly:
-no points, no reason codes, <code>supports_scorecard = FALSE</code>
-(decision D10).</p>
+no points, no reason codes, <code>supports_scorecard = FALSE</code>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res_risk</span>, challenger <span class="op">=</span> <span class="st">"xgboost"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">

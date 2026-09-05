@@ -1,4 +1,4 @@
-# The monitoring plan: the contract scr_monitor() reads
+# Monitoring plan read by scr_monitor()
 
 A small `item`/`value` table with the thresholds and the frozen score
 bands of a scorecard. It is created by
@@ -41,20 +41,13 @@ A `data.frame` of class `scr_monitoring_plan` with the items
 
 ## See also
 
-Other stages:
+Other production:
 [`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
-[`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
-[`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
-[`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
-[`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
+[`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
 [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
-[`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
-[`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
-[`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
-[`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),
-[`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md),
-[`scr_triage()`](https://evandeilton.github.io/scorecraft/reference/scr_triage.md)
+[`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md),
+[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
 
 ## Examples
 

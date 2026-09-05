@@ -9,7 +9,7 @@ and
 on a table and a binary target, and returns an object with the
 shortlist, the complete audit funnel, the gains table and the production
 SQL of the approved variables. Every stage remains callable on its own
-for whoever wants more control (hybrid interface, decision D13).
+for whoever wants more control (hybrid interface).
 
 ## Usage
 
@@ -96,15 +96,11 @@ for several targets straight from the database,
 for the next step.
 
 Other stages:
-[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
 [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
-[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
-[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
 [`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),
 [`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md),
@@ -120,7 +116,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 0.8s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel

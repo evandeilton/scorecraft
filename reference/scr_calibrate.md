@@ -75,7 +75,8 @@ An object of class `scr_pd_calibration`: `alignment` (the new
 (the closed-form King-Zeng shift), `slope_ratio` (`S* / S`),
 `mean_pd_before`, `mean_pd_after`, `ar_before`, `ar_after` (observed),
 `ar_implied_before`, `ar_implied_after`, `n`, `segments` (table and
-alignments when `segment` is given), `ledger`.
+alignments when `segment` is given), `ledger`. Also `ar_target`, `note`
+and `sample`.
 
 ## Details
 

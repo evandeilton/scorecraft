@@ -35,9 +35,9 @@ flag records when the average sits below it."><meta property="og:image" content=
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -116,14 +116,17 @@ flag records when the average sits below it.</p>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
-<dd><p>A <code><a href="scr_config.html">scr_config()</a></code> (only <code>pd_dr_by</code> and <code>verbose</code> are read).</p></dd>
+<dd><p>A <code><a href="scr_config.html">scr_config()</a></code>; only <code>pd_dr_by</code> is read (the default of
+<code>by</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object of class <code>scr_dr</code>: <code>table</code> (cohort rates), <code>lra</code>
-(<code>mean</code>, <code>weighted_mean</code>, <code>recent5_mean</code>, <code>all_mean</code>, <code>benchmark</code>,
-<code>n_cohorts</code>, <code>years</code>, <code>flag_below_benchmark</code>), <code>horizon</code>, <code>by</code>.</p>
+    <p>An object of class <code>scr_dr</code>: <code>table</code> (cohort rates, by grade or
+segment when given), <code>portfolio</code> (one row per cohort: <code>n</code>, <code>defaults</code>,
+<code>dr</code>), <code>lra</code> (<code>mean</code>, <code>weighted_mean</code>, <code>recent5_mean</code>, <code>all_mean</code>,
+<code>benchmark</code>, <code>flag_below_benchmark</code>, <code>min</code>, <code>max</code>, <code>sd</code>, <code>n_cohorts</code>,
+<code>years</code>), <code>horizon</code> and <code>by</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

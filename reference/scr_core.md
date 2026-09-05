@@ -29,6 +29,7 @@ A `data.table` with `feature`, `n_targets`, `targets` and `mean_rank`.
 
 Other portfolio:
 [`scr_compare()`](https://evandeilton.github.io/scorecraft/reference/scr_compare.md),
+[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_runset`](https://evandeilton.github.io/scorecraft/reference/scr_runset.md)
 
 ## Examples

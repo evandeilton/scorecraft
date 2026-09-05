@@ -23,9 +23,9 @@ target), in parallel by column, and applies in sequence:"><meta property="og:ima
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -74,8 +74,9 @@ target), in parallel by column, and applies in sequence:</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An <code>scr_bins</code> object with <code>fit</code> (an <code>obwoe</code> object), <code>screen</code>
 (<code>summary</code> and <code>full</code>), <code>holdout</code>, <code>prune</code>, <code>pool</code> (eligible for the
-models), <code>derived_excluded</code>, the WOE matrices <code>woe_train</code>/<code>woe_holdout</code>
-and the originating <code>triage</code>.</p>
+models), <code>derived_excluded</code>, the counts <code>binned</code>, <code>pos_screen</code> and
+<code>pos_holdout</code> (the survivors of each gate, in order), the WOE matrices
+<code>woe_train</code>/<code>woe_holdout</code>, the originating <code>triage</code> and the <code>config</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -101,14 +102,10 @@ worker and the fits are merged. The result is identical to the serial one
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other stages:
-<code><a href="predict.scr_align.html">predict.scr_align()</a></code>,
 <code><a href="scr_align.html">scr_align()</a></code>,
 <code><a href="scr_cutoff.html">scr_cutoff()</a></code>,
 <code><a href="scr_model.html">scr_model()</a></code>,
-<code><a href="scr_monitor.html">scr_monitor()</a></code>,
-<code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>,
 <code><a href="scr_reject.html">scr_reject()</a></code>,
-<code><a href="scr_run.html">scr_run()</a></code>,
 <code><a href="scr_scorecard.html">scr_scorecard()</a></code>,
 <code><a href="scr_select.html">scr_select()</a></code>,
 <code><a href="scr_split.html">scr_split()</a></code>,

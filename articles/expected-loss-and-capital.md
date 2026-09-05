@@ -1,5 +1,9 @@
 # Expected loss and regulatory capital
 
+This vignette takes PD, LGD and EAD from the previous two and turns them
+into expected loss, IRB risk weights, capital with the output floor and
+accounting ECL, on the bundled `scr_demo_portfolio`.
+
 ``` r
 
 library(scorecraft)
@@ -15,7 +19,7 @@ covered by provisions and pricing. The loss in a bad year exceeds that
 average, and the gap between a high quantile of the loss distribution
 and its mean is the **unexpected loss** that capital must absorb. The
 IRB risk-weight function turns a through-the-cycle PD into the PD of a
-year at the 99.9th percentile of a one-factor model, and charges capital
+year at the 99.9 % quantile of a one-factor model, and charges capital
 for the difference between the loss at that quantile and the expected
 loss. Every number that a regime fixes in that calculation (PD and LGD
 floors, asset correlations, the maturity rule, the confidence level, the
@@ -27,6 +31,10 @@ consume it, and an edited table is recorded as such on every object
 built from it.
 
 ## 2. The parameter tables
+
+[`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md)
+returns every regime-specific number as a table; the print summarises
+them.
 
 ``` r
 
@@ -223,8 +231,9 @@ p$sa_rw[asset_class == "retail_mortgage" & sub_class == "standard"]
 
 `scr_demo_portfolio` holds 5,000 exposures in six segments that map one
 to one onto the asset classes; PD is a grade PD and LGD a pool value, so
-segment by grade is a homogeneous pool. About 3 % of the rows are in
-default with an `elbe` and a provision.
+segment by grade is homogeneous in PD and LGD, while maturity varies
+inside the corporate pools (section 6 comes back to this). About 3 % of
+the rows are in default with an `elbe` and a provision.
 
 ``` r
 
@@ -301,8 +310,8 @@ cap$segments[, .(segment, n, ead, pd_mean, lgd_mean, rw, rwa_irb, irb_sa_ratio, 
 
 The `irb_sa_ratio` column says where the IRB approach saves the most
 against the standardised one; mortgages sit far below the 72.5 % line on
-their own, the corporate book far above it, and the output floor is
-applied to the total, not by segment.
+their own, the large corporate book just above it and the SME book well
+above, and the output floor is applied to the total, not by segment.
 
 ### Floors and the output-floor bridge
 

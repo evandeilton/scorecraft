@@ -1,4 +1,4 @@
-# The classing specification as a long table (and its file round trip)
+# Classing specification as a long table, with its file round trip
 
 One row per bin of every variable in the lab, optimal and manual, with
 the authoritative columns a reviewer may edit (`lower`/`upper` for
@@ -30,7 +30,9 @@ scr_classing_import(lab, file)
 
 - file:
 
-  Optional `.csv` or `.xlsx` path to write the table to.
+  For `scr_classing_spec()`, an optional `.csv` or `.xlsx` path to write
+  the table to. For `scr_classing_read()`, the path to read. For
+  `scr_classing_import()`, a path or an `scr_classing_spec` object.
 
 - sep:
 
@@ -46,6 +48,9 @@ variable whose bins differ from the lab's current ones), each to be
 accepted or discarded.
 
 ## See also
+
+[`scr_coarse_classing()`](https://evandeilton.github.io/scorecraft/reference/scr_coarse_classing.md)
+for a complete session, from lab to scorecard.
 
 Other classing:
 [`scr_classing_accept()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_accept.md),

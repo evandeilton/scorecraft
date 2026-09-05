@@ -41,9 +41,9 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -363,9 +363,11 @@ bands whose averages break the increasing order. With 620 training
 defaults and a minimum of 100 per pool, the seven target bands collapse
 to three. Per pool: the default-weighted LRA, the exposure-weighted one,
 and the category-C margin of conservatism, a one-sided 95% t interval on
-the mean. The downturn column is provisional at this point (a type-3
-add-on by configuration) and the floor is zero until the next two calls
-run.</p>
+the mean. The downturn column is provisional at this point: the
+configured method is <code>"type1"</code>, which needs periods, so until
+<code><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn()</a></code> runs each pool carries the type-3 add-on
+of 15% as a placeholder, and the floor is zero until
+<code><a href="../reference/scr_lgd_floor.html">scr_lgd_floor()</a></code> runs.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span><span class="op">$</span><span class="va">pools</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">pool</span>, <span class="va">pred_lo</span>, <span class="va">pred_hi</span>, <span class="va">n</span>, <span class="va">lra</span>, <span class="va">lra_ew</span>, <span class="va">se</span>, <span class="va">moc_c</span>, <span class="va">lgd_dt</span>, <span class="va">floor</span>, <span class="va">lgd_final</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;     pool   pred_lo   pred_hi     n       lra    lra_ew         se      moc_c</span></span>
@@ -499,7 +501,7 @@ floored result.</p>
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">m</span>, table <span class="op">=</span> <span class="st">"prd.defaults"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span><span class="op">)</span></span>
 <span><span class="va">sql_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">sql</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$"</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294914 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998077 THEN 2 ELSE 3 END AS pool</span></span>
+<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294914 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998083 THEN 2 ELSE 3 END AS pool</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor</span></span>
 <span><span class="co">#&gt;     GREATEST(lgd_dt, lgd_floor) AS lgd_final</span></span></code></pre></div>
@@ -559,7 +561,12 @@ between pools. The lights use the p-value thresholds of
 test between the two halves of each pool, split at its median
 prediction, finds that the halves still differ, so the pools are not yet
 homogeneous. That is what the battery is for; the fix is more defaults
-or a lower minimum per pool, and either is a ledger row.</p>
+or a lower minimum per pool, and either is a ledger row. Two ambers sit
+beside it: one pool realises a little more than it estimates (the
+one-sided t-test at p = 0.04), and the loss shortfall says the portfolio
+estimate is slightly below the realised loss; <code>dt_covers</code> is
+<code>TRUE</code> in every pool, which is what the downturn add-on and
+the margin are there for.</p>
 <p><code><a href="../reference/scr_export.html">scr_export()</a></code> writes one workbook with the RDS funnel and
 summaries, the recovery profile, the bins and coefficients of both
 stages, the sign checks, the pools, the downturn and its periods, the

@@ -1,4 +1,4 @@
-# From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables
+# From database to production
 
 The introductory vignette walks the modelling pipeline on the bundled
 `scr_demo` table. This one covers what surrounds it in a real
@@ -61,8 +61,9 @@ the connection class: `rand(seed)` on Spark, Databricks and MySQL,
 `random()` on PostgreSQL, Redshift and DuckDB, and an integer-modulo
 expression on SQLite, whose `random()` returns a signed 64-bit integer
 and cannot be seeded. `sample_expr` overrides the choice for a dialect
-the package does not know. The query is echoed when verbose messages are
-on.
+the package does not know. The query is echoed while
+[`scr_verbose()`](https://evandeilton.github.io/scorecraft/reference/scr_verbose.md)
+is on; `config$verbose` does not reach the database functions.
 
 ``` r
 
@@ -71,7 +72,7 @@ half <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
 class(half)
 #> [1] "data.table" "data.frame"
 nrow(half)
-#> [1] 2090
+#> [1] 2089
 ```
 
 `max_rows` is a memory guard rather than a second sampler. When it
@@ -85,7 +86,7 @@ capped <- scr_fetch(con, "dtm", max_rows = 1000)
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.238095
 nrow(capped)
-#> [1] 978
+#> [1] 996
 ```
 
 ### Several targets straight from the connection
@@ -102,10 +103,12 @@ follows:
   records the table name in the configuration, so the SQL generated
   later already points at `dtm` rather than at the placeholder
   `your_table`;
-- it has no `date_col` argument, so the split it performs is random by
-  row. For an out-of-time split, fetch the table and call
+- its `date_col` defaults to `config$oot_date_col`, which is `NULL`
+  here, and `ref_date` is dropped from the candidates, so the split is
+  random by row. For an out-of-time split pass `date_col = "ref_date"`
+  (and keep the column out of `drop`), or fetch the table and call
   [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
-  with `date_col`, as in section 2.
+  as in section 2.
 
 ``` r
 
@@ -462,7 +465,7 @@ sql_woe <- unlist(strsplit(scr_sql(res), "\n", fixed = TRUE))
 cat(head(sql_woe, 24), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: ansi
-#> -- Generated on 2026-09-05 03:35:01
+#> -- Generated on 2026-09-05 13:12:00
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
@@ -515,9 +518,9 @@ sql_sc <- unlist(strsplit(scr_sql(sc, table = "prd.customers", dialect = "databr
 cat(head(sql_sc, 12), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | scorecard of target: default | 12 variables | dialect: databricks
-#> -- Generated on 2026-09-05 03:35:02
+#> -- Generated on 2026-09-05 13:12:01
 #> -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer
-#> -- score = 491.19665800103655 + -26.318891476654567 * logit | base_points = 538
+#> -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538
 #> -- Block 1 (CTE base_scr): pre-processing frozen on train.
 #> -- Block 2 (CTE woe_scr): WOE and bin index, emitted by OptimalBinningWoE::obwoe_sql().
 #> -- Block 3: exact score (from the WOE) and whole points (from the bin index).
@@ -530,18 +533,18 @@ i <- max(which(sql_sc == "SELECT"))
 cat(sql_sc[i:(i + 15)], sep = "\n")
 #> SELECT
 #>     538.30012744760336
-#>       + -29.70104376344629 * vl_score_01_woe
-#>       + -27.130718819754303 * vl_score_02_woe
-#>       + -26.64928685994122 * vl_score_04_woe
-#>       + -30.277321636127535 * ds_faixa_woe
-#>       + -29.966768640958321 * vl_tardio_woe
-#>       + -28.964890297230781 * ds_regiao_woe
-#>       + -28.874743439251922 * vl_score_06_woe
-#>       + -26.679330009796985 * vl_score_07_woe
-#>       + -35.128873453122374 * vl_score_05_woe
-#>       + -33.247622050806385 * ds_canal_woe
-#>       + -30.803729315270559 * vl_hist_04_woe
-#>       + -35.878212555936535 * vl_score_10_woe AS score,
+#>       + -29.701043763446282 * vl_score_01_woe
+#>       + -27.130718819754311 * vl_score_02_woe
+#>       + -26.649286859941228 * vl_score_04_woe
+#>       + -30.277321636127542 * ds_faixa_woe
+#>       + -29.966768640958328 * vl_tardio_woe
+#>       + -28.964890297230774 * ds_regiao_woe
+#>       + -28.874743439251926 * vl_score_06_woe
+#>       + -26.679330009797006 * vl_score_07_woe
+#>       + -35.128873453122381 * vl_score_05_woe
+#>       + -33.247622050806406 * ds_canal_woe
+#>       + -30.803729315270584 * vl_hist_04_woe
+#>       + -35.878212555936543 * vl_score_10_woe AS score,
 #>     vl_score_01_points,
 #>     vl_score_02_points,
 # ... the whole points, and one of the CASE expressions behind them

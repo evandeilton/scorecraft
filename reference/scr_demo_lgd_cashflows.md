@@ -16,7 +16,7 @@ scr_demo_lgd_cashflows
 
 ## Format
 
-A `data.frame` with 5,743 rows and 4 columns:
+A `data.frame` with 5,737 rows and 4 columns:
 
 - `default_id`:
 

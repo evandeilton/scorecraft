@@ -35,9 +35,9 @@ whether they were edited."><meta property="og:image" content="https://evandeilto
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -173,7 +173,11 @@ segment and grade with the constants the SQL emits), <code>totals</code> (<code>
 <code>sensitivity</code> (<code>shock</code>, <code>rwa</code>, <code>delta</code>, <code>delta_pct</code>),
 <code>concentration</code> (share of EAD and RWA by segment), <code>framework</code>,
 <code>approach</code>, <code>params</code>, <code>config</code>, <code>ledger</code>, <code>model_card</code> and, after
-<code><a href="scr_export.html">scr_export()</a></code>, <code>files</code>.</p>
+<code><a href="scr_export.html">scr_export()</a></code>, <code>files</code>.
+<code>segments</code> and <code>totals</code> also carry <code>n_defaulted</code>; <code>totals</code> also
+<code>el_rate</code> and <code>rwa_irb_no_floors</code>; <code>concentration</code> has <code>segment</code>, <code>n</code>,
+<code>ead</code>, <code>rwa</code>, <code>ead_share</code>, <code>rwa_share</code> and <code>hhi_contribution</code>; <code>columns</code>
+records the column names the SQL reads.</p>
     </div>
     <div class="section level2">
     <h2 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a></h2>

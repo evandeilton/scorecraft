@@ -72,6 +72,12 @@ A `data.table` ordered with the approved first.
 
   Entered the shortlist.
 
+- `08.manual_drop`:
+
+  In the automatic consensus, but removed by the analyst in the coarse
+  classing lab
+  ([`scr_classing_choose()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_choose.md)).
+
 ## See also
 
 Other accessors:

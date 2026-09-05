@@ -16,8 +16,6 @@
 Every stage of the pipeline as a function, plus the shortcuts that chain
 them.
 
-- [`predict(`*`<scr_align>`*`)`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md)
-  : Apply an alignment to raw scores
 - [`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md)
   : Stage 5: align a raw score to the declared scale
 - [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md)
@@ -27,14 +25,8 @@ them.
   : Stage 6: cut-off sweep with frozen cuts
 - [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md)
   : Stages 3 and 4: multi-strategy selection and consensus
-- [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md)
-  : Monitor the scorecard on new data
-- [`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md)
-  : The monitoring plan: the contract scr_monitor() reads
 - [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md)
   : Stage 6: honest reject inference through a sensitivity band
-- [`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md)
-  : Run the selection for several targets straight from the database
 - [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
   : Stages 4 and 5: points scorecard, aligned to the declared scale
 - [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
@@ -62,7 +54,7 @@ Manual binning, manual variable choice and the decision ledger.
 - [`scr_classing_spec()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_spec.md)
   [`scr_classing_read()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_spec.md)
   [`scr_classing_import()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_spec.md)
-  : The classing specification as a long table (and its file round trip)
+  : Classing specification as a long table, with its file round trip
 - [`scr_classing_view()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_view.md)
   : Inspect the current bins of a variable in the lab
 - [`scr_coarse_classing()`](https://evandeilton.github.io/scorecraft/reference/scr_coarse_classing.md)
@@ -94,10 +86,16 @@ Manual binning, manual variable choice and the decision ledger.
 
 Scoring in R, production SQL, deliverables.
 
+- [`predict(`*`<scr_align>`*`)`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md)
+  : Apply an alignment to raw scores
 - [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
   : Apply the WOE transformation or the scorecard to new data
 - [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
   : Write the deliverables
+- [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md)
+  : Monitor the scorecard on new data
+- [`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md)
+  : Monitoring plan read by scr_monitor()
 - [`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md)
   : Reason codes: the variables that took the most points from each row
 - [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
@@ -119,6 +117,8 @@ Scoring in R, production SQL, deliverables.
   : Compare runs across targets
 - [`scr_core()`](https://evandeilton.github.io/scorecraft/reference/scr_core.md)
   : Variables that cross several targets
+- [`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md)
+  : Run the selection for several targets straight from the database
 - [`print(`*`<scr_runset>`*`)`](https://evandeilton.github.io/scorecraft/reference/scr_runset.md)
   : Set of runs, one per target
 - [`scr_connect()`](https://evandeilton.github.io/scorecraft/reference/scr_connect.md)

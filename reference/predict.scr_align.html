@@ -21,9 +21,9 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -83,22 +83,27 @@ calibrated event probability implied by the alignment.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other stages:
-<code><a href="scr_align.html">scr_align()</a></code>,
-<code><a href="scr_bin.html">scr_bin()</a></code>,
-<code><a href="scr_cutoff.html">scr_cutoff()</a></code>,
-<code><a href="scr_model.html">scr_model()</a></code>,
+    <div class="dont-index"><p>Other production:
+<code><a href="scr_apply.html">scr_apply()</a></code>,
+<code><a href="scr_export.html">scr_export()</a></code>,
 <code><a href="scr_monitor.html">scr_monitor()</a></code>,
 <code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>,
-<code><a href="scr_reject.html">scr_reject()</a></code>,
-<code><a href="scr_run.html">scr_run()</a></code>,
-<code><a href="scr_scorecard.html">scr_scorecard()</a></code>,
-<code><a href="scr_select.html">scr_select()</a></code>,
-<code><a href="scr_split.html">scr_split()</a></code>,
-<code><a href="scr_strategy.html">scr_strategy()</a></code>,
-<code><a href="scr_triage.html">scr_triage()</a></code></p></div>
+<code><a href="scr_reasons.html">scr_reasons()</a></code>,
+<code><a href="scr_sql.html">scr_sql()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span>   <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">2000</span>, <span class="fl">1</span>, <span class="fl">0.15</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">qlogis</a></span><span class="op">(</span><span class="fl">0.15</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1.3</span> <span class="op">*</span> <span class="va">y</span> <span class="op">+</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2000</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">al</span>  <span class="op">&lt;-</span> <span class="fu"><a href="scr_align.html">scr_align</a></span><span class="op">(</span><span class="va">raw</span>, <span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">al</span>, <span class="va">raw</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 545.4062 603.0933 597.0212 642.2758 539.8784 586.7383</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">al</span>, <span class="va">raw</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.117124721 0.017649730 0.021694049 0.004599538 0.138432936 0.030697183</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

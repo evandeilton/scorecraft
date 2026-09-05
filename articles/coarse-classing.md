@@ -1,4 +1,4 @@
-# Coarse classing: manual bins and manual variable choice with an audit trail
+# Coarse classing with an audit trail
 
 ## Why manual coarse classing still matters
 
@@ -61,7 +61,7 @@ defaults to the system user.
 
 lab <- scr_coarse_classing(res, author = "analyst")
 lab
-#> <scr_classing> target "default" | opened 2026-09-05 03:34 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 13:11 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)
 ```
 
@@ -70,7 +70,8 @@ Without a variable,
 prints one line per variable: its current source (optimal or manual),
 the number of bins, the train and hold-out IV, the PSI and a verdict
 computed with the same rules a proposal will face. The last column says
-whether the variable is currently in the final shortlist.
+whether the variable is currently in the final shortlist (`yes`, or
+`-`).
 
 ``` r
 
@@ -183,7 +184,7 @@ Suppose underwriting quotes `vl_score_01` in the bands below 40, 40 to
 
 p_breaks <- scr_classing_propose(lab, "vl_score_01", breaks = c(40, 55, 70))
 p_breaks
-#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-05 03:34
+#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-05 13:11
 #>                         optimal     manual      delta
 #>   n_bins                      7          4         -3
 #>   iv_train               0.3464     0.2993    -0.0471
@@ -223,7 +224,7 @@ p_merge$entry$cutpoints
 p_split <- scr_classing_propose(lab, "vl_score_01",
                                 split = c(1, res$fit$results$vl_score_01$cutpoints[1] - 5))
 p_split
-#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-05 03:34
+#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-05 13:11
 #>                         optimal     manual      delta
 #>   n_bins                      7          8          1
 #>   iv_train               0.3464     0.3561     0.0098
@@ -252,15 +253,12 @@ p_split
 The split proposal is a `REVIEW`: the new first bin holds 2% of the
 training rows and breaks the monotone pattern of the event rate, so the
 engine’s `NOT_MONOTONIC` rule fires. A `REVIEW` verdict is advisory: the
-proposal can be accepted with a reason or discarded. Note that the three
-proposals above all print as `P001`: a proposal takes the next free id
-at the moment it is made, and the id is only reserved when the proposal
-is accepted or discarded. Competing proposals made against the same
-untouched lab therefore share an id, and once one of them is acted on
-the lab refuses the others (it will not act twice on `P001`). The idiom
-to remember is *propose, decide, propose*: proposals made side by side
-are for comparison, and the one to be kept is remade right before it is
-decided.
+proposal can be accepted with a reason or discarded. Every proposal
+takes the next id from the lab’s counter (`P001`, `P002`, …), whether or
+not it is later acted on, so the ids in a session count the proposals
+made, not the decisions taken. A proposal is a value and can be kept for
+as long as the lab is open; the lab only refuses a proposal that has
+already been accepted or discarded.
 
 ### Categorical: groups, other_to, missing_to
 
@@ -274,7 +272,7 @@ p_groups <- scr_classing_propose(lab, "ds_regiao",
                                  groups = list(south = c("BA", "RS"),
                                                north = c("SP", "RJ", "MG")))
 p_groups
-#> <scr_classing_proposal> P004 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-05 03:34
+#> <scr_classing_proposal> P004 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-05 13:11
 #>                         optimal     manual      delta
 #>   n_bins                      5          2         -3
 #>   iv_train               0.0846     0.0739    -0.0107
@@ -318,7 +316,7 @@ kept on its own. `missing_to` folds it into another bin.
 
 p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
 p_missing
-#> <scr_classing_proposal> P006 ds_optin | missing_to = 1 | 2026-09-05 03:34
+#> <scr_classing_proposal> P006 ds_optin | missing_to = 1 | 2026-09-05 13:11
 #>                         optimal     manual      delta
 #>   n_bins                      3          2         -1
 #>   iv_train               0.0065     0.0000    -0.0065
@@ -375,19 +373,13 @@ lab <- scr_classing_accept(lab, p_breaks, reason = "policy bands 40/55/70 used b
 #>   vl_score_01: P001 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2740
 ```
 
-The categorical proposals of the previous section were made against the
-untouched lab and share the id just consumed, so the grouping is remade
-(it now takes `P002`) and accepted in turn.
+The grouping proposed in the previous section is still valid and is
+accepted in turn.
 
 ``` r
 
-p_groups <- scr_classing_propose(lab, "ds_regiao",
-                                 groups = list(south = c("BA", "RS"),
-                                               north = c("SP", "RJ", "MG")))
-p_groups$id
-#> [1] "P007"
 lab <- scr_classing_accept(lab, p_groups, reason = "north/south is what pricing uses")
-#>   ds_regiao: P007 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
+#>   ds_regiao: P004 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
 ```
 
 The `ds_optin` proposal erased what little signal the variable had
@@ -417,7 +409,7 @@ p_blocked$blocking
 
 scr_classing_accept(lab, p_blocked, reason = "we need this band for the policy")
 #> Error:
-#> ! scr_classing_accept(): proposal P009 is BLOCKED (EMPTY_BIN). Pass override = TRUE to accept it anyway; the override is recorded.
+#> ! scr_classing_accept(): proposal P008 is BLOCKED (EMPTY_BIN). Pass override = TRUE to accept it anyway; the override is recorded.
 ```
 
 The override path is `override = TRUE`. It exists because there are
@@ -431,12 +423,12 @@ copy of the lab so that the session carries on without the empty bin.
 
 lab_override <- scr_classing_accept(lab, p_blocked, reason = "deliberate policy floor at -5000",
                                     override = TRUE)
-#>   vl_score_04: P009 accepted (BLOCKED) - 3 bins, hold-out IV 0.0010
+#>   vl_score_04: P008 accepted (BLOCKED) - 3 bins, hold-out IV 0.0010
 scr_decisions(lab_override)[variable == "vl_score_04", .(seq, action, proposal_id, verdict, warnings, reason)]
 #>      seq   action proposal_id verdict
 #>    <int>   <char>      <char>  <char>
-#> 1:     4 override        P009 BLOCKED
-#> 2:     5   accept        P009 BLOCKED
+#> 1:     4 override        P008 BLOCKED
+#> 2:     5   accept        P008 BLOCKED
 #>                                                                            warnings
 #>                                                                              <char>
 #> 1:                                                                        EMPTY_BIN
@@ -483,11 +475,11 @@ final choice.
 ``` r
 
 lab
-#> <scr_classing> target "default" | opened 2026-09-05 03:34 by analyst | 37 variables | 9 proposals: 2 accepted, 1 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 13:11 by analyst | 37 variables | 8 proposals: 2 accepted, 1 discarded
 #>   variable                   action      bins          IV train       IV hold-out verdict     reason
 #>   vl_score_01                accepted  7->4     0.3464->0.2993     0.2877->0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti
 #>   ds_regiao                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      north/south is what pricing uses
-#>   ds_optin                   discard  P008: folding MISSING into SIM erases the sign
+#>   ds_optin                   discard  P007: folding MISSING into SIM erases the sign
 #>   final choice: 12 variables | consensus 12 | force: vl_score_03 | drop: vl_score_10
 ```
 
@@ -503,8 +495,8 @@ scr_decisions(lab)[, .(seq, variable, action, proposal_id, verdict, reason)]
 #>      seq    variable  action proposal_id    verdict
 #>    <int>      <char>  <char>      <char>     <char>
 #> 1:     1 vl_score_01  accept        P001 ACCEPTABLE
-#> 2:     2   ds_regiao  accept        P007     REVIEW
-#> 3:     3    ds_optin discard        P008     REVIEW
+#> 2:     2   ds_regiao  accept        P004     REVIEW
+#> 3:     3    ds_optin discard        P007     REVIEW
 #> 4:     4 vl_score_03   force        <NA>       <NA>
 #> 5:     5 vl_score_10    drop        <NA>       <NA>
 #>                                        reason
@@ -562,7 +554,7 @@ spec
 #>   ... (+137 rows)
 spec_file <- file.path(tempdir(), "classing_default.csv")
 scr_classing_spec(lab, file = spec_file)
-#> classing spec written to /tmp/RtmpYrcmPd/classing_default.csv
+#> classing spec written to /tmp/RtmpuyYlxF/classing_default.csv
 ```
 
 A reviewer opens the file, moves the first cut of `vl_score_01` from 40
@@ -616,7 +608,7 @@ names(imported)
 imported$vl_score_01$imported_reason
 #> [1] "reviewer: first cut moved to 42 to match the bureau band"
 imported$vl_score_01
-#> <scr_classing_proposal> P010 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-05 03:34
+#> <scr_classing_proposal> P009 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-05 13:11
 #>                         optimal    current     manual      delta
 #>   n_bins                      7          4          4         -3
 #>   iv_train               0.3464     0.2993     0.2990    -0.0474
@@ -643,13 +635,13 @@ supersedes it, and the ledger records both facts.
 ``` r
 
 lab <- scr_classing_accept(lab, imported$vl_score_01, reason = imported$vl_score_01$imported_reason)
-#>   vl_score_01: P010 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2631
+#>   vl_score_01: P009 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2631
 scr_decisions(lab)[variable == "vl_score_01", .(seq, action, proposal_id, instruction, verdict)]
 #>      seq    action proposal_id            instruction    verdict
 #>    <int>    <char>      <char>                 <char>     <char>
 #> 1:     1    accept        P001 breaks = c(40, 55, 70) ACCEPTABLE
 #> 2:     6 supersede        P001                   <NA>       <NA>
-#> 3:     7    accept        P010 breaks = c(42, 55, 70) ACCEPTABLE
+#> 3:     7    accept        P009 breaks = c(42, 55, 70) ACCEPTABLE
 ```
 
 ## Committing the lab: what changed
@@ -667,7 +659,7 @@ res2 <- scr_classing_apply(lab)
 res2
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 0.8s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel

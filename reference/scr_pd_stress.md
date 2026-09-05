@@ -38,11 +38,15 @@ A numeric vector of conditional PDs.
 ## References
 
 Vasicek, O. (2002). The distribution of loan portfolio value. *Risk*,
-December, 160-162. Gordy, M. B. (2003). A risk-factor model foundation
-for ratings-based bank capital rules. *Journal of Financial
-Intermediation*, 12(3), 199-232.
+15(12), 160-162. Gordy, M. B. (2003). A risk-factor model foundation for
+ratings-based bank capital rules. *Journal of Financial Intermediation*,
+12(3), 199-232.
 
 ## See also
+
+[`scr_pd_pit_ttc()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_pit_ttc.md),
+the same bridge with the systematic factor given as a value of `z`
+rather than a quantile `q`.
 
 Other irb-capital:
 [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md),

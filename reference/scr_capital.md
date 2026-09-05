@@ -115,7 +115,10 @@ constants the SQL emits), `totals` (`n`, `ead`, `el`, `rwa_irb`,
 `framework`, `approach`, `params`, `config`, `ledger`, `model_card` and,
 after
 [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
-`files`.
+`files`. `segments` and `totals` also carry `n_defaulted`; `totals` also
+`el_rate` and `rwa_irb_no_floors`; `concentration` has `segment`, `n`,
+`ead`, `rwa`, `ead_share`, `rwa_share` and `hhi_contribution`; `columns`
+records the column names the SQL reads.
 
 ## Inputs
 

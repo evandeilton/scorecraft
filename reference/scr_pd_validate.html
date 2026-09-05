@@ -27,9 +27,9 @@ horizon months, exactly as scr_default_rate() does."><meta property="og:image" c
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -150,7 +150,10 @@ grade, pooled), <code>calibration_cohort</code> (per cohort and grade),
 <code>multi_period_z</code>, <code>multi_period_p</code>, <code>brier</code>), <code>discrimination</code>,
 <code>stability</code> (<code>psi</code> table, <code>migration</code>, <code>concentration</code>), <code>summary</code>
 (one row per test with <code>statistic</code>, <code>p_value</code>, <code>light</code>), <code>light</code>
-(the worst light of the summary), <code>n_cohorts</code>, <code>alpha</code>, <code>lights</code>.</p>
+(the worst light of the summary), <code>n_cohorts</code>, <code>alpha</code>, <code>lights</code>.
+<code>portfolio_tests</code> also carries <code>critical</code>, <code>z</code>, <code>p_normal</code>, <code>n_cohorts</code>
+and <code>pd_column</code>; the object also has <code>horizon</code>, <code>by</code>, <code>pd_column</code> and
+<code>target</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

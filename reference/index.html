@@ -21,9 +21,9 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -93,13 +93,6 @@
 
       <dl><dt>
 
-          <code><a href="predict.scr_align.html">predict(<i>&lt;scr_align&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Apply an alignment to raw scores</dd>
-
-        <dt>
-
           <code><a href="scr_align.html">scr_align()</a></code>
 
         </dt>
@@ -128,31 +121,10 @@
 
         <dt>
 
-          <code><a href="scr_monitor.html">scr_monitor()</a></code>
-
-        </dt>
-        <dd>Monitor the scorecard on new data</dd>
-
-        <dt>
-
-          <code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>
-
-        </dt>
-        <dd>The monitoring plan: the contract scr_monitor() reads</dd>
-
-        <dt>
-
           <code><a href="scr_reject.html">scr_reject()</a></code>
 
         </dt>
         <dd>Stage 6: honest reject inference through a sensitivity band</dd>
-
-        <dt>
-
-          <code><a href="scr_run.html">scr_run()</a></code>
-
-        </dt>
-        <dd>Run the selection for several targets straight from the database</dd>
 
         <dt>
 
@@ -231,7 +203,7 @@
           <code><a href="scr_classing_spec.html">scr_classing_spec()</a></code> <code><a href="scr_classing_spec.html">scr_classing_read()</a></code> <code><a href="scr_classing_spec.html">scr_classing_import()</a></code>
 
         </dt>
-        <dd>The classing specification as a long table (and its file round trip)</dd>
+        <dd>Classing specification as a long table, with its file round trip</dd>
 
         <dt>
 
@@ -323,6 +295,13 @@
 
       <dl><dt>
 
+          <code><a href="predict.scr_align.html">predict(<i>&lt;scr_align&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Apply an alignment to raw scores</dd>
+
+        <dt>
+
           <code><a href="scr_apply.html">scr_apply()</a></code>
 
         </dt>
@@ -334,6 +313,20 @@
 
         </dt>
         <dd>Write the deliverables</dd>
+
+        <dt>
+
+          <code><a href="scr_monitor.html">scr_monitor()</a></code>
+
+        </dt>
+        <dd>Monitor the scorecard on new data</dd>
+
+        <dt>
+
+          <code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>
+
+        </dt>
+        <dd>Monitoring plan read by scr_monitor()</dd>
 
         <dt>
 
@@ -401,6 +394,13 @@
 
         </dt>
         <dd>Variables that cross several targets</dd>
+
+        <dt>
+
+          <code><a href="scr_run.html">scr_run()</a></code>
+
+        </dt>
+        <dd>Run the selection for several targets straight from the database</dd>
 
         <dt>
 

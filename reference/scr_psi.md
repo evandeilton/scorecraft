@@ -1,8 +1,8 @@
 # Population stability index, with the fixed and the sample-size-adjusted threshold
 
 `PSI = sum((p - q) * ln(p / q))` over bins frozen on the base. Reports
-both thresholds side by side (project decision D17): the traditional
-fixed one (`< 0.10` stable, `0.10-0.25` moderate, `>= 0.25` act) and the
+both thresholds side by side: the traditional fixed one (`< 0.10`
+`"stable"`, `0.10-0.25` `"moderate"`, `>= 0.25` `"shift"`) and the
 sample-size-adjusted critical value of Yurdakul and Naranjo (2020),
 under which the PSI is asymptotically
 `(1/n + 1/m) * chi-squared(B - 1)`. With `n = m = 1000` and ten bins the
@@ -55,7 +55,8 @@ scr_psi(
 
 - thresholds:
 
-  The two fixed thresholds (moderate, act).
+  The two fixed thresholds: below the first the flag is `"stable"`,
+  below the second `"moderate"`, otherwise `"shift"`.
 
 ## Value
 

@@ -51,8 +51,8 @@ scr_run(
 
   Date column of the out-of-time split, passed on to
   [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md).
-  `NULL` uses `config$oot_date_col` (a random stratified split when that
-  is `NULL` too).
+  Defaults to `config$oot_date_col`; an explicit `NULL` forces a random
+  stratified split.
 
 - event_level:
 
@@ -84,23 +84,15 @@ target.
 
 ## See also
 
-[`scr_compare()`](https://evandeilton.github.io/scorecraft/reference/scr_compare.md),
+[`scr_compare()`](https://evandeilton.github.io/scorecraft/reference/scr_compare.md)
+and
 [`scr_core()`](https://evandeilton.github.io/scorecraft/reference/scr_core.md)
+to read the run set.
 
-Other stages:
-[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
-[`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
-[`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
-[`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
-[`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
-[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
-[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
-[`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
-[`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
-[`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),
-[`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md),
-[`scr_triage()`](https://evandeilton.github.io/scorecraft/reference/scr_triage.md)
+Other portfolio:
+[`scr_compare()`](https://evandeilton.github.io/scorecraft/reference/scr_compare.md),
+[`scr_core()`](https://evandeilton.github.io/scorecraft/reference/scr_core.md),
+[`scr_runset`](https://evandeilton.github.io/scorecraft/reference/scr_runset.md)
 
 ## Examples
 

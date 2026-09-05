@@ -27,9 +27,9 @@ hold-out before any supervised fit."><meta property="og:image" content="https://
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -96,7 +96,9 @@ stratified split.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Seed of the random split.</p></dd>
+<dd><p>Seed of the random split. <code>NULL</code> leaves the random number
+generator untouched, so the split is reproducible only through the
+<code>seed</code> of <code><a href="scr_config.html">scr_config()</a></code>.</p></dd>
 
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
@@ -145,15 +147,11 @@ scale.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other stages:
-<code><a href="predict.scr_align.html">predict.scr_align()</a></code>,
 <code><a href="scr_align.html">scr_align()</a></code>,
 <code><a href="scr_bin.html">scr_bin()</a></code>,
 <code><a href="scr_cutoff.html">scr_cutoff()</a></code>,
 <code><a href="scr_model.html">scr_model()</a></code>,
-<code><a href="scr_monitor.html">scr_monitor()</a></code>,
-<code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>,
 <code><a href="scr_reject.html">scr_reject()</a></code>,
-<code><a href="scr_run.html">scr_run()</a></code>,
 <code><a href="scr_scorecard.html">scr_scorecard()</a></code>,
 <code><a href="scr_select.html">scr_select()</a></code>,
 <code><a href="scr_strategy.html">scr_strategy()</a></code>,

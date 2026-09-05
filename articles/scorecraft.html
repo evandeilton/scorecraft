@@ -41,9 +41,9 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -84,6 +84,10 @@
 defects real data has: sentinel <code>-999</code>, missing values,
 constants, duplicates, a redundant pair, high cardinality, pure noise
 and a column that only degrades in the last period.</p>
+<p>The <code>"moderate"</code> preset sets the admission rules of the
+funnel; the overrides below only make the run light (one thread, two
+consensus voters, a short boosting schedule, thirty resamples) and are
+not what a development run would use.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/evandeilton/scorecraft" class="external-link">scorecraft</a></span><span class="op">)</span></span>
 <span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span><span class="st">"moderate"</span>, objective <span class="op">=</span> <span class="st">"risk"</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -121,7 +125,7 @@ and a column that only degrades in the last period.</p>
 <span><span class="co">#&gt;   enabled                glmnet, xgboost, lightgbm</span></span>
 <span><span class="co">#&gt;   row cap                200,000</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="stages-0-to-4-selection">Stages 0 to 4: selection<a class="anchor" aria-label="anchor" href="#stages-0-to-4-selection"></a>
+<h2 id="selection-split-triage-binning-and-consensus">Selection: split, triage, binning and consensus<a class="anchor" aria-label="anchor" href="#selection-split-triage-binning-and-consensus"></a>
 </h2>
 <p><code><a href="../reference/scr_select.html">scr_select()</a></code> chains the split (out-of-time by whole
 periods), the triage, the optimal binning with screening and hold-out
@@ -129,18 +133,20 @@ revalidation, and the multi-strategy consensus. Each stage is also
 exported on its own (<code><a href="../reference/scr_split.html">scr_split()</a></code>,
 <code><a href="../reference/scr_triage.html">scr_triage()</a></code>, <code><a href="../reference/scr_bin.html">scr_bin()</a></code>,
 <code><a href="../reference/scr_model.html">scr_model()</a></code>).</p>
+<p>The sibling target is dropped so that it cannot become a
+candidate.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>, drop <span class="op">=</span> <span class="st">"id"</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>, drop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"churn"</span><span class="op">)</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span>
 <span><span class="va">res</span></span>
 <span><span class="co">#&gt; &lt;scr_result&gt; target "default"</span></span>
 <span><span class="co">#&gt;   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span></span>
-<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.3s</span></span>
+<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.9s</span></span>
 <span><span class="co">#&gt;   convention: risk (target=1 is the bad case)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Funnel</span></span>
-<span><span class="co">#&gt;   candidates        38 ############################</span></span>
-<span><span class="co">#&gt;   1. triage         37 ###########################</span></span>
-<span><span class="co">#&gt;   2. binning        37 ###########################</span></span>
+<span><span class="co">#&gt;   candidates        37 ############################</span></span>
+<span><span class="co">#&gt;   1. triage         37 ############################</span></span>
+<span><span class="co">#&gt;   2. binning        37 ############################</span></span>
 <span><span class="co">#&gt;   3. screening      20 ###############</span></span>
 <span><span class="co">#&gt;   4. hold-out       16 ############</span></span>
 <span><span class="co">#&gt;   5. correlation    12 #########</span></span>
@@ -167,7 +173,7 @@ at and why.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_funnel.html">scr_funnel</a></span><span class="op">(</span><span class="va">res</span>, cols <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span><span class="op">$</span><span class="va">exit_stage</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;            00.config            01.triage         03.screening </span></span>
-<span><span class="co">#&gt;                    2                    8                   17 </span></span>
+<span><span class="co">#&gt;                    3                    7                   17 </span></span>
 <span><span class="co">#&gt;           04.holdout       05.correlation 05b.derived_excluded </span></span>
 <span><span class="co">#&gt;                    4                    1                    3 </span></span>
 <span><span class="co">#&gt;          07.approved </span></span>
@@ -183,7 +189,7 @@ at and why.</p>
 <span><span class="co">#&gt; 6:   ds_regiao 0.08464808 0.09714339 0.1141337 0.006365199            stable</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="stages-4-and-5-scorecard-and-alignment">Stages 4 and 5: scorecard and alignment<a class="anchor" aria-label="anchor" href="#stages-4-and-5-scorecard-and-alignment"></a>
+<h2 id="scorecard-and-alignment">Scorecard and alignment<a class="anchor" aria-label="anchor" href="#scorecard-and-alignment"></a>
 </h2>
 <p><code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code> fits the logistic regression on the WOE
 columns, checks the signs, and aligns the logit to the declared scale by
@@ -238,7 +244,7 @@ the score PSI with both thresholds.</p>
 <span><span class="co">#&gt; 1: holdout 0.006937751     stable 0.01812748        stable   2800      1400</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="stage-6-cut-off-strategy-and-reject-inference">Stage 6: cut-off, strategy and reject inference<a class="anchor" aria-label="anchor" href="#stage-6-cut-off-strategy-and-reject-inference"></a>
+<h2 id="cut-off-strategy-and-reject-inference">Cut-off, strategy and reject inference<a class="anchor" aria-label="anchor" href="#cut-off-strategy-and-reject-inference"></a>
 </h2>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_cutoff.html">scr_cutoff</a></span><span class="op">(</span><span class="va">sc</span>, n_cuts <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
@@ -345,11 +351,11 @@ and a Markdown summary.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-vignette"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpXEacHR/scorecraft-vignette/scorecard_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpXEacHR/scorecraft-vignette/validation_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpXEacHR/scorecraft-vignette/strategy_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpXEacHR/scorecraft-vignette/sql_score_default.sql</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpXEacHR/scorecraft-vignette/sql_woe_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmp6xQNJC/scorecraft-vignette/scorecard_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmp6xQNJC/scorecraft-vignette/validation_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmp6xQNJC/scorecraft-vignette/strategy_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmp6xQNJC/scorecraft-vignette/sql_score_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmp6xQNJC/scorecraft-vignette/sql_woe_default.sql</span></span>
 <span><span class="co">#&gt; [1] "scorecard_default.xlsx"  "validation_default.xlsx"</span></span>
 <span><span class="co">#&gt; [3] "strategy_default.xlsx"   "sql_score_default.sql"  </span></span>
 <span><span class="co">#&gt; [5] "sql_woe_default.sql"</span></span></code></pre></div>

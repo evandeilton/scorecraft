@@ -317,8 +317,13 @@ averages break the increasing order. With 620 training defaults and a
 minimum of 100 per pool, the seven target bands collapse to three. Per
 pool: the default-weighted LRA, the exposure-weighted one, and the
 category-C margin of conservatism, a one-sided 95% t interval on the
-mean. The downturn column is provisional at this point (a type-3 add-on
-by configuration) and the floor is zero until the next two calls run.
+mean. The downturn column is provisional at this point: the configured
+method is `"type1"`, which needs periods, so until
+[`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md)
+runs each pool carries the type-3 add-on of 15% as a placeholder, and
+the floor is zero until
+[`scr_lgd_floor()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_floor.md)
+runs.
 
 ``` r
 
@@ -473,7 +478,7 @@ pool parameters and the floored result.
 sql <- scr_sql(m, table = "prd.defaults", dialect = "duckdb")
 sql_lines <- unlist(strsplit(sql, "\n", fixed = TRUE))
 cat(grep("AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$", sql_lines, value = TRUE), sep = "\n")
-#>     CASE WHEN lgd_pred <= 0.37690454385294914 THEN 1 WHEN lgd_pred <= 0.45265644452998077 THEN 2 ELSE 3 END AS pool
+#>     CASE WHEN lgd_pred <= 0.37690454385294914 THEN 1 WHEN lgd_pred <= 0.45265644452998083 THEN 2 ELSE 3 END AS pool
 #>     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,
 #>     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor
 #>     GREATEST(lgd_dt, lgd_floor) AS lgd_final
@@ -542,7 +547,12 @@ The red light on homogeneity is the price of three pools: a Welch test
 between the two halves of each pool, split at its median prediction,
 finds that the halves still differ, so the pools are not yet
 homogeneous. That is what the battery is for; the fix is more defaults
-or a lower minimum per pool, and either is a ledger row.
+or a lower minimum per pool, and either is a ledger row. Two ambers sit
+beside it: one pool realises a little more than it estimates (the
+one-sided t-test at p = 0.04), and the loss shortfall says the portfolio
+estimate is slightly below the realised loss; `dt_covers` is `TRUE` in
+every pool, which is what the downturn add-on and the margin are there
+for.
 
 [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
 writes one workbook with the RDS funnel and summaries, the recovery

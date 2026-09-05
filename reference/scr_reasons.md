@@ -37,6 +37,11 @@ scr_reasons(x, newdata, k = 4L, reference = c("mean", "max"))
 A `data.table` with `reason_1` ... `reason_k` (variable names) and
 `shortfall_1` ... `shortfall_k` (points below the reference).
 
+## Details
+
+Under `higher_is_riskier` the shortfall is measured the other way round:
+the reasons are the variables that added the most points.
+
 ## References
 
 12 CFR 1002.9 (Regulation B), official commentary to paragraph 9(b)(2).
@@ -44,9 +49,12 @@ A `data.table` with `reason_1` ... `reason_k` (variable names) and
 ## See also
 
 Other production:
+[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
-[`scr_export.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
-[`scr_sql.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
+[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
+[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
 
 ## Examples
 

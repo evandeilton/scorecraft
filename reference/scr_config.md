@@ -76,11 +76,11 @@ and that one, unlike this, rewrites everything.
 ## Binning algorithm (`algorithm`)
 
 `"jedi"` is the default and stays exposed side by side with the
-alternatives (decision D6), never hidden behind an `"auto"`. Choices
-with distinct properties: `"ivb"`, `"dp"` and `"sblp"` are provably
-optimal for categoricals; `"cm"` (ChiMerge) and `"fetb"` have a
-principled stopping rule; `"ir"` (isotonic) guarantees monotone WOE;
-`"fast_mdlp"` is the faithful Fayyad-Irani. The full list is in
+alternatives, never hidden behind an `"auto"`. Choices with distinct
+properties: `"ivb"`, `"dp"` and `"sblp"` are provably optimal for
+categoricals; `"cm"` (ChiMerge) and `"fetb"` have a principled stopping
+rule; `"ir"` (isotonic) guarantees monotone WOE; `"fast_mdlp"` is the
+faithful Fayyad-Irani. The full list is in
 [`OptimalBinningWoE::obwoe_algorithms()`](https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_algorithms.html).
 A numeric-only or categorical-only algorithm applies where it is valid
 and the other type falls back to `"jedi"`.

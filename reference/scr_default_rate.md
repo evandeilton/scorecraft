@@ -57,14 +57,16 @@ scr_default_rate(
 - config:
 
   A
-  [`scr_config()`](https://evandeilton.github.io/scorecraft/reference/scr_config.md)
-  (only `pd_dr_by` and `verbose` are read).
+  [`scr_config()`](https://evandeilton.github.io/scorecraft/reference/scr_config.md);
+  only `pd_dr_by` is read (the default of `by`).
 
 ## Value
 
-An object of class `scr_dr`: `table` (cohort rates), `lra` (`mean`,
-`weighted_mean`, `recent5_mean`, `all_mean`, `benchmark`, `n_cohorts`,
-`years`, `flag_below_benchmark`), `horizon`, `by`.
+An object of class `scr_dr`: `table` (cohort rates, by grade or segment
+when given), `portfolio` (one row per cohort: `n`, `defaults`, `dr`),
+`lra` (`mean`, `weighted_mean`, `recent5_mean`, `all_mean`, `benchmark`,
+`flag_below_benchmark`, `min`, `max`, `sd`, `n_cohorts`, `years`),
+`horizon` and `by`.
 
 ## See also
 

@@ -1,4 +1,4 @@
-# Scale alignment: making scorecards comparable across targets, engines and conventions
+# Scale alignment across targets, engines and conventions
 
 ``` r
 
@@ -246,7 +246,7 @@ but in the right place, and its mean predicted probability matches the
 observed event rate; the direct map reports whatever the raw score
 claims, here a third too low. This is why
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
-always aligns (decision D9) and defaults to `"regression"`.
+always aligns and defaults to `"regression"`.
 
 ## 3. Two targets, two conventions, one scale
 
@@ -351,7 +351,7 @@ A gradient-boosted model can be fitted on the same WOE columns as the
 scorecard and aligned to the same scale by the same regression. That
 makes its output comparable point for point with the champion; it does
 **not** make it a scorecard. The object says so explicitly: no points,
-no reason codes, `supports_scorecard = FALSE` (decision D10).
+no reason codes, `supports_scorecard = FALSE`.
 
 ``` r
 

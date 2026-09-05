@@ -35,17 +35,23 @@ A numeric vector of the length of `raw`.
 
 ## See also
 
-Other stages:
-[`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
-[`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
-[`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
-[`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
+Other production:
+[`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
 [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
 [`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
-[`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
-[`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
-[`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
-[`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),
-[`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md),
-[`scr_triage()`](https://evandeilton.github.io/scorecraft/reference/scr_triage.md)
+[`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md),
+[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+
+## Examples
+
+``` r
+set.seed(3)
+y   <- stats::rbinom(2000, 1, 0.15)
+raw <- stats::qlogis(0.15) + 1.3 * y + stats::rnorm(2000)
+al  <- scr_align(raw, y)
+head(predict(al, raw))
+#> [1] 545.4062 603.0933 597.0212 642.2758 539.8784 586.7383
+head(predict(al, raw, type = "prob"))
+#> [1] 0.117124721 0.017649730 0.021694049 0.004599538 0.138432936 0.030697183
+```

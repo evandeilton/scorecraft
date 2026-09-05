@@ -38,11 +38,12 @@ scr_strategy(
 
 - revenue_good:
 
-  Expected revenue per account without the event.
+  Expected revenue per account without the event (default `1`).
 
 - loss_bad:
 
-  Expected loss per account with the event.
+  Expected loss per account with the event (default `1`; with both
+  defaults the break-even event rate is 50%).
 
 - sample:
 
@@ -61,15 +62,11 @@ sends to review a band up to 25% above it and declines the rest; pass
 ## See also
 
 Other stages:
-[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
 [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
-[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
-[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
 [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
 [`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),

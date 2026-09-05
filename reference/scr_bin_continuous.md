@@ -1,15 +1,15 @@
 # Bin drivers against a continuous target (LGD, CCF)
 
 Supervised binning for a bounded continuous target, with the result in
-the shape of an `obwoe` object so that
+the shape of an `obwoe` object, so that the
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
 and
 [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
-machinery,
-[`OptimalBinningWoE::obwoe_apply()`](https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_apply.html)
+machinery
+([`OptimalBinningWoE::obwoe_apply()`](https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_apply.html)
 and
-[`OptimalBinningWoE::obwoe_sql()`](https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_sql.html)
-reproduce the bin statistic unchanged. The `woe` slot of every bin
+[`OptimalBinningWoE::obwoe_sql()`](https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_sql.html))
+reproduces the bin statistic unchanged. The `woe` slot of every bin
 carries the target mean of the bin (or its logit with
 `scale = "logit"`); `iv` carries the bin's share of the between-bin sum
 of squares, so `total_iv` is the eta-squared of the driver, in `[0, 1]`.
@@ -88,7 +88,10 @@ An object of class `scr_cbins`: `fit` (the `obwoe`-shaped object),
 `summary` (one row per driver: `feature`, `type`, `n_bins`, `eta2`,
 `direction`, `converged`, and after revalidation `eta2_holdout`, `psi`,
 `psi_flag`, `holdout_ok`, `holdout_reason`), `holdout` (bin table per
-driver with train and hold-out means), `scale`.
+driver with train and hold-out means), `scale` and `target`. `summary`
+keeps the engine columns (`algorithm`, `total_iv`, `iterations`,
+`error`) and, after revalidation, `psi_critical`, `psi_flag_adjusted`
+and `pct_unbinned`.
 
 ## Details
 

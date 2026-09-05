@@ -41,9 +41,9 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -79,6 +79,9 @@
 
     
     
+<p>This vignette takes PD, LGD and EAD from the previous two and turns
+them into expected loss, IRB risk weights, capital with the output floor
+and accounting ECL, on the bundled <code>scr_demo_portfolio</code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/evandeilton/scorecraft" class="external-link">scorecraft</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
@@ -92,8 +95,8 @@ a cost of doing business and is covered by provisions and pricing. The
 loss in a bad year exceeds that average, and the gap between a high
 quantile of the loss distribution and its mean is the <strong>unexpected
 loss</strong> that capital must absorb. The IRB risk-weight function
-turns a through-the-cycle PD into the PD of a year at the 99.9th
-percentile of a one-factor model, and charges capital for the difference
+turns a through-the-cycle PD into the PD of a year at the 99.9 %
+quantile of a one-factor model, and charges capital for the difference
 between the loss at that quantile and the expected loss. Every number
 that a regime fixes in that calculation (PD and LGD floors, asset
 correlations, the maturity rule, the confidence level, the standardised
@@ -105,6 +108,8 @@ table is recorded as such on every object built from it.</p>
 <div class="section level2">
 <h2 id="the-parameter-tables">2. The parameter tables<a class="anchor" aria-label="anchor" href="#the-parameter-tables"></a>
 </h2>
+<p><code><a href="../reference/scr_irb_params.html">scr_irb_params()</a></code> returns every regime-specific number as
+a table; the print summarises them.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_irb_params.html">scr_irb_params</a></span><span class="op">(</span><span class="st">"bcb"</span><span class="op">)</span></span>
 <span><span class="va">p</span></span>
@@ -278,8 +283,10 @@ defaulted exposures by provision ratio.</p>
 </h2>
 <p><code>scr_demo_portfolio</code> holds 5,000 exposures in six segments
 that map one to one onto the asset classes; PD is a grade PD and LGD a
-pool value, so segment by grade is a homogeneous pool. About 3 % of the
-rows are in default with an <code>elbe</code> and a provision.</p>
+pool value, so segment by grade is homogeneous in PD and LGD, while
+maturity varies inside the corporate pools (section 6 comes back to
+this). About 3 % of the rows are in default with an <code>elbe</code>
+and a provision.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">scr_demo_portfolio</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">segment</span>, <span class="va">d</span><span class="op">$</span><span class="va">asset_class</span><span class="op">)</span></span>
@@ -350,8 +357,9 @@ provisions.</p>
 <span><span class="co">#&gt; 6:    0.4907211    37575.5      42936         5360.503</span></span></code></pre></div>
 <p>The <code>irb_sa_ratio</code> column says where the IRB approach
 saves the most against the standardised one; mortgages sit far below the
-72.5 % line on their own, the corporate book far above it, and the
-output floor is applied to the total, not by segment.</p>
+72.5 % line on their own, the large corporate book just above it and the
+SME book well above, and the output floor is applied to the total, not
+by segment.</p>
 </div>
 <div class="section level3">
 <h3 id="floors-and-the-output-floor-bridge">Floors and the output-floor bridge<a class="anchor" aria-label="anchor" href="#floors-and-the-output-floor-bridge"></a>

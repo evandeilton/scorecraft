@@ -6,6 +6,11 @@ a synthetic dataset fabricated with the defects real data has: sentinel
 cardinality, pure noise and a column that only degrades in the last
 period.
 
+The `"moderate"` preset sets the admission rules of the funnel; the
+overrides below only make the run light (one thread, two consensus
+voters, a short boosting schedule, thirty resamples) and are not what a
+development run would use.
+
 ``` r
 
 library(scorecraft)
@@ -45,7 +50,7 @@ cfg
 #>   row cap                200,000
 ```
 
-## Stages 0 to 4: selection
+## Selection: split, triage, binning and consensus
 
 [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
 chains the split (out-of-time by whole periods), the triage, the optimal
@@ -56,19 +61,21 @@ consensus. Each stage is also exported on its own
 [`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md)).
 
+The sibling target is dropped so that it cannot become a candidate.
+
 ``` r
 
-res <- scr_select(scr_demo, "default", config = cfg, drop = "id", date_col = "ref_date")
+res <- scr_select(scr_demo, "default", config = cfg, drop = c("id", "churn"), date_col = "ref_date")
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.9s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
-#>   candidates        38 ############################
-#>   1. triage         37 ###########################
-#>   2. binning        37 ###########################
+#>   candidates        37 ############################
+#>   1. triage         37 ############################
+#>   2. binning        37 ############################
 #>   3. screening      20 ###############
 #>   4. hold-out       16 ############
 #>   5. correlation    12 #########
@@ -99,7 +106,7 @@ and why.
 table(scr_funnel(res, cols = "all")$exit_stage)
 #> 
 #>            00.config            01.triage         03.screening 
-#>                    2                    8                   17 
+#>                    3                    7                   17 
 #>           04.holdout       05.correlation 05b.derived_excluded 
 #>                    4                    1                    3 
 #>          07.approved 
@@ -115,7 +122,7 @@ head(scr_funnel(res, only_selected = TRUE)[, .(feature, total_iv, iv_holdout, ks
 #> 6:   ds_regiao 0.08464808 0.09714339 0.1141337 0.006365199            stable
 ```
 
-## Stages 4 and 5: scorecard and alignment
+## Scorecard and alignment
 
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
 fits the logistic regression on the WOE columns, checks the signs, and
@@ -177,7 +184,7 @@ sc$stability$score
 #> 1: holdout 0.006937751     stable 0.01812748        stable   2800      1400
 ```
 
-## Stage 6: cut-off, strategy and reject inference
+## Cut-off, strategy and reject inference
 
 ``` r
 
@@ -294,11 +301,11 @@ strategy), the SQL files and a Markdown summary.
 
 out <- file.path(tempdir(), "scorecraft-vignette")
 basename(unlist(scr_export(sc, out, stamp = FALSE)$files))
-#>   /tmp/RtmpXEacHR/scorecraft-vignette/scorecard_default.xlsx
-#>   /tmp/RtmpXEacHR/scorecraft-vignette/validation_default.xlsx
-#>   /tmp/RtmpXEacHR/scorecraft-vignette/strategy_default.xlsx
-#>   /tmp/RtmpXEacHR/scorecraft-vignette/sql_score_default.sql
-#>   /tmp/RtmpXEacHR/scorecraft-vignette/sql_woe_default.sql
+#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/scorecard_default.xlsx
+#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/validation_default.xlsx
+#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/strategy_default.xlsx
+#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/sql_score_default.sql
+#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/sql_woe_default.sql
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  
 #> [5] "sql_woe_default.sql"

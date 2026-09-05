@@ -64,7 +64,8 @@ scr_moc(
 - dr:
 
   Optional `scr_dr` by grade for `"ci_timeseries"`, keyed by the final
-  grades of `x` (stored in `x$dr` when absent).
+  grades of `x`; `NULL` uses the series already stored in `x$dr` by
+  [`scr_grades()`](https://evandeilton.github.io/scorecraft/reference/scr_grades.md).
 
 - n_boot, seed:
 

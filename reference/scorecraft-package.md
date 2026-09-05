@@ -1,8 +1,10 @@
-# scorecraft: scorecard engine with alignment, cut-off strategy and production SQL
+# scorecraft: scorecard engine with alignment, cut-off strategy, IRB risk parameters and production SQL
 
-A professional scorecard is born of seven chained stages, and this
-package exposes each of them as a function of its own, next to the
-shortcut
+A professional scorecard is born of eight chained stages, numbered 0 to
+7 in every message and in
+[`scr_config_keys()`](https://evandeilton.github.io/scorecraft/reference/scr_config_keys.md),
+and this package exposes each of them as a function of its own, next to
+the shortcut
 [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
 that chains them for the common case:
 
@@ -57,9 +59,11 @@ sample-size-adjusted threshold, and never schedules anything by itself.
 
 ## IRB risk parameters
 
-The IRB layer turns the scorecard into regulatory parameters and keeps
-the same contracts (one configuration, ledgers, hold-out revalidation,
-workbooks, production SQL).
+The IRB (internal ratings-based) layer, stages 8 to 12 of
+[`scr_config_keys()`](https://evandeilton.github.io/scorecraft/reference/scr_config_keys.md),
+turns the scorecard into regulatory parameters and keeps the same
+contracts (one configuration, ledgers, hold-out revalidation, workbooks,
+production SQL).
 [`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md)
 holds every regime-specific number as a table selected by preset
 (`"bcb"`, `"basel3_final"`, `"crr3"`);
@@ -77,7 +81,13 @@ and
 add the margin of conservatism and the floor, and
 [`scr_pd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_validate.md)
 runs the calibration, discrimination and stability tests with traffic
-lights. LGD:
+lights;
+[`scr_master_scale()`](https://evandeilton.github.io/scorecraft/reference/scr_master_scale.md),
+[`scr_migration()`](https://evandeilton.github.io/scorecraft/reference/scr_migration.md)
+and
+[`scr_pd_pit_ttc()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_pit_ttc.md)
+support the grade structure, the migration analysis and the
+point-in-time bridge. LGD:
 [`scr_workout()`](https://evandeilton.github.io/scorecraft/reference/scr_workout.md)
 discounts recovery cash flows into realised LGD,
 [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md)
@@ -86,14 +96,24 @@ fits the cure and severity stages and the pools,
 [`scr_lgd_floor()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_floor.md)
 and
 [`scr_elbe()`](https://evandeilton.github.io/scorecraft/reference/scr_elbe.md)
-complete the estimate. EAD:
+complete the estimate,
+[`scr_lgd_pools()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_pools.md)
+and
+[`scr_lgd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_validate.md)
+close the pools and the validation. EAD:
 [`scr_ead_data()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_data.md)
 builds the realised conversion factors from facility snapshots and
 [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
-the pools.
+the pools;
+[`scr_ead_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_downturn.md)
+and
+[`scr_ead_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_validate.md)
+add the downturn and the validation.
 [`scr_el()`](https://evandeilton.github.io/scorecraft/reference/scr_el.md),
 [`scr_irb_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_rw.md),
-[`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md)
+[`scr_sa_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_sa_rw.md),
+[`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md),
+[`scr_pd_stress()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_stress.md)
 and
 [`scr_ecl()`](https://evandeilton.github.io/scorecraft/reference/scr_ecl.md)
 compute expected loss, risk weights, capital and expected credit loss.

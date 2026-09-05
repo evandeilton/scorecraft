@@ -57,11 +57,11 @@ A `data.frame` with 4,200 rows and 41 columns:
 
 - `default`:
 
-  Risk target (0/1, about 10% events).
+  Risk target (0/1, about 14% events).
 
 - `churn`:
 
-  Propensity target (0/1, about 25% events), for the portfolio examples.
+  Propensity target (0/1, about 29% events), for the portfolio examples.
 
 ## Source
 

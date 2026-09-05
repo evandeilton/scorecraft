@@ -29,9 +29,9 @@ same numbers, and a test guarantees it.'><meta property="og:image" content="http
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -113,7 +113,9 @@ the approved ones.</p></dd>
 
 <dt id="arg-what">what<a class="anchor" aria-label="anchor" href="#arg-what"></a></dt>
 <dd><p>For <code>scr_result</code>: <code>"woe"</code>, <code>"bin"</code> or <code>"both"</code>. For
-<code>scr_scorecard</code>: <code>"score"</code>, <code>"points"</code>, <code>"woe"</code> or <code>"all"</code>.</p></dd>
+<code>scr_scorecard</code>: <code>"score"</code>, <code>"points"</code>, <code>"woe"</code> or <code>"all"</code>. For
+<code>scr_lgd</code>: <code>"pool"</code> (pool and pool LGDs), <code>"lgd"</code> (adds the predicted
+LGD) or <code>"all"</code> (adds the cure probability and the severity).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -121,22 +123,40 @@ the approved ones.</p></dd>
     <p>A <code>data.table</code> with one row per row of <code>newdata</code>.</p>
     </div>
     <div class="section level2">
-    <h2 id="method-arguments">Method arguments<a class="anchor" aria-label="anchor" href="#method-arguments"></a></h2>
+    <h2 id="output-columns">Output columns<a class="anchor" aria-label="anchor" href="#output-columns"></a></h2>
 
 
 
-<p>For <code>scr_result</code>: <code>features</code> (default: the approved ones) and <code>what</code>
-(<code>"woe"</code>, <code>"bin"</code> or <code>"both"</code>). For <code>scr_scorecard</code>: <code>what</code> (<code>"score"</code>,
-<code>"points"</code>, <code>"woe"</code> or <code>"all"</code>). The score output carries <code>link</code>
-(logit), <code>prob</code> (model probability), <code>score</code> (exact, <code>a + b * logit</code>) and
-<code>score_points</code> (the sum of the whole points per bin plus the base).</p>
+<p>For <code>scr_result</code>: <code>&lt;f&gt;_woe</code> and/or <code>&lt;f&gt;_bin</code> per variable. For
+<code>scr_scorecard</code>, <code>"score"</code> gives <code>link</code> (logit), <code>prob</code> (model
+probability), <code>score</code> (exact, <code>a + b * logit</code>) and <code>score_points</code> (base
+plus the whole points per bin); <code>"points"</code> gives <code>score</code>, <code>score_points</code>
+and <code>&lt;f&gt;_points</code>; <code>"woe"</code> gives <code>link</code>, <code>score</code> and <code>&lt;f&gt;_woe</code>; <code>"all"</code>
+gives everything.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="irb-models">IRB models<a class="anchor" aria-label="anchor" href="#irb-models"></a></h2>
+
+
+
+<p><code>scr_pd</code> returns <code>score</code>, <code>score_points</code>, <code>grade</code>, <code>pd</code> (calibrated
+individual PD), <code>pd_be</code> and <code>pd_final</code> of the grade. <code>scr_lgd</code> returns
+<code>pool</code>, <code>lgd_lra</code>, <code>lgd_dt</code>, <code>lgd_final</code> and, with <code>what</code>, <code>p_cure</code>,
+<code>severity</code> and <code>lgd_pred</code>. <code>scr_ead</code> returns <code>pool</code>, <code>measure</code>,
+<code>utilisation</code>, <code>undrawn</code>, <code>ccf_applied</code>, <code>ead_model</code>, <code>ead_floor</code>,
+<code>ead_predicted</code> and <code>ead_floor_binding</code>; the predicted EAD is never below
+the drawn amount. <code><a href="scr_capital.html">scr_capital()</a></code> reads <code>pd_final</code>, <code>lgd_final</code> and
+<code>ead_predicted</code> from these outputs in its list form.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other production:
-<code><a href="scr_export.html">scr_export.scr_capital()</a></code>,
+<code><a href="predict.scr_align.html">predict.scr_align()</a></code>,
+<code><a href="scr_export.html">scr_export()</a></code>,
+<code><a href="scr_monitor.html">scr_monitor()</a></code>,
+<code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>,
 <code><a href="scr_reasons.html">scr_reasons()</a></code>,
-<code><a href="scr_sql.html">scr_sql.scr_capital()</a></code></p></div>
+<code><a href="scr_sql.html">scr_sql()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -151,7 +171,7 @@ the approved ones.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, ".internal.selfref")=&lt;pointer: 0x55dbed8aca30&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, ".internal.selfref")=&lt;pointer: 0x558901f14a30&gt; </span>
 <span class="r-in"><span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">sc</span>, <span class="va">new</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         link       prob    score score_points</span>

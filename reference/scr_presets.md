@@ -1,7 +1,8 @@
 # Selection presets, side by side
 
-Returns the keys a preset changes, resolved, to compare before choosing.
-Every other configuration key is identical across presets.
+Returns the funnel keys resolved per preset, to compare before choosing.
+`target_min` and `iv_max` are shown for context; the presets leave them
+unchanged, as they do every other configuration key.
 
 ## Usage
 

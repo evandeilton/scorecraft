@@ -3,13 +3,13 @@
 PSI against train with frozen bands, the CSI of every variable with
 frozen bins plus the signed points shift and, when the target is
 present, the performance by vintage (event rate, AUC/KS/Gini with CI).
-Always reports both thresholds (fixed and n-adjusted, D17). Schedules
-nothing: the analyst calls it when needed (D19)."><meta property="og:description" content="Recomputes, per period of date_col (or for the whole data), the score
+Always reports both thresholds (fixed and n-adjusted). Schedules
+nothing: the analyst calls it when needed."><meta property="og:description" content="Recomputes, per period of date_col (or for the whole data), the score
 PSI against train with frozen bands, the CSI of every variable with
 frozen bins plus the signed points shift and, when the target is
 present, the performance by vintage (event rate, AUC/KS/Gini with CI).
-Always reports both thresholds (fixed and n-adjusted, D17). Schedules
-nothing: the analyst calls it when needed (D19)."><meta property="og:image" content="https://evandeilton.github.io/scorecraft/logo.png"></head><body>
+Always reports both thresholds (fixed and n-adjusted). Schedules
+nothing: the analyst calls it when needed."><meta property="og:image" content="https://evandeilton.github.io/scorecraft/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -31,9 +31,9 @@ nothing: the analyst calls it when needed (D19)."><meta property="og:image" cont
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -61,8 +61,8 @@ nothing: the analyst calls it when needed (D19)."><meta property="og:image" cont
 PSI against train with frozen bands, the CSI of every variable with
 frozen bins plus the signed points shift and, when the target is
 present, the performance by vintage (event rate, AUC/KS/Gini with CI).
-Always reports both thresholds (fixed and n-adjusted, D17). Schedules
-nothing: the analyst calls it when needed (D19).</p>
+Always reports both thresholds (fixed and n-adjusted). Schedules
+nothing: the analyst calls it when needed.</p>
     </div>
 
     <div class="section level2">
@@ -126,20 +126,13 @@ and <code>plan</code> (the contract actually used).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other stages:
+    <div class="dont-index"><p>Other production:
 <code><a href="predict.scr_align.html">predict.scr_align()</a></code>,
-<code><a href="scr_align.html">scr_align()</a></code>,
-<code><a href="scr_bin.html">scr_bin()</a></code>,
-<code><a href="scr_cutoff.html">scr_cutoff()</a></code>,
-<code><a href="scr_model.html">scr_model()</a></code>,
+<code><a href="scr_apply.html">scr_apply()</a></code>,
+<code><a href="scr_export.html">scr_export()</a></code>,
 <code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>,
-<code><a href="scr_reject.html">scr_reject()</a></code>,
-<code><a href="scr_run.html">scr_run()</a></code>,
-<code><a href="scr_scorecard.html">scr_scorecard()</a></code>,
-<code><a href="scr_select.html">scr_select()</a></code>,
-<code><a href="scr_split.html">scr_split()</a></code>,
-<code><a href="scr_strategy.html">scr_strategy()</a></code>,
-<code><a href="scr_triage.html">scr_triage()</a></code></p></div>
+<code><a href="scr_reasons.html">scr_reasons()</a></code>,
+<code><a href="scr_sql.html">scr_sql()</a></code></p></div>
     </div>
 
     <div class="section level2">

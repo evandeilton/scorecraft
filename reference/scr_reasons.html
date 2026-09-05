@@ -31,9 +31,9 @@ no reason codes.'><meta property="og:image" content="https://evandeilton.github.
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
-    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing: manual bins and manual variable choice with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment: making scorecards comparable across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables</a></li>
+    <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
+    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -96,15 +96,23 @@ no reason codes.</p>
 and <code>shortfall_1</code> ... <code>shortfall_k</code> (points below the reference).</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Under <code>higher_is_riskier</code> the shortfall is measured the other way round:
+the reasons are the variables that added the most points.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>12 CFR 1002.9 (Regulation B), official commentary to paragraph 9(b)(2).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other production:
+<code><a href="predict.scr_align.html">predict.scr_align()</a></code>,
 <code><a href="scr_apply.html">scr_apply()</a></code>,
-<code><a href="scr_export.html">scr_export.scr_capital()</a></code>,
-<code><a href="scr_sql.html">scr_sql.scr_capital()</a></code></p></div>
+<code><a href="scr_export.html">scr_export()</a></code>,
+<code><a href="scr_monitor.html">scr_monitor()</a></code>,
+<code><a href="scr_monitoring_plan.html">scr_monitoring_plan()</a></code>,
+<code><a href="scr_sql.html">scr_sql()</a></code></p></div>
     </div>
 
     <div class="section level2">

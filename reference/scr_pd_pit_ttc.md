@@ -41,6 +41,10 @@ Vasicek, O. (2002). The distribution of loan portfolio value. *Risk*,
 
 ## See also
 
+[`scr_pd_stress()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_stress.md),
+the same bridge with the systematic factor given as a quantile `q`
+rather than a value of `z`.
+
 Other irb-pd:
 [`predict.scr_grades()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_grades.md),
 [`predict.scr_pd()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_pd.md),

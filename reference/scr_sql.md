@@ -6,6 +6,8 @@ variables (or those of the scorecard), in blocks in this order:
 ## Usage
 
 ``` r
+scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
+
 # S3 method for class 'scr_capital'
 scr_sql(
   x,
@@ -23,8 +25,6 @@ scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
 scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
 
 # S3 method for class 'scr_pd'
-scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
-
 scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
 
 # S3 method for class 'scr_result'
@@ -46,9 +46,13 @@ scr_sql(
 - x:
 
   An object from
-  [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
-  or from
-  [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md).
+  [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
+  [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
+  [`scr_pd()`](https://evandeilton.github.io/scorecraft/reference/scr_pd.md),
+  [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md),
+  [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
+  or
+  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md).
 
 - table:
 
@@ -65,14 +69,14 @@ scr_sql(
 
   Path to write to. `NULL` (default) returns the lines.
 
+- ...:
+
+  Passed on to the methods.
+
 - level:
 
   For `scr_capital`: `"exposure"` (default, one row per exposure with
   `el`, `k`, `rw`, `rwa`) or `"portfolio"` (the aggregate by segment).
-
-- ...:
-
-  Passed on to the methods.
 
 - output:
 
@@ -108,11 +112,27 @@ matches
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
 numerically, by an automated test that runs both paths.
 
+## IRB models
+
+`scr_pd` wraps the scorecard SQL in a common table expression and adds a
+`CASE` on the score cut points that yields `grade` and `pd_final`.
+`scr_lgd` chains the driver bins of both stages, the logits, the pool
+`CASE` and the floored result. `scr_ead` computes the utilisation and
+the undrawn amount, assigns the pool from the frozen cut points and
+applies the greatest of the model, the drawn amount and the standardised
+floor. `scr_capital` carries the constants of every pool (PD, LGD, `k`,
+risk weight) in a `pool_params` table joined on segment and grade, so no
+normal quantile is evaluated at run time; `level` chooses the exposure
+or the portfolio output.
+
 ## See also
 
 Other production:
+[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
-[`scr_export.scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
+[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reasons()`](https://evandeilton.github.io/scorecraft/reference/scr_reasons.md)
 
 ## Examples
@@ -125,7 +145,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-09-05 03:34:20
+#> -- Generated on 2026-09-05 13:10:56
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().

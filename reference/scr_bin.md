@@ -25,8 +25,9 @@ scr_bin(triage, config = scr_config())
 
 An `scr_bins` object with `fit` (an `obwoe` object), `screen` (`summary`
 and `full`), `holdout`, `prune`, `pool` (eligible for the models),
-`derived_excluded`, the WOE matrices `woe_train`/`woe_holdout` and the
-originating `triage`.
+`derived_excluded`, the counts `binned`, `pos_screen` and `pos_holdout`
+(the survivors of each gate, in order), the WOE matrices
+`woe_train`/`woe_holdout`, the originating `triage` and the `config`.
 
 ## Details
 
@@ -51,14 +52,10 @@ one (a test pins this): the engine is deterministic per column.
 ## See also
 
 Other stages:
-[`predict.scr_align()`](https://evandeilton.github.io/scorecraft/reference/predict.scr_align.md),
 [`scr_align()`](https://evandeilton.github.io/scorecraft/reference/scr_align.md),
 [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
 [`scr_model()`](https://evandeilton.github.io/scorecraft/reference/scr_model.md),
-[`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md),
-[`scr_monitoring_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.md),
 [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md),
-[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md),
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
 [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md),
 [`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md),

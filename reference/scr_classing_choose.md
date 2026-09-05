@@ -54,6 +54,9 @@ The updated lab, invisibly.
 
 ## See also
 
+[`scr_coarse_classing()`](https://evandeilton.github.io/scorecraft/reference/scr_coarse_classing.md)
+for a complete session, from lab to scorecard.
+
 Other classing:
 [`scr_classing_accept()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_accept.md),
 [`scr_classing_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_apply.md),
