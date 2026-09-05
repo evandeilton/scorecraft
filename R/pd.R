@@ -735,8 +735,9 @@ predict.scr_grades <- function(object, score, type = c("grade", "pd"), ...) {
 #' @export
 print.scr_grades <- function(x, ...) {
   t <- x$table; c0 <- x$concentration
+  src <- if (identical(x$pd_source, "lra") && is.null(x$dr)) "lra (sample default rate; pass `dr` for the series)" else x$pd_source
   cat(sprintf("<scr_grades> target \"%s\" | %d grades (%s) on %s | PD source: %s | %s\n", x$target, nrow(t), x$method, x$sample,
-              x$pd_source, x$direction))
+              src, x$direction))
   cat(sprintf("  concentration: HHI %.3f | CV %.3f | HI %s | repairs %d%s\n", c0$hhi, c0$cv, .fmt_num(c0$hi, 3), nrow(x$repairs),
               if (!is.na(x$ct)) sprintf(" | calibrated to CT %s", fmt_pct(x$ct, 3)) else ""))
   cat(sprintf("  %-5s %-7s %9s %9s %6s %6s %5s %8s %8s %8s\n", "grade", "label", "score_lo", "score_hi", "n", "share", "def", "dr", "pd_mean", "pd_be"))
@@ -1430,7 +1431,14 @@ scr_pd_validate <- function(x, newdata, id = "id", date = "date", default = "def
     sm[[length(sm) + 1L]] <- row("jeffreys_grades_red", "grade", sum(by_g$light == "red", na.rm = TRUE), min(by_g$p_jeffreys, na.rm = TRUE)) }
   if ("binomial" %in% tests) sm[[length(sm) + 1L]] <- row("binomial", "portfolio", portfolio_tests$critical, portfolio_tests$p_binomial)
   if ("normal" %in% tests) sm[[length(sm) + 1L]] <- row("normal", "portfolio", portfolio_tests$z, portfolio_tests$p_normal)
-  if ("hl" %in% tests) sm[[length(sm) + 1L]] <- row("hosmer_lemeshow", "portfolio", hl_chi2, hl_p)
+  if ("hl" %in% tests) {
+    # two-sided by construction: a PD above the observed rate in every grade
+    # (the conservative side, usual once the margin of conservatism is in)
+    # cannot fail the calibration test
+    hl_row <- row("hosmer_lemeshow", "portfolio", hl_chi2, hl_p)
+    if (all(by_g$d <= by_g$n * by_g$pd + 1e-9, na.rm = TRUE) && !is.na(hl_p)) hl_row$light <- "green"
+    sm[[length(sm) + 1L]] <- hl_row
+  }
   if ("multi_period" %in% tests) sm[[length(sm) + 1L]] <- row("multi_period", "portfolio", mp_z, portfolio_tests$multi_period_p)
   if (!is.null(disc)) sm[[length(sm) + 1L]] <- row("auc_vs_initial", "portfolio", disc$s_stat, disc$p_value)
   if (!is.null(psi_tab)) { last_psi <- psi_tab[nrow(psi_tab)]

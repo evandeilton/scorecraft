@@ -448,3 +448,17 @@ test_that("the workbook is written with every sheet and re-read", {
   v0 <- openxlsx::read.xlsx(ex0$files$pd, sheet = "Validation_Calibration")
   expect_equal(v0$reason_code, "NO_VALIDATION_SUPPLIED")
 })
+
+test_that("the Hosmer-Lemeshow light is one-sided in practice and the grades print says where the PD came from", {
+  pd <- pd_model()
+  p  <- pd_panel()
+  v_final <- scr_pd_validate(pd, p, score = "score", pd_column = "pd_final", tests = c("jeffreys", "hl"))
+  hl <- v_final$summary[test == "hosmer_lemeshow"]
+  g  <- v_final$calibration
+  conservative <- all(g$d <= g$n * g$pd + 1e-9, na.rm = TRUE)
+  if (conservative) expect_equal(hl$light, "green") else expect_equal(hl$light, .pd_light(hl$p_value, v_final$lights))
+  v_be <- scr_pd_validate(pd, p, score = "score", pd_column = "pd_be", tests = c("hl"))
+  expect_true(is.finite(v_be$summary[test == "hosmer_lemeshow", statistic]))
+  gr <- pd_grades()
+  expect_output(print(gr), if (is.null(gr$dr)) "sample default rate" else "PD source: lra")
+})

@@ -18,7 +18,8 @@ scr_irb_rw(
   approach = c("airb", "firb"),
   apply_floors = TRUE,
   collateral = NULL,
-  secured_share = NULL
+  secured_share = NULL,
+  claim = NULL
 )
 }
 \arguments{
@@ -58,6 +59,11 @@ collateral type of each exposure (\code{"financial"}, \code{"receivables"},
 
 \item{secured_share}{Optional secured share in \verb{[0, 1]} blending the
 unsecured and the collateral floors.}
+
+\item{claim}{Under \code{"firb"}, an optional claim type per exposure naming a
+row of \code{params$lgd_firb} (for example \code{"senior_unsecured"} or
+\code{"subordinated"}); the supervisory LGD of that row replaces \code{lgd}.
+\code{NULL} keeps the caller's \code{lgd}.}
 }
 \value{
 A \code{data.table} with one row per exposure: \code{pd_used}, \code{lgd_used}
@@ -87,6 +93,9 @@ scr_irb_rw(0.01, 0.45, m = 2.5, asset_class = "corporate")
 scr_irb_rw(c(0.01, 0.02), c(0.20, 0.80), asset_class = c("retail_mortgage", "qrre_revolver"))
 r <- scr_irb_rw(1e-4, 0.5, asset_class = "retail_other")
 attr(r, "floors_hit")
+# foundation approach: the supervisory LGD of the claim type
+scr_irb_rw(0.01, lgd = 0, m = 2.5, asset_class = "corporate", approach = "firb",
+           claim = "senior_unsecured")
 }
 \references{
 Basel Committee on Banking Supervision (2023). \emph{The Basel Framework},

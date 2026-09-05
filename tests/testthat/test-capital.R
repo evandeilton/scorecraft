@@ -421,3 +421,32 @@ test_that("ECL of a flat hazard equals the closed form, with discounting, prepay
   expect_error(scr_ecl(h, lgd, ead, scenarios = list(a = list()), weights = c(1, 2), config = cfg), "weights")
   expect_error(scr_ecl(h, lgd, ead, prepay = 0.995, config = cfg), "prepay")
 })
+
+test_that("the foundation approach reads the supervisory LGD of the claim and retail can be non-granular", {
+  bcb <- scr_irb_params("bcb"); b3 <- scr_irb_params("basel3_final")
+  r1 <- scr_irb_rw(0.01, 0, m = 2.5, asset_class = "corporate", approach = "firb", claim = "senior_unsecured", params = bcb)
+  expect_equal(r1$lgd_used, 0.75)
+  r2 <- scr_irb_rw(0.01, 0, m = 2.5, asset_class = "corporate", approach = "firb", claim = "senior_unsecured_corporate", params = b3)
+  expect_equal(r2$lgd_used, 0.40)
+  expect_equal(r2$m, 2.5)
+  r3 <- scr_irb_rw(0.01, 0.40, m = 2.5, asset_class = "corporate", approach = "airb", apply_floors = FALSE, params = b3)
+  expect_equal(r2$k, r3$k, tolerance = 1e-12)
+  expect_error(scr_irb_rw(0.01, 0, asset_class = "corporate", approach = "firb", claim = "boats"), "claim")
+  r4 <- scr_irb_rw(0.01, 0.45, m = 2.5, asset_class = "corporate", approach = "airb", claim = "subordinated")
+  expect_equal(r4$lgd_used, 0.45)
+  expect_equal(scr_sa_rw("retail_other"), 0.75)
+  expect_equal(scr_sa_rw("retail_other", granular = FALSE), 1.00)
+  expect_equal(scr_sa_rw(c("retail_other", "retail_other"), transactor = c(TRUE, TRUE), granular = c(TRUE, FALSE)), c(0.45, 1.00))
+  expect_equal(scr_sa_rw("retail_mortgage", ltv = 0.55, granular = FALSE), 0.25)
+  port <- data.table::as.data.table(scr_demo_portfolio)[asset_class %in% c("corporate", "retail_other")][1:400]
+  port[, claim := ifelse(asset_class == "corporate", "senior_unsecured", NA_character_)]
+  cf <- cfg_test(capital_approach = "firb", capital_sensitivity = FALSE)
+  cap_f <- scr_capital(port, segment = "segment", asset_class = "asset_class", m = "m", claim = "claim", config = cf, keep_rows = TRUE)
+  expect_true(all(cap_f$exposures[asset_class == "corporate", lgd_used] == 0.75))
+  cap_g <- scr_capital(port, segment = "segment", asset_class = "asset_class", m = "m", granular = FALSE,
+                       config = cfg_test(capital_sensitivity = FALSE), keep_rows = TRUE)
+  cap_0 <- scr_capital(port, segment = "segment", asset_class = "asset_class", m = "m",
+                       config = cfg_test(capital_sensitivity = FALSE), keep_rows = TRUE)
+  expect_gt(cap_g$totals$rwa_sa, cap_0$totals$rwa_sa)
+  expect_equal(cap_g$totals$rwa_irb, cap_0$totals$rwa_irb)
+})

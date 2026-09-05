@@ -140,7 +140,7 @@ scr_pd_stress <- function(pd, rho, q) {
 #' @noRd
 .irb_rw <- function(pd, lgd, ead = 1, m = NULL, asset_class, sales = NULL, fi = FALSE, defaulted = NULL,
                     elbe = NULL, params, approach = "airb", floors = c("pd", "lgd", "m"), r_mult = 1,
-                    collateral = NULL, secured_share = NULL) {
+                    collateral = NULL, secured_share = NULL, claim = NULL) {
   n <- max(length(pd), length(lgd), length(ead), length(asset_class), length(m), length(defaulted), length(elbe),
            length(sales), length(fi), length(collateral), length(secured_share))
   pd <- rep_len(as.double(pd), n); lgd <- rep_len(as.double(lgd), n); ead <- rep_len(as.double(ead), n)
@@ -168,9 +168,18 @@ scr_pd_stress <- function(pd, rho, q) {
   }
   pd_used[d] <- 1
 
+  # F-IRB: the supervisory LGD of the claim type replaces the caller's value
+  lgd_used <- lgd
+  if (firb && !is.null(claim)) {
+    cl <- rep_len(as.character(claim), n)
+    tb <- params$lgd_firb
+    badc <- setdiff(unique(cl[!is.na(cl)]), tb$claim)
+    if (length(badc)) stop("unknown `claim`: ", lst(badc), ". Use one of ", lst(tb$claim, 10), " (params$lgd_firb).", call. = FALSE)
+    sup <- tb$lgd[match(cl, tb$claim)]
+    lgd_used[!is.na(sup)] <- sup[!is.na(sup)]
+  }
   # LGD floor: own estimates only (A-IRB); the unsecured column unless a
   # collateral column (and optionally a secured share) is given
-  lgd_used <- lgd
   if ("lgd" %in% floors && !firb) {
     lf <- params$lgd_floor
     cls <- ac
@@ -263,6 +272,10 @@ scr_pd_stress <- function(pd, rho, q) {
 #'   `"real_estate"`, `"other_physical"`); `NULL` means unsecured.
 #' @param secured_share Optional secured share in `[0, 1]` blending the
 #'   unsecured and the collateral floors.
+#' @param claim Under `"firb"`, an optional claim type per exposure naming a
+#'   row of `params$lgd_firb` (for example `"senior_unsecured"` or
+#'   `"subordinated"`); the supervisory LGD of that row replaces `lgd`.
+#'   `NULL` keeps the caller's `lgd`.
 #'
 #' @return A `data.table` with one row per exposure: `pd_used`, `lgd_used`
 #'   (after floors; PD one on defaulted rows), `m` (after clipping), `r`,
@@ -281,15 +294,18 @@ scr_pd_stress <- function(pd, rho, q) {
 #' scr_irb_rw(c(0.01, 0.02), c(0.20, 0.80), asset_class = c("retail_mortgage", "qrre_revolver"))
 #' r <- scr_irb_rw(1e-4, 0.5, asset_class = "retail_other")
 #' attr(r, "floors_hit")
+#' # foundation approach: the supervisory LGD of the claim type
+#' scr_irb_rw(0.01, lgd = 0, m = 2.5, asset_class = "corporate", approach = "firb",
+#'            claim = "senior_unsecured")
 #' @export
 scr_irb_rw <- function(pd, lgd, ead = 1, m = NULL, asset_class, sales = NULL, fi = FALSE, defaulted = NULL,
                        elbe = NULL, params = scr_irb_params("bcb"), approach = c("airb", "firb"),
-                       apply_floors = TRUE, collateral = NULL, secured_share = NULL) {
+                       apply_floors = TRUE, collateral = NULL, secured_share = NULL, claim = NULL) {
   approach <- match.arg(approach)
   params <- .check_params(params, "scr_irb_rw")
   floors <- .floors_of(apply_floors)
   .irb_rw(pd, lgd, ead, m, asset_class, sales, fi, defaulted, elbe, params, approach, floors,
-          collateral = collateral, secured_share = secured_share)
+          collateral = collateral, secured_share = secured_share, claim = claim)
 }
 
 #' @keywords internal
@@ -323,6 +339,9 @@ scr_irb_rw <- function(pd, lgd, ead = 1, m = NULL, asset_class, sales = NULL, fi
 #'   (defaulted rows).
 #' @param sme Logical: corporate small or medium enterprise (also implied by
 #'   `asset_class = "corporate_sme"`).
+#' @param granular Logical (scalar or per exposure): whether the retail
+#'   exposure belongs to a granular regulatory retail pool; `FALSE` applies
+#'   the non-granular retail weight.
 #'
 #' @return A numeric vector of standardised risk weights (decimals).
 #'
@@ -337,10 +356,11 @@ scr_irb_rw <- function(pd, lgd, ead = 1, m = NULL, asset_class, sales = NULL, fi
 #' scr_sa_rw("retail_other", defaulted = TRUE, provision_ratio = c(0.1, 0.3))
 #' @export
 scr_sa_rw <- function(asset_class, ltv = NULL, rating = NULL, transactor = NULL, defaulted = NULL,
-                      provision_ratio = NULL, sme = NULL, params = scr_irb_params("bcb")) {
+                      provision_ratio = NULL, sme = NULL, granular = TRUE, params = scr_irb_params("bcb")) {
   params <- .check_params(params, "scr_sa_rw")
   n <- max(length(asset_class), length(ltv), length(rating), length(transactor), length(defaulted),
-           length(provision_ratio), length(sme))
+           length(provision_ratio), length(sme), length(granular))
+  gr <- rep_len(isTRUE_vec(granular), n)
   ac <- rep_len(as.character(asset_class), n)
   bad <- setdiff(unique(ac), .irb_classes)
   if (length(bad) || anyNA(ac)) stop("unknown `asset_class`: ", lst(c(bad, if (anyNA(ac)) "NA")), ".", call. = FALSE)
@@ -355,7 +375,8 @@ scr_sa_rw <- function(asset_class, ltv = NULL, rating = NULL, transactor = NULL,
   rw <- rep(NA_real_, n)
 
   ret <- ac %in% c("retail_other", "qrre_revolver", "qrre_transactor")
-  rw[ret] <- look("retail_other", ifelse(tr[ret] | ac[ret] == "qrre_transactor", "transactor", "standard"))
+  rw[ret] <- look("retail_other", ifelse(!gr[ret], "non_granular",
+                                          ifelse(tr[ret] | ac[ret] == "qrre_transactor", "transactor", "standard")))
   mo <- ac == "retail_mortgage"
   if (any(mo)) {
     bands <- tab[tab$asset_class == "retail_mortgage" & tab$sub_class == "standard", ]
@@ -435,6 +456,12 @@ scr_sa_rw <- function(asset_class, ltv = NULL, rating = NULL, transactor = NULL,
 #'   annual sales, financial-institution flag, transactor flag, PD grade
 #'   (defines the SQL pools together with `segment`) and exposure
 #'   identifier.
+#' @param claim Optional column name: the claim type of each exposure under
+#'   the foundation approach (a row of `params$lgd_firb`); the supervisory
+#'   LGD then replaces `lgd`.
+#' @param granular `TRUE`, `FALSE` or a column name: whether the retail
+#'   exposures belong to a granular regulatory retail pool (the standardised
+#'   comparison uses the non-granular weight otherwise).
 #' @param params An [scr_irb_params()] object; defaults to the preset of
 #'   `config$framework`.
 #' @param config An [scr_config()] object (`capital_approach`,
@@ -477,6 +504,7 @@ scr_sa_rw <- function(asset_class, ltv = NULL, rating = NULL, transactor = NULL,
 scr_capital <- function(x, pd = "pd", lgd = "lgd", ead = "ead", segment = NULL, asset_class = config$capital_asset_class,
                         m = NULL, defaulted = NULL, elbe = NULL, provisions = NULL, ltv = NULL, rating = NULL,
                         sales = NULL, fi = NULL, transactor = NULL, grade = NULL, id = NULL,
+                        claim = NULL, granular = TRUE,
                         params = scr_irb_params(config$framework), config = scr_config(), keep_rows = FALSE) {
   check_config(config, "scr_capital")
   cfg <- config
@@ -517,6 +545,8 @@ scr_capital <- function(x, pd = "pd", lgd = "lgd", ead = "ead", segment = NULL, 
     dt[[nm]]
   }
   v_pd <- col(pd, "pd"); v_lgd <- col(lgd, "lgd"); v_ead <- col(ead, "ead")
+  v_claim <- col(claim, "claim")
+  v_gr <- if (is.character(granular)) col(granular, "granular") else rep_len(isTRUE_vec(granular), nrow(dt))
   ac_src <- if (length(asset_class) == 1L && asset_class %in% names(dt)) "column"
             else if (all(asset_class %in% .irb_classes) && length(asset_class) == 1L) "constant"
             else stop("scr_capital(): `asset_class` must be a column of `x` or one of ", lst(.irb_classes, 20), ".", call. = FALSE)
@@ -534,7 +564,8 @@ scr_capital <- function(x, pd = "pd", lgd = "lgd", ead = "ead", segment = NULL, 
 
   # -- IRB, floors, SA, EL -------------------------------------------------- #
   run <- function(pd_v = v_pd, lgd_v = v_lgd, ead_v = v_ead, floors = c("pd", "lgd", "m"), r_mult = 1) {
-    .irb_rw(pd_v, lgd_v, ead_v, v_m, v_ac, v_sales, v_fi %||% FALSE, v_def, v_elbe, params, approach, floors, r_mult)
+    .irb_rw(pd_v, lgd_v, ead_v, v_m, v_ac, v_sales, v_fi %||% FALSE, v_def, v_elbe, params, approach, floors, r_mult,
+            claim = v_claim)
   }
   irb <- run()
   fh <- attr(irb, "floors_hit")
@@ -550,7 +581,7 @@ scr_capital <- function(x, pd = "pd", lgd = "lgd", ead = "ead", segment = NULL, 
   use_sa <- isTRUE(cfg$capital_output_floor)
   rw_sa <- if (use_sa) {
     pr <- if (is.null(v_prov)) NULL else ifelse(v_ead > 0, v_prov / v_ead, NA_real_)
-    scr_sa_rw(v_ac, v_ltv, v_rat, v_tr, d, pr, v_ac == "corporate_sme", params)
+    scr_sa_rw(v_ac, v_ltv, v_rat, v_tr, d, pr, v_ac == "corporate_sme", granular = v_gr, params = params)
   } else rep(NA_real_, n)
   ex <- data.table::data.table(id = if (is.null(v_id)) seq_len(n) else v_id, segment = v_seg,
                                grade = if (is.null(v_grade)) NA_character_ else as.character(v_grade),

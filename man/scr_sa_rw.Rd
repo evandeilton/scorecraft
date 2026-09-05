@@ -12,6 +12,7 @@ scr_sa_rw(
   defaulted = NULL,
   provision_ratio = NULL,
   sme = NULL,
+  granular = TRUE,
   params = scr_irb_params("bcb")
 )
 }
@@ -33,6 +34,10 @@ scr_sa_rw(
 
 \item{sme}{Logical: corporate small or medium enterprise (also implied by
 \code{asset_class = "corporate_sme"}).}
+
+\item{granular}{Logical (scalar or per exposure): whether the retail
+exposure belongs to a granular regulatory retail pool; \code{FALSE} applies
+the non-granular retail weight.}
 
 \item{params}{An \code{\link[=scr_irb_params]{scr_irb_params()}} object.}
 }

@@ -58,6 +58,12 @@ parameter tables selected by a preset, never prose.
   (survival-weighted 12-month and lifetime expected credit loss with
   stages and scenarios), with `scr_sql()` (constants per pool, no normal
   quantile at run time) and `scr_export()` methods.
+* `scr_irb_rw()` and `scr_capital()` read the supervisory LGD of the
+  foundation approach from `params$lgd_firb` through a `claim` type;
+  `scr_sa_rw()` and `scr_capital()` apply the non-granular retail weight
+  with `granular = FALSE`; the Hosmer-Lemeshow light of
+  `scr_pd_validate()` is green when every grade sits on the conservative
+  side (the PD above the observed rate), since the statistic is two-sided.
 * `betareg` joins Suggests for the beta severity engine of the LGD model.
 
 # scorecraft 0.1.0
