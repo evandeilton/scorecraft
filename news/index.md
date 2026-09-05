@@ -125,6 +125,11 @@ are parameter tables selected by a preset, never prose.
   the observed rate), since the statistic is two-sided.
 - `betareg` (Suggests) powers the beta severity engine of
   [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md).
+- [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+  on a scorecard gains `what = "all"` (bin label, WOE and points of
+  every variable next to the exact score and the whole-points score) and
+  `keep_columns` (key columns carried into the output), for a deployment
+  that reports the band of each variable with the score.
 - After the documentation audit:
   [`scr_iv()`](https://evandeilton.github.io/scorecraft/reference/scr_iv.md)
   ignores `NA` for every group type;

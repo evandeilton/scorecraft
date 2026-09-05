@@ -140,7 +140,7 @@ candidate.</p>
 <span><span class="va">res</span></span>
 <span><span class="co">#&gt; &lt;scr_result&gt; target "default"</span></span>
 <span><span class="co">#&gt;   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span></span>
-<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.5s</span></span>
+<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.7s</span></span>
 <span><span class="co">#&gt;   convention: risk (target=1 is the bad case)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Funnel</span></span>
@@ -351,11 +351,11 @@ and a Markdown summary.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-vignette"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmpnh7Mjv/scorecraft-vignette/scorecard_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmpnh7Mjv/scorecraft-vignette/validation_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmpnh7Mjv/scorecraft-vignette/strategy_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmpnh7Mjv/scorecraft-vignette/sql_score_default.sql</span></span>
-<span><span class="co">#&gt;   /tmp/Rtmpnh7Mjv/scorecraft-vignette/sql_woe_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmpn8o6yx/scorecraft-vignette/scorecard_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmpn8o6yx/scorecraft-vignette/validation_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmpn8o6yx/scorecraft-vignette/strategy_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmpn8o6yx/scorecraft-vignette/sql_score_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmpn8o6yx/scorecraft-vignette/sql_woe_default.sql</span></span>
 <span><span class="co">#&gt; [1] "scorecard_default.xlsx"  "validation_default.xlsx"</span></span>
 <span><span class="co">#&gt; [3] "strategy_default.xlsx"   "sql_score_default.sql"  </span></span>
 <span><span class="co">#&gt; [5] "sql_woe_default.sql"</span></span></code></pre></div>

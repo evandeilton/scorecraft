@@ -110,7 +110,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
                   date_col = "ref_date")
 lab <- scr_coarse_classing(res)
 lab
-#> <scr_classing> target "default" | opened 2026-09-05 14:07 by runner | 37 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 18:06 by runner | 37 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)
 scr_classing_view(lab, "ds_region")
 #> <scr_classing> ds_region (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)
@@ -131,7 +131,7 @@ p <- scr_classing_propose(lab, "ds_region",
                           groups = list(edge = c("NORTH", "SOUTH"),
                                         core = c("EAST", "WEST", "CENTRE")))
 p
-#> <scr_classing_proposal> P001 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-05 14:07
+#> <scr_classing_proposal> P001 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-05 18:06
 #>                         optimal     manual      delta
 #>   n_bins                      5          2         -3
 #>   iv_train               0.0846     0.0739    -0.0107
@@ -154,7 +154,7 @@ lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
 lab <- scr_classing_choose(lab, drop = "vl_score_10",
                            reason = "not available at decision time")
 lab
-#> <scr_classing> target "default" | opened 2026-09-05 14:07 by runner | 37 variables | 1 proposals: 1 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 18:06 by runner | 37 variables | 1 proposals: 1 accepted, 0 discarded
 #>   variable                   action      bins          IV train       IV hold-out verdict     reason
 #>   ds_region                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      edge/core is what pricing uses
 #>   final choice: 11 variables | consensus 12 | force: (none) | drop: vl_score_10

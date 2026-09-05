@@ -132,11 +132,11 @@ seedable <code>random()</code>); pass <code>sample_expr</code> to override it.</
 <span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbWriteTable.html" class="external-link">dbWriteTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, <span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu">scr_fetch</span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, sample_frac <span class="op">=</span> <span class="fl">0.5</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.500000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2146</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2112</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu">scr_fetch</span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, max_rows <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.238095</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1042</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 993</span>
 <span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>

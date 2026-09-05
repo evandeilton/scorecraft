@@ -36,7 +36,8 @@ scr_sql(
   table = NULL,
   dialect = NULL,
   file = NULL,
-  what = c("score", "woe"),
+  what = c("score", "woe", "all"),
+  keep_columns = NULL,
   ...
 )
 ```
@@ -85,8 +86,18 @@ scr_sql(
 
 - what:
 
-  For `scr_scorecard`: `"score"` (default, the three blocks) or `"woe"`
-  (the WOE/BIN SQL of the scorecard variables only).
+  For `scr_scorecard`: `"score"` (default: the three blocks, with the
+  points per variable, the exact score and the whole-points score),
+  `"woe"` (the WOE/BIN SQL of the scorecard variables only) or `"all"`
+  (the three blocks plus, for every variable, its bin label, WOE and
+  points side by side: the deployment layout that reports the band of
+  each variable next to the score).
+
+- keep_columns:
+
+  For `scr_scorecard`: key columns carried untransformed into the output
+  (for example the customer identifier and the reference date); `NULL`
+  uses `config$sql_keep_columns`.
 
 ## Value
 
@@ -145,7 +156,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-09-05 14:08:20
+#> -- Generated on 2026-09-05 18:07:02
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
