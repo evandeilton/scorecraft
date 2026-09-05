@@ -75,8 +75,9 @@ scr_pd_validate(
 
 - lights:
 
-  Two p-value thresholds (red below the first, amber below the second);
-  `NULL` reads `config$pd_lights`.
+  Two p-value thresholds (red at or below the first, amber at or below
+  the second, green above; the convention shared with the LGD and EAD
+  validations); `NULL` reads `config$pd_lights`.
 
 - pd_column:
 

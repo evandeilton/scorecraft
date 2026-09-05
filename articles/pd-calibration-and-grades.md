@@ -23,7 +23,7 @@ provisioning model needs. Four things separate the two:
 Every step below leaves a record: the merges and repairs of the grades,
 the entries of the margin ledger, the parameter table used for the
 floor. The names follow the public frameworks (the Basel Framework of
-the BCBS, the EBA guidelines on PD and LGD estimation, Resolução BCB
+the BCBS, the EBA guidelines on PD and LGD estimation, BCB Resolution
 303/2023) only where they explain a name; the package is a technical
 tool and the frameworks are tables of numbers it reads, not prose it
 interprets.
@@ -85,7 +85,7 @@ dr <- scr_default_rate(d, by = "quarter", config = cfg)
 dr
 #> <scr_dr> 8 quarterly cohorts over 1.7 years | horizon 12 months
 #>   default rate: mean 9.63% | weighted 9.64% | min 9.03% | max 10.28% | sd 0.42%
-#>   long-run average 9.63% vs benchmark 9.63% (max of last-5-years 9.63% and all-years 9.63%)
+#>   long-run average 9.63% | benchmark 9.63% (max of last-5-years 9.63% and all-years 9.63%)
 #>   note: fewer than five years of cohorts; the average is not a long-run one yet
 dr$table
 #>        cohort     n defaults         dr
@@ -440,8 +440,8 @@ cat(tail(sql, 6), sep = "\n")
 #> -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)
 #> SELECT
 #>     s.*,
-#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947983 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
-#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947983 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
+#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947994 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
+#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947994 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
 #> FROM score_scr s;
 ```
 
@@ -655,8 +655,8 @@ an availability row, never a fabricated number.
 
 out <- file.path(tempdir(), "scorecraft-pd-vignette")
 ex <- scr_export(pd, out, stamp = FALSE, validation = v)
-#>   /tmp/RtmpCfvzvV/scorecraft-pd-vignette/pd_default.xlsx
-#>   /tmp/RtmpCfvzvV/scorecraft-pd-vignette/sql_pd_default.sql
+#>   /tmp/RtmpIY5JhU/scorecraft-pd-vignette/pd_default.xlsx
+#>   /tmp/RtmpIY5JhU/scorecraft-pd-vignette/sql_pd_default.sql
 basename(unlist(ex$files))
 #> [1] "pd_default.xlsx"    "sql_pd_default.sql"
 openxlsx::getSheetNames(ex$files$pd)

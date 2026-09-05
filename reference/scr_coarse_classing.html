@@ -169,28 +169,28 @@ ledger row.</p>
 <span class="r-in"><span>                  date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu">scr_coarse_classing</span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lab</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; target "default" | opened 2026-09-05 13:09 by runner | 37 variables | 0 proposals: 0 accepted, 0 discarded</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; target "default" | opened 2026-09-05 14:07 by runner | 37 variables | 0 proposals: 0 accepted, 0 discarded</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)</span>
-<span class="r-in"><span><span class="fu"><a href="scr_classing_view.html">scr_classing_view</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_regiao"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; ds_regiao (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)</span>
+<span class="r-in"><span><span class="fu"><a href="scr_classing_view.html">scr_classing_view</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_region"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; ds_region (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   monotone: yes | min bin 7.9% | PSI 0.0064 (stable) | KS 0.114 | degenerate bins: 0 | verdict: ACCEPTABLE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    id  bin                                  n      %  events   rate      WOE      IV |  n.hold      %    rate WOE.hold</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1  MG                                 539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2  SP                               1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     3  RJ                                 582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     4  BA                                 318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     5  RS                                 222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1  CENTRE                             539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2  EAST                             1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     3  WEST                               582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     4  NORTH                              318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     5  SOUTH                              222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   event rate by bin (train | hold-out)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     1  ########            10.6% | ##########          13.0%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     2  ##########          12.6% | ###########         13.8%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     3  ###########         14.1% | ########            10.0%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     4  ################    20.8% | ##################  23.6%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     5  #################   22.5% | ##############      18.8%</span>
-<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_regiao"</span>,</span></span>
-<span class="r-in"><span>                          groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>south <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BA"</span>, <span class="st">"RS"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                                        north <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SP"</span>, <span class="st">"RJ"</span>, <span class="st">"MG"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_region"</span>,</span></span>
+<span class="r-in"><span>                          groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NORTH"</span>, <span class="st">"SOUTH"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                                        core <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAST"</span>, <span class="st">"WEST"</span>, <span class="st">"CENTRE"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">p</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing_proposal&gt; P001 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-05 13:09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing_proposal&gt; P001 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-05 14:07</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         optimal     manual      delta</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   n_bins                      5          2         -3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   iv_train               0.0846     0.0739    -0.0107</span>
@@ -203,28 +203,28 @@ ledger row.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   n_degenerate                0          0          0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   monotonic                   1          1          0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   manual bins (train | hold-out)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1  BA | RS                            540  19.3%  21.5%   0.499 |     279  19.9%  21.9%   0.501</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2  SP | RJ | MG                     2,260  80.7%  12.5%  -0.149 |   1,121  80.1%  12.7%  -0.156</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1  NORTH | SOUTH                      540  19.3%  21.5%   0.499 |     279  19.9%  21.9%   0.501</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2  EAST | WEST | CENTRE             2,260  80.7%  12.5%  -0.149 |   1,121  80.1%  12.7%  -0.156</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Warnings</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     - IV_LOSS_VS_OPTIMAL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.</span>
-<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p</span>, reason <span class="op">=</span> <span class="st">"north/south is what pricing uses"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ds_regiao: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786</span>
+<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p</span>, reason <span class="op">=</span> <span class="st">"edge/core is what pricing uses"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ds_region: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786</span>
 <span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_choose.html">scr_classing_choose</a></span><span class="op">(</span><span class="va">lab</span>, drop <span class="op">=</span> <span class="st">"vl_score_10"</span>,</span></span>
 <span class="r-in"><span>                           reason <span class="op">=</span> <span class="st">"not available at decision time"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lab</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; target "default" | opened 2026-09-05 13:09 by runner | 37 variables | 1 proposals: 1 accepted, 0 discarded</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; target "default" | opened 2026-09-05 14:07 by runner | 37 variables | 1 proposals: 1 accepted, 0 discarded</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   variable                   action      bins          IV train       IV hold-out verdict     reason</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ds_regiao                  accepted  5-&gt;2     0.0846-&gt;0.0739     0.0971-&gt;0.0786   REVIEW      north/south is what pricing uses</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ds_region                  accepted  5-&gt;2     0.0846-&gt;0.0739     0.0971-&gt;0.0786   REVIEW      edge/core is what pricing uses</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   final choice: 11 variables | consensus 12 | force: (none) | drop: vl_score_10</span>
 <span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_apply.html">scr_classing_apply</a></span><span class="op">(</span><span class="va">lab</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] "vl_hist_04" </span>
 <span class="r-in"><span><span class="fu"><a href="scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res2</span>, which <span class="op">=</span> <span class="st">"consensus"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] "vl_score_10" "vl_hist_04" </span>
 <span class="r-in"><span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sc</span><span class="op">$</span><span class="va">model_card</span><span class="op">$</span><span class="va">binning_algorithm</span></span></span>

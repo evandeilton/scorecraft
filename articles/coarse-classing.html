@@ -87,7 +87,7 @@ groupings that maximise the information value of a variable subject to
 the admission rules (minimum bin size, monotonicity, hold-out
 stability). What it cannot know is how the business reads the variable.
 A bureau score is communicated to underwriters in policy bands; a region
-is priced as north and south, not as five states; an age is quoted in
+is priced as edge and core, not as five regions; an age is quoted in
 decades. A scorecard whose bins cut at 33.36 and 48.06 is correct, but
 nobody in the credit committee can explain it, and a bin nobody can
 explain is a bin nobody will defend when the model is challenged.</p>
@@ -121,8 +121,8 @@ seconds of run time on <code>scr_demo</code>.</p>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>,</span>
 <span>                  drop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"churn"</span><span class="op">)</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  </span></span>
-<span><span class="co">#&gt;  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   </span></span>
+<span><span class="co">#&gt;  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    </span></span>
+<span><span class="co">#&gt;  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" </span></span>
 <span><span class="co">#&gt; [11] "vl_hist_04"  "vl_score_10"</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -136,7 +136,7 @@ the system user.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span>, author <span class="op">=</span> <span class="st">"analyst"</span><span class="op">)</span></span>
 <span><span class="va">lab</span></span>
-<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-05 13:11 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded</span></span>
+<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-05 14:08 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded</span></span>
 <span><span class="co">#&gt;   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)</span></span></code></pre></div>
 <p>Without a variable, <code><a href="../reference/scr_classing_view.html">scr_classing_view()</a></code> prints one line
 per variable: its current source (optimal or manual), the number of
@@ -168,27 +168,27 @@ variable is currently in the final shortlist (<code>yes</code>, or
 <span><span class="co">#&gt;   vl_hist_03__sp               optimal      2    0.0357    0.0764  0.0006 ACCEPTABLE  -</span></span>
 <span><span class="co">#&gt;   vl_hist_04                   optimal      3    0.0332    0.0809  0.0047 ACCEPTABLE  yes</span></span>
 <span><span class="co">#&gt;   vl_hist_04__sp               optimal      2    0.0642    0.1053  0.0058 ACCEPTABLE  -</span></span>
-<span><span class="co">#&gt;   vl_parcial_01                optimal      5    0.0045    0.0144  0.0051 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_parcial_01__sp            optimal      2    0.0020    0.0036  0.0002 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_parcial_02                optimal      4    0.0036    0.0111  0.0013 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_parcial_02__sp            optimal      2    0.0031    0.0062  0.0002 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_tardio                    optimal      7    0.0711    0.0638  0.1042 ACCEPTABLE  yes</span></span>
-<span><span class="co">#&gt;   vl_ruido_01                  optimal      3    0.0031    0.0079  0.0015 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_ruido_02                  optimal      6    0.0084    0.0231  0.0062 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_ruido_03                  optimal      5    0.0188    0.0173  0.0039 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_ruido_04                  optimal      3    0.0053    0.0192  0.0004 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_ruido_05                  optimal      3    0.0018    0.0020  0.0050 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_ruido_06                  optimal      6    0.0024    0.0501  0.0032 REVIEW      -</span></span>
-<span><span class="co">#&gt;   vl_redundante                optimal      7    0.1743    0.1071  0.0065 ACCEPTABLE  -</span></span>
-<span><span class="co">#&gt;   ds_regiao                    optimal      5    0.0846    0.0971  0.0064 ACCEPTABLE  yes</span></span>
-<span><span class="co">#&gt;   ds_faixa                     optimal      4    0.0805    0.0780  0.0013 ACCEPTABLE  yes</span></span>
-<span><span class="co">#&gt;   ds_canal                     optimal      3    0.0279    0.0438  0.0003 ACCEPTABLE  yes</span></span>
+<span><span class="co">#&gt;   vl_partial_01                optimal      5    0.0045    0.0144  0.0051 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_partial_01__sp            optimal      2    0.0020    0.0036  0.0002 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_partial_02                optimal      4    0.0036    0.0111  0.0013 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_partial_02__sp            optimal      2    0.0031    0.0062  0.0002 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_late                      optimal      7    0.0711    0.0638  0.1042 ACCEPTABLE  yes</span></span>
+<span><span class="co">#&gt;   vl_noise_01                  optimal      3    0.0031    0.0079  0.0015 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_noise_02                  optimal      6    0.0084    0.0231  0.0062 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_noise_03                  optimal      5    0.0188    0.0173  0.0039 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_noise_04                  optimal      3    0.0053    0.0192  0.0004 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_noise_05                  optimal      3    0.0018    0.0020  0.0050 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_noise_06                  optimal      6    0.0024    0.0501  0.0032 REVIEW      -</span></span>
+<span><span class="co">#&gt;   vl_redundant                 optimal      7    0.1743    0.1071  0.0065 ACCEPTABLE  -</span></span>
+<span><span class="co">#&gt;   ds_region                    optimal      5    0.0846    0.0971  0.0064 ACCEPTABLE  yes</span></span>
+<span><span class="co">#&gt;   ds_band                      optimal      4    0.0805    0.0780  0.0013 ACCEPTABLE  yes</span></span>
+<span><span class="co">#&gt;   ds_channel                   optimal      3    0.0279    0.0438  0.0003 ACCEPTABLE  yes</span></span>
 <span><span class="co">#&gt;   ds_optin                     optimal      3    0.0065    0.0032  0.0019 REVIEW      -</span></span>
 <span><span class="co">#&gt;   vl_hist_05__sp               optimal      2    0.0191    0.0428  0.0006 REVIEW      -</span></span></code></pre></div>
 <p>With a variable, the view is the bin table with train and hold-out
 side by side, plus a text bar chart of the event rate.
 <code>vl_score_01</code> is a numeric with seven optimal bins;
-<code>ds_regiao</code> is a categorical with one bin per state.</p>
+<code>ds_region</code> is a categorical with one bin per state.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_classing_view.html">scr_classing_view</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"vl_score_01"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;scr_classing&gt; vl_score_01 (numerical) | current: optimal (jedi) | 7 bins | train IV 0.3464, hold-out IV 0.2877 (ratio 0.86)</span></span>
@@ -210,15 +210,15 @@ side by side, plus a text bar chart of the event rate.
 <span><span class="co">#&gt;     6  #############       25.1% | ############        22.4%</span></span>
 <span><span class="co">#&gt;     7  ################    31.0% | ##################  34.4%</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_classing_view.html">scr_classing_view</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_regiao"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;scr_classing&gt; ds_regiao (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_classing_view.html">scr_classing_view</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_region"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;scr_classing&gt; ds_region (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)</span></span>
 <span><span class="co">#&gt;   monotone: yes | min bin 7.9% | PSI 0.0064 (stable) | KS 0.114 | degenerate bins: 0 | verdict: ACCEPTABLE</span></span>
 <span><span class="co">#&gt;    id  bin                                  n      %  events   rate      WOE      IV |  n.hold      %    rate WOE.hold</span></span>
-<span><span class="co">#&gt;     1  MG                                 539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130</span></span>
-<span><span class="co">#&gt;     2  SP                               1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058</span></span>
-<span><span class="co">#&gt;     3  RJ                                 582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419</span></span>
-<span><span class="co">#&gt;     4  BA                                 318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599</span></span>
-<span><span class="co">#&gt;     5  RS                                 222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312</span></span>
+<span><span class="co">#&gt;     1  CENTRE                             539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130</span></span>
+<span><span class="co">#&gt;     2  EAST                             1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058</span></span>
+<span><span class="co">#&gt;     3  WEST                               582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419</span></span>
+<span><span class="co">#&gt;     4  NORTH                              318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599</span></span>
+<span><span class="co">#&gt;     5  SOUTH                              222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312</span></span>
 <span><span class="co">#&gt;   event rate by bin (train | hold-out)</span></span>
 <span><span class="co">#&gt;     1  ########            10.6% | ##########          13.0%</span></span>
 <span><span class="co">#&gt;     2  ##########          12.6% | ###########         13.8%</span></span>
@@ -246,7 +246,7 @@ below 40, 40 to 55, 55 to 70 and above 70.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"vl_score_01"</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">55</span>, <span class="fl">70</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_breaks</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-05 13:11</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-05 14:08</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          4         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.2993    -0.0471</span></span>
@@ -282,7 +282,7 @@ points, which is what the header shows.</p>
 <span><span class="va">p_split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"vl_score_01"</span>,</span>
 <span>                                split <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">res</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">vl_score_01</span><span class="op">$</span><span class="va">cutpoints</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_split</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P003 vl_score_01 | split = c(1, 28.36) | 2026-09-05 13:11</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P003 vl_score_01 | split = c(1, 28.36) | 2026-09-05 14:08</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          8          1</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.3561     0.0098</span></span>
@@ -305,6 +305,7 @@ points, which is what the header shows.</p>
 <span><span class="co">#&gt;     8  (72.610000;+Inf]                   145   5.2%  31.0%   0.996 |      61   4.4%  34.4%   1.130</span></span>
 <span><span class="co">#&gt;   Warnings</span></span>
 <span><span class="co">#&gt;     - NOT_MONOTONIC</span></span>
+<span><span class="co">#&gt;     - TOO_MANY_BINS</span></span>
 <span><span class="co">#&gt;   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.</span></span></code></pre></div>
 <p>The split proposal is a <code>REVIEW</code>: the new first bin holds
 2% of the training rows and breaks the monotone pattern of the event
@@ -325,11 +326,11 @@ labels; the bin label stored in the entry is the categories joined by
 the configuration’s separator, exactly as the binning engine writes
 it.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p_groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_regiao"</span>,</span>
-<span>                                 groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>south <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BA"</span>, <span class="st">"RS"</span><span class="op">)</span>,</span>
-<span>                                               north <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SP"</span>, <span class="st">"RJ"</span>, <span class="st">"MG"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">p_groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_region"</span>,</span>
+<span>                                 groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NORTH"</span>, <span class="st">"SOUTH"</span><span class="op">)</span>,</span>
+<span>                                               core <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAST"</span>, <span class="st">"WEST"</span>, <span class="st">"CENTRE"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_groups</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P004 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-05 13:11</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-05 14:08</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      5          2         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.0846     0.0739    -0.0107</span></span>
@@ -342,8 +343,8 @@ it.</p>
 <span><span class="co">#&gt;   n_degenerate                0          0          0</span></span>
 <span><span class="co">#&gt;   monotonic                   1          1          0</span></span>
 <span><span class="co">#&gt;   manual bins (train | hold-out)</span></span>
-<span><span class="co">#&gt;     1  BA | RS                            540  19.3%  21.5%   0.499 |     279  19.9%  21.9%   0.501</span></span>
-<span><span class="co">#&gt;     2  SP | RJ | MG                     2,260  80.7%  12.5%  -0.149 |   1,121  80.1%  12.7%  -0.156</span></span>
+<span><span class="co">#&gt;     1  NORTH | SOUTH                      540  19.3%  21.5%   0.499 |     279  19.9%  21.9%   0.501</span></span>
+<span><span class="co">#&gt;     2  EAST | WEST | CENTRE             2,260  80.7%  12.5%  -0.149 |   1,121  80.1%  12.7%  -0.156</span></span>
 <span><span class="co">#&gt;   Warnings</span></span>
 <span><span class="co">#&gt;     - IV_LOSS_VS_OPTIMAL</span></span>
 <span><span class="co">#&gt;   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.</span></span></code></pre></div>
@@ -353,11 +354,11 @@ which is also how a reviewer says “everything else goes here”. The
 result is the same grouping, and the entry records that the second bin
 is the catch-all (<code>is_other</code>).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p_other</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_regiao"</span>,</span>
-<span>                                groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>south <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BA"</span>, <span class="st">"RS"</span><span class="op">)</span>, rest <span class="op">=</span> <span class="st">"SP"</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="va">p_other</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_region"</span>,</span>
+<span>                                groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NORTH"</span>, <span class="st">"SOUTH"</span><span class="op">)</span>, rest <span class="op">=</span> <span class="st">"EAST"</span><span class="op">)</span>,</span>
 <span>                                other_to <span class="op">=</span> <span class="st">"rest"</span><span class="op">)</span></span>
 <span><span class="va">p_other</span><span class="op">$</span><span class="va">entry</span><span class="op">$</span><span class="va">bin</span></span>
-<span><span class="co">#&gt; [1] "BA%;%RS"      "SP%;%RJ%;%MG"</span></span>
+<span><span class="co">#&gt; [1] "NORTH%;%SOUTH"        "EAST%;%WEST%;%CENTRE"</span></span>
 <span><span class="va">p_other</span><span class="op">$</span><span class="va">entry</span><span class="op">$</span><span class="va">manual</span><span class="op">$</span><span class="va">is_other</span></span>
 <span><span class="co">#&gt; [1] FALSE  TRUE</span></span></code></pre></div>
 <p><code>ds_optin</code> carries a <code>"MISSING"</code> category,
@@ -366,7 +367,7 @@ it into another bin.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_missing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_optin"</span>, missing_to <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">p_missing</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P006 ds_optin | missing_to = 1 | 2026-09-05 13:11</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P006 ds_optin | missing_to = 1 | 2026-09-05 14:08</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      3          2         -1</span></span>
 <span><span class="co">#&gt;   iv_train               0.0065     0.0000    -0.0065</span></span>
@@ -379,8 +380,8 @@ it into another bin.</p>
 <span><span class="co">#&gt;   n_degenerate                0          0          0</span></span>
 <span><span class="co">#&gt;   monotonic                   1          1          0</span></span>
 <span><span class="co">#&gt;   manual bins (train | hold-out)</span></span>
-<span><span class="co">#&gt;     1  SIM | MISSING                    1,564  55.9%  14.3%   0.001 |     753  53.8%  13.9%  -0.046</span></span>
-<span><span class="co">#&gt;     2  NAO                              1,236  44.1%  14.2%  -0.001 |     647  46.2%  15.1%   0.051</span></span>
+<span><span class="co">#&gt;     1  YES | MISSING                    1,564  55.9%  14.3%   0.001 |     753  53.8%  13.9%  -0.046</span></span>
+<span><span class="co">#&gt;     2  NO                               1,236  44.1%  14.2%  -0.001 |     647  46.2%  15.1%   0.051</span></span>
 <span><span class="co">#&gt;   Warnings</span></span>
 <span><span class="co">#&gt;     - IV_BELOW_MIN</span></span>
 <span><span class="co">#&gt;     - IV_LOW_ON_HOLDOUT</span></span>
@@ -402,7 +403,7 @@ verdict: the engine screening codes (<code>NOT_MONOTONIC</code>,
 (<code>IV_DROPS_ON_HOLDOUT</code>, <code>IV_LOW_ON_HOLDOUT</code>,
 <code>PSI_UNSTABLE</code>, …) and <code>IV_LOSS_VS_OPTIMAL</code>,
 raised when the hold-out IV falls more than <code>lab_max_iv_loss</code>
-(10% by default) below the optimal one. The <code>ds_regiao</code>
+(10% by default) below the optimal one. The <code>ds_region</code>
 grouping is a <code>REVIEW</code> for exactly that reason: two regions
 lose about a fifth of the hold-out IV of five states.</li>
 <li>
@@ -429,15 +430,15 @@ now. Both verbs return the updated lab, so the idiom is to reassign.</p>
 <p>The grouping proposed in the previous section is still valid and is
 accepted in turn.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_groups</span>, reason <span class="op">=</span> <span class="st">"north/south is what pricing uses"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ds_regiao: P004 accepted (REVIEW) - 2 bins, hold-out IV 0.0786</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_groups</span>, reason <span class="op">=</span> <span class="st">"edge/core is what pricing uses"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   ds_region: P004 accepted (REVIEW) - 2 bins, hold-out IV 0.0786</span></span></code></pre></div>
 <p>The <code>ds_optin</code> proposal erased what little signal the
 variable had (<code>IV_BELOW_MIN</code>), so it is discarded, with a
 reason, and the variable keeps its optimal bins. A discarded proposal is
 a ledger row too.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_missing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_optin"</span>, missing_to <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_discard</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_missing</span>, reason <span class="op">=</span> <span class="st">"folding MISSING into SIM erases the signal"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_discard</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_missing</span>, reason <span class="op">=</span> <span class="st">"folding MISSING into YES erases the signal"</span><span class="op">)</span></span></code></pre></div>
 <p>A blocking rule cannot be accepted through the normal path. A break
 at -5000 on <code>vl_score_04</code>, whose minimum is above 16, leaves
 the first bin empty:</p>
@@ -511,11 +512,11 @@ bins and IV before and after, the verdicts, the reasons, the discards
 and the final choice.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lab</span></span>
-<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-05 13:11 by analyst | 37 variables | 8 proposals: 2 accepted, 1 discarded</span></span>
+<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-05 14:08 by analyst | 37 variables | 8 proposals: 2 accepted, 1 discarded</span></span>
 <span><span class="co">#&gt;   variable                   action      bins          IV train       IV hold-out verdict     reason</span></span>
 <span><span class="co">#&gt;   vl_score_01                accepted  7-&gt;4     0.3464-&gt;0.2993     0.2877-&gt;0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti</span></span>
-<span><span class="co">#&gt;   ds_regiao                  accepted  5-&gt;2     0.0846-&gt;0.0739     0.0971-&gt;0.0786   REVIEW      north/south is what pricing uses</span></span>
-<span><span class="co">#&gt;   ds_optin                   discard  P007: folding MISSING into SIM erases the sign</span></span>
+<span><span class="co">#&gt;   ds_region                  accepted  5-&gt;2     0.0846-&gt;0.0739     0.0971-&gt;0.0786   REVIEW      edge/core is what pricing uses</span></span>
+<span><span class="co">#&gt;   ds_optin                   discard  P007: folding MISSING into YES erases the sign</span></span>
 <span><span class="co">#&gt;   final choice: 12 variables | consensus 12 | force: vl_score_03 | drop: vl_score_10</span></span></code></pre></div>
 <p><code><a href="../reference/scr_decisions.html">scr_decisions()</a></code> returns the ledger: one row per
 decision, append-only, with the author, the timestamp, the instruction,
@@ -527,15 +528,15 @@ scorecard fitted on it.</p>
 <span><span class="co">#&gt;      seq    variable  action proposal_id    verdict</span></span>
 <span><span class="co">#&gt;    &lt;int&gt;      &lt;char&gt;  &lt;char&gt;      &lt;char&gt;     &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1:     1 vl_score_01  accept        P001 ACCEPTABLE</span></span>
-<span><span class="co">#&gt; 2:     2   ds_regiao  accept        P004     REVIEW</span></span>
+<span><span class="co">#&gt; 2:     2   ds_region  accept        P004     REVIEW</span></span>
 <span><span class="co">#&gt; 3:     3    ds_optin discard        P007     REVIEW</span></span>
 <span><span class="co">#&gt; 4:     4 vl_score_03   force        &lt;NA&gt;       &lt;NA&gt;</span></span>
 <span><span class="co">#&gt; 5:     5 vl_score_10    drop        &lt;NA&gt;       &lt;NA&gt;</span></span>
 <span><span class="co">#&gt;                                        reason</span></span>
 <span><span class="co">#&gt;                                        &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1: policy bands 40/55/70 used by underwriting</span></span>
-<span><span class="co">#&gt; 2:           north/south is what pricing uses</span></span>
-<span><span class="co">#&gt; 3: folding MISSING into SIM erases the signal</span></span>
+<span><span class="co">#&gt; 2:             edge/core is what pricing uses</span></span>
+<span><span class="co">#&gt; 3: folding MISSING into YES erases the signal</span></span>
 <span><span class="co">#&gt; 4:         policy: bureau band must be scored</span></span>
 <span><span class="co">#&gt; 5:             not available at decision time</span></span></code></pre></div>
 </div>
@@ -584,7 +585,7 @@ is regenerated on read. Open ends are written as empty cells. A
 <span><span class="co">#&gt;   ... (+137 rows)</span></span>
 <span><span class="va">spec_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"classing_default.csv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/scr_classing_spec.html">scr_classing_spec</a></span><span class="op">(</span><span class="va">lab</span>, file <span class="op">=</span> <span class="va">spec_file</span><span class="op">)</span></span>
-<span><span class="co">#&gt; classing spec written to /tmp/RtmpuyYlxF/classing_default.csv</span></span></code></pre></div>
+<span><span class="co">#&gt; classing spec written to /tmp/RtmpBMKHqn/classing_default.csv</span></span></code></pre></div>
 <p>A reviewer opens the file, moves the first cut of
 <code>vl_score_01</code> from 40 to 42 and writes why in
 <code>reason</code>. Done in R, as it would be done in a spreadsheet
@@ -624,7 +625,7 @@ accepted on the analyst’s behalf.</p>
 <span><span class="va">imported</span><span class="op">$</span><span class="va">vl_score_01</span><span class="op">$</span><span class="va">imported_reason</span></span>
 <span><span class="co">#&gt; [1] "reviewer: first cut moved to 42 to match the bureau band"</span></span>
 <span><span class="va">imported</span><span class="op">$</span><span class="va">vl_score_01</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P009 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-05 13:11</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P009 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-05 14:08</span></span>
 <span><span class="co">#&gt;                         optimal    current     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          4          4         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.2993     0.2990    -0.0474</span></span>
@@ -670,7 +671,7 @@ rebuilt.</p>
 <span><span class="va">res2</span></span>
 <span><span class="co">#&gt; &lt;scr_result&gt; target "default"</span></span>
 <span><span class="co">#&gt;   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span></span>
-<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.3s</span></span>
+<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.1s</span></span>
 <span><span class="co">#&gt;   convention: risk (target=1 is the bad case)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Funnel</span></span>
@@ -687,8 +688,8 @@ rebuilt.</p>
 <span><span class="co">#&gt;    1. vl_score_01                                  IV  0.299  KS 0.247</span></span>
 <span><span class="co">#&gt;    2. vl_score_02                                  IV  0.172  KS 0.156</span></span>
 <span><span class="co">#&gt;    3. vl_score_04                                  IV  0.124  KS 0.120</span></span>
-<span><span class="co">#&gt;    4. ds_faixa                                     IV  0.081  KS 0.110</span></span>
-<span><span class="co">#&gt;    5. vl_tardio                                    IV  0.071  KS 0.120</span></span>
+<span><span class="co">#&gt;    4. ds_band                                      IV  0.081  KS 0.110</span></span>
+<span><span class="co">#&gt;    5. vl_late                                      IV  0.071  KS 0.120</span></span>
 <span><span class="co">#&gt;   ... (+7) - scr_selected() for the list</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Models (hold-out)</span></span>
@@ -704,12 +705,12 @@ the automatic one is still there under
 <code>which = "consensus"</code>.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  </span></span>
-<span><span class="co">#&gt;  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   </span></span>
+<span><span class="co">#&gt;  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    </span></span>
+<span><span class="co">#&gt;  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" </span></span>
 <span><span class="co">#&gt; [11] "vl_hist_04"  "vl_score_03"</span></span>
 <span><span class="fu"><a href="../reference/scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res2</span>, <span class="st">"consensus"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  </span></span>
-<span><span class="co">#&gt;  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   </span></span>
+<span><span class="co">#&gt;  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    </span></span>
+<span><span class="co">#&gt;  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" </span></span>
 <span><span class="co">#&gt; [11] "vl_hist_04"  "vl_score_10"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span>, <span class="fu"><a href="../reference/scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res2</span>, <span class="st">"consensus"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "vl_score_03"</span></span>
@@ -724,19 +725,19 @@ variable exits at a new stage, <code>08.manual_drop</code>; a forced one
 is <code>07.approved</code> even though the consensus never selected
 it.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">touched</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vl_score_01"</span>, <span class="st">"ds_regiao"</span>, <span class="st">"vl_score_03"</span>, <span class="st">"vl_score_10"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">touched</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vl_score_01"</span>, <span class="st">"ds_region"</span>, <span class="st">"vl_score_03"</span>, <span class="st">"vl_score_10"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/scr_funnel.html">scr_funnel</a></span><span class="op">(</span><span class="va">res2</span>, cols <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span><span class="op">[</span><span class="va">feature</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">touched</span>,</span>
 <span>                               <span class="fu">.</span><span class="op">(</span><span class="va">feature</span>, <span class="va">exit_stage</span>, <span class="va">provenance</span>, <span class="va">manual_reason</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        feature     exit_stage   provenance</span></span>
 <span><span class="co">#&gt;         &lt;char&gt;         &lt;char&gt;       &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1: vl_score_01    07.approved manual:rebin</span></span>
-<span><span class="co">#&gt; 2:   ds_regiao    07.approved manual:rebin</span></span>
+<span><span class="co">#&gt; 2:   ds_region    07.approved manual:rebin</span></span>
 <span><span class="co">#&gt; 3: vl_score_03    07.approved   manual:add</span></span>
 <span><span class="co">#&gt; 4: vl_score_10 08.manual_drop  manual:drop</span></span>
 <span><span class="co">#&gt;                                               manual_reason</span></span>
 <span><span class="co">#&gt;                                                      &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1: reviewer: first cut moved to 42 to match the bureau band</span></span>
-<span><span class="co">#&gt; 2:                         north/south is what pricing uses</span></span>
+<span><span class="co">#&gt; 2:                           edge/core is what pricing uses</span></span>
 <span><span class="co">#&gt; 3:                       policy: bureau band must be scored</span></span>
 <span><span class="co">#&gt; 4:                           not available at decision time</span></span></code></pre></div>
 <p>The automatic fit is frozen as <code>fit_auto</code>, so the optimal
@@ -747,11 +748,11 @@ result lives.</p>
 <span><span class="co">#&gt; [1] 33.36 38.15 44.24 48.06 63.94 72.61</span></span>
 <span><span class="va">res2</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">vl_score_01</span><span class="op">$</span><span class="va">cutpoints</span></span>
 <span><span class="co">#&gt; [1] 42 55 70</span></span>
-<span><span class="va">res2</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span><span class="va">res2</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">feature</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vl_score_01"</span>, <span class="st">"ds_regiao"</span><span class="op">)</span>,</span>
+<span><span class="va">res2</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span><span class="va">res2</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">feature</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vl_score_01"</span>, <span class="st">"ds_region"</span><span class="op">)</span>,</span>
 <span>                 <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"feature"</span>, <span class="st">"algorithm"</span>, <span class="st">"n_bins"</span>, <span class="st">"total_iv"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        feature algorithm n_bins   total_iv</span></span>
 <span><span class="co">#&gt; 1  vl_score_01    manual      4 0.29898958</span></span>
-<span><span class="co">#&gt; 33   ds_regiao    manual      2 0.07392963</span></span></code></pre></div>
+<span><span class="co">#&gt; 33   ds_region    manual      2 0.07392963</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="refitting-the-scorecard">Refitting the scorecard<a class="anchor" aria-label="anchor" href="#refitting-the-scorecard"></a>
@@ -787,11 +788,11 @@ manually binned variable are distributed over its four policy bands.</p>
 <span><span class="co">#&gt; 2: vl_score_01 (42.000000;55.000000] -0.3753944     12</span></span>
 <span><span class="co">#&gt; 3: vl_score_01 (55.000000;70.000000]  0.3836922    -12</span></span>
 <span><span class="co">#&gt; 4: vl_score_01      (70.000000;+Inf]  0.9037063    -28</span></span>
-<span><span class="va">sc</span><span class="op">$</span><span class="va">points</span><span class="op">[</span><span class="va">variable</span> <span class="op">==</span> <span class="st">"ds_regiao"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">variable</span>, <span class="va">bin</span>, <span class="va">woe</span>, <span class="va">points</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;     variable          bin        woe points</span></span>
-<span><span class="co">#&gt;       &lt;char&gt;       &lt;char&gt;      &lt;num&gt;  &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1: ds_regiao      BA%;%RS  0.4985359    -15</span></span>
-<span><span class="co">#&gt; 2: ds_regiao SP%;%RJ%;%MG -0.1492097      5</span></span></code></pre></div>
+<span><span class="va">sc</span><span class="op">$</span><span class="va">points</span><span class="op">[</span><span class="va">variable</span> <span class="op">==</span> <span class="st">"ds_region"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">variable</span>, <span class="va">bin</span>, <span class="va">woe</span>, <span class="va">points</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;     variable                  bin        woe points</span></span>
+<span><span class="co">#&gt;       &lt;char&gt;               &lt;char&gt;      &lt;num&gt;  &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: ds_region        NORTH%;%SOUTH  0.4985359    -15</span></span>
+<span><span class="co">#&gt; 2: ds_region EAST%;%WEST%;%CENTRE -0.1492097      5</span></span></code></pre></div>
 <p>The model card states the provenance in words: which binning
 algorithms the card mixes, whether the shortlist came from the consensus
 or from the lab, how many manual bins it carries and which variables
@@ -804,7 +805,7 @@ well.</p>
 <span><span class="co">#&gt;  $ binning_algorithm: chr "manual, jedi"</span></span>
 <span><span class="co">#&gt;  $ shortlist_source : chr "manual"</span></span>
 <span><span class="co">#&gt;  $ n_manual_bins    : int 2</span></span>
-<span><span class="co">#&gt;  $ manual_bins      : chr "vl_score_01, ds_regiao"</span></span>
+<span><span class="co">#&gt;  $ manual_bins      : chr "vl_score_01, ds_region"</span></span>
 <span><span class="co">#&gt;  $ forced_in        : chr "vl_score_03"</span></span>
 <span><span class="co">#&gt;  $ manual_dropped   : chr "vl_score_10"</span></span>
 <span><span class="co">#&gt;  $ n_decisions      : int 7</span></span>
@@ -818,18 +819,18 @@ well.</p>
 <code><a href="../reference/scr_apply.html">scr_apply()</a></code> scores new rows in R with the frozen
 pre-processing and the frozen bins; the points for
 <code>vl_score_01</code> fall in one of the four policy bands and the
-points for <code>ds_regiao</code> in one of the two regions.</p>
+points for <code>ds_region</code> in one of the two regions.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="va">new</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vl_score_01"</span>, <span class="st">"ds_regiao"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;   vl_score_01 ds_regiao</span></span>
-<span><span class="co">#&gt; 1       71.94        SP</span></span>
-<span><span class="co">#&gt; 2       39.02        RJ</span></span>
-<span><span class="co">#&gt; 3       57.39        MG</span></span>
-<span><span class="co">#&gt; 4       57.38        BA</span></span>
-<span><span class="co">#&gt; 5       54.20        RJ</span></span>
-<span><span class="fu"><a href="../reference/scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">new</span>, what <span class="op">=</span> <span class="st">"points"</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">score</span>, <span class="va">score_points</span>, <span class="va">vl_score_01_points</span>, <span class="va">ds_regiao_points</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;       score score_points vl_score_01_points ds_regiao_points</span></span>
+<span><span class="va">new</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vl_score_01"</span>, <span class="st">"ds_region"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;   vl_score_01 ds_region</span></span>
+<span><span class="co">#&gt; 1       71.94      EAST</span></span>
+<span><span class="co">#&gt; 2       39.02      WEST</span></span>
+<span><span class="co">#&gt; 3       57.39    CENTRE</span></span>
+<span><span class="co">#&gt; 4       57.38     NORTH</span></span>
+<span><span class="co">#&gt; 5       54.20      WEST</span></span>
+<span><span class="fu"><a href="../reference/scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">new</span>, what <span class="op">=</span> <span class="st">"points"</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">score</span>, <span class="va">score_points</span>, <span class="va">vl_score_01_points</span>, <span class="va">ds_region_points</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;       score score_points vl_score_01_points ds_region_points</span></span>
 <span><span class="co">#&gt;       &lt;num&gt;        &lt;num&gt;              &lt;num&gt;            &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1: 544.1540          545                -28                5</span></span>
 <span><span class="co">#&gt; 2: 575.3205          576                 28                5</span></span>
@@ -846,30 +847,30 @@ whole points from that index.</p>
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">sc</span>, table <span class="op">=</span> <span class="st">"prd.customers"</span>, dialect <span class="op">=</span> <span class="st">"databricks"</span><span class="op">)</span></span>
 <span><span class="va">sql_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">sql</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"^-- Provenance"</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; -- Provenance: 2 manually binned (vl_score_01, ds_regiao), 1 forced in (vl_score_03), 1 dropped (vl_score_10) - see the decision ledger</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"WHEN (vl_score_01|ds_regiao) "</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; -- Provenance: 2 manually binned (vl_score_01, ds_region), 1 forced in (vl_score_03), 1 dropped (vl_score_10) - see the decision ledger</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"WHEN (vl_score_01|ds_region) "</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     CASE WHEN vl_score_01 IS NULL OR vl_score_01 IN (-999) THEN 52.75 ELSE vl_score_01 END AS vl_score_01,</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 IS NULL THEN 0</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 &lt;= 42 THEN -0.8929621501396132</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 &gt; 42 AND vl_score_01 &lt;= 55 THEN -0.37539440893887893</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 &gt; 55 AND vl_score_01 &lt;= 70 THEN 0.3836922056211275</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 &gt; 70 THEN 0.9037062554415245</span></span>
-<span><span class="co">#&gt;     WHEN ds_regiao IS NULL THEN 0</span></span>
-<span><span class="co">#&gt;     WHEN ds_regiao IN ('BA', 'RS') THEN 0.4985359152057967</span></span>
-<span><span class="co">#&gt;     WHEN ds_regiao IN ('SP', 'RJ', 'MG') THEN -0.1492097461959896</span></span>
+<span><span class="co">#&gt;     WHEN ds_region IS NULL THEN 0</span></span>
+<span><span class="co">#&gt;     WHEN ds_region IN ('NORTH', 'SOUTH') THEN 0.4985359152057967</span></span>
+<span><span class="co">#&gt;     WHEN ds_region IN ('EAST', 'WEST', 'CENTRE') THEN -0.1492097461959896</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 IS NULL THEN NULL</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 &lt;= 42 THEN 1</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 &gt; 42 AND vl_score_01 &lt;= 55 THEN 2</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 &gt; 55 AND vl_score_01 &lt;= 70 THEN 3</span></span>
 <span><span class="co">#&gt;     WHEN vl_score_01 &gt; 70 THEN 4</span></span>
-<span><span class="co">#&gt;     WHEN ds_regiao IS NULL THEN NULL</span></span>
-<span><span class="co">#&gt;     WHEN ds_regiao IN ('BA', 'RS') THEN 1</span></span>
-<span><span class="co">#&gt;     WHEN ds_regiao IN ('SP', 'RJ', 'MG') THEN 2</span></span>
+<span><span class="co">#&gt;     WHEN ds_region IS NULL THEN NULL</span></span>
+<span><span class="co">#&gt;     WHEN ds_region IN ('NORTH', 'SOUTH') THEN 1</span></span>
+<span><span class="co">#&gt;     WHEN ds_region IN ('EAST', 'WEST', 'CENTRE') THEN 2</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">sql</span>, <span class="fl">8</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       CASE vl_score_06_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -3 WHEN 4 THEN -4 WHEN 5 THEN -5 WHEN 6 THEN -10 WHEN 7 THEN -15 ELSE 0 END AS vl_score_06_points,</span></span>
 <span><span class="co">#&gt;       CASE vl_score_07_idx WHEN 1 THEN 15 WHEN 2 THEN 7 WHEN 3 THEN 6 WHEN 4 THEN 1 WHEN 5 THEN -2 WHEN 6 THEN -8 ELSE 0 END AS vl_score_07_points,</span></span>
 <span><span class="co">#&gt;       CASE vl_score_05_idx WHEN 1 THEN 7 WHEN 2 THEN -3 WHEN 3 THEN -9 WHEN 4 THEN -9 WHEN 5 THEN -15 ELSE 0 END AS vl_score_05_points,</span></span>
-<span><span class="co">#&gt;       CASE ds_canal_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_canal_points,</span></span>
+<span><span class="co">#&gt;       CASE ds_channel_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_channel_points,</span></span>
 <span><span class="co">#&gt;       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points,</span></span>
 <span><span class="co">#&gt;       CASE vl_score_03_idx WHEN 1 THEN 3 WHEN 2 THEN -22 WHEN 3 THEN -19 ELSE 0 END AS vl_score_03_points</span></span>
 <span><span class="co">#&gt;   FROM woe_scr</span></span>

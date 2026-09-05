@@ -66,9 +66,8 @@ yields <code>Inf</code> and contaminates any ordering that depends on the IV.</p
 
 
 <dl><dt id="arg-g">g<a class="anchor" aria-label="anchor" href="#arg-g"></a></dt>
-<dd><p>Group vector (any coercible type). For a character or factor
-<code>g</code>, <code>NA</code> forms a group of its own; for integer codes, <code>NA</code> rows are
-dropped.</p></dd>
+<dd><p>Group vector (any coercible type). Rows where <code>g</code> or <code>y</code> is
+<code>NA</code> are ignored, whatever the type of <code>g</code>.</p></dd>
 
 
 <dt id="arg-y">y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>

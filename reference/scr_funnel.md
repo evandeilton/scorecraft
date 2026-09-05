@@ -101,9 +101,9 @@ head(scr_funnel(res, only_selected = TRUE))
 #> 1: vl_score_01         <NA>     numeric     TRUE 07.approved              1
 #> 2: vl_score_02         <NA>     numeric     TRUE 07.approved              2
 #> 3: vl_score_04         <NA>     numeric     TRUE 07.approved              3
-#> 4:    ds_faixa         <NA> categorical     TRUE 07.approved              4
-#> 5:   vl_tardio         <NA>     numeric     TRUE 07.approved              5
-#> 6:   ds_regiao         <NA> categorical     TRUE 07.approved              6
+#> 4:     ds_band         <NA> categorical     TRUE 07.approved              4
+#> 5:     vl_late         <NA>     numeric     TRUE 07.approved              5
+#> 6:   ds_region         <NA> categorical     TRUE 07.approved              6
 #>    consensus_score votes n_bins   total_iv iv_holdout        ks         psi
 #>              <num> <int>  <int>      <num>      <num>     <num>       <num>
 #> 1:       1.0000000     3      7 0.34639015 0.28772640 0.1981484 0.006635574

@@ -125,6 +125,32 @@ are parameter tables selected by a preset, never prose.
   the observed rate), since the statistic is two-sided.
 - `betareg` (Suggests) powers the beta severity engine of
   [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md).
+- After the documentation audit:
+  [`scr_iv()`](https://evandeilton.github.io/scorecraft/reference/scr_iv.md)
+  ignores `NA` for every group type;
+  [`scr_classing_read()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_spec.md)
+  validates the separator and the spec carries it into
+  [`scr_classing_import()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_spec.md);
+  the `TOO_MANY_BINS` screening rule can fire (the screen reads
+  `max_bins`);
+  [`scr_psi()`](https://evandeilton.github.io/scorecraft/reference/scr_psi.md)
+  stores and prints its thresholds;
+  [`scr_default_rate()`](https://evandeilton.github.io/scorecraft/reference/scr_default_rate.md)
+  reports one long-run mean and benchmarks an optional `lra_adjusted`;
+  one `asset_class` configuration key replaces `pd_asset_class` and
+  `capital_asset_class`;
+  [`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md)
+  always records a reason; the traffic-light convention is red at or
+  below the first threshold in PD, LGD and EAD;
+  [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
+  on an `scr_ead` takes `what`;
+  [`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)
+  gains `verbose` and
+  [`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md)
+  follows `config$verbose`; the `scr_demo` columns carry English names
+  (`vl_partial_*`, `vl_noise_*`, `vl_constant`, `vl_near_const`,
+  `vl_duplicate`, `vl_redundant`, `vl_late`, `ds_region`, `ds_band`,
+  `ds_channel`, `ds_high_card`).
 
 ### Scorecard pipeline hardening
 

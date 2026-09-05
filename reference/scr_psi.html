@@ -127,7 +127,8 @@ uses the union of the observed ones.</p></dd>
     <p>A list of class <code>scr_psi</code> with <code>psi</code>, <code>flag_fixed</code>, <code>critical</code>
 (adjusted critical value), <code>flag_adjusted</code> (<code>"stable"</code> or <code>"shift"</code>),
 <code>n_base</code>, <code>n_compare</code>, <code>n_bins</code> and <code>table</code> (per band: <code>pct_base</code>,
-<code>pct_compare</code>, <code>psi_band</code>).</p>
+<code>pct_compare</code>, <code>psi_band</code>).
+The <code>thresholds</code> and <code>alpha</code> used are stored and printed.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -150,7 +151,7 @@ population stability index. <em>Journal of Risk Model Validation</em>, 14(4),
 <span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">scr_psi</span><span class="op">(</span><span class="va">base</span>, <span class="va">new</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">p</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_psi&gt; PSI = 0.0143 | bands = 10 | n = 5,000 vs 5,000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   fixed threshold (0.10/0.25):       stable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   fixed threshold (0.1/0.25):       stable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   n-adjusted threshold (0.0068):     shift  [Yurdakul &amp; Naranjo, alpha = 0.05]</span>
 <span class="r-in"><span><span class="va">p</span><span class="op">$</span><span class="va">table</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               band n_base n_compare pct_base pct_compare     psi_band</span>

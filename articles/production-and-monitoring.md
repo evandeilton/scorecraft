@@ -61,9 +61,13 @@ the connection class: `rand(seed)` on Spark, Databricks and MySQL,
 `random()` on PostgreSQL, Redshift and DuckDB, and an integer-modulo
 expression on SQLite, whose `random()` returns a signed 64-bit integer
 and cannot be seeded. `sample_expr` overrides the choice for a dialect
-the package does not know. The query is echoed while
+the package does not know. The query is echoed while messages are on:
+[`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)
+follows
 [`scr_verbose()`](https://evandeilton.github.io/scorecraft/reference/scr_verbose.md)
-is on; `config$verbose` does not reach the database functions.
+unless its own `verbose` argument says otherwise, and
+[`scr_run()`](https://evandeilton.github.io/scorecraft/reference/scr_run.md)
+follows `config$verbose`.
 
 ``` r
 
@@ -72,7 +76,7 @@ half <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
 class(half)
 #> [1] "data.table" "data.frame"
 nrow(half)
-#> [1] 2089
+#> [1] 2129
 ```
 
 `max_rows` is a memory guard rather than a second sampler. When it
@@ -86,7 +90,7 @@ capped <- scr_fetch(con, "dtm", max_rows = 1000)
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.238095
 nrow(capped)
-#> [1] 996
+#> [1] 989
 ```
 
 ### Several targets straight from the connection
@@ -114,14 +118,6 @@ follows:
 
 rs <- scr_run(con, "dtm", targets = c("default", "churn"), config = cfg,
               drop = c("id", "ref_date", "default", "churn"))
-#> 
-#> ############### TARGET: default ###############
-#> SQL: select * from dtm
-#> 
-#> ############### TARGET: churn ###############
-#> SQL: select * from dtm
-#> 
-#> Done: 2 of 2 target(s) succeeded.
 rs
 #> <scr_runset> 2 target(s): 2 succeeded, 0 failed
 #> 
@@ -438,9 +434,9 @@ scr_reasons(sc, new, k = 3)
 #>       reason_1 shortfall_1    reason_2 shortfall_2    reason_3 shortfall_3
 #>         <char>       <num>      <char>       <num>      <char>       <num>
 #> 1: vl_score_01   25.197857 vl_score_02   17.828571 vl_score_05    9.054286
-#> 2: vl_score_04    9.052857   vl_tardio    5.716071    ds_canal    5.387857
-#> 3:   vl_tardio   13.716071 vl_score_07    7.605357    ds_canal    5.387857
-#> 4:   ds_regiao   13.807143    ds_faixa   11.932500 vl_score_02   11.828571
+#> 2: vl_score_04    9.052857     vl_late    5.716071  ds_channel    5.387857
+#> 3:     vl_late   13.716071 vl_score_07    7.605357  ds_channel    5.387857
+#> 4:   ds_region   13.807143     ds_band   11.932500 vl_score_02   11.828571
 #> 5: vl_score_02   17.828571 vl_score_05    9.054286 vl_score_01    5.197857
 ```
 
@@ -465,7 +461,7 @@ sql_woe <- unlist(strsplit(scr_sql(res), "\n", fixed = TRUE))
 cat(head(sql_woe, 24), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: ansi
-#> -- Generated on 2026-09-05 13:12:00
+#> -- Generated on 2026-09-05 14:09:08
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
@@ -475,13 +471,13 @@ cat(head(sql_woe, 24), sep = "\n")
 #>     CASE WHEN vl_score_01 IS NULL OR vl_score_01 IN (-999) THEN 52.75 ELSE vl_score_01 END AS vl_score_01,
 #>     CASE WHEN vl_score_02 IS NULL OR vl_score_02 IN (-999) THEN 55.98 ELSE vl_score_02 END AS vl_score_02,
 #>     CASE WHEN vl_score_04 IS NULL OR vl_score_04 IN (-999) THEN 61.835 ELSE vl_score_04 END AS vl_score_04,
-#>     COALESCE(ds_faixa, 'MISSING') AS ds_faixa,
-#>     CASE WHEN vl_tardio IS NULL OR vl_tardio IN (-999) THEN 0.0065000000000000006 ELSE vl_tardio END AS vl_tardio,
-#>     COALESCE(ds_regiao, 'MISSING') AS ds_regiao,
+#>     COALESCE(ds_band, 'MISSING') AS ds_band,
+#>     CASE WHEN vl_late IS NULL OR vl_late IN (-999) THEN 0.0065000000000000006 ELSE vl_late END AS vl_late,
+#>     COALESCE(ds_region, 'MISSING') AS ds_region,
 #>     CASE WHEN vl_score_06 IS NULL OR vl_score_06 IN (-999) THEN 67.815 ELSE vl_score_06 END AS vl_score_06,
 #>     CASE WHEN vl_score_07 IS NULL OR vl_score_07 IN (-999) THEN 71.16 ELSE vl_score_07 END AS vl_score_07,
 #>     CASE WHEN vl_score_05 IS NULL OR vl_score_05 IN (-999) THEN 65.425000000000011 ELSE vl_score_05 END AS vl_score_05,
-#>     COALESCE(ds_canal, 'MISSING') AS ds_canal,
+#>     COALESCE(ds_channel, 'MISSING') AS ds_channel,
 #>     CASE WHEN vl_hist_04 IS NULL OR vl_hist_04 IN (-999) THEN 25 ELSE vl_hist_04 END AS vl_hist_04,
 #>     CASE WHEN vl_score_10 IS NULL OR vl_score_10 IN (-999) THEN 80 ELSE vl_score_10 END AS vl_score_10
 #>   FROM your_table
@@ -518,9 +514,9 @@ sql_sc <- unlist(strsplit(scr_sql(sc, table = "prd.customers", dialect = "databr
 cat(head(sql_sc, 12), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | scorecard of target: default | 12 variables | dialect: databricks
-#> -- Generated on 2026-09-05 13:12:01
+#> -- Generated on 2026-09-05 14:09:09
 #> -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer
-#> -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538
+#> -- score = 491.19665800103655 + -26.318891476654567 * logit | base_points = 538
 #> -- Block 1 (CTE base_scr): pre-processing frozen on train.
 #> -- Block 2 (CTE woe_scr): WOE and bin index, emitted by OptimalBinningWoE::obwoe_sql().
 #> -- Block 3: exact score (from the WOE) and whole points (from the bin index).
@@ -533,23 +529,23 @@ i <- max(which(sql_sc == "SELECT"))
 cat(sql_sc[i:(i + 15)], sep = "\n")
 #> SELECT
 #>     538.30012744760336
-#>       + -29.701043763446282 * vl_score_01_woe
-#>       + -27.130718819754311 * vl_score_02_woe
-#>       + -26.649286859941228 * vl_score_04_woe
-#>       + -30.277321636127542 * ds_faixa_woe
-#>       + -29.966768640958328 * vl_tardio_woe
-#>       + -28.964890297230774 * ds_regiao_woe
-#>       + -28.874743439251926 * vl_score_06_woe
-#>       + -26.679330009797006 * vl_score_07_woe
-#>       + -35.128873453122381 * vl_score_05_woe
-#>       + -33.247622050806406 * ds_canal_woe
-#>       + -30.803729315270584 * vl_hist_04_woe
-#>       + -35.878212555936543 * vl_score_10_woe AS score,
+#>       + -29.70104376344629 * vl_score_01_woe
+#>       + -27.130718819754303 * vl_score_02_woe
+#>       + -26.64928685994122 * vl_score_04_woe
+#>       + -30.277321636127535 * ds_band_woe
+#>       + -29.966768640958321 * vl_late_woe
+#>       + -28.964890297230781 * ds_region_woe
+#>       + -28.874743439251922 * vl_score_06_woe
+#>       + -26.679330009796985 * vl_score_07_woe
+#>       + -35.128873453122374 * vl_score_05_woe
+#>       + -33.247622050806385 * ds_channel_woe
+#>       + -30.803729315270559 * vl_hist_04_woe
+#>       + -35.878212555936535 * vl_score_10_woe AS score,
 #>     vl_score_01_points,
 #>     vl_score_02_points,
 # ... the whole points, and one of the CASE expressions behind them
 cat(grep("AS score_points", sql_sc, value = TRUE), sep = "\n")
-#>     538 + vl_score_01_points + vl_score_02_points + vl_score_04_points + ds_faixa_points + vl_tardio_points + ds_regiao_points + vl_score_06_points + vl_score_07_points + vl_score_05_points + ds_canal_points + vl_hist_04_points + vl_score_10_points AS score_points
+#>     538 + vl_score_01_points + vl_score_02_points + vl_score_04_points + ds_band_points + vl_late_points + ds_region_points + vl_score_06_points + vl_score_07_points + vl_score_05_points + ds_channel_points + vl_hist_04_points + vl_score_10_points AS score_points
 cat(grep("AS vl_score_01_points", sql_sc, value = TRUE), sep = "\n")
 #>       CASE vl_score_01_idx WHEN 1 THEN 61 WHEN 2 THEN 22 WHEN 3 THEN 20 WHEN 4 THEN 16 WHEN 5 THEN -1 WHEN 6 THEN -21 WHEN 7 THEN -30 ELSE 0 END AS vl_score_01_points,
 ```
@@ -620,7 +616,7 @@ mo
 #>   2026-05-01        700      550.2   0.0284 stable       0.0302 stable  
 #>   2026-06-01        700      552.3   0.0129 stable       0.0302 stable  
 #>   largest points shifts (variable @ period):
-#>     vl_tardio                    2026-06-01   CSI 0.4141  shift +1.89 pts
+#>     vl_late                      2026-06-01   CSI 0.4141  shift +1.89 pts
 #>     vl_score_01                  2026-02-01   CSI 0.0039  shift -1.01 pts
 #>     vl_score_04                  2026-02-01   CSI 0.0189  shift +0.80 pts
 #>     vl_score_01                  2026-06-01   CSI 0.0209  shift -0.61 pts
@@ -673,13 +669,13 @@ gap: the change in bin shares weighted by the points of each bin, which
 is the amount by which the variable moved the mean score, with its sign,
 and it is additive across variables.
 
-`vl_tardio` is built to degrade in the last period only, and the monitor
+`vl_late` is built to degrade in the last period only, and the monitor
 finds it: stable for five periods, then a CSI far above both thresholds
 and the largest points shift of the run.
 
 ``` r
 
-mo$csi[variable == "vl_tardio", .(period, n, csi, flag_fixed, critical, flag_adjusted, points_shift)]
+mo$csi[variable == "vl_late", .(period, n, csi, flag_fixed, critical, flag_adjusted, points_shift)]
 #>        period     n         csi flag_fixed   critical flag_adjusted
 #>        <char> <int>       <num>     <char>      <num>        <char>
 #> 1: 2026-01-01   700 0.008873842     stable 0.02248498        stable
@@ -700,11 +696,11 @@ mo$csi[period == max(period)][order(-abs(points_shift))][1:5,
        .(variable, csi, flag_fixed, flag_adjusted, points_shift)]
 #>       variable         csi flag_fixed flag_adjusted points_shift
 #>         <char>       <num>     <char>        <char>        <num>
-#> 1:   vl_tardio 0.414109814      shift         shift    1.8853571
+#> 1:     vl_late 0.414109814      shift         shift    1.8853571
 #> 2: vl_score_01 0.020937580     stable        stable   -0.6107143
 #> 3: vl_score_10 0.008143611     stable        stable    0.4417857
 #> 4: vl_score_02 0.006988276     stable        stable   -0.4057143
-#> 5:    ds_faixa 0.003471581     stable        stable   -0.3767857
+#> 5:     ds_band 0.003471581     stable        stable   -0.3767857
 ```
 
 ### Performance by vintage

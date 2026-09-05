@@ -120,8 +120,8 @@ estimate is subject to an input floor by asset class and collateral. The
 <code>"type1"</code> and <code>"type3"</code> labels of the downturn
 methods below follow the public supervisory guidance on downturn LGD
 estimation (observed impact, and reference value plus add-on); the
-<code>"bcb"</code> parameter preset is the Brazilian text (Resolução BCB
-303/2023).</p>
+<code>"bcb"</code> parameter preset is the Brazilian text (BCB
+Resolution 303/2023).</p>
 </div>
 <div class="section level3">
 <h3 id="the-reference-data-set-scr_workout">The reference data set: <code>scr_workout()</code><a class="anchor" aria-label="anchor" href="#the-reference-data-set-scr_workout"></a>
@@ -501,7 +501,7 @@ floored result.</p>
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">m</span>, table <span class="op">=</span> <span class="st">"prd.defaults"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span><span class="op">)</span></span>
 <span><span class="va">sql_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">sql</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$"</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294914 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998083 THEN 2 ELSE 3 END AS pool</span></span>
+<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294914 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998077 THEN 2 ELSE 3 END AS pool</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor</span></span>
 <span><span class="co">#&gt;     GREATEST(lgd_dt, lgd_floor) AS lgd_final</span></span></code></pre></div>

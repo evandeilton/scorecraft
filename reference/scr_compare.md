@@ -48,14 +48,14 @@ scr_compare(list(default = r1, churn = r2))
 #> 2:         11     9        9           0.325            0     glmnet 0.7262
 #>    auc_lo auc_hi     ks seconds             relaxation
 #>     <num>  <num>  <num>   <num>                 <char>
-#> 1: 0.7065 0.7762 0.3695       2                   none
+#> 1: 0.7065 0.7762 0.3695       1                   none
 #> 2: 0.7086 0.7544 0.3288       1 min_votes reduced to 1
 scr_core(list(default = r1, churn = r2), min_targets = 2)
 #>        feature n_targets mean_rank        targets
 #>         <char>     <int>     <num>         <char>
 #> 1: vl_score_02         2       2.0 churn, default
 #> 2: vl_score_04         2       3.5 churn, default
-#> 3:   ds_regiao         2       6.0 churn, default
+#> 3:   ds_region         2       6.0 churn, default
 #> 4: vl_score_06         2       6.0 churn, default
 #> 5: vl_score_05         2       6.0 churn, default
 #> 6: vl_score_07         2       7.5 churn, default

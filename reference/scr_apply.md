@@ -24,7 +24,7 @@ scr_apply(
 scr_apply(x, newdata, what = c("score", "points", "woe", "all"), ...)
 
 # S3 method for class 'scr_ead'
-scr_apply(x, newdata, ...)
+scr_apply(x, newdata, what = c("all", "ead", "pool"), ...)
 
 # S3 method for class 'scr_lgd'
 scr_apply(x, newdata, what = c("pool", "lgd", "all"), ...)
@@ -62,7 +62,9 @@ scr_apply(x, newdata, ...)
   For `scr_result`: `"woe"`, `"bin"` or `"both"`. For `scr_scorecard`:
   `"score"`, `"points"`, `"woe"` or `"all"`. For `scr_lgd`: `"pool"`
   (pool and pool LGDs), `"lgd"` (adds the predicted LGD) or `"all"`
-  (adds the cure probability and the severity).
+  (adds the cure probability and the severity). For `scr_ead`: `"all"`
+  (default), `"ead"` (pool, measure, applied CCF, predicted EAD and the
+  floor flag) or `"pool"` (pool and measure).
 
 ## Value
 
@@ -113,7 +115,7 @@ str(scr_apply(res, new)[, 1:3])
 #>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...
 #>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...
 #>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...
-#>  - attr(*, ".internal.selfref")=<pointer: 0x558901f14a30> 
+#>  - attr(*, ".internal.selfref")=<pointer: 0x5627ee2a7a30> 
 sc <- scr_scorecard(res)
 head(scr_apply(sc, new))
 #>         link       prob    score score_points
@@ -133,22 +135,22 @@ head(scr_apply(sc, new, what = "points"))
 #> 4: 507.0636          507                 -1                -10
 #> 5: 536.7619          536                 -1                -16
 #> 6: 604.2917          604                 16                  6
-#>    vl_score_04_points ds_faixa_points vl_tardio_points ds_regiao_points
-#>                 <num>           <num>            <num>            <num>
-#> 1:                 24               2                5                4
-#> 2:                 -8               0               -5                0
-#> 3:                  1               2              -13               10
-#> 4:                  1             -11               -5              -13
-#> 5:                  1               0                5                0
-#> 6:                  9              13                5                4
-#>    vl_score_06_points vl_score_07_points vl_score_05_points ds_canal_points
-#>                 <num>              <num>              <num>           <num>
-#> 1:                 -3                 14                 -9               9
-#> 2:                  4                  1                 -3              -5
-#> 3:                  4                 -7                 -3              -5
-#> 4:                 -3                  6                 -3               9
-#> 5:                  9                  6                 -9               4
-#> 6:                -15                 14                  6               9
+#>    vl_score_04_points ds_band_points vl_late_points ds_region_points
+#>                 <num>          <num>          <num>            <num>
+#> 1:                 24              2              5                4
+#> 2:                 -8              0             -5                0
+#> 3:                  1              2            -13               10
+#> 4:                  1            -11             -5              -13
+#> 5:                  1              0              5                0
+#> 6:                  9             13              5                4
+#>    vl_score_06_points vl_score_07_points vl_score_05_points ds_channel_points
+#>                 <num>              <num>              <num>             <num>
+#> 1:                 -3                 14                 -9                 9
+#> 2:                  4                  1                 -3                -5
+#> 3:                  4                 -7                 -3                -5
+#> 4:                 -3                  6                 -3                 9
+#> 5:                  9                  6                 -9                 4
+#> 6:                -15                 14                  6                 9
 #>    vl_score_10_points vl_hist_04_points
 #>                 <num>             <num>
 #> 1:                  2                -3

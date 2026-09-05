@@ -104,14 +104,6 @@ cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
                   xgb_rounds = 60, n_boot = 20)
 rs <- scr_run(con, "dtm", targets = c("default", "churn"), config = cfg,
               drop = c("id", "ref_date", "default", "churn"))
-#> 
-#> ############### TARGET: default ###############
-#> SQL: select * from dtm
-#> 
-#> ############### TARGET: churn ###############
-#> SQL: select * from dtm
-#> 
-#> Done: 2 of 2 target(s) succeeded.
 rs
 #> <scr_runset> 2 target(s): 2 succeeded, 0 failed
 #> 

@@ -63,7 +63,7 @@ scr_psi(
 A list of class `scr_psi` with `psi`, `flag_fixed`, `critical` (adjusted
 critical value), `flag_adjusted` (`"stable"` or `"shift"`), `n_base`,
 `n_compare`, `n_bins` and `table` (per band: `pct_base`, `pct_compare`,
-`psi_band`).
+`psi_band`). The `thresholds` and `alpha` used are stored and printed.
 
 ## References
 
@@ -86,7 +86,7 @@ new  <- stats::rnorm(5000, mean = 0.15)
 p <- scr_psi(base, new)
 p
 #> <scr_psi> PSI = 0.0143 | bands = 10 | n = 5,000 vs 5,000
-#>   fixed threshold (0.10/0.25):       stable
+#>   fixed threshold (0.1/0.25):       stable
 #>   n-adjusted threshold (0.0068):     shift  [Yurdakul & Naranjo, alpha = 0.05]
 p$table
 #>               band n_base n_compare pct_base pct_compare     psi_band

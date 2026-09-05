@@ -147,14 +147,6 @@ target.</p>
 <span class="r-in"><span>                  xgb_rounds <span class="op">=</span> <span class="fl">60</span>, n_boot <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu">scr_run</span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, targets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"churn"</span><span class="op">)</span>, config <span class="op">=</span> <span class="va">cfg</span>,</span></span>
 <span class="r-in"><span>              drop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"ref_date"</span>, <span class="st">"default"</span>, <span class="st">"churn"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ############### TARGET: default ###############</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> SQL: select * from dtm</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ############### TARGET: churn ###############</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> SQL: select * from dtm</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Done: 2 of 2 target(s) succeeded.</span>
 <span class="r-in"><span><span class="va">rs</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_runset&gt; 2 target(s): 2 succeeded, 0 failed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

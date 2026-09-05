@@ -38,7 +38,7 @@ scr_lgd_floor(
 
 - asset_class:
 
-  Row of `params$lgd_floor`; `NULL` uses `capital_asset_class` of the
+  Row of `params$lgd_floor`; `NULL` uses `asset_class` of the
   configuration.
 
 - secured_share:

@@ -7,9 +7,11 @@ computes for every cohort start the population of non-defaulted units,
 the share that defaults within `horizon` months, optionally by `grade`
 or `segment` (as observed at the cohort start) and exposure-weighted
 when `exposure` is given. The long-run average is the arithmetic mean of
-the cohort rates; the benchmark is the larger of the last five years'
-mean and the whole period's mean, and a flag records when the average
-sits below it.
+the cohort rates. When the analyst proposes an adjusted value
+(`lra_adjusted`, for instance after judging that the period lacks bad
+years), it is benchmarked against the larger of the last five years'
+mean and the whole period's mean, and a flag records when it sits below
+that benchmark.
 
 ## Usage
 
@@ -24,6 +26,7 @@ scr_default_rate(
   grade = NULL,
   segment = NULL,
   exposure = NULL,
+  lra_adjusted = NULL,
   config = scr_config()
 )
 ```
@@ -54,6 +57,11 @@ scr_default_rate(
 
   Optional column name; adds exposure-weighted rates.
 
+- lra_adjusted:
+
+  Optional adjusted long-run average proposed by the analyst, in
+  `[0, 1]`; benchmarked and flagged, never applied.
+
 - config:
 
   A
@@ -64,7 +72,7 @@ scr_default_rate(
 
 An object of class `scr_dr`: `table` (cohort rates, by grade or segment
 when given), `portfolio` (one row per cohort: `n`, `defaults`, `dr`),
-`lra` (`mean`, `weighted_mean`, `recent5_mean`, `all_mean`, `benchmark`,
+`lra` (`mean`, `weighted_mean`, `recent5_mean`, `benchmark`, `adjusted`,
 `flag_below_benchmark`, `min`, `max`, `sd`, `n_cohorts`, `years`),
 `horizon` and `by`.
 
@@ -83,7 +91,7 @@ dr <- scr_default_rate(d, by = "quarter")
 dr
 #> <scr_dr> 8 quarterly cohorts over 1.7 years | horizon 12 months
 #>   default rate: mean 12.32% | weighted 12.30% | min 10.83% | max 14.19% | sd 1.11%
-#>   long-run average 12.32% vs benchmark 12.32% (max of last-5-years 12.32% and all-years 12.32%)
+#>   long-run average 12.32% | benchmark 12.32% (max of last-5-years 12.32% and all-years 12.32%)
 #>   note: fewer than five years of cohorts; the average is not a long-run one yet
 dr$table
 #>        cohort     n defaults        dr

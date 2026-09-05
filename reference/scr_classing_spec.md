@@ -36,8 +36,10 @@ scr_classing_import(lab, file)
 
 - sep:
 
-  Bin separator used in `categories` (the configuration's
-  `bin_separator`).
+  Bin separator of the `categories` column (the configuration's
+  `bin_separator`). It is validated (no empty category, no category in
+  two bins) and recorded on the spec, so that `scr_classing_import()`
+  refuses a spec read with a different separator.
 
 ## Value
 

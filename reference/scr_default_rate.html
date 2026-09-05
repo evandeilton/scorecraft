@@ -4,16 +4,20 @@ default column by unit and month), computes for every cohort start the
 population of non-defaulted units, the share that defaults within
 horizon months, optionally by grade or segment (as observed at the
 cohort start) and exposure-weighted when exposure is given. The long-run
-average is the arithmetic mean of the cohort rates; the benchmark is the
-larger of the last five years' mean and the whole period's mean, and a
-flag records when the average sits below it."><meta property="og:description" content="From a flagged panel (an scr_default() object or any table with a 0/1
+average is the arithmetic mean of the cohort rates. When the analyst
+proposes an adjusted value (lra_adjusted, for instance after judging
+that the period lacks bad years), it is benchmarked against the larger of
+the last five years' mean and the whole period's mean, and a flag records
+when it sits below that benchmark."><meta property="og:description" content="From a flagged panel (an scr_default() object or any table with a 0/1
 default column by unit and month), computes for every cohort start the
 population of non-defaulted units, the share that defaults within
 horizon months, optionally by grade or segment (as observed at the
 cohort start) and exposure-weighted when exposure is given. The long-run
-average is the arithmetic mean of the cohort rates; the benchmark is the
-larger of the last five years' mean and the whole period's mean, and a
-flag records when the average sits below it."><meta property="og:image" content="https://evandeilton.github.io/scorecraft/logo.png"></head><body>
+average is the arithmetic mean of the cohort rates. When the analyst
+proposes an adjusted value (lra_adjusted, for instance after judging
+that the period lacks bad years), it is benchmarked against the larger of
+the last five years' mean and the whole period's mean, and a flag records
+when it sits below that benchmark."><meta property="og:image" content="https://evandeilton.github.io/scorecraft/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -66,9 +70,11 @@ default column by unit and month), computes for every cohort start the
 population of non-defaulted units, the share that defaults within
 <code>horizon</code> months, optionally by <code>grade</code> or <code>segment</code> (as observed at the
 cohort start) and exposure-weighted when <code>exposure</code> is given. The long-run
-average is the arithmetic mean of the cohort rates; the benchmark is the
-larger of the last five years' mean and the whole period's mean, and a
-flag records when the average sits below it.</p>
+average is the arithmetic mean of the cohort rates. When the analyst
+proposes an adjusted value (<code>lra_adjusted</code>, for instance after judging
+that the period lacks bad years), it is benchmarked against the larger of
+the last five years' mean and the whole period's mean, and a flag records
+when it sits below that benchmark.</p>
     </div>
 
     <div class="section level2">
@@ -83,6 +89,7 @@ flag records when the average sits below it.</p>
 <span>  grade <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  segment <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  exposure <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lra_adjusted <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  config <span class="op">=</span> <span class="fu"><a href="scr_config.html">scr_config</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -115,6 +122,11 @@ flag records when the average sits below it.</p>
 <dd><p>Optional column name; adds exposure-weighted rates.</p></dd>
 
 
+<dt id="arg-lra-adjusted">lra_adjusted<a class="anchor" aria-label="anchor" href="#arg-lra-adjusted"></a></dt>
+<dd><p>Optional adjusted long-run average proposed by the
+analyst, in <code>[0, 1]</code>; benchmarked and flagged, never applied.</p></dd>
+
+
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
 <dd><p>A <code><a href="scr_config.html">scr_config()</a></code>; only <code>pd_dr_by</code> is read (the default of
 <code>by</code>).</p></dd>
@@ -124,8 +136,8 @@ flag records when the average sits below it.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>scr_dr</code>: <code>table</code> (cohort rates, by grade or
 segment when given), <code>portfolio</code> (one row per cohort: <code>n</code>, <code>defaults</code>,
-<code>dr</code>), <code>lra</code> (<code>mean</code>, <code>weighted_mean</code>, <code>recent5_mean</code>, <code>all_mean</code>,
-<code>benchmark</code>, <code>flag_below_benchmark</code>, <code>min</code>, <code>max</code>, <code>sd</code>, <code>n_cohorts</code>,
+<code>dr</code>), <code>lra</code> (<code>mean</code>, <code>weighted_mean</code>, <code>recent5_mean</code>, <code>benchmark</code>,
+<code>adjusted</code>, <code>flag_below_benchmark</code>, <code>min</code>, <code>max</code>, <code>sd</code>, <code>n_cohorts</code>,
 <code>years</code>), <code>horizon</code> and <code>by</code>.</p>
     </div>
     <div class="section level2">
@@ -143,7 +155,7 @@ segment when given), <code>portfolio</code> (one row per cohort: <code>n</code>,
 <span class="r-in"><span><span class="va">dr</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_dr&gt; 8 quarterly cohorts over 1.7 years | horizon 12 months</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   default rate: mean 12.32% | weighted 12.30% | min 10.83% | max 14.19% | sd 1.11%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   long-run average 12.32% vs benchmark 12.32% (max of last-5-years 12.32% and all-years 12.32%)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   long-run average 12.32% | benchmark 12.32% (max of last-5-years 12.32% and all-years 12.32%)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   note: fewer than five years of cohorts; the average is not a long-run one yet</span>
 <span class="r-in"><span><span class="va">dr</span><span class="op">$</span><span class="va">table</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        cohort     n defaults        dr</span>

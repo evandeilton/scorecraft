@@ -45,7 +45,7 @@ scr_pd(
 
 - asset_class:
 
-  Asset class of the floor; `NULL` uses `config$pd_asset_class`.
+  Asset class of the floor; `NULL` uses `config$asset_class`.
 
 - philosophy:
 
@@ -125,7 +125,7 @@ cat(tail(scr_sql(pd), 8), sep = "\n")
 #> -- Block 4: rating grade and final PD from the score cut points (4 grades, higher_is_safer)
 #> SELECT
 #>     s.*,
-#>     CASE WHEN score <= 503.11688107909112 THEN 4 WHEN score <= 535.6113744573629 THEN 3 WHEN score <= 562.8474695224495 THEN 2 ELSE 1 END AS grade,
-#>     CASE WHEN score <= 503.11688107909112 THEN 0.45234017577521279 WHEN score <= 535.6113744573629 THEN 0.3053654350250784 WHEN score <= 562.8474695224495 THEN 0.15257567651855442 ELSE 0.04749931808441589 END AS pd_final
+#>     CASE WHEN score <= 503.11688107909117 THEN 4 WHEN score <= 535.6113744573629 THEN 3 WHEN score <= 562.84746952244961 THEN 2 ELSE 1 END AS grade,
+#>     CASE WHEN score <= 503.11688107909117 THEN 0.45234017577521279 WHEN score <= 535.6113744573629 THEN 0.3053654350250784 WHEN score <= 562.84746952244961 THEN 0.15257567651855442 ELSE 0.04749931808441589 END AS pd_final
 #> FROM score_scr s;
 ```

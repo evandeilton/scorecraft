@@ -69,7 +69,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = c("id", "churn"), da
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.9s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.5s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -85,8 +85,8 @@ res
 #>    1. vl_score_01                                  IV  0.346  KS 0.198
 #>    2. vl_score_02                                  IV  0.172  KS 0.156
 #>    3. vl_score_04                                  IV  0.124  KS 0.120
-#>    4. ds_faixa                                     IV  0.081  KS 0.110
-#>    5. vl_tardio                                    IV  0.071  KS 0.120
+#>    4. ds_band                                      IV  0.081  KS 0.110
+#>    5. vl_late                                      IV  0.071  KS 0.120
 #>   ... (+7) - scr_selected() for the list
 #> 
 #> Models (hold-out)
@@ -117,9 +117,9 @@ head(scr_funnel(res, only_selected = TRUE)[, .(feature, total_iv, iv_holdout, ks
 #> 1: vl_score_01 0.34639015 0.28772640 0.1981484 0.006635574            stable
 #> 2: vl_score_02 0.17206972 0.12336796 0.1564626 0.005346830            stable
 #> 3: vl_score_04 0.12430307 0.11773607 0.1199427 0.003216554            stable
-#> 4:    ds_faixa 0.08054551 0.07804157 0.1100565 0.001317467            stable
-#> 5:   vl_tardio 0.07109472 0.06384879 0.1201400 0.104196466             shift
-#> 6:   ds_regiao 0.08464808 0.09714339 0.1141337 0.006365199            stable
+#> 4:     ds_band 0.08054551 0.07804157 0.1100565 0.001317467            stable
+#> 5:     vl_late 0.07109472 0.06384879 0.1201400 0.104196466             shift
+#> 6:   ds_region 0.08464808 0.09714339 0.1141337 0.006365199            stable
 ```
 
 ## Scorecard and alignment
@@ -239,9 +239,9 @@ scr_reasons(sc, new, k = 2)
 #>       reason_1 shortfall_1    reason_2 shortfall_2
 #>         <char>       <num>      <char>       <num>
 #> 1: vl_score_01   25.197857 vl_score_02   17.828571
-#> 2: vl_score_04    9.052857   vl_tardio    5.716071
-#> 3:   vl_tardio   13.716071 vl_score_07    7.605357
-#> 4:   ds_regiao   13.807143    ds_faixa   11.932500
+#> 2: vl_score_04    9.052857     vl_late    5.716071
+#> 3:     vl_late   13.716071 vl_score_07    7.605357
+#> 4:   ds_region   13.807143     ds_band   11.932500
 #> 5: vl_score_02   17.828571 vl_score_05    9.054286
 ```
 
@@ -251,7 +251,7 @@ cat(tail(scr_sql(sc, table = "prd.customers", dialect = "databricks"), 8), sep =
 #>       CASE vl_score_06_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -3 WHEN 4 THEN -4 WHEN 5 THEN -5 WHEN 6 THEN -10 WHEN 7 THEN -15 ELSE 0 END AS vl_score_06_points,
 #>       CASE vl_score_07_idx WHEN 1 THEN 14 WHEN 2 THEN 6 WHEN 3 THEN 6 WHEN 4 THEN 1 WHEN 5 THEN -2 WHEN 6 THEN -7 ELSE 0 END AS vl_score_07_points,
 #>       CASE vl_score_05_idx WHEN 1 THEN 6 WHEN 2 THEN -3 WHEN 3 THEN -9 WHEN 4 THEN -9 WHEN 5 THEN -14 ELSE 0 END AS vl_score_05_points,
-#>       CASE ds_canal_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_canal_points,
+#>       CASE ds_channel_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_channel_points,
 #>       CASE vl_score_10_idx WHEN 1 THEN 2 WHEN 2 THEN -6 WHEN 3 THEN -21 ELSE 0 END AS vl_score_10_points,
 #>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points
 #>   FROM woe_scr
@@ -277,7 +277,7 @@ scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default", n_boot = 30
 #>   2026-05-01        700      550.2   0.0284 stable       0.0302 stable  
 #>   2026-06-01        700      552.3   0.0129 stable       0.0302 stable  
 #>   largest points shifts (variable @ period):
-#>     vl_tardio                    2026-06-01   CSI 0.4141  shift +1.89 pts
+#>     vl_late                      2026-06-01   CSI 0.4141  shift +1.89 pts
 #>     vl_score_01                  2026-02-01   CSI 0.0039  shift -1.01 pts
 #>     vl_score_04                  2026-02-01   CSI 0.0189  shift +0.80 pts
 #>     vl_score_01                  2026-06-01   CSI 0.0209  shift -0.61 pts
@@ -301,11 +301,11 @@ strategy), the SQL files and a Markdown summary.
 
 out <- file.path(tempdir(), "scorecraft-vignette")
 basename(unlist(scr_export(sc, out, stamp = FALSE)$files))
-#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/scorecard_default.xlsx
-#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/validation_default.xlsx
-#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/strategy_default.xlsx
-#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/sql_score_default.sql
-#>   /tmp/Rtmp6xQNJC/scorecraft-vignette/sql_woe_default.sql
+#>   /tmp/Rtmpnh7Mjv/scorecraft-vignette/scorecard_default.xlsx
+#>   /tmp/Rtmpnh7Mjv/scorecraft-vignette/validation_default.xlsx
+#>   /tmp/Rtmpnh7Mjv/scorecraft-vignette/strategy_default.xlsx
+#>   /tmp/Rtmpnh7Mjv/scorecraft-vignette/sql_score_default.sql
+#>   /tmp/Rtmpnh7Mjv/scorecraft-vignette/sql_woe_default.sql
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  
 #> [5] "sql_woe_default.sql"

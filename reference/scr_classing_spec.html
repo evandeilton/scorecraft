@@ -96,7 +96,10 @@ For <code>scr_classing_import()</code>, a path or an <code>scr_classing_spec</co
 
 
 <dt id="arg-sep">sep<a class="anchor" aria-label="anchor" href="#arg-sep"></a></dt>
-<dd><p>Bin separator used in <code>categories</code> (the configuration's <code>bin_separator</code>).</p></dd>
+<dd><p>Bin separator of the <code>categories</code> column (the configuration's
+<code>bin_separator</code>). It is validated (no empty category, no category in
+two bins) and recorded on the spec, so that <code>scr_classing_import()</code>
+refuses a spec read with a different separator.</p></dd>
 
 </dl></div>
     <div class="section level2">

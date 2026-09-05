@@ -7,7 +7,7 @@ groupings that maximise the information value of a variable subject to
 the admission rules (minimum bin size, monotonicity, hold-out
 stability). What it cannot know is how the business reads the variable.
 A bureau score is communicated to underwriters in policy bands; a region
-is priced as north and south, not as five states; an age is quoted in
+is priced as edge and core, not as five regions; an age is quoted in
 decades. A scorecard whose bins cut at 33.36 and 48.06 is correct, but
 nobody in the credit committee can explain it, and a bin nobody can
 explain is a bin nobody will defend when the model is challenged.
@@ -44,8 +44,8 @@ cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
 res <- scr_select(scr_demo, "default", config = cfg,
                   drop = c("id", "churn"), date_col = "ref_date")
 scr_selected(res)
-#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  
-#>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   
+#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    
+#>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" 
 #> [11] "vl_hist_04"  "vl_score_10"
 ```
 
@@ -61,7 +61,7 @@ defaults to the system user.
 
 lab <- scr_coarse_classing(res, author = "analyst")
 lab
-#> <scr_classing> target "default" | opened 2026-09-05 13:11 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 14:08 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)
 ```
 
@@ -98,28 +98,28 @@ ov <- scr_classing_view(lab)
 #>   vl_hist_03__sp               optimal      2    0.0357    0.0764  0.0006 ACCEPTABLE  -
 #>   vl_hist_04                   optimal      3    0.0332    0.0809  0.0047 ACCEPTABLE  yes
 #>   vl_hist_04__sp               optimal      2    0.0642    0.1053  0.0058 ACCEPTABLE  -
-#>   vl_parcial_01                optimal      5    0.0045    0.0144  0.0051 REVIEW      -
-#>   vl_parcial_01__sp            optimal      2    0.0020    0.0036  0.0002 REVIEW      -
-#>   vl_parcial_02                optimal      4    0.0036    0.0111  0.0013 REVIEW      -
-#>   vl_parcial_02__sp            optimal      2    0.0031    0.0062  0.0002 REVIEW      -
-#>   vl_tardio                    optimal      7    0.0711    0.0638  0.1042 ACCEPTABLE  yes
-#>   vl_ruido_01                  optimal      3    0.0031    0.0079  0.0015 REVIEW      -
-#>   vl_ruido_02                  optimal      6    0.0084    0.0231  0.0062 REVIEW      -
-#>   vl_ruido_03                  optimal      5    0.0188    0.0173  0.0039 REVIEW      -
-#>   vl_ruido_04                  optimal      3    0.0053    0.0192  0.0004 REVIEW      -
-#>   vl_ruido_05                  optimal      3    0.0018    0.0020  0.0050 REVIEW      -
-#>   vl_ruido_06                  optimal      6    0.0024    0.0501  0.0032 REVIEW      -
-#>   vl_redundante                optimal      7    0.1743    0.1071  0.0065 ACCEPTABLE  -
-#>   ds_regiao                    optimal      5    0.0846    0.0971  0.0064 ACCEPTABLE  yes
-#>   ds_faixa                     optimal      4    0.0805    0.0780  0.0013 ACCEPTABLE  yes
-#>   ds_canal                     optimal      3    0.0279    0.0438  0.0003 ACCEPTABLE  yes
+#>   vl_partial_01                optimal      5    0.0045    0.0144  0.0051 REVIEW      -
+#>   vl_partial_01__sp            optimal      2    0.0020    0.0036  0.0002 REVIEW      -
+#>   vl_partial_02                optimal      4    0.0036    0.0111  0.0013 REVIEW      -
+#>   vl_partial_02__sp            optimal      2    0.0031    0.0062  0.0002 REVIEW      -
+#>   vl_late                      optimal      7    0.0711    0.0638  0.1042 ACCEPTABLE  yes
+#>   vl_noise_01                  optimal      3    0.0031    0.0079  0.0015 REVIEW      -
+#>   vl_noise_02                  optimal      6    0.0084    0.0231  0.0062 REVIEW      -
+#>   vl_noise_03                  optimal      5    0.0188    0.0173  0.0039 REVIEW      -
+#>   vl_noise_04                  optimal      3    0.0053    0.0192  0.0004 REVIEW      -
+#>   vl_noise_05                  optimal      3    0.0018    0.0020  0.0050 REVIEW      -
+#>   vl_noise_06                  optimal      6    0.0024    0.0501  0.0032 REVIEW      -
+#>   vl_redundant                 optimal      7    0.1743    0.1071  0.0065 ACCEPTABLE  -
+#>   ds_region                    optimal      5    0.0846    0.0971  0.0064 ACCEPTABLE  yes
+#>   ds_band                      optimal      4    0.0805    0.0780  0.0013 ACCEPTABLE  yes
+#>   ds_channel                   optimal      3    0.0279    0.0438  0.0003 ACCEPTABLE  yes
 #>   ds_optin                     optimal      3    0.0065    0.0032  0.0019 REVIEW      -
 #>   vl_hist_05__sp               optimal      2    0.0191    0.0428  0.0006 REVIEW      -
 ```
 
 With a variable, the view is the bin table with train and hold-out side
 by side, plus a text bar chart of the event rate. `vl_score_01` is a
-numeric with seven optimal bins; `ds_regiao` is a categorical with one
+numeric with seven optimal bins; `ds_region` is a categorical with one
 bin per state.
 
 ``` r
@@ -147,15 +147,15 @@ scr_classing_view(lab, "vl_score_01")
 
 ``` r
 
-scr_classing_view(lab, "ds_regiao")
-#> <scr_classing> ds_regiao (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)
+scr_classing_view(lab, "ds_region")
+#> <scr_classing> ds_region (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)
 #>   monotone: yes | min bin 7.9% | PSI 0.0064 (stable) | KS 0.114 | degenerate bins: 0 | verdict: ACCEPTABLE
 #>    id  bin                                  n      %  events   rate      WOE      IV |  n.hold      %    rate WOE.hold
-#>     1  MG                                 539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130
-#>     2  SP                               1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058
-#>     3  RJ                                 582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419
-#>     4  BA                                 318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599
-#>     5  RS                                 222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312
+#>     1  CENTRE                             539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130
+#>     2  EAST                             1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058
+#>     3  WEST                               582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419
+#>     4  NORTH                              318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599
+#>     5  SOUTH                              222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312
 #>   event rate by bin (train | hold-out)
 #>     1  ########            10.6% | ##########          13.0%
 #>     2  ##########          12.6% | ###########         13.8%
@@ -184,7 +184,7 @@ Suppose underwriting quotes `vl_score_01` in the bands below 40, 40 to
 
 p_breaks <- scr_classing_propose(lab, "vl_score_01", breaks = c(40, 55, 70))
 p_breaks
-#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-05 13:11
+#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-05 14:08
 #>                         optimal     manual      delta
 #>   n_bins                      7          4         -3
 #>   iv_train               0.3464     0.2993    -0.0471
@@ -224,7 +224,7 @@ p_merge$entry$cutpoints
 p_split <- scr_classing_propose(lab, "vl_score_01",
                                 split = c(1, res$fit$results$vl_score_01$cutpoints[1] - 5))
 p_split
-#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-05 13:11
+#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-05 14:08
 #>                         optimal     manual      delta
 #>   n_bins                      7          8          1
 #>   iv_train               0.3464     0.3561     0.0098
@@ -247,6 +247,7 @@ p_split
 #>     8  (72.610000;+Inf]                   145   5.2%  31.0%   0.996 |      61   4.4%  34.4%   1.130
 #>   Warnings
 #>     - NOT_MONOTONIC
+#>     - TOO_MANY_BINS
 #>   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.
 ```
 
@@ -268,11 +269,11 @@ the configuration’s separator, exactly as the binning engine writes it.
 
 ``` r
 
-p_groups <- scr_classing_propose(lab, "ds_regiao",
-                                 groups = list(south = c("BA", "RS"),
-                                               north = c("SP", "RJ", "MG")))
+p_groups <- scr_classing_propose(lab, "ds_region",
+                                 groups = list(edge = c("NORTH", "SOUTH"),
+                                               core = c("EAST", "WEST", "CENTRE")))
 p_groups
-#> <scr_classing_proposal> P004 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-05 13:11
+#> <scr_classing_proposal> P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-05 14:08
 #>                         optimal     manual      delta
 #>   n_bins                      5          2         -3
 #>   iv_train               0.0846     0.0739    -0.0107
@@ -285,8 +286,8 @@ p_groups
 #>   n_degenerate                0          0          0
 #>   monotonic                   1          1          0
 #>   manual bins (train | hold-out)
-#>     1  BA | RS                            540  19.3%  21.5%   0.499 |     279  19.9%  21.9%   0.501
-#>     2  SP | RJ | MG                     2,260  80.7%  12.5%  -0.149 |   1,121  80.1%  12.7%  -0.156
+#>     1  NORTH | SOUTH                      540  19.3%  21.5%   0.499 |     279  19.9%  21.9%   0.501
+#>     2  EAST | WEST | CENTRE             2,260  80.7%  12.5%  -0.149 |   1,121  80.1%  12.7%  -0.156
 #>   Warnings
 #>     - IV_LOSS_VS_OPTIMAL
 #>   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.
@@ -300,11 +301,11 @@ catch-all (`is_other`).
 
 ``` r
 
-p_other <- scr_classing_propose(lab, "ds_regiao",
-                                groups = list(south = c("BA", "RS"), rest = "SP"),
+p_other <- scr_classing_propose(lab, "ds_region",
+                                groups = list(edge = c("NORTH", "SOUTH"), rest = "EAST"),
                                 other_to = "rest")
 p_other$entry$bin
-#> [1] "BA%;%RS"      "SP%;%RJ%;%MG"
+#> [1] "NORTH%;%SOUTH"        "EAST%;%WEST%;%CENTRE"
 p_other$entry$manual$is_other
 #> [1] FALSE  TRUE
 ```
@@ -316,7 +317,7 @@ kept on its own. `missing_to` folds it into another bin.
 
 p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
 p_missing
-#> <scr_classing_proposal> P006 ds_optin | missing_to = 1 | 2026-09-05 13:11
+#> <scr_classing_proposal> P006 ds_optin | missing_to = 1 | 2026-09-05 14:08
 #>                         optimal     manual      delta
 #>   n_bins                      3          2         -1
 #>   iv_train               0.0065     0.0000    -0.0065
@@ -329,8 +330,8 @@ p_missing
 #>   n_degenerate                0          0          0
 #>   monotonic                   1          1          0
 #>   manual bins (train | hold-out)
-#>     1  SIM | MISSING                    1,564  55.9%  14.3%   0.001 |     753  53.8%  13.9%  -0.046
-#>     2  NAO                              1,236  44.1%  14.2%  -0.001 |     647  46.2%  15.1%   0.051
+#>     1  YES | MISSING                    1,564  55.9%  14.3%   0.001 |     753  53.8%  13.9%  -0.046
+#>     2  NO                               1,236  44.1%  14.2%  -0.001 |     647  46.2%  15.1%   0.051
 #>   Warnings
 #>     - IV_BELOW_MIN
 #>     - IV_LOW_ON_HOLDOUT
@@ -349,7 +350,7 @@ lab-specific rules. Codes fall into two tiers.
   the hold-out codes (`IV_DROPS_ON_HOLDOUT`, `IV_LOW_ON_HOLDOUT`,
   `PSI_UNSTABLE`, …) and `IV_LOSS_VS_OPTIMAL`, raised when the hold-out
   IV falls more than `lab_max_iv_loss` (10% by default) below the
-  optimal one. The `ds_regiao` grouping is a `REVIEW` for exactly that
+  optimal one. The `ds_region` grouping is a `REVIEW` for exactly that
   reason: two regions lose about a fifth of the hold-out IV of five
   states.
 - **Blocking** codes give a `BLOCKED` verdict: an empty bin, a
@@ -378,8 +379,8 @@ accepted in turn.
 
 ``` r
 
-lab <- scr_classing_accept(lab, p_groups, reason = "north/south is what pricing uses")
-#>   ds_regiao: P004 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
+lab <- scr_classing_accept(lab, p_groups, reason = "edge/core is what pricing uses")
+#>   ds_region: P004 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
 ```
 
 The `ds_optin` proposal erased what little signal the variable had
@@ -389,7 +390,7 @@ keeps its optimal bins. A discarded proposal is a ledger row too.
 ``` r
 
 p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
-lab <- scr_classing_discard(lab, p_missing, reason = "folding MISSING into SIM erases the signal")
+lab <- scr_classing_discard(lab, p_missing, reason = "folding MISSING into YES erases the signal")
 ```
 
 A blocking rule cannot be accepted through the normal path. A break at
@@ -475,11 +476,11 @@ final choice.
 ``` r
 
 lab
-#> <scr_classing> target "default" | opened 2026-09-05 13:11 by analyst | 37 variables | 8 proposals: 2 accepted, 1 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 14:08 by analyst | 37 variables | 8 proposals: 2 accepted, 1 discarded
 #>   variable                   action      bins          IV train       IV hold-out verdict     reason
 #>   vl_score_01                accepted  7->4     0.3464->0.2993     0.2877->0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti
-#>   ds_regiao                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      north/south is what pricing uses
-#>   ds_optin                   discard  P007: folding MISSING into SIM erases the sign
+#>   ds_region                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      edge/core is what pricing uses
+#>   ds_optin                   discard  P007: folding MISSING into YES erases the sign
 #>   final choice: 12 variables | consensus 12 | force: vl_score_03 | drop: vl_score_10
 ```
 
@@ -495,15 +496,15 @@ scr_decisions(lab)[, .(seq, variable, action, proposal_id, verdict, reason)]
 #>      seq    variable  action proposal_id    verdict
 #>    <int>      <char>  <char>      <char>     <char>
 #> 1:     1 vl_score_01  accept        P001 ACCEPTABLE
-#> 2:     2   ds_regiao  accept        P004     REVIEW
+#> 2:     2   ds_region  accept        P004     REVIEW
 #> 3:     3    ds_optin discard        P007     REVIEW
 #> 4:     4 vl_score_03   force        <NA>       <NA>
 #> 5:     5 vl_score_10    drop        <NA>       <NA>
 #>                                        reason
 #>                                        <char>
 #> 1: policy bands 40/55/70 used by underwriting
-#> 2:           north/south is what pricing uses
-#> 3: folding MISSING into SIM erases the signal
+#> 2:             edge/core is what pricing uses
+#> 3: folding MISSING into YES erases the signal
 #> 4:         policy: bureau band must be scored
 #> 5:             not available at decision time
 ```
@@ -554,7 +555,7 @@ spec
 #>   ... (+137 rows)
 spec_file <- file.path(tempdir(), "classing_default.csv")
 scr_classing_spec(lab, file = spec_file)
-#> classing spec written to /tmp/RtmpuyYlxF/classing_default.csv
+#> classing spec written to /tmp/RtmpBMKHqn/classing_default.csv
 ```
 
 A reviewer opens the file, moves the first cut of `vl_score_01` from 40
@@ -608,7 +609,7 @@ names(imported)
 imported$vl_score_01$imported_reason
 #> [1] "reviewer: first cut moved to 42 to match the bureau band"
 imported$vl_score_01
-#> <scr_classing_proposal> P009 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-05 13:11
+#> <scr_classing_proposal> P009 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-05 14:08
 #>                         optimal    current     manual      delta
 #>   n_bins                      7          4          4         -3
 #>   iv_train               0.3464     0.2993     0.2990    -0.0474
@@ -659,7 +660,7 @@ res2 <- scr_classing_apply(lab)
 res2
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.1s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -676,8 +677,8 @@ res2
 #>    1. vl_score_01                                  IV  0.299  KS 0.247
 #>    2. vl_score_02                                  IV  0.172  KS 0.156
 #>    3. vl_score_04                                  IV  0.124  KS 0.120
-#>    4. ds_faixa                                     IV  0.081  KS 0.110
-#>    5. vl_tardio                                    IV  0.071  KS 0.120
+#>    4. ds_band                                      IV  0.081  KS 0.110
+#>    5. vl_late                                      IV  0.071  KS 0.120
 #>   ... (+7) - scr_selected() for the list
 #> 
 #> Models (hold-out)
@@ -697,12 +698,12 @@ there under `which = "consensus"`.
 ``` r
 
 scr_selected(res2)
-#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  
-#>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   
+#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    
+#>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" 
 #> [11] "vl_hist_04"  "vl_score_03"
 scr_selected(res2, "consensus")
-#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  
-#>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   
+#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    
+#>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" 
 #> [11] "vl_hist_04"  "vl_score_10"
 setdiff(scr_selected(res2), scr_selected(res2, "consensus"))
 #> [1] "vl_score_03"
@@ -719,19 +720,19 @@ consensus never selected it.
 
 ``` r
 
-touched <- c("vl_score_01", "ds_regiao", "vl_score_03", "vl_score_10")
+touched <- c("vl_score_01", "ds_region", "vl_score_03", "vl_score_10")
 scr_funnel(res2, cols = "all")[feature %in% touched,
                                .(feature, exit_stage, provenance, manual_reason)]
 #>        feature     exit_stage   provenance
 #>         <char>         <char>       <char>
 #> 1: vl_score_01    07.approved manual:rebin
-#> 2:   ds_regiao    07.approved manual:rebin
+#> 2:   ds_region    07.approved manual:rebin
 #> 3: vl_score_03    07.approved   manual:add
 #> 4: vl_score_10 08.manual_drop  manual:drop
 #>                                               manual_reason
 #>                                                      <char>
 #> 1: reviewer: first cut moved to 42 to match the bureau band
-#> 2:                         north/south is what pricing uses
+#> 2:                           edge/core is what pricing uses
 #> 3:                       policy: bureau band must be scored
 #> 4:                           not available at decision time
 ```
@@ -746,11 +747,11 @@ res2$fit_auto$results$vl_score_01$cutpoints
 #> [1] 33.36 38.15 44.24 48.06 63.94 72.61
 res2$fit$results$vl_score_01$cutpoints
 #> [1] 42 55 70
-res2$fit$summary[res2$fit$summary$feature %in% c("vl_score_01", "ds_regiao"),
+res2$fit$summary[res2$fit$summary$feature %in% c("vl_score_01", "ds_region"),
                  c("feature", "algorithm", "n_bins", "total_iv")]
 #>        feature algorithm n_bins   total_iv
 #> 1  vl_score_01    manual      4 0.29898958
-#> 33   ds_regiao    manual      2 0.07392963
+#> 33   ds_region    manual      2 0.07392963
 ```
 
 ## Refitting the scorecard
@@ -789,11 +790,11 @@ sc$points[variable == "vl_score_01", .(variable, bin, woe, points)]
 #> 2: vl_score_01 (42.000000;55.000000] -0.3753944     12
 #> 3: vl_score_01 (55.000000;70.000000]  0.3836922    -12
 #> 4: vl_score_01      (70.000000;+Inf]  0.9037063    -28
-sc$points[variable == "ds_regiao", .(variable, bin, woe, points)]
-#>     variable          bin        woe points
-#>       <char>       <char>      <num>  <num>
-#> 1: ds_regiao      BA%;%RS  0.4985359    -15
-#> 2: ds_regiao SP%;%RJ%;%MG -0.1492097      5
+sc$points[variable == "ds_region", .(variable, bin, woe, points)]
+#>     variable                  bin        woe points
+#>       <char>               <char>      <num>  <num>
+#> 1: ds_region        NORTH%;%SOUTH  0.4985359    -15
+#> 2: ds_region EAST%;%WEST%;%CENTRE -0.1492097      5
 ```
 
 The model card states the provenance in words: which binning algorithms
@@ -809,7 +810,7 @@ str(sc$model_card[c("binning_algorithm", "shortlist_source", "n_manual_bins",
 #>  $ binning_algorithm: chr "manual, jedi"
 #>  $ shortlist_source : chr "manual"
 #>  $ n_manual_bins    : int 2
-#>  $ manual_bins      : chr "vl_score_01, ds_regiao"
+#>  $ manual_bins      : chr "vl_score_01, ds_region"
 #>  $ forced_in        : chr "vl_score_03"
 #>  $ manual_dropped   : chr "vl_score_10"
 #>  $ n_decisions      : int 7
@@ -823,20 +824,20 @@ Nothing downstream needs to know that a bin was drawn by hand.
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
 scores new rows in R with the frozen pre-processing and the frozen bins;
 the points for `vl_score_01` fall in one of the four policy bands and
-the points for `ds_regiao` in one of the two regions.
+the points for `ds_region` in one of the two regions.
 
 ``` r
 
 new <- head(scr_demo, 5)
-new[, c("vl_score_01", "ds_regiao")]
-#>   vl_score_01 ds_regiao
-#> 1       71.94        SP
-#> 2       39.02        RJ
-#> 3       57.39        MG
-#> 4       57.38        BA
-#> 5       54.20        RJ
-scr_apply(sc, new, what = "points")[, .(score, score_points, vl_score_01_points, ds_regiao_points)]
-#>       score score_points vl_score_01_points ds_regiao_points
+new[, c("vl_score_01", "ds_region")]
+#>   vl_score_01 ds_region
+#> 1       71.94      EAST
+#> 2       39.02      WEST
+#> 3       57.39    CENTRE
+#> 4       57.38     NORTH
+#> 5       54.20      WEST
+scr_apply(sc, new, what = "points")[, .(score, score_points, vl_score_01_points, ds_region_points)]
+#>       score score_points vl_score_01_points ds_region_points
 #>       <num>        <num>              <num>            <num>
 #> 1: 544.1540          545                -28                5
 #> 2: 575.3205          576                 28                5
@@ -857,30 +858,30 @@ composes the whole points from that index.
 sql <- scr_sql(sc, table = "prd.customers", dialect = "databricks")
 sql_lines <- unlist(strsplit(sql, "\n", fixed = TRUE))
 cat(grep("^-- Provenance", sql_lines, value = TRUE), sep = "\n")
-#> -- Provenance: 2 manually binned (vl_score_01, ds_regiao), 1 forced in (vl_score_03), 1 dropped (vl_score_10) - see the decision ledger
-cat(grep("WHEN (vl_score_01|ds_regiao) ", sql_lines, value = TRUE), sep = "\n")
+#> -- Provenance: 2 manually binned (vl_score_01, ds_region), 1 forced in (vl_score_03), 1 dropped (vl_score_10) - see the decision ledger
+cat(grep("WHEN (vl_score_01|ds_region) ", sql_lines, value = TRUE), sep = "\n")
 #>     CASE WHEN vl_score_01 IS NULL OR vl_score_01 IN (-999) THEN 52.75 ELSE vl_score_01 END AS vl_score_01,
 #>     WHEN vl_score_01 IS NULL THEN 0
 #>     WHEN vl_score_01 <= 42 THEN -0.8929621501396132
 #>     WHEN vl_score_01 > 42 AND vl_score_01 <= 55 THEN -0.37539440893887893
 #>     WHEN vl_score_01 > 55 AND vl_score_01 <= 70 THEN 0.3836922056211275
 #>     WHEN vl_score_01 > 70 THEN 0.9037062554415245
-#>     WHEN ds_regiao IS NULL THEN 0
-#>     WHEN ds_regiao IN ('BA', 'RS') THEN 0.4985359152057967
-#>     WHEN ds_regiao IN ('SP', 'RJ', 'MG') THEN -0.1492097461959896
+#>     WHEN ds_region IS NULL THEN 0
+#>     WHEN ds_region IN ('NORTH', 'SOUTH') THEN 0.4985359152057967
+#>     WHEN ds_region IN ('EAST', 'WEST', 'CENTRE') THEN -0.1492097461959896
 #>     WHEN vl_score_01 IS NULL THEN NULL
 #>     WHEN vl_score_01 <= 42 THEN 1
 #>     WHEN vl_score_01 > 42 AND vl_score_01 <= 55 THEN 2
 #>     WHEN vl_score_01 > 55 AND vl_score_01 <= 70 THEN 3
 #>     WHEN vl_score_01 > 70 THEN 4
-#>     WHEN ds_regiao IS NULL THEN NULL
-#>     WHEN ds_regiao IN ('BA', 'RS') THEN 1
-#>     WHEN ds_regiao IN ('SP', 'RJ', 'MG') THEN 2
+#>     WHEN ds_region IS NULL THEN NULL
+#>     WHEN ds_region IN ('NORTH', 'SOUTH') THEN 1
+#>     WHEN ds_region IN ('EAST', 'WEST', 'CENTRE') THEN 2
 cat(tail(sql, 8), sep = "\n")
 #>       CASE vl_score_06_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -3 WHEN 4 THEN -4 WHEN 5 THEN -5 WHEN 6 THEN -10 WHEN 7 THEN -15 ELSE 0 END AS vl_score_06_points,
 #>       CASE vl_score_07_idx WHEN 1 THEN 15 WHEN 2 THEN 7 WHEN 3 THEN 6 WHEN 4 THEN 1 WHEN 5 THEN -2 WHEN 6 THEN -8 ELSE 0 END AS vl_score_07_points,
 #>       CASE vl_score_05_idx WHEN 1 THEN 7 WHEN 2 THEN -3 WHEN 3 THEN -9 WHEN 4 THEN -9 WHEN 5 THEN -15 ELSE 0 END AS vl_score_05_points,
-#>       CASE ds_canal_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_canal_points,
+#>       CASE ds_channel_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_channel_points,
 #>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points,
 #>       CASE vl_score_03_idx WHEN 1 THEN 3 WHEN 2 THEN -22 WHEN 3 THEN -19 ELSE 0 END AS vl_score_03_points
 #>   FROM woe_scr

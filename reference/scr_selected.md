@@ -55,7 +55,7 @@ cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
 res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
                   date_col = "ref_date")
 scr_selected(res)
-#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  
-#>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   
+#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    
+#>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" 
 #> [11] "vl_score_10" "vl_hist_04" 
 ```

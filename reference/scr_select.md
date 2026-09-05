@@ -116,7 +116,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.0s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -132,8 +132,8 @@ res
 #>    1. vl_score_01                                  IV  0.346  KS 0.198
 #>    2. vl_score_02                                  IV  0.172  KS 0.156
 #>    3. vl_score_04                                  IV  0.124  KS 0.120
-#>    4. ds_faixa                                     IV  0.081  KS 0.110
-#>    5. vl_tardio                                    IV  0.071  KS 0.120
+#>    4. ds_band                                      IV  0.081  KS 0.110
+#>    5. vl_late                                      IV  0.071  KS 0.120
 #>   ... (+7) - scr_selected() for the list
 #> 
 #> Models (hold-out)
@@ -144,8 +144,8 @@ res
 #> Warnings
 #>   - 3 derived flag(s) outside the deliverable by policy (allow_derived_final)
 scr_selected(res)
-#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  
-#>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   
+#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    
+#>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" 
 #> [11] "vl_score_10" "vl_hist_04" 
 head(scr_funnel(res, only_selected = TRUE))
 #>        feature derived_from        type approved  exit_stage consensus_rank
@@ -153,9 +153,9 @@ head(scr_funnel(res, only_selected = TRUE))
 #> 1: vl_score_01         <NA>     numeric     TRUE 07.approved              1
 #> 2: vl_score_02         <NA>     numeric     TRUE 07.approved              2
 #> 3: vl_score_04         <NA>     numeric     TRUE 07.approved              3
-#> 4:    ds_faixa         <NA> categorical     TRUE 07.approved              4
-#> 5:   vl_tardio         <NA>     numeric     TRUE 07.approved              5
-#> 6:   ds_regiao         <NA> categorical     TRUE 07.approved              6
+#> 4:     ds_band         <NA> categorical     TRUE 07.approved              4
+#> 5:     vl_late         <NA>     numeric     TRUE 07.approved              5
+#> 6:   ds_region         <NA> categorical     TRUE 07.approved              6
 #>    consensus_score votes n_bins   total_iv iv_holdout        ks         psi
 #>              <num> <int>  <int>      <num>      <num>     <num>       <num>
 #> 1:       1.0000000     3      7 0.34639015 0.28772640 0.1981484 0.006635574

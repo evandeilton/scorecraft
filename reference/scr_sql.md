@@ -145,7 +145,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-09-05 13:10:56
+#> -- Generated on 2026-09-05 14:08:20
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
@@ -156,23 +156,23 @@ cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep
 #>     CASE WHEN vl_score_01 IS NULL OR vl_score_01 IN (-999) THEN 52.75 ELSE vl_score_01 END AS vl_score_01,
 #>     CASE WHEN vl_score_02 IS NULL OR vl_score_02 IN (-999) THEN 55.98 ELSE vl_score_02 END AS vl_score_02,
 #>     CASE WHEN vl_score_04 IS NULL OR vl_score_04 IN (-999) THEN 61.835 ELSE vl_score_04 END AS vl_score_04,
-#>     COALESCE(ds_faixa, 'MISSING') AS ds_faixa,
-#>     CASE WHEN vl_tardio IS NULL OR vl_tardio IN (-999) THEN 0.0065000000000000006 ELSE vl_tardio END AS vl_tardio,
-#>     COALESCE(ds_regiao, 'MISSING') AS ds_regiao,
+#>     COALESCE(ds_band, 'MISSING') AS ds_band,
+#>     CASE WHEN vl_late IS NULL OR vl_late IN (-999) THEN 0.0065000000000000006 ELSE vl_late END AS vl_late,
+#>     COALESCE(ds_region, 'MISSING') AS ds_region,
 #>     CASE WHEN vl_score_06 IS NULL OR vl_score_06 IN (-999) THEN 67.815 ELSE vl_score_06 END AS vl_score_06,
 #>     CASE WHEN vl_score_07 IS NULL OR vl_score_07 IN (-999) THEN 71.16 ELSE vl_score_07 END AS vl_score_07,
 #>     CASE WHEN vl_score_05 IS NULL OR vl_score_05 IN (-999) THEN 65.425000000000011 ELSE vl_score_05 END AS vl_score_05,
-#>     COALESCE(ds_canal, 'MISSING') AS ds_canal,
+#>     COALESCE(ds_channel, 'MISSING') AS ds_channel,
 sc <- scr_scorecard(res)
 cat(tail(scr_sql(sc), 12), sep = "\n")
 #>       CASE vl_score_04_idx WHEN 1 THEN 28 WHEN 2 THEN 24 WHEN 3 THEN 9 WHEN 4 THEN 1 WHEN 5 THEN -6 WHEN 6 THEN -8 WHEN 7 THEN -15 ELSE 0 END AS vl_score_04_points,
-#>       CASE ds_faixa_idx WHEN 1 THEN 13 WHEN 2 THEN 2 WHEN 3 THEN 0 WHEN 4 THEN -11 ELSE 0 END AS ds_faixa_points,
-#>       CASE vl_tardio_idx WHEN 1 THEN 16 WHEN 2 THEN 7 WHEN 3 THEN 6 WHEN 4 THEN 5 WHEN 5 THEN -5 WHEN 6 THEN -8 WHEN 7 THEN -13 ELSE 0 END AS vl_tardio_points,
-#>       CASE ds_regiao_idx WHEN 1 THEN 10 WHEN 2 THEN 4 WHEN 3 THEN 0 WHEN 4 THEN -13 WHEN 5 THEN -16 ELSE 0 END AS ds_regiao_points,
+#>       CASE ds_band_idx WHEN 1 THEN 13 WHEN 2 THEN 2 WHEN 3 THEN 0 WHEN 4 THEN -11 ELSE 0 END AS ds_band_points,
+#>       CASE vl_late_idx WHEN 1 THEN 16 WHEN 2 THEN 7 WHEN 3 THEN 6 WHEN 4 THEN 5 WHEN 5 THEN -5 WHEN 6 THEN -8 WHEN 7 THEN -13 ELSE 0 END AS vl_late_points,
+#>       CASE ds_region_idx WHEN 1 THEN 10 WHEN 2 THEN 4 WHEN 3 THEN 0 WHEN 4 THEN -13 WHEN 5 THEN -16 ELSE 0 END AS ds_region_points,
 #>       CASE vl_score_06_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -3 WHEN 4 THEN -4 WHEN 5 THEN -5 WHEN 6 THEN -10 WHEN 7 THEN -15 ELSE 0 END AS vl_score_06_points,
 #>       CASE vl_score_07_idx WHEN 1 THEN 14 WHEN 2 THEN 6 WHEN 3 THEN 6 WHEN 4 THEN 1 WHEN 5 THEN -2 WHEN 6 THEN -7 ELSE 0 END AS vl_score_07_points,
 #>       CASE vl_score_05_idx WHEN 1 THEN 6 WHEN 2 THEN -3 WHEN 3 THEN -9 WHEN 4 THEN -9 WHEN 5 THEN -14 ELSE 0 END AS vl_score_05_points,
-#>       CASE ds_canal_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_canal_points,
+#>       CASE ds_channel_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_channel_points,
 #>       CASE vl_score_10_idx WHEN 1 THEN 2 WHEN 2 THEN -6 WHEN 3 THEN -21 ELSE 0 END AS vl_score_10_points,
 #>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points
 #>   FROM woe_scr

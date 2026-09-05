@@ -68,8 +68,8 @@ scr_reasons(sc, head(scr_demo, 5), k = 3)
 #>       reason_1 shortfall_1    reason_2 shortfall_2    reason_3 shortfall_3
 #>         <char>       <num>      <char>       <num>      <char>       <num>
 #> 1: vl_score_01   25.197857 vl_score_02   17.828571 vl_score_05    9.054286
-#> 2: vl_score_04    9.052857   vl_tardio    5.716071    ds_canal    5.387857
-#> 3:   vl_tardio   13.716071 vl_score_07    7.605357    ds_canal    5.387857
-#> 4:   ds_regiao   13.807143    ds_faixa   11.932500 vl_score_02   11.828571
+#> 2: vl_score_04    9.052857     vl_late    5.716071  ds_channel    5.387857
+#> 3:     vl_late   13.716071 vl_score_07    7.605357  ds_channel    5.387857
+#> 4:   ds_region   13.807143     ds_band   11.932500 vl_score_02   11.828571
 #> 5: vl_score_02   17.828571 vl_score_05    9.054286 vl_score_01    5.197857
 ```

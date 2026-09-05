@@ -63,7 +63,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 res                      # print: the funnel in one screen
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.2s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -79,8 +79,8 @@ res                      # print: the funnel in one screen
 #>    1. vl_score_01                                  IV  0.346  KS 0.198
 #>    2. vl_score_02                                  IV  0.172  KS 0.156
 #>    3. vl_score_04                                  IV  0.124  KS 0.120
-#>    4. ds_faixa                                     IV  0.081  KS 0.110
-#>    5. vl_tardio                                    IV  0.071  KS 0.120
+#>    4. ds_band                                      IV  0.081  KS 0.110
+#>    5. vl_late                                      IV  0.071  KS 0.120
 #>   ... (+7) - scr_selected() for the list
 #> 
 #> Models (hold-out)
@@ -129,13 +129,13 @@ summary(res)             # full text report
 #> | 1 | vl_score_01 | numeric | 7 | 0.3464 | 0.2877 | 0.1981 | 0.007 | 3 | 1.000 |
 #> | 2 | vl_score_02 | numeric | 7 | 0.1721 | 0.1234 | 0.1565 | 0.005 | 3 | 0.909 |
 #> | 3 | vl_score_04 | numeric | 7 | 0.1243 | 0.1177 | 0.1199 | 0.003 | 3 | 0.818 |
-#> | 4 | ds_faixa | categorical | 4 | 0.0805 | 0.0780 | 0.1101 | 0.001 | 3 | 0.638 |
-#> | 5 | vl_tardio | numeric | 7 | 0.0711 | 0.0638 | 0.1201 | 0.104 | 3 | 0.637 |
-#> | 6 | ds_regiao | categorical | 5 | 0.0846 | 0.0971 | 0.1141 | 0.006 | 3 | 0.635 |
+#> | 4 | ds_band | categorical | 4 | 0.0805 | 0.0780 | 0.1101 | 0.001 | 3 | 0.638 |
+#> | 5 | vl_late | numeric | 7 | 0.0711 | 0.0638 | 0.1201 | 0.104 | 3 | 0.637 |
+#> | 6 | ds_region | categorical | 5 | 0.0846 | 0.0971 | 0.1141 | 0.006 | 3 | 0.635 |
 #> | 7 | vl_score_06 | numeric | 7 | 0.0483 | 0.0794 | 0.0940 | 0.005 | 3 | 0.455 |
 #> | 8 | vl_score_07 | numeric | 6 | 0.0505 | 0.0705 | 0.0955 | 0.007 | 3 | 0.304 |
 #> | 9 | vl_score_05 | numeric | 5 | 0.0363 | 0.0289 | 0.0842 | 0.002 | 3 | 0.302 |
-#> | 10 | ds_canal | categorical | 3 | 0.0279 | 0.0438 | 0.0804 | 0.000 | 3 | 0.152 |
+#> | 10 | ds_channel | categorical | 3 | 0.0279 | 0.0438 | 0.0804 | 0.000 | 3 | 0.152 |
 #> | 11 | vl_score_10 | numeric | 3 | 0.0282 | 0.0432 | 0.0500 | 0.002 | 3 | 0.091 |
 #> | 12 | vl_hist_04 | numeric | 3 | 0.0332 | 0.0809 | 0.0732 | 0.005 | 3 | 0.062 |
 #> 
@@ -153,7 +153,7 @@ summary(res)             # full text report
 #> 
 #> | Variable | IV | Stage | Reason |
 #> |---|---:|---|---|
-#> | vl_redundante | 0.1743 | 05.correlation | REDUNDANT_WITH:vl_score_02(0.93) |
+#> | vl_redundant | 0.1743 | 05.correlation | REDUNDANT_WITH:vl_score_02(0.93) |
 #> | vl_score_11 | 0.0781 | 04.holdout | IV_DROPS_ON_HOLDOUT;IV_LOW_ON_HOLDOUT |
 #> | vl_score_12 | 0.0717 | 04.holdout | IV_DROPS_ON_HOLDOUT |
 #> | vl_hist_04__sp | 0.0642 | 05b.derived_excluded |  |
@@ -169,9 +169,9 @@ head(as.data.frame(res)) # the funnel as a data.frame
 #> 1 vl_score_01         <NA>     numeric     TRUE 07.approved              1
 #> 2 vl_score_02         <NA>     numeric     TRUE 07.approved              2
 #> 3 vl_score_04         <NA>     numeric     TRUE 07.approved              3
-#> 4    ds_faixa         <NA> categorical     TRUE 07.approved              4
-#> 5   vl_tardio         <NA>     numeric     TRUE 07.approved              5
-#> 6   ds_regiao         <NA> categorical     TRUE 07.approved              6
+#> 4     ds_band         <NA> categorical     TRUE 07.approved              4
+#> 5     vl_late         <NA>     numeric     TRUE 07.approved              5
+#> 6   ds_region         <NA> categorical     TRUE 07.approved              6
 #>   consensus_score votes n_bins   total_iv iv_holdout        ks         psi
 #> 1       1.0000000     3      7 0.34639015 0.28772640 0.1981484 0.006635574
 #> 2       0.9090909     3      7 0.17206972 0.12336796 0.1564626 0.005346830

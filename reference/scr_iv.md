@@ -14,8 +14,8 @@ scr_iv(g, y, laplace = 0.5)
 
 - g:
 
-  Group vector (any coercible type). For a character or factor `g`, `NA`
-  forms a group of its own; for integer codes, `NA` rows are dropped.
+  Group vector (any coercible type). Rows where `g` or `y` is `NA` are
+  ignored, whatever the type of `g`.
 
 - y:
 

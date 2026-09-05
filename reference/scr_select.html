@@ -158,7 +158,7 @@ and the bootstrap, and the binning is deterministic per column.</p>
 <span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_result&gt; target "default"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   event: 14.25% on train, 14.50% on hold-out | 1.3s</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   event: 14.25% on train, 14.50% on hold-out | 1.0s</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   convention: risk (target=1 is the bad case)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Funnel</span>
@@ -174,8 +174,8 @@ and the bootstrap, and the binning is deterministic per column.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    1. vl_score_01                                  IV  0.346  KS 0.198</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    2. vl_score_02                                  IV  0.172  KS 0.156</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    3. vl_score_04                                  IV  0.124  KS 0.120</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    4. ds_faixa                                     IV  0.081  KS 0.110</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    5. vl_tardio                                    IV  0.071  KS 0.120</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4. ds_band                                      IV  0.081  KS 0.110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5. vl_late                                      IV  0.071  KS 0.120</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ... (+7) - scr_selected() for the list</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Models (hold-out)</span>
@@ -186,8 +186,8 @@ and the bootstrap, and the binning is deterministic per column.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Warnings</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   - 3 derived flag(s) outside the deliverable by policy (allow_derived_final)</span>
 <span class="r-in"><span><span class="fu"><a href="scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] "vl_score_10" "vl_hist_04" </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="scr_funnel.html">scr_funnel</a></span><span class="op">(</span><span class="va">res</span>, only_selected <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        feature derived_from        type approved  exit_stage consensus_rank</span>
@@ -195,9 +195,9 @@ and the bootstrap, and the binning is deterministic per column.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: vl_score_01         &lt;NA&gt;     numeric     TRUE 07.approved              1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2: vl_score_02         &lt;NA&gt;     numeric     TRUE 07.approved              2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3: vl_score_04         &lt;NA&gt;     numeric     TRUE 07.approved              3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:    ds_faixa         &lt;NA&gt; categorical     TRUE 07.approved              4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   vl_tardio         &lt;NA&gt;     numeric     TRUE 07.approved              5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:   ds_regiao         &lt;NA&gt; categorical     TRUE 07.approved              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:     ds_band         &lt;NA&gt; categorical     TRUE 07.approved              4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:     vl_late         &lt;NA&gt;     numeric     TRUE 07.approved              5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:   ds_region         &lt;NA&gt; categorical     TRUE 07.approved              6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    consensus_score votes n_bins   total_iv iv_holdout        ks         psi</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              &lt;num&gt; &lt;int&gt;  &lt;int&gt;      &lt;num&gt;      &lt;num&gt;     &lt;num&gt;       &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:       1.0000000     3      7 0.34639015 0.28772640 0.1981484 0.006635574</span>

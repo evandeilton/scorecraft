@@ -41,7 +41,7 @@ them.
 p <- scr_irb_params("bcb")
 p
 #> <scr_irb_params> framework: bcb
-#>   Resolucao BCB 303/2023 (IRB) and 229/2022 (standardised); values as tables, editable
+#>   BCB Resolutions 303/2023 (IRB) and 229/2022 (standardised); values as tables, editable
 #>   PD floors:   corporate 0.05% | bank 0.05% | sovereign none | retail_mortgage 0.05% | qrre_transactor 0.05% | qrre_revolver 0.10% | retail_other 0.05% 
 #>   LGD floors (unsecured):  corporate 25% | retail_mortgage n/a | qrre 50% | retail_other 30% 
 #>   F-IRB LGD: senior_unsecured 75% | priority_claim 45% | subordinated 75% | secured_financial 0% | secured_receivables 20% | secured_real_estate 20% | secured_other 25%
@@ -61,7 +61,7 @@ p$pd_floor
 ```
 
 The presets differ in a handful of cells (`"bcb"` takes its values from
-Resolução BCB 303/2023, `"basel3_final"` from the consolidated Basel
+BCB Resolution 303/2023, `"basel3_final"` from the consolidated Basel
 Framework, whose CRE31 chapter is the risk-weight function). The visible
 differences are the supervisory LGD table of the foundation approach and
 the firm-size bounds of the SME correlation adjustment.

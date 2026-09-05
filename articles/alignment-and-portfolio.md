@@ -452,7 +452,7 @@ scr_core(runs, min_targets = 2)
 #>         <char>     <int>     <num>         <char>
 #> 1: vl_score_02         2       2.0 churn, default
 #> 2: vl_score_04         2       3.5 churn, default
-#> 3:   ds_regiao         2       6.0 churn, default
+#> 3:   ds_region         2       6.0 churn, default
 #> 4: vl_score_06         2       6.0 churn, default
 #> 5: vl_score_05         2       6.0 churn, default
 #> 6: vl_score_07         2       7.5 churn, default
@@ -526,14 +526,14 @@ merge(sc_risk$points[, .(variable, bin, points_600 = points)],
       sc_700$points[, .(variable, bin, points_700 = points)],
       by = c("variable", "bin"))[1:6]
 #> Key: <variable, bin>
-#>    variable    bin points_600 points_700
-#>      <char> <char>      <num>      <num>
-#> 1: ds_canal    APP         -5         -6
-#> 2: ds_canal   LOJA          9         11
-#> 3: ds_canal    WEB          4          5
-#> 4: ds_faixa      A        -11        -14
-#> 5: ds_faixa      B          0         -1
-#> 6: ds_faixa      C          2          3
+#>      variable    bin points_600 points_700
+#>        <char> <char>      <num>      <num>
+#> 1:    ds_band      A        -11        -14
+#> 2:    ds_band      B          0         -1
+#> 3:    ds_band      C          2          3
+#> 4:    ds_band      D         13         16
+#> 5: ds_channel    APP         -5         -6
+#> 6: ds_channel  STORE          9         11
 ```
 
 The two scores are the same log-odds seen through two maps, so one can

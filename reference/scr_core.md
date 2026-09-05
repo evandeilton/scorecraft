@@ -46,7 +46,7 @@ scr_core(list(default = r1, churn = r2), min_targets = 2)
 #>         <char>     <int>     <num>         <char>
 #> 1: vl_score_02         2       2.0 churn, default
 #> 2: vl_score_04         2       3.5 churn, default
-#> 3:   ds_regiao         2       6.0 churn, default
+#> 3:   ds_region         2       6.0 churn, default
 #> 4: vl_score_06         2       6.0 churn, default
 #> 5: vl_score_05         2       6.0 churn, default
 #> 6: vl_score_07         2       7.5 churn, default

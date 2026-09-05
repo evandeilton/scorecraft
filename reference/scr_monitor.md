@@ -98,7 +98,7 @@ mo
 #>   2026-05-01        700      550.2   0.0284 stable       0.0302 stable  
 #>   2026-06-01        700      552.3   0.0129 stable       0.0302 stable  
 #>   largest points shifts (variable @ period):
-#>     vl_tardio                    2026-06-01   CSI 0.4141  shift +1.89 pts
+#>     vl_late                      2026-06-01   CSI 0.4141  shift +1.89 pts
 #>     vl_score_01                  2026-02-01   CSI 0.0039  shift -1.01 pts
 #>     vl_score_04                  2026-02-01   CSI 0.0189  shift +0.80 pts
 #>     vl_score_01                  2026-06-01   CSI 0.0209  shift -0.61 pts
@@ -125,9 +125,9 @@ head(mo$csi)
 #> 1: 2026-01-01 vl_score_01   700 0.004088224     stable 0.02248498        stable
 #> 2: 2026-01-01 vl_score_02   700 0.004951889     stable 0.02248498        stable
 #> 3: 2026-01-01 vl_score_04   700 0.003680758     stable 0.02248498        stable
-#> 4: 2026-01-01    ds_faixa   700 0.002128715     stable 0.01395487        stable
-#> 5: 2026-01-01   vl_tardio   700 0.008873842     stable 0.02248498        stable
-#> 6: 2026-01-01   ds_regiao   700 0.005328940     stable 0.01694237        stable
+#> 4: 2026-01-01     ds_band   700 0.002128715     stable 0.01395487        stable
+#> 5: 2026-01-01     vl_late   700 0.008873842     stable 0.02248498        stable
+#> 6: 2026-01-01   ds_region   700 0.005328940     stable 0.01694237        stable
 #>    points_shift
 #>           <num>
 #> 1:   0.06071429

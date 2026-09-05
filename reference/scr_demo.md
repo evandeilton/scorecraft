@@ -2,8 +2,8 @@
 
 A fabricated table so that every example and every vignette runs without
 a database. On purpose, it carries the defects real data has: sentinel
-`-999` in several masses (`vl_hist_*`), missing values (`vl_parcial_*`),
-a column that only degrades in the last period (`vl_tardio`), constant,
+`-999` in several masses (`vl_hist_*`), missing values (`vl_partial_*`),
+a column that only degrades in the last period (`vl_late`), constant,
 near-constant, exact duplicate, high cardinality, a redundant pair and
 pure noise. Without them, the audit funnel would have nothing to show.
 
@@ -34,24 +34,24 @@ A `data.frame` with 4,200 rows and 41 columns:
   Numerics with an increasing mass of sentinel `-999`; the signal is in
   the absence.
 
-- `vl_parcial_01` to `vl_parcial_03`:
+- `vl_partial_01` to `vl_partial_03`:
 
   Numerics with genuine `NA`.
 
-- `vl_tardio`:
+- `vl_late`:
 
   Numeric with `NA`/sentinel in the last period only.
 
-- `vl_ruido_01` to `vl_ruido_06`:
+- `vl_noise_01` to `vl_noise_06`:
 
   Pure noise.
 
-- `vl_constante`, `vl_quase_const`, `ds_constante`, `vl_duplicada`,
-  `vl_redundante`, `ds_alta_card`:
+- `vl_constant`, `vl_near_const`, `ds_constant`, `vl_duplicate`,
+  `vl_redundant`, `ds_high_card`:
 
   Structural pathologies.
 
-- `ds_regiao`, `ds_faixa`, `ds_canal`, `ds_optin`:
+- `ds_region`, `ds_band`, `ds_channel`, `ds_optin`:
 
   Categoricals with signal; `ds_optin` has `NA`.
 

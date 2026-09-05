@@ -17,7 +17,8 @@ scr_fetch(
   sample_frac = 1,
   seed = NULL,
   max_rows = NULL,
-  sample_expr = NULL
+  sample_expr = NULL,
+  verbose = NULL
 )
 ```
 
@@ -49,6 +50,12 @@ scr_fetch(
   Optional SQL expression yielding a uniform number in `[0, 1)`, used as
   `WHERE <sample_expr> <= sample_frac`.
 
+- verbose:
+
+  `TRUE`/`FALSE` to echo (or not) the query for this call; `NULL`
+  follows
+  [`scr_verbose()`](https://evandeilton.github.io/scorecraft/reference/scr_verbose.md).
+
 ## Value
 
 A `data.table` with the fetched table.
@@ -66,10 +73,10 @@ d <- scr_demo; d$ref_date <- as.character(d$ref_date)
 DBI::dbWriteTable(con, "dtm", d)
 nrow(scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42))
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.500000
-#> [1] 2114
+#> [1] 2146
 nrow(scr_fetch(con, "dtm", max_rows = 1000))
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.238095
-#> [1] 981
+#> [1] 1042
 DBI::dbDisconnect(con)
 ```

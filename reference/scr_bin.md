@@ -75,14 +75,14 @@ bn
 #>   screening: IV_BELOW_MIN;NOT_MONOTONIC 4
 #>   screening: NOT_MONOTONIC              1
 head(bn$holdout)
-#>          feature iv_train_bins iv_holdout  iv_ratio         psi psi_flag
-#>           <char>         <num>      <num>     <num>       <num>   <char>
-#> 1:   vl_score_01    0.33268544 0.28772640 0.8648602 0.006635574   stable
-#> 2: vl_redundante    0.17271398 0.10710836 0.6201488 0.006536686   stable
-#> 3:   vl_score_02    0.16913274 0.12336796 0.7294150 0.005346830   stable
-#> 4:   vl_score_04    0.11904839 0.11773607 0.9889766 0.003216554   stable
-#> 5:     ds_regiao    0.08497314 0.09714339 1.1432247 0.006365199   stable
-#> 6:      ds_faixa    0.07980052 0.07804157 0.9779582 0.001317467   stable
+#>         feature iv_train_bins iv_holdout  iv_ratio         psi psi_flag
+#>          <char>         <num>      <num>     <num>       <num>   <char>
+#> 1:  vl_score_01    0.33268544 0.28772640 0.8648602 0.006635574   stable
+#> 2: vl_redundant    0.17271398 0.10710836 0.6201488 0.006536686   stable
+#> 3:  vl_score_02    0.16913274 0.12336796 0.7294150 0.005346830   stable
+#> 4:  vl_score_04    0.11904839 0.11773607 0.9889766 0.003216554   stable
+#> 5:    ds_region    0.08497314 0.09714339 1.1432247 0.006365199   stable
+#> 6:      ds_band    0.07980052 0.07804157 0.9779582 0.001317467   stable
 #>    psi_critical psi_flag_adjusted pct_unbinned holdout_ok holdout_reason
 #>           <num>            <char>        <num>     <lgcl>         <char>
 #> 1:  0.013490986            stable            0       TRUE             OK

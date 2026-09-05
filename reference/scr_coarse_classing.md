@@ -110,28 +110,28 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
                   date_col = "ref_date")
 lab <- scr_coarse_classing(res)
 lab
-#> <scr_classing> target "default" | opened 2026-09-05 13:09 by runner | 37 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 14:07 by runner | 37 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)
-scr_classing_view(lab, "ds_regiao")
-#> <scr_classing> ds_regiao (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)
+scr_classing_view(lab, "ds_region")
+#> <scr_classing> ds_region (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)
 #>   monotone: yes | min bin 7.9% | PSI 0.0064 (stable) | KS 0.114 | degenerate bins: 0 | verdict: ACCEPTABLE
 #>    id  bin                                  n      %  events   rate      WOE      IV |  n.hold      %    rate WOE.hold
-#>     1  MG                                 539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130
-#>     2  SP                               1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058
-#>     3  RJ                                 582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419
-#>     4  BA                                 318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599
-#>     5  RS                                 222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312
+#>     1  CENTRE                             539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130
+#>     2  EAST                             1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058
+#>     3  WEST                               582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419
+#>     4  NORTH                              318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599
+#>     5  SOUTH                              222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312
 #>   event rate by bin (train | hold-out)
 #>     1  ########            10.6% | ##########          13.0%
 #>     2  ##########          12.6% | ###########         13.8%
 #>     3  ###########         14.1% | ########            10.0%
 #>     4  ################    20.8% | ##################  23.6%
 #>     5  #################   22.5% | ##############      18.8%
-p <- scr_classing_propose(lab, "ds_regiao",
-                          groups = list(south = c("BA", "RS"),
-                                        north = c("SP", "RJ", "MG")))
+p <- scr_classing_propose(lab, "ds_region",
+                          groups = list(edge = c("NORTH", "SOUTH"),
+                                        core = c("EAST", "WEST", "CENTRE")))
 p
-#> <scr_classing_proposal> P001 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-05 13:09
+#> <scr_classing_proposal> P001 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-05 14:07
 #>                         optimal     manual      delta
 #>   n_bins                      5          2         -3
 #>   iv_train               0.0846     0.0739    -0.0107
@@ -144,28 +144,28 @@ p
 #>   n_degenerate                0          0          0
 #>   monotonic                   1          1          0
 #>   manual bins (train | hold-out)
-#>     1  BA | RS                            540  19.3%  21.5%   0.499 |     279  19.9%  21.9%   0.501
-#>     2  SP | RJ | MG                     2,260  80.7%  12.5%  -0.149 |   1,121  80.1%  12.7%  -0.156
+#>     1  NORTH | SOUTH                      540  19.3%  21.5%   0.499 |     279  19.9%  21.9%   0.501
+#>     2  EAST | WEST | CENTRE             2,260  80.7%  12.5%  -0.149 |   1,121  80.1%  12.7%  -0.156
 #>   Warnings
 #>     - IV_LOSS_VS_OPTIMAL
 #>   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.
-lab <- scr_classing_accept(lab, p, reason = "north/south is what pricing uses")
-#>   ds_regiao: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
+lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+#>   ds_region: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
 lab <- scr_classing_choose(lab, drop = "vl_score_10",
                            reason = "not available at decision time")
 lab
-#> <scr_classing> target "default" | opened 2026-09-05 13:09 by runner | 37 variables | 1 proposals: 1 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 14:07 by runner | 37 variables | 1 proposals: 1 accepted, 0 discarded
 #>   variable                   action      bins          IV train       IV hold-out verdict     reason
-#>   ds_regiao                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      north/south is what pricing uses
+#>   ds_region                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      edge/core is what pricing uses
 #>   final choice: 11 variables | consensus 12 | force: (none) | drop: vl_score_10
 res2 <- scr_classing_apply(lab)
 scr_selected(res2)
-#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  
-#>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   
+#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    
+#>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" 
 #> [11] "vl_hist_04" 
 scr_selected(res2, which = "consensus")
-#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_faixa"    "vl_tardio"  
-#>  [6] "ds_regiao"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_canal"   
+#>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    
+#>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" 
 #> [11] "vl_score_10" "vl_hist_04" 
 sc <- scr_scorecard(res2)
 sc$model_card$binning_algorithm

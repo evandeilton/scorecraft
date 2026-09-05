@@ -133,15 +133,17 @@ class: <code>rand(seed)</code> on Spark, Databricks and MySQL,
 integer-modulo expression on SQLite, whose <code>random()</code> returns
 a signed 64-bit integer and cannot be seeded. <code>sample_expr</code>
 overrides the choice for a dialect the package does not know. The query
-is echoed while <code><a href="../reference/scr_verbose.html">scr_verbose()</a></code> is on;
-<code>config$verbose</code> does not reach the database functions.</p>
+is echoed while messages are on: <code><a href="../reference/scr_fetch.html">scr_fetch()</a></code> follows
+<code><a href="../reference/scr_verbose.html">scr_verbose()</a></code> unless its own <code>verbose</code> argument
+says otherwise, and <code><a href="../reference/scr_run.html">scr_run()</a></code> follows
+<code>config$verbose</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">half</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_fetch.html">scr_fetch</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, sample_frac <span class="op">=</span> <span class="fl">0.5</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.500000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">half</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "data.table" "data.frame"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">half</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2089</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 2129</span></span></code></pre></div>
 <p><code>max_rows</code> is a memory guard rather than a second sampler.
 When it binds, the function counts the table first, reduces the fraction
 on the server so that the expected number of rows fits under the cap,
@@ -151,7 +153,7 @@ and reports the reduction:</p>
 <span><span class="co">#&gt;   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.238095</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">capped</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 996</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 989</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="several-targets-straight-from-the-connection">Several targets straight from the connection<a class="anchor" aria-label="anchor" href="#several-targets-straight-from-the-connection"></a>
@@ -178,14 +180,6 @@ random by row. For an out-of-time split pass
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_run.html">scr_run</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, targets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"churn"</span><span class="op">)</span>, config <span class="op">=</span> <span class="va">cfg</span>,</span>
 <span>              drop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"ref_date"</span>, <span class="st">"default"</span>, <span class="st">"churn"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ############### TARGET: default ###############</span></span>
-<span><span class="co">#&gt; SQL: select * from dtm</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ############### TARGET: churn ###############</span></span>
-<span><span class="co">#&gt; SQL: select * from dtm</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Done: 2 of 2 target(s) succeeded.</span></span>
 <span><span class="va">rs</span></span>
 <span><span class="co">#&gt; &lt;scr_runset&gt; 2 target(s): 2 succeeded, 0 failed</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -487,9 +481,9 @@ exists for the additive scorecard.</p>
 <span><span class="co">#&gt;       reason_1 shortfall_1    reason_2 shortfall_2    reason_3 shortfall_3</span></span>
 <span><span class="co">#&gt;         &lt;char&gt;       &lt;num&gt;      &lt;char&gt;       &lt;num&gt;      &lt;char&gt;       &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1: vl_score_01   25.197857 vl_score_02   17.828571 vl_score_05    9.054286</span></span>
-<span><span class="co">#&gt; 2: vl_score_04    9.052857   vl_tardio    5.716071    ds_canal    5.387857</span></span>
-<span><span class="co">#&gt; 3:   vl_tardio   13.716071 vl_score_07    7.605357    ds_canal    5.387857</span></span>
-<span><span class="co">#&gt; 4:   ds_regiao   13.807143    ds_faixa   11.932500 vl_score_02   11.828571</span></span>
+<span><span class="co">#&gt; 2: vl_score_04    9.052857     vl_late    5.716071  ds_channel    5.387857</span></span>
+<span><span class="co">#&gt; 3:     vl_late   13.716071 vl_score_07    7.605357  ds_channel    5.387857</span></span>
+<span><span class="co">#&gt; 4:   ds_region   13.807143     ds_band   11.932500 vl_score_02   11.828571</span></span>
 <span><span class="co">#&gt; 5: vl_score_02   17.828571 vl_score_05    9.054286 vl_score_01    5.197857</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -514,7 +508,7 @@ script.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sql_woe</span>, <span class="fl">24</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- =============================================================</span></span>
 <span><span class="co">#&gt; -- scorecraft | target: default | 12 approved variables | dialect: ansi</span></span>
-<span><span class="co">#&gt; -- Generated on 2026-09-05 13:12:00</span></span>
+<span><span class="co">#&gt; -- Generated on 2026-09-05 14:09:08</span></span>
 <span><span class="co">#&gt; -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing</span></span>
 <span><span class="co">#&gt; --   and sentinel values by the TRAINING median, special-population flags.</span></span>
 <span><span class="co">#&gt; -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().</span></span>
@@ -524,13 +518,13 @@ script.</p>
 <span><span class="co">#&gt;     CASE WHEN vl_score_01 IS NULL OR vl_score_01 IN (-999) THEN 52.75 ELSE vl_score_01 END AS vl_score_01,</span></span>
 <span><span class="co">#&gt;     CASE WHEN vl_score_02 IS NULL OR vl_score_02 IN (-999) THEN 55.98 ELSE vl_score_02 END AS vl_score_02,</span></span>
 <span><span class="co">#&gt;     CASE WHEN vl_score_04 IS NULL OR vl_score_04 IN (-999) THEN 61.835 ELSE vl_score_04 END AS vl_score_04,</span></span>
-<span><span class="co">#&gt;     COALESCE(ds_faixa, 'MISSING') AS ds_faixa,</span></span>
-<span><span class="co">#&gt;     CASE WHEN vl_tardio IS NULL OR vl_tardio IN (-999) THEN 0.0065000000000000006 ELSE vl_tardio END AS vl_tardio,</span></span>
-<span><span class="co">#&gt;     COALESCE(ds_regiao, 'MISSING') AS ds_regiao,</span></span>
+<span><span class="co">#&gt;     COALESCE(ds_band, 'MISSING') AS ds_band,</span></span>
+<span><span class="co">#&gt;     CASE WHEN vl_late IS NULL OR vl_late IN (-999) THEN 0.0065000000000000006 ELSE vl_late END AS vl_late,</span></span>
+<span><span class="co">#&gt;     COALESCE(ds_region, 'MISSING') AS ds_region,</span></span>
 <span><span class="co">#&gt;     CASE WHEN vl_score_06 IS NULL OR vl_score_06 IN (-999) THEN 67.815 ELSE vl_score_06 END AS vl_score_06,</span></span>
 <span><span class="co">#&gt;     CASE WHEN vl_score_07 IS NULL OR vl_score_07 IN (-999) THEN 71.16 ELSE vl_score_07 END AS vl_score_07,</span></span>
 <span><span class="co">#&gt;     CASE WHEN vl_score_05 IS NULL OR vl_score_05 IN (-999) THEN 65.425000000000011 ELSE vl_score_05 END AS vl_score_05,</span></span>
-<span><span class="co">#&gt;     COALESCE(ds_canal, 'MISSING') AS ds_canal,</span></span>
+<span><span class="co">#&gt;     COALESCE(ds_channel, 'MISSING') AS ds_channel,</span></span>
 <span><span class="co">#&gt;     CASE WHEN vl_hist_04 IS NULL OR vl_hist_04 IN (-999) THEN 25 ELSE vl_hist_04 END AS vl_hist_04,</span></span>
 <span><span class="co">#&gt;     CASE WHEN vl_score_10 IS NULL OR vl_score_10 IN (-999) THEN 80 ELSE vl_score_10 END AS vl_score_10</span></span>
 <span><span class="co">#&gt;   FROM your_table</span></span>
@@ -567,9 +561,9 @@ configuration; the dialects available are <code>ansi</code>,
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sql_sc</span>, <span class="fl">12</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- =============================================================</span></span>
 <span><span class="co">#&gt; -- scorecraft | scorecard of target: default | 12 variables | dialect: databricks</span></span>
-<span><span class="co">#&gt; -- Generated on 2026-09-05 13:12:01</span></span>
+<span><span class="co">#&gt; -- Generated on 2026-09-05 14:09:09</span></span>
 <span><span class="co">#&gt; -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer</span></span>
-<span><span class="co">#&gt; -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538</span></span>
+<span><span class="co">#&gt; -- score = 491.19665800103655 + -26.318891476654567 * logit | base_points = 538</span></span>
 <span><span class="co">#&gt; -- Block 1 (CTE base_scr): pre-processing frozen on train.</span></span>
 <span><span class="co">#&gt; -- Block 2 (CTE woe_scr): WOE and bin index, emitted by OptimalBinningWoE::obwoe_sql().</span></span>
 <span><span class="co">#&gt; -- Block 3: exact score (from the WOE) and whole points (from the bin index).</span></span>
@@ -582,23 +576,23 @@ configuration; the dialects available are <code>ansi</code>,
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">sql_sc</span><span class="op">[</span><span class="va">i</span><span class="op">:</span><span class="op">(</span><span class="va">i</span> <span class="op">+</span> <span class="fl">15</span><span class="op">)</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SELECT</span></span>
 <span><span class="co">#&gt;     538.30012744760336</span></span>
-<span><span class="co">#&gt;       + -29.701043763446282 * vl_score_01_woe</span></span>
-<span><span class="co">#&gt;       + -27.130718819754311 * vl_score_02_woe</span></span>
-<span><span class="co">#&gt;       + -26.649286859941228 * vl_score_04_woe</span></span>
-<span><span class="co">#&gt;       + -30.277321636127542 * ds_faixa_woe</span></span>
-<span><span class="co">#&gt;       + -29.966768640958328 * vl_tardio_woe</span></span>
-<span><span class="co">#&gt;       + -28.964890297230774 * ds_regiao_woe</span></span>
-<span><span class="co">#&gt;       + -28.874743439251926 * vl_score_06_woe</span></span>
-<span><span class="co">#&gt;       + -26.679330009797006 * vl_score_07_woe</span></span>
-<span><span class="co">#&gt;       + -35.128873453122381 * vl_score_05_woe</span></span>
-<span><span class="co">#&gt;       + -33.247622050806406 * ds_canal_woe</span></span>
-<span><span class="co">#&gt;       + -30.803729315270584 * vl_hist_04_woe</span></span>
-<span><span class="co">#&gt;       + -35.878212555936543 * vl_score_10_woe AS score,</span></span>
+<span><span class="co">#&gt;       + -29.70104376344629 * vl_score_01_woe</span></span>
+<span><span class="co">#&gt;       + -27.130718819754303 * vl_score_02_woe</span></span>
+<span><span class="co">#&gt;       + -26.64928685994122 * vl_score_04_woe</span></span>
+<span><span class="co">#&gt;       + -30.277321636127535 * ds_band_woe</span></span>
+<span><span class="co">#&gt;       + -29.966768640958321 * vl_late_woe</span></span>
+<span><span class="co">#&gt;       + -28.964890297230781 * ds_region_woe</span></span>
+<span><span class="co">#&gt;       + -28.874743439251922 * vl_score_06_woe</span></span>
+<span><span class="co">#&gt;       + -26.679330009796985 * vl_score_07_woe</span></span>
+<span><span class="co">#&gt;       + -35.128873453122374 * vl_score_05_woe</span></span>
+<span><span class="co">#&gt;       + -33.247622050806385 * ds_channel_woe</span></span>
+<span><span class="co">#&gt;       + -30.803729315270559 * vl_hist_04_woe</span></span>
+<span><span class="co">#&gt;       + -35.878212555936535 * vl_score_10_woe AS score,</span></span>
 <span><span class="co">#&gt;     vl_score_01_points,</span></span>
 <span><span class="co">#&gt;     vl_score_02_points,</span></span>
 <span><span class="co"># ... the whole points, and one of the CASE expressions behind them</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"AS score_points"</span>, <span class="va">sql_sc</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     538 + vl_score_01_points + vl_score_02_points + vl_score_04_points + ds_faixa_points + vl_tardio_points + ds_regiao_points + vl_score_06_points + vl_score_07_points + vl_score_05_points + ds_canal_points + vl_hist_04_points + vl_score_10_points AS score_points</span></span>
+<span><span class="co">#&gt;     538 + vl_score_01_points + vl_score_02_points + vl_score_04_points + ds_band_points + vl_late_points + ds_region_points + vl_score_06_points + vl_score_07_points + vl_score_05_points + ds_channel_points + vl_hist_04_points + vl_score_10_points AS score_points</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"AS vl_score_01_points"</span>, <span class="va">sql_sc</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       CASE vl_score_01_idx WHEN 1 THEN 61 WHEN 2 THEN 22 WHEN 3 THEN 20 WHEN 4 THEN 16 WHEN 5 THEN -1 WHEN 6 THEN -21 WHEN 7 THEN -30 ELSE 0 END AS vl_score_01_points,</span></span></code></pre></div>
 </div>
@@ -667,7 +661,7 @@ training vintages and the last two the hold-out.</p>
 <span><span class="co">#&gt;   2026-05-01        700      550.2   0.0284 stable       0.0302 stable  </span></span>
 <span><span class="co">#&gt;   2026-06-01        700      552.3   0.0129 stable       0.0302 stable  </span></span>
 <span><span class="co">#&gt;   largest points shifts (variable @ period):</span></span>
-<span><span class="co">#&gt;     vl_tardio                    2026-06-01   CSI 0.4141  shift +1.89 pts</span></span>
+<span><span class="co">#&gt;     vl_late                      2026-06-01   CSI 0.4141  shift +1.89 pts</span></span>
 <span><span class="co">#&gt;     vl_score_01                  2026-02-01   CSI 0.0039  shift -1.01 pts</span></span>
 <span><span class="co">#&gt;     vl_score_04                  2026-02-01   CSI 0.0189  shift +0.80 pts</span></span>
 <span><span class="co">#&gt;     vl_score_01                  2026-06-01   CSI 0.0209  shift -0.61 pts</span></span>
@@ -727,11 +721,11 @@ says that a variable moved but not where the score went.
 weighted by the points of each bin, which is the amount by which the
 variable moved the mean score, with its sign, and it is additive across
 variables.</p>
-<p><code>vl_tardio</code> is built to degrade in the last period only,
-and the monitor finds it: stable for five periods, then a CSI far above
-both thresholds and the largest points shift of the run.</p>
+<p><code>vl_late</code> is built to degrade in the last period only, and
+the monitor finds it: stable for five periods, then a CSI far above both
+thresholds and the largest points shift of the run.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mo</span><span class="op">$</span><span class="va">csi</span><span class="op">[</span><span class="va">variable</span> <span class="op">==</span> <span class="st">"vl_tardio"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">period</span>, <span class="va">n</span>, <span class="va">csi</span>, <span class="va">flag_fixed</span>, <span class="va">critical</span>, <span class="va">flag_adjusted</span>, <span class="va">points_shift</span><span class="op">)</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">mo</span><span class="op">$</span><span class="va">csi</span><span class="op">[</span><span class="va">variable</span> <span class="op">==</span> <span class="st">"vl_late"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">period</span>, <span class="va">n</span>, <span class="va">csi</span>, <span class="va">flag_fixed</span>, <span class="va">critical</span>, <span class="va">flag_adjusted</span>, <span class="va">points_shift</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        period     n         csi flag_fixed   critical flag_adjusted</span></span>
 <span><span class="co">#&gt;        &lt;char&gt; &lt;int&gt;       &lt;num&gt;     &lt;char&gt;      &lt;num&gt;        &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1: 2026-01-01   700 0.008873842     stable 0.02248498        stable</span></span>
@@ -752,11 +746,11 @@ both thresholds and the largest points shift of the run.</p>
 <span>       <span class="fu">.</span><span class="op">(</span><span class="va">variable</span>, <span class="va">csi</span>, <span class="va">flag_fixed</span>, <span class="va">flag_adjusted</span>, <span class="va">points_shift</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;       variable         csi flag_fixed flag_adjusted points_shift</span></span>
 <span><span class="co">#&gt;         &lt;char&gt;       &lt;num&gt;     &lt;char&gt;        &lt;char&gt;        &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:   vl_tardio 0.414109814      shift         shift    1.8853571</span></span>
+<span><span class="co">#&gt; 1:     vl_late 0.414109814      shift         shift    1.8853571</span></span>
 <span><span class="co">#&gt; 2: vl_score_01 0.020937580     stable        stable   -0.6107143</span></span>
 <span><span class="co">#&gt; 3: vl_score_10 0.008143611     stable        stable    0.4417857</span></span>
 <span><span class="co">#&gt; 4: vl_score_02 0.006988276     stable        stable   -0.4057143</span></span>
-<span><span class="co">#&gt; 5:    ds_faixa 0.003471581     stable        stable   -0.3767857</span></span></code></pre></div>
+<span><span class="co">#&gt; 5:     ds_band 0.003471581     stable        stable   -0.3767857</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="performance-by-vintage">Performance by vintage<a class="anchor" aria-label="anchor" href="#performance-by-vintage"></a>

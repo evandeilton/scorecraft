@@ -46,8 +46,8 @@ scr_lgd_downturn(
 
 - reason:
 
-  Free text recorded in the ledger. Mandatory when `method` or `add_on`
-  differ from the configuration.
+  Free text recorded in the ledger, mandatory: the choice of periods and
+  method is an analyst decision.
 
 ## Value
 
@@ -74,7 +74,8 @@ cfg <- scr_config(verbose = FALSE, nthread = 1, n_boot = 20)
 wo <- scr_workout(scr_demo_lgd, scr_demo_lgd_cashflows, rates = scr_demo_rates, config = cfg)
 m <- scr_lgd(wo, drivers = c("product", "ltv", "prior_dpd_max"), config = cfg)
 m <- scr_lgd_downturn(m, periods = data.frame(start = as.Date("2022-01-01"),
-                                               end = as.Date("2023-12-31")))
+                                               end = as.Date("2023-12-31")),
+                      reason = "reference rate above 13% in 2022-2023")
 m$downturn$table
 #>     pool     n       lra      moc_c reference_value  dt_type3 dt_observed
 #>    <int> <int>     <num>      <num>           <num>     <num>       <num>

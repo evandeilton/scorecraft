@@ -65,9 +65,9 @@ scr_reject(sc)
 
 # Coarse classing lab: manual bins and manual variable choice, with a reason
 lab <- scr_coarse_classing(res)
-p   <- scr_classing_propose(lab, "ds_regiao",
-                            groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")))
-lab <- scr_classing_accept(lab, p, reason = "north/south is what pricing uses")
+p   <- scr_classing_propose(lab, "ds_region",
+                            groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")))
+lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
 lab <- scr_classing_choose(lab, drop = "vl_score_10", reason = "not available at decision time")
 res2 <- scr_classing_apply(lab)      # a new scr_result; scr_scorecard(res2) refits on it
 scr_decisions(res2)                  # the append-only decision ledger
