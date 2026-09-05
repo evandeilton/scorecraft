@@ -874,7 +874,7 @@ scr_moc <- function(x, category = c("A", "B", "C"), method = NULL, level = NULL,
 #' @param grades An [scr_grades()] object, after [scr_moc()].
 #' @param moc `NULL` uses `grades$moc`; otherwise a ledger in the same format.
 #' @param params An [scr_irb_params()]; `NULL` uses `config$framework`.
-#' @param asset_class Asset class of the floor; `NULL` uses `config$pd_asset_class`.
+#' @param asset_class Asset class of the floor; `NULL` uses `config$asset_class`.
 #' @param philosophy `"ttc"` (default) or `"pit"`.
 #' @param rho,z Asset correlation and systematic factor for `"pit"`.
 #'
@@ -912,7 +912,7 @@ scr_pd <- function(grades, moc = NULL, params = NULL, asset_class = NULL, philos
   cfg <- grades$config
   old <- scr_verbose(isTRUE(cfg$verbose)); on.exit(scr_verbose(old), add = TRUE)
   params <- .check_params(params %||% scr_irb_params(cfg$framework), "scr_pd")
-  asset_class <- asset_class %||% cfg$pd_asset_class
+  asset_class <- asset_class %||% cfg$asset_class
   floor <- .pd_floor_of(params, asset_class)
   ledger <- data.table::copy(grades$ledger)
   add <- function(action, detail) ledger <<- data.table::rbindlist(list(ledger, data.table::data.table(action = action, detail = detail, date = format(Sys.Date()))), use.names = TRUE)
@@ -1252,7 +1252,7 @@ print.scr_migration <- function(x, ...) {
 #' Traffic light of a p-value
 #' @keywords internal
 #' @noRd
-.pd_light <- function(p, lights) ifelse(is.na(p), NA_character_, ifelse(p < lights[1], "red", ifelse(p < lights[2], "amber", "green")))
+.pd_light <- function(p, lights) ifelse(is.na(p), NA_character_, ifelse(p <= lights[1], "red", ifelse(p <= lights[2], "amber", "green")))
 
 #' Hanley-McNeil standard error of an AUC
 #' @keywords internal
@@ -1298,8 +1298,9 @@ print.scr_migration <- function(x, ...) {
 #' @param cv_init Development coefficient of variation; `NULL` uses the one of `x`.
 #' @param tests Subset of the battery to run.
 #' @param alpha Significance level of the binomial critical count.
-#' @param lights Two p-value thresholds (red below the first, amber below
-#'   the second); `NULL` reads `config$pd_lights`.
+#' @param lights Two p-value thresholds (red at or below the first, amber at
+#'   or below the second, green above; the convention shared with the LGD
+#'   and EAD validations); `NULL` reads `config$pd_lights`.
 #' @param pd_column Grade PD tested: `"pd_final"` (default), `"pd_moc"` or `"pd_be"`.
 #' @param horizon,by Cohort window in months and frequency (`NULL` reads `config$pd_dr_by`).
 #' @param n_boot,seed Bootstrap resamples and seed of the discrimination interval.

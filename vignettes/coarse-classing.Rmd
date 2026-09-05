@@ -17,8 +17,8 @@ Optimal binning does one job well: it finds the cut points and the
 groupings that maximise the information value of a variable subject to the
 admission rules (minimum bin size, monotonicity, hold-out stability). What
 it cannot know is how the business reads the variable. A bureau score is
-communicated to underwriters in policy bands; a region is priced as north
-and south, not as five states; an age is quoted in decades. A scorecard
+communicated to underwriters in policy bands; a region is priced as edge
+and core, not as five regions; an age is quoted in decades. A scorecard
 whose bins cut at 33.36 and 48.06 is correct, but nobody in the credit
 committee can explain it, and a bin nobody can explain is a bin nobody
 will defend when the model is challenged.
@@ -79,7 +79,7 @@ ov <- scr_classing_view(lab)
 
 With a variable, the view is the bin table with train and hold-out side
 by side, plus a text bar chart of the event rate. `vl_score_01` is a
-numeric with seven optimal bins; `ds_regiao` is a categorical with one
+numeric with seven optimal bins; `ds_region` is a categorical with one
 bin per state.
 
 ```{r view-num}
@@ -87,7 +87,7 @@ scr_classing_view(lab, "vl_score_01")
 ```
 
 ```{r view-cat}
-scr_classing_view(lab, "ds_regiao")
+scr_classing_view(lab, "ds_region")
 ```
 
 ## Proposing bins
@@ -147,9 +147,9 @@ labels; the bin label stored in the entry is the categories joined by the
 configuration's separator, exactly as the binning engine writes it.
 
 ```{r propose-groups}
-p_groups <- scr_classing_propose(lab, "ds_regiao",
-                                 groups = list(south = c("BA", "RS"),
-                                               north = c("SP", "RJ", "MG")))
+p_groups <- scr_classing_propose(lab, "ds_region",
+                                 groups = list(edge = c("NORTH", "SOUTH"),
+                                               core = c("EAST", "WEST", "CENTRE")))
 p_groups
 ```
 
@@ -160,8 +160,8 @@ same grouping, and the entry records that the second bin is the catch-all
 (`is_other`).
 
 ```{r propose-other}
-p_other <- scr_classing_propose(lab, "ds_regiao",
-                                groups = list(south = c("BA", "RS"), rest = "SP"),
+p_other <- scr_classing_propose(lab, "ds_region",
+                                groups = list(edge = c("NORTH", "SOUTH"), rest = "EAST"),
                                 other_to = "rest")
 p_other$entry$bin
 p_other$entry$manual$is_other
@@ -186,7 +186,7 @@ lab-specific rules. Codes fall into two tiers.
   the hold-out codes (`IV_DROPS_ON_HOLDOUT`, `IV_LOW_ON_HOLDOUT`,
   `PSI_UNSTABLE`, ...) and `IV_LOSS_VS_OPTIMAL`, raised when the hold-out
   IV falls more than `lab_max_iv_loss` (10% by default) below the optimal
-  one. The `ds_regiao` grouping is a `REVIEW` for exactly that reason: two
+  one. The `ds_region` grouping is a `REVIEW` for exactly that reason: two
   regions lose about a fifth of the hold-out IV of five states.
 * **Blocking** codes give a `BLOCKED` verdict: an empty bin, a degenerate
   bin (no events or no non-events, unless the lab was opened with
@@ -211,7 +211,7 @@ The grouping proposed in the previous section is still valid and is
 accepted in turn.
 
 ```{r accept-groups}
-lab <- scr_classing_accept(lab, p_groups, reason = "north/south is what pricing uses")
+lab <- scr_classing_accept(lab, p_groups, reason = "edge/core is what pricing uses")
 ```
 
 The `ds_optin` proposal erased what little signal the variable had
@@ -220,7 +220,7 @@ keeps its optimal bins. A discarded proposal is a ledger row too.
 
 ```{r discard}
 p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
-lab <- scr_classing_discard(lab, p_missing, reason = "folding MISSING into SIM erases the signal")
+lab <- scr_classing_discard(lab, p_missing, reason = "folding MISSING into YES erases the signal")
 ```
 
 A blocking rule cannot be accepted through the normal path. A break at
@@ -391,7 +391,7 @@ stage, `08.manual_drop`; a forced one is `07.approved` even though the
 consensus never selected it.
 
 ```{r funnel}
-touched <- c("vl_score_01", "ds_regiao", "vl_score_03", "vl_score_10")
+touched <- c("vl_score_01", "ds_region", "vl_score_03", "vl_score_10")
 scr_funnel(res2, cols = "all")[feature %in% touched,
                                .(feature, exit_stage, provenance, manual_reason)]
 ```
@@ -402,7 +402,7 @@ remain available next to the manual ones for as long as the result lives.
 ```{r frozen}
 res2$fit_auto$results$vl_score_01$cutpoints
 res2$fit$results$vl_score_01$cutpoints
-res2$fit$summary[res2$fit$summary$feature %in% c("vl_score_01", "ds_regiao"),
+res2$fit$summary[res2$fit$summary$feature %in% c("vl_score_01", "ds_region"),
                  c("feature", "algorithm", "n_bins", "total_iv")]
 ```
 
@@ -417,7 +417,7 @@ distributed over its four policy bands.
 sc <- scr_scorecard(res2)
 sc
 sc$points[variable == "vl_score_01", .(variable, bin, woe, points)]
-sc$points[variable == "ds_regiao", .(variable, bin, woe, points)]
+sc$points[variable == "ds_region", .(variable, bin, woe, points)]
 ```
 
 The model card states the provenance in words: which binning algorithms
@@ -436,12 +436,12 @@ nrow(scr_decisions(sc))
 Nothing downstream needs to know that a bin was drawn by hand.
 `scr_apply()` scores new rows in R with the frozen pre-processing and the
 frozen bins; the points for `vl_score_01` fall in one of the four policy
-bands and the points for `ds_regiao` in one of the two regions.
+bands and the points for `ds_region` in one of the two regions.
 
 ```{r apply-new}
 new <- head(scr_demo, 5)
-new[, c("vl_score_01", "ds_regiao")]
-scr_apply(sc, new, what = "points")[, .(score, score_points, vl_score_01_points, ds_regiao_points)]
+new[, c("vl_score_01", "ds_region")]
+scr_apply(sc, new, what = "points")[, .(score, score_points, vl_score_01_points, ds_region_points)]
 ```
 
 `scr_sql()` emits the same thing for the database. The header carries the
@@ -454,7 +454,7 @@ The tail composes the whole points from that index.
 sql <- scr_sql(sc, table = "prd.customers", dialect = "databricks")
 sql_lines <- unlist(strsplit(sql, "\n", fixed = TRUE))
 cat(grep("^-- Provenance", sql_lines, value = TRUE), sep = "\n")
-cat(grep("WHEN (vl_score_01|ds_regiao) ", sql_lines, value = TRUE), sep = "\n")
+cat(grep("WHEN (vl_score_01|ds_region) ", sql_lines, value = TRUE), sep = "\n")
 cat(tail(sql, 8), sep = "\n")
 ```
 

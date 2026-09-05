@@ -234,6 +234,7 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
     default_probation  = 3L,
     default_probation_restructured = 12L,
     default_pulling    = 0.20,
+    asset_class        = "retail_other",
 
     # ---- Stage 9: PD calibration and grades (IRB) ------------------------ #
     pd_calibration  = "intercept",
@@ -244,7 +245,6 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
     pd_source       = "lra",
     pd_moc_method   = "ci_timeseries",
     pd_moc_level    = 0.95,
-    pd_asset_class  = "retail_other",
     pd_lights       = c(0.01, 0.05),
     pd_dr_by        = "quarter",
 
@@ -280,7 +280,6 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
     # ---- Stage 12: expected loss, capital, ECL (IRB) --------------------- #
     framework            = "bcb",
     capital_approach     = "airb",
-    capital_asset_class  = "retail_other",
     capital_target_ratio = 0.08,
     capital_output_floor = TRUE,
     capital_sensitivity  = TRUE,
@@ -356,6 +355,7 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
     }
   }
   .enum("default_level", c("obligor", "facility"))
+  .enum("asset_class", .irb_classes)
   .enum("pd_calibration", c("intercept", "logodds_ab", "scaling", "qmm"))
   .enum("pd_grade_method", c("geometric", "quantile", "supplied"))
   .enum("pd_source", c("lra", "mean_pd"))
@@ -571,6 +571,7 @@ scr_config_keys <- function(stage = NULL) {
     .ck("default_probation", 8, "3", "Months without a trigger before leaving default"),
     .ck("default_probation_restructured", 8, "12", "Probation after a distressed restructuring"),
     .ck("default_pulling", 8, "0.20", "Share of defaulted exposure that pulls the whole obligor into default"),
+    .ck("asset_class", 8, "retail_other", "Asset class of the floors and the risk-weight function (one key for PD, LGD and capital)"),
     .ck("pd_calibration", 9, "intercept", "Calibration to the central tendency: intercept, logodds_ab, scaling, qmm"),
     .ck("pd_n_grades", 9, "10", "Number of rating grades when derived"),
     .ck("pd_grade_method", 9, "geometric", "Grade construction: geometric, quantile, supplied"),
@@ -579,8 +580,7 @@ scr_config_keys <- function(stage = NULL) {
     .ck("pd_source", 9, "lra", "Grade PD: long-run default rate or mean of individual PDs"),
     .ck("pd_moc_method", 9, "ci_timeseries", "Estimation-error margin of conservatism: ci_timeseries, ci_binomial, bootstrap"),
     .ck("pd_moc_level", 9, "0.95", "One-sided confidence level of the estimation-error margin"),
-    .ck("pd_asset_class", 9, "retail_other", "Asset class for the PD floor"),
-    .ck("pd_lights", 9, "0.01, 0.05", "Traffic-light p-value thresholds (red, amber) of the PD and LGD validation"),
+    .ck("pd_lights", 9, "0.01, 0.05", "Traffic-light p-value thresholds: red at or below the first, amber at or below the second (PD and LGD validation)"),
     .ck("pd_dr_by", 9, "quarter", "Cohort frequency of the default-rate series"),
     .ck("lgd_discount_add_on", 10, "0.05", "Add-on over the reference rate in the workout discount rate"),
     .ck("lgd_discount_rate", 10, "NA", "Flat annual discount rate when no rates table is given"),
@@ -609,7 +609,6 @@ scr_config_keys <- function(stage = NULL) {
     .ck("post_default_drawings_in", 11, "lgd", "Where drawings after default are booked: lgd or ccf"),
     .ck("framework", 12, "bcb", "Parameter preset: bcb, basel3_final, crr3"),
     .ck("capital_approach", 12, "airb", "Capital approach: airb (own LGD, floored) or firb (supervisory LGD, fixed maturity)"),
-    .ck("capital_asset_class", 12, "retail_other", "Default asset class of the risk-weight function"),
     .ck("capital_target_ratio", 12, "0.08", "Capital ratio applied to the reported RWA"),
     .ck("capital_output_floor", 12, "TRUE", "Compute the standardised comparison and the output floor"),
     .ck("capital_sensitivity", 12, "TRUE", "Run the fixed sensitivity grid"),

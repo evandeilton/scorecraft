@@ -78,12 +78,12 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
                   date_col = "ref_date")
 lab <- scr_coarse_classing(res)
 lab
-scr_classing_view(lab, "ds_regiao")
-p <- scr_classing_propose(lab, "ds_regiao",
-                          groups = list(south = c("BA", "RS"),
-                                        north = c("SP", "RJ", "MG")))
+scr_classing_view(lab, "ds_region")
+p <- scr_classing_propose(lab, "ds_region",
+                          groups = list(edge = c("NORTH", "SOUTH"),
+                                        core = c("EAST", "WEST", "CENTRE")))
 p
-lab <- scr_classing_accept(lab, p, reason = "north/south is what pricing uses")
+lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
 lab <- scr_classing_choose(lab, drop = "vl_score_10",
                            reason = "not available at decision time")
 lab

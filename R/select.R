@@ -155,6 +155,7 @@ scr_select <- function(data, target, config = scr_config(), drop = character(),
 scr_run <- function(con, table, targets, config = scr_config(), drop = character(), date_col = config$oot_date_col,
                     event_level = NULL, sample_frac = 1.0, max_rows = NULL, export = NULL) {
   check_config(config, "scr_run")
+  old <- scr_verbose(isTRUE(config$verbose)); on.exit(scr_verbose(old), add = TRUE)
   if (!length(targets)) stop("`targets` is empty.", call. = FALSE)
   frac_of <- function(vt) if (is.list(sample_frac)) sample_frac[[vt]] %||% 1.0 else sample_frac
   res <- vector("list", length(targets)); names(res) <- targets

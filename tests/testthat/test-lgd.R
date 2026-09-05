@@ -174,7 +174,7 @@ test_that("the beta severity engine runs when betareg is installed and fails cle
 test_that("downturn: observed impact per pool, the type-3 add-on, the reference value and the reasons", {
   m <- lgd_demo()
   per <- data.frame(start = as.Date("2022-01-01"), end = as.Date("2023-12-31"))
-  d1 <- scr_lgd_downturn(m, periods = per)
+  d1 <- scr_lgd_downturn(m, periods = per, reason = "stress window")
   tb <- d1$downturn$table
   expect_equal(d1$downturn$status, "final")
   expect_true(all(tb$method_used %in% c("type1", "type3_fallback")))
@@ -195,8 +195,10 @@ test_that("downturn: observed impact per pool, the type-3 add-on, the reference 
   d0 <- scr_lgd_downturn(m, method = "none", reason = "no downturn by decision")
   expect_equal(d0$downturn$table$lgd_dt, pmin(1, m$pools$lra + m$pools$moc_c))
   expect_error(scr_lgd_downturn(m, method = "type3"), "reason")
-  expect_error(scr_lgd_downturn(m), "periods")
-  expect_error(scr_lgd_downturn(m, periods = data.frame(start = as.Date("2023-01-01"), end = as.Date("2022-01-01"))), "start <= end")
+  expect_error(scr_lgd_downturn(m, periods = per), "reason")
+  expect_error(scr_lgd_downturn(m, periods = per, reason = "  "), "reason")
+  expect_error(scr_lgd_downturn(m, reason = "x"), "periods")
+  expect_error(scr_lgd_downturn(m, periods = data.frame(start = as.Date("2023-01-01"), end = as.Date("2022-01-01")), reason = "x"), "start <= end")
 })
 
 test_that("floors: the blended input floor binds from below and edits of the parameters are recorded", {

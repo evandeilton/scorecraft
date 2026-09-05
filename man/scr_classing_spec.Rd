@@ -20,7 +20,10 @@ returned by \code{\link[=scr_classing_apply]{scr_classing_apply()}}.}
 to write the table to. For \code{scr_classing_read()}, the path to read.
 For \code{scr_classing_import()}, a path or an \code{scr_classing_spec} object.}
 
-\item{sep}{Bin separator used in \code{categories} (the configuration's \code{bin_separator}).}
+\item{sep}{Bin separator of the \code{categories} column (the configuration's
+\code{bin_separator}). It is validated (no empty category, no category in
+two bins) and recorded on the spec, so that \code{\link[=scr_classing_import]{scr_classing_import()}}
+refuses a spec read with a different separator.}
 }
 \value{
 A \code{data.frame} of class \code{scr_classing_spec}.

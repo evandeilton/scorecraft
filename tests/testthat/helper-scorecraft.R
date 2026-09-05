@@ -22,5 +22,5 @@ sc_demo <- function() {
   .fx$sc
 }
 
-noise_names  <- function() grep("^vl_ruido_", names(scr_demo), value = TRUE)
+noise_names  <- function() grep("^vl_noise_", names(scr_demo), value = TRUE)
 signal_names <- function() grep("^vl_score_", names(scr_demo), value = TRUE)

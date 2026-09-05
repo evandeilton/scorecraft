@@ -143,9 +143,8 @@ as.data.frame.scr_metrics <- function(x, ...) {
 #' aggregation: this function is called once per candidate variable, hundreds
 #' of times per run, and the fixed cost dominated the triage.
 #'
-#' @param g Group vector (any coercible type). For a character or factor
-#'   `g`, `NA` forms a group of its own; for integer codes, `NA` rows are
-#'   dropped.
+#' @param g Group vector (any coercible type). Rows where `g` or `y` is
+#'   `NA` are ignored, whatever the type of `g`.
 #' @param y 0/1 outcome vector.
 #' @param laplace Smoothing constant added to each count. `0` switches it off.
 #'
@@ -159,10 +158,14 @@ as.data.frame.scr_metrics <- function(x, ...) {
 #' scr_iv(g, y)
 #' @export
 scr_iv <- function(g, y, laplace = 0.5) {
-  gi <- if (is.integer(g) && min(g, na.rm = TRUE) >= 1L) g else match(g, unique(g))
-  k  <- suppressWarnings(max(gi, na.rm = TRUE))
+  if (length(g) != length(y)) stop("scr_iv(): `g` and `y` must have the same length.", call. = FALSE)
+  .scr_num1(laplace, "laplace", lower = 0)
+  ok <- !is.na(g) & !is.na(y)
+  g <- g[ok]; y <- as.integer(y[ok])
+  if (!length(g)) return(0)
+  gi <- if (is.integer(g) && min(g) >= 1L) g else match(g, unique(g))
+  k  <- max(gi)
   if (!is.finite(k) || k < 2L) return(0)
-  y  <- as.integer(y)
   np <- tabulate(gi[y == 1L], nbins = k)
   nn <- tabulate(gi[y == 0L], nbins = k)
   live <- (np + nn) > 0L
@@ -213,6 +216,7 @@ woe_subpop <- function(mask, y, laplace = 0.5) {
 #'   (adjusted critical value), `flag_adjusted` (`"stable"` or `"shift"`),
 #'   `n_base`, `n_compare`, `n_bins` and `table` (per band: `pct_base`,
 #'   `pct_compare`, `psi_band`).
+#'   The `thresholds` and `alpha` used are stored and printed.
 #'
 #' @references
 #' Yurdakul, B. and Naranjo, J. (2020). Statistical properties of the
@@ -230,6 +234,11 @@ woe_subpop <- function(mask, y, laplace = 0.5) {
 #' @export
 scr_psi <- function(base, compare, levels = NULL, breaks = NULL, n_groups = 10L,
                     alpha = 0.05, thresholds = c(0.10, 0.25)) {
+  .scr_num1(alpha, "alpha", lower = 0, upper = 1, open_lower = TRUE)
+  if (!is.numeric(thresholds) || length(thresholds) != 2L || any(!is.finite(thresholds)) ||
+      thresholds[1] < 0 || thresholds[1] >= thresholds[2]) {
+    stop("`thresholds` must be two increasing non-negative numbers (moderate, shift).", call. = FALSE)
+  }
   if (is.numeric(base) && is.numeric(compare) && is.null(levels)) {
     if (is.null(breaks)) {
       probs  <- seq(0, 1, length.out = n_groups + 1L)[-c(1L, n_groups + 1L)]
@@ -248,7 +257,8 @@ scr_psi <- function(base, compare, levels = NULL, breaks = NULL, n_groups = 10L,
   if (n == 0L || m == 0L || B < 2L) {
     return(structure(list(psi = NA_real_, flag_fixed = NA_character_, critical = NA_real_,
                           flag_adjusted = NA_character_, n_base = n, n_compare = m,
-                          n_bins = B, alpha = alpha, table = NULL), class = c("scr_psi", "list")))
+                          n_bins = B, alpha = alpha, thresholds = thresholds, table = NULL),
+                     class = c("scr_psi", "list")))
   }
   # empty bins on one side: minimal smoothing only when a zero exists, so the
   # PSI of populated bands is left untouched
@@ -262,7 +272,7 @@ scr_psi <- function(base, compare, levels = NULL, breaks = NULL, n_groups = 10L,
   structure(list(
     psi = psi, flag_fixed = flag_fixed, critical = crit,
     flag_adjusted = if (psi < crit) "stable" else "shift",
-    n_base = n, n_compare = m, n_bins = B, alpha = alpha,
+    n_base = n, n_compare = m, n_bins = B, alpha = alpha, thresholds = thresholds,
     table = data.frame(band = lv, n_base = nb, n_compare = nc, pct_base = nb / n,
                        pct_compare = nc / m, psi_band = band, stringsAsFactors = FALSE)
   ), class = c("scr_psi", "list"))
@@ -273,7 +283,8 @@ print.scr_psi <- function(x, ...) {
   if (is.na(x$psi)) { cat("<scr_psi> undefined (insufficient sample or bands)\n"); return(invisible(x)) }
   cat(sprintf("<scr_psi> PSI = %.4f | bands = %d | n = %s vs %s\n", x$psi, x$n_bins,
               n_fmt(x$n_base), n_fmt(x$n_compare)))
-  cat(sprintf("  fixed threshold (0.10/0.25):       %s\n", x$flag_fixed))
+  th <- x$thresholds %||% c(0.10, 0.25)
+  cat(sprintf("  fixed threshold (%s/%s):       %s\n", .g3(th[1]), .g3(th[2]), x$flag_fixed))
   cat(sprintf("  n-adjusted threshold (%.4f):     %s  [Yurdakul & Naranjo, alpha = %.2f]\n",
               x$critical, x$flag_adjusted, x$alpha))
   invisible(x)

@@ -10,7 +10,7 @@ scr_capital(
   lgd = "lgd",
   ead = "ead",
   segment = NULL,
-  asset_class = config$capital_asset_class,
+  asset_class = config$asset_class,
   m = NULL,
   defaulted = NULL,
   elbe = NULL,

@@ -37,6 +37,7 @@ A list of class \code{scr_psi} with \code{psi}, \code{flag_fixed}, \code{critica
 (adjusted critical value), \code{flag_adjusted} (\code{"stable"} or \code{"shift"}),
 \code{n_base}, \code{n_compare}, \code{n_bins} and \code{table} (per band: \code{pct_base},
 \code{pct_compare}, \code{psi_band}).
+The \code{thresholds} and \code{alpha} used are stored and printed.
 }
 \description{
 \code{PSI = sum((p - q) * ln(p / q))} over bins frozen on the base. Reports

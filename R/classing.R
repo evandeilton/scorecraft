@@ -67,12 +67,12 @@
 #'                   date_col = "ref_date")
 #' lab <- scr_coarse_classing(res)
 #' lab
-#' scr_classing_view(lab, "ds_regiao")
-#' p <- scr_classing_propose(lab, "ds_regiao",
-#'                           groups = list(south = c("BA", "RS"),
-#'                                         north = c("SP", "RJ", "MG")))
+#' scr_classing_view(lab, "ds_region")
+#' p <- scr_classing_propose(lab, "ds_region",
+#'                           groups = list(edge = c("NORTH", "SOUTH"),
+#'                                         core = c("EAST", "WEST", "CENTRE")))
 #' p
-#' lab <- scr_classing_accept(lab, p, reason = "north/south is what pricing uses")
+#' lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
 #' lab <- scr_classing_choose(lab, drop = "vl_score_10",
 #'                            reason = "not available at decision time")
 #' lab
@@ -797,9 +797,18 @@ print.scr_classing_spec <- function(x, ...) {
 }
 
 #' @rdname scr_classing_spec
-#' @param sep Bin separator used in `categories` (the configuration's `bin_separator`).
+#' @param sep Bin separator of the `categories` column (the configuration's
+#'   `bin_separator`). It is validated (no empty category, no category in
+#'   two bins) and recorded on the spec, so that [scr_classing_import()]
+#'   refuses a spec read with a different separator.
 #' @export
 scr_classing_read <- function(file, sep = "%;%") {
+  if (!is.character(sep) || length(sep) != 1L || is.na(sep) || !nzchar(sep)) {
+    stop("scr_classing_read(): `sep` must be a single non-empty string.", call. = FALSE)
+  }
+  if (!is.character(file) || length(file) != 1L || !file.exists(file)) {
+    stop("scr_classing_read(): `file` must be the path of an existing .csv or .xlsx file.", call. = FALSE)
+  }
   d <- if (grepl("\\.xlsx$", file, ignore.case = TRUE)) {
     .need_openxlsx(); openxlsx::read.xlsx(file, sheet = 1)
   } else utils::read.csv(file, stringsAsFactors = FALSE, na.strings = c("", "NA"))
@@ -827,10 +836,20 @@ scr_classing_read <- function(file, sep = "%;%") {
       if (!isTRUE(all.equal(lo, up))) errs <- c(errs, sprintf("%s: `lower` of bin i must equal `upper` of bin i-1 (contiguity)", v))
     } else {
       if (anyNA(r$categories) || any(!nzchar(r$categories))) errs <- c(errs, sprintf("%s: every categorical bin needs `categories`", v))
+      else {
+        cs <- as.character(r$categories)
+        if (any(startsWith(cs, sep) | endsWith(cs, sep) | grepl(paste0(sep, sep), cs, fixed = TRUE))) {
+          errs <- c(errs, sprintf("%s: empty category around the separator '%s'", v, sep))
+        }
+        cats <- unlist(strsplit(cs, sep, fixed = TRUE))
+        dup <- unique(cats[duplicated(cats)])
+        if (length(dup)) errs <- c(errs, sprintf("%s: category in two bins (%s)", v, lst(dup, 5)))
+      }
       if (sum(r$is_other) > 1L) errs <- c(errs, sprintf("%s: only one bin may be `is_other`", v))
     }
   }
   if (length(errs)) stop("scr_classing_read(): invalid spec\n  - ", paste(errs, collapse = "\n  - "), call. = FALSE)
+  attr(d, "sep") <- sep
   class(d) <- c("scr_classing_spec", "data.frame")
   d
 }
@@ -845,6 +864,10 @@ scr_classing_import <- function(lab, file) {
   sep <- lab$result$config$bin_separator
   spec <- if (is.character(file)) scr_classing_read(file, sep = sep) else file
   if (!inherits(spec, "scr_classing_spec")) stop("scr_classing_import(): `file` must be a path or an scr_classing_spec.", call. = FALSE)
+  spec_sep <- attr(spec, "sep")
+  if (!is.null(spec_sep) && !identical(spec_sep, sep)) {
+    stop("scr_classing_import(): the spec was read with separator '", spec_sep, "' but the lab uses '", sep, "'.", call. = FALSE)
+  }
   out <- list()
   for (v in intersect(unique(spec$variable), lab$features)) {
     r <- spec[spec$variable == v, , drop = FALSE]; r <- r[order(r$bin_id), , drop = FALSE]

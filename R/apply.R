@@ -20,7 +20,9 @@
 #' @param what For `scr_result`: `"woe"`, `"bin"` or `"both"`. For
 #'   `scr_scorecard`: `"score"`, `"points"`, `"woe"` or `"all"`. For
 #'   `scr_lgd`: `"pool"` (pool and pool LGDs), `"lgd"` (adds the predicted
-#'   LGD) or `"all"` (adds the cure probability and the severity).
+#'   LGD) or `"all"` (adds the cure probability and the severity). For
+#'   `scr_ead`: `"all"` (default), `"ead"` (pool, measure, applied CCF,
+#'   predicted EAD and the floor flag) or `"pool"` (pool and measure).
 #'
 #' @section Output columns:
 #'

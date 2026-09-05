@@ -53,7 +53,7 @@ below the LRA; and an own estimate is subject to an input floor by asset
 class and collateral. The `"type1"` and `"type3"` labels of the downturn
 methods below follow the public supervisory guidance on downturn LGD
 estimation (observed impact, and reference value plus add-on); the `"bcb"`
-parameter preset is the Brazilian text (Resolução BCB 303/2023).
+parameter preset is the Brazilian text (BCB Resolution 303/2023).
 
 ## The reference data set: `scr_workout()`
 

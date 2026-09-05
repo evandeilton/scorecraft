@@ -22,8 +22,8 @@ periods. Required for \code{"type1"}.}
 
 \item{add_on}{Type-3 add-on; \code{NULL} uses \code{lgd_downturn_add_on}.}
 
-\item{reason}{Free text recorded in the ledger. Mandatory when \code{method}
-or \code{add_on} differ from the configuration.}
+\item{reason}{Free text recorded in the ledger, mandatory: the choice of
+periods and method is an analyst decision.}
 }
 \value{
 The \code{scr_lgd} object with \code{downturn} (\code{table} per pool:
@@ -49,7 +49,8 @@ cfg <- scr_config(verbose = FALSE, nthread = 1, n_boot = 20)
 wo <- scr_workout(scr_demo_lgd, scr_demo_lgd_cashflows, rates = scr_demo_rates, config = cfg)
 m <- scr_lgd(wo, drivers = c("product", "ltv", "prior_dpd_max"), config = cfg)
 m <- scr_lgd_downturn(m, periods = data.frame(start = as.Date("2022-01-01"),
-                                               end = as.Date("2023-12-31")))
+                                               end = as.Date("2023-12-31")),
+                      reason = "reference rate above 13\% in 2022-2023")
 m$downturn$table
 }
 \seealso{

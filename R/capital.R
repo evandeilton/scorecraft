@@ -509,7 +509,7 @@ scr_sa_rw <- function(asset_class, ltv = NULL, rating = NULL, transactor = NULL,
 #' cap$segments[, c("segment", "n", "rw", "irb_sa_ratio")]
 #' cap$floors
 #' @export
-scr_capital <- function(x, pd = "pd", lgd = "lgd", ead = "ead", segment = NULL, asset_class = config$capital_asset_class,
+scr_capital <- function(x, pd = "pd", lgd = "lgd", ead = "ead", segment = NULL, asset_class = config$asset_class,
                         m = NULL, defaulted = NULL, elbe = NULL, provisions = NULL, ltv = NULL, rating = NULL,
                         sales = NULL, fi = NULL, transactor = NULL, grade = NULL, id = NULL,
                         claim = NULL, granular = TRUE,

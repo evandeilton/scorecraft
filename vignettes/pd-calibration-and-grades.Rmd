@@ -32,7 +32,7 @@ model needs. Four things separate the two:
 Every step below leaves a record: the merges and repairs of the grades, the
 entries of the margin ledger, the parameter table used for the floor. The
 names follow the public frameworks (the Basel Framework of the BCBS, the
-EBA guidelines on PD and LGD estimation, Resolução BCB 303/2023) only where
+EBA guidelines on PD and LGD estimation, BCB Resolution 303/2023) only where
 they explain a name; the package is a technical tool and the frameworks
 are tables of numbers it reads, not prose it interprets.
 

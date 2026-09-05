@@ -14,13 +14,13 @@ test_that("structural pathologies fail with the right reason", {
   sp <- scr_split(scr_demo, "default", date_col = "ref_date", drop = c("id", "churn"))
   p <- scr_triage(sp, cfg_test())$profile
   reason <- function(f) p[feature == f, triage_reason]
-  expect_equal(reason("vl_constante"), "CONSTANT")
-  expect_equal(reason("ds_constante"), "CONSTANT")
-  expect_equal(reason("vl_quase_const"), "NEAR_CONSTANT")
-  expect_equal(reason("ds_alta_card"), "HIGH_CARDINALITY")
-  expect_match(reason("vl_duplicada"), "^DUPLICATE_OF:")
-  expect_match(reason("vl_parcial_03"), "TOO_MANY_MISSING")
-  expect_false("vl_duplicada" %in% p[triage_status == "keep", feature])
+  expect_equal(reason("vl_constant"), "CONSTANT")
+  expect_equal(reason("ds_constant"), "CONSTANT")
+  expect_equal(reason("vl_near_const"), "NEAR_CONSTANT")
+  expect_equal(reason("ds_high_card"), "HIGH_CARDINALITY")
+  expect_match(reason("vl_duplicate"), "^DUPLICATE_OF:")
+  expect_match(reason("vl_partial_03"), "TOO_MANY_MISSING")
+  expect_false("vl_duplicate" %in% p[triage_status == "keep", feature])
 })
 
 test_that("the ledger is unconditional for survivors so hold-out and production agree", {

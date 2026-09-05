@@ -21,7 +21,7 @@ scr_pd(
 
 \item{params}{An \code{\link[=scr_irb_params]{scr_irb_params()}}; \code{NULL} uses \code{config$framework}.}
 
-\item{asset_class}{Asset class of the floor; \code{NULL} uses \code{config$pd_asset_class}.}
+\item{asset_class}{Asset class of the floor; \code{NULL} uses \code{config$asset_class}.}
 
 \item{philosophy}{\code{"ttc"} (default) or \code{"pit"}.}
 

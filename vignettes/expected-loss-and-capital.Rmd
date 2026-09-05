@@ -50,7 +50,7 @@ p$pd_floor
 ```
 
 The presets differ in a handful of cells (`"bcb"` takes its values from
-Resolução BCB 303/2023, `"basel3_final"` from the consolidated Basel
+BCB Resolution 303/2023, `"basel3_final"` from the consolidated Basel
 Framework, whose CRE31 chapter is the risk-weight function). The visible
 differences are the supervisory LGD table of the foundation approach and
 the firm-size bounds of the SME correlation adjustment.

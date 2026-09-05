@@ -14,6 +14,7 @@ scr_default_rate(
   grade = NULL,
   segment = NULL,
   exposure = NULL,
+  lra_adjusted = NULL,
   config = scr_config()
 )
 }
@@ -30,14 +31,17 @@ scr_default_rate(
 
 \item{exposure}{Optional column name; adds exposure-weighted rates.}
 
+\item{lra_adjusted}{Optional adjusted long-run average proposed by the
+analyst, in \verb{[0, 1]}; benchmarked and flagged, never applied.}
+
 \item{config}{A \code{\link[=scr_config]{scr_config()}}; only \code{pd_dr_by} is read (the default of
 \code{by}).}
 }
 \value{
 An object of class \code{scr_dr}: \code{table} (cohort rates, by grade or
 segment when given), \code{portfolio} (one row per cohort: \code{n}, \code{defaults},
-\code{dr}), \code{lra} (\code{mean}, \code{weighted_mean}, \code{recent5_mean}, \code{all_mean},
-\code{benchmark}, \code{flag_below_benchmark}, \code{min}, \code{max}, \code{sd}, \code{n_cohorts},
+\code{dr}), \code{lra} (\code{mean}, \code{weighted_mean}, \code{recent5_mean}, \code{benchmark},
+\code{adjusted}, \code{flag_below_benchmark}, \code{min}, \code{max}, \code{sd}, \code{n_cohorts},
 \code{years}), \code{horizon} and \code{by}.
 }
 \description{
@@ -46,9 +50,11 @@ default column by unit and month), computes for every cohort start the
 population of non-defaulted units, the share that defaults within
 \code{horizon} months, optionally by \code{grade} or \code{segment} (as observed at the
 cohort start) and exposure-weighted when \code{exposure} is given. The long-run
-average is the arithmetic mean of the cohort rates; the benchmark is the
-larger of the last five years' mean and the whole period's mean, and a
-flag records when the average sits below it.
+average is the arithmetic mean of the cohort rates. When the analyst
+proposes an adjusted value (\code{lra_adjusted}, for instance after judging
+that the period lacks bad years), it is benchmarked against the larger of
+the last five years' mean and the whole period's mean, and a flag records
+when it sits below that benchmark.
 }
 \examples{
 d <- scr_default(scr_demo_panel, id = "id", date = "ref_date", dpd = "dpd",

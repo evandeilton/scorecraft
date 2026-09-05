@@ -957,8 +957,8 @@ scr_lgd_pools <- function(x, n_pools = NULL, min_defaults = NULL) {
 #'   periods. Required for `"type1"`.
 #' @param method `"type1"`, `"type3"` or `"none"`; `NULL` uses `lgd_downturn`.
 #' @param add_on Type-3 add-on; `NULL` uses `lgd_downturn_add_on`.
-#' @param reason Free text recorded in the ledger. Mandatory when `method`
-#'   or `add_on` differ from the configuration.
+#' @param reason Free text recorded in the ledger, mandatory: the choice of
+#'   periods and method is an analyst decision.
 #'
 #' @return The `scr_lgd` object with `downturn` (`table` per pool:
 #'   `lra`, `moc_c`, `dt_observed`, `n_downturn`, `dt_type3`,
@@ -972,17 +972,21 @@ scr_lgd_pools <- function(x, n_pools = NULL, min_defaults = NULL) {
 #' wo <- scr_workout(scr_demo_lgd, scr_demo_lgd_cashflows, rates = scr_demo_rates, config = cfg)
 #' m <- scr_lgd(wo, drivers = c("product", "ltv", "prior_dpd_max"), config = cfg)
 #' m <- scr_lgd_downturn(m, periods = data.frame(start = as.Date("2022-01-01"),
-#'                                                end = as.Date("2023-12-31")))
+#'                                                end = as.Date("2023-12-31")),
+#'                       reason = "reference rate above 13% in 2022-2023")
 #' m$downturn$table
 #' @export
 scr_lgd_downturn <- function(x, periods = NULL, method = NULL, add_on = NULL, reason = NULL) {
   if (!inherits(x, "scr_lgd")) stop("scr_lgd_downturn(): `x` must come from scr_lgd().", call. = FALSE)
   cfg <- x$config
-  overridden <- (!is.null(method) && !identical(method, cfg$lgd_downturn)) || (!is.null(add_on) && !isTRUE(all.equal(add_on, cfg$lgd_downturn_add_on)))
+    overridden <- (!is.null(method) && !identical(method, cfg$lgd_downturn)) ||
+    (!is.null(add_on) && !isTRUE(all.equal(add_on, cfg$lgd_downturn_add_on)))
   method <- match.arg(method %||% cfg$lgd_downturn, c("type1", "type3", "none"))
   add_on <- add_on %||% cfg$lgd_downturn_add_on
   .scr_num1(add_on, "add_on", lower = 0, upper = 1)
-  if (overridden && is.null(reason)) stop("scr_lgd_downturn(): give a `reason` when `method` or `add_on` differ from the configuration.", call. = FALSE)
+  if (is.null(reason) || !is.character(reason) || length(reason) != 1L || !nzchar(trimws(reason))) {
+    stop("scr_lgd_downturn(): a `reason` is mandatory (the downturn periods and method go in the ledger).", call. = FALSE)
+  }
   if (identical(method, "type1") && is.null(periods)) stop("scr_lgd_downturn(): `periods` (start, end) are required for method \"type1\".", call. = FALSE)
   p <- if (is.null(periods)) NULL else data.table::as.data.table(periods)[, list(start = as.Date(start), end = as.Date(end))]
   base <- x$pools[, list(pool, pred_lo, pred_hi, pred_mean, n, share, ead, lra, lra_ew, sd, se, moc_c, lra_moc, merged_from)]
@@ -1013,7 +1017,7 @@ scr_lgd_downturn <- function(x, periods = NULL, method = NULL, add_on = NULL, re
 #' @param params An [scr_irb_params()] object; `NULL` uses the configured
 #'   framework. Edits are detected and recorded in the ledger.
 #' @param asset_class Row of `params$lgd_floor`; `NULL` uses
-#'   `capital_asset_class` of the configuration.
+#'   `asset_class` of the configuration.
 #' @param secured_share Secured share of the exposure in `[0, 1]`: one value
 #'   or one per pool. `NULL` means unsecured.
 #' @param collateral Column of `params$lgd_floor` for the secured part:
@@ -1038,7 +1042,7 @@ scr_lgd_floor <- function(x, params = NULL, asset_class = NULL, secured_share = 
   if (!inherits(x, "scr_lgd")) stop("scr_lgd_floor(): `x` must come from scr_lgd().", call. = FALSE)
   collateral <- match.arg(collateral)
   params <- .check_params(params %||% scr_irb_params(x$config$framework), "scr_lgd_floor")
-  asset_class <- asset_class %||% x$config$capital_asset_class
+  asset_class <- asset_class %||% x$config$asset_class
   lf <- params$lgd_floor
   i <- match(asset_class, lf$asset_class)
   if (is.na(i)) stop("scr_lgd_floor(): unknown `asset_class` '", asset_class, "'. See scr_irb_params()$lgd_floor.", call. = FALSE)

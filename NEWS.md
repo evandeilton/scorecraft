@@ -65,6 +65,20 @@ parameter tables selected by a preset, never prose.
   `scr_pd_validate()` is green when every grade sits on the conservative
   side (the PD above the observed rate), since the statistic is two-sided.
 * `betareg` (Suggests) powers the beta severity engine of `scr_lgd()`.
+* After the documentation audit: `scr_iv()` ignores `NA` for every group
+  type; `scr_classing_read()` validates the separator and the spec carries
+  it into `scr_classing_import()`; the `TOO_MANY_BINS` screening rule can
+  fire (the screen reads `max_bins`); `scr_psi()` stores and prints its
+  thresholds; `scr_default_rate()` reports one long-run mean and
+  benchmarks an optional `lra_adjusted`; one `asset_class` configuration
+  key replaces `pd_asset_class` and `capital_asset_class`;
+  `scr_lgd_downturn()` always records a reason; the traffic-light
+  convention is red at or below the first threshold in PD, LGD and EAD;
+  `scr_apply()` on an `scr_ead` takes `what`; `scr_fetch()` gains
+  `verbose` and `scr_run()` follows `config$verbose`; the `scr_demo`
+  columns carry English names (`vl_partial_*`, `vl_noise_*`,
+  `vl_constant`, `vl_near_const`, `vl_duplicate`, `vl_redundant`,
+  `vl_late`, `ds_region`, `ds_band`, `ds_channel`, `ds_high_card`).
 
 ## Scorecard pipeline hardening
 

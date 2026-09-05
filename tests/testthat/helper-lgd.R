@@ -24,7 +24,8 @@ lgd_demo <- function() {
 # a downturn-and-floored copy of the demo model
 lgd_final <- function() {
   if (is.null(.fx$lgd_final)) {
-    m <- scr_lgd_downturn(lgd_demo(), periods = data.frame(start = as.Date("2022-01-01"), end = as.Date("2023-12-31")))
+    m <- scr_lgd_downturn(lgd_demo(), periods = data.frame(start = as.Date("2022-01-01"), end = as.Date("2023-12-31")),
+                          reason = "reference rate above 13% in 2022-2023")
     .fx$lgd_final <- scr_lgd_floor(m, asset_class = "retail_other", secured_share = 0.4)
   }
   .fx$lgd_final

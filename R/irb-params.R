@@ -100,7 +100,7 @@ scr_irb_params <- function(framework = c("bcb", "basel3_final", "crr3")) {
   ), use.names = TRUE)
 
   source <- switch(framework,
-    bcb          = "Resolucao BCB 303/2023 (IRB) and 229/2022 (standardised); values as tables, editable",
+    bcb          = "BCB Resolutions 303/2023 (IRB) and 229/2022 (standardised); values as tables, editable",
     basel3_final = "Basel Framework CRE20/CRE30-36 as in force from 2023; values as tables, editable",
     crr3         = "Regulation (EU) 575/2013 as amended by 2024/1623; values as tables, editable")
 

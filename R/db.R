@@ -55,6 +55,8 @@ scr_connect <- function(dsn = NULL, driver = NULL, timeout = 20, ...) {
 #' @param max_rows Row cap. `NULL` switches it off.
 #' @param sample_expr Optional SQL expression yielding a uniform number in
 #'   `[0, 1)`, used as `WHERE <sample_expr> <= sample_frac`.
+#' @param verbose `TRUE`/`FALSE` to echo (or not) the query for this call;
+#'   `NULL` follows [scr_verbose()].
 #'
 #' @return A `data.table` with the fetched table.
 #'
@@ -67,8 +69,13 @@ scr_connect <- function(dsn = NULL, driver = NULL, timeout = 20, ...) {
 #' nrow(scr_fetch(con, "dtm", max_rows = 1000))
 #' DBI::dbDisconnect(con)
 #' @export
-scr_fetch <- function(con, table, sample_frac = 1.0, seed = NULL, max_rows = NULL, sample_expr = NULL) {
+scr_fetch <- function(con, table, sample_frac = 1.0, seed = NULL, max_rows = NULL, sample_expr = NULL,
+                      verbose = NULL) {
   if (!requireNamespace("DBI", quietly = TRUE)) stop("scr_fetch() needs the 'DBI' package.", call. = FALSE)
+  if (!is.null(verbose)) {
+    if (!is.logical(verbose) || length(verbose) != 1L || is.na(verbose)) stop("scr_fetch(): `verbose` must be TRUE, FALSE or NULL.", call. = FALSE)
+    old <- scr_verbose(verbose); on.exit(scr_verbose(old), add = TRUE)
+  }
   .scr_num1(sample_frac, "sample_frac", lower = 0, upper = 1, open_lower = TRUE)
   if (!is.null(max_rows) && is.finite(max_rows)) {
     n_tab <- tryCatch(as.numeric(DBI::dbGetQuery(con, DBI::SQL(sprintf(

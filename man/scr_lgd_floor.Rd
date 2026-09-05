@@ -19,7 +19,7 @@ scr_lgd_floor(
 framework. Edits are detected and recorded in the ledger.}
 
 \item{asset_class}{Row of \code{params$lgd_floor}; \code{NULL} uses
-\code{capital_asset_class} of the configuration.}
+\code{asset_class} of the configuration.}
 
 \item{secured_share}{Secured share of the exposure in \verb{[0, 1]}: one value
 or one per pool. \code{NULL} means unsecured.}

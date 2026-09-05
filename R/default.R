@@ -213,9 +213,11 @@ print.scr_default <- function(x, ...) {
 #' population of non-defaulted units, the share that defaults within
 #' `horizon` months, optionally by `grade` or `segment` (as observed at the
 #' cohort start) and exposure-weighted when `exposure` is given. The long-run
-#' average is the arithmetic mean of the cohort rates; the benchmark is the
-#' larger of the last five years' mean and the whole period's mean, and a
-#' flag records when the average sits below it.
+#' average is the arithmetic mean of the cohort rates. When the analyst
+#' proposes an adjusted value (`lra_adjusted`, for instance after judging
+#' that the period lacks bad years), it is benchmarked against the larger of
+#' the last five years' mean and the whole period's mean, and a flag records
+#' when it sits below that benchmark.
 #'
 #' @param x An `scr_default` or a `data.frame`/`data.table`.
 #' @param id,date,default Column names (ignored for an `scr_default`).
@@ -223,13 +225,15 @@ print.scr_default <- function(x, ...) {
 #' @param by Cohort frequency: `"month"`, `"quarter"` or `"year"`.
 #' @param grade,segment Optional column names observed at the cohort start.
 #' @param exposure Optional column name; adds exposure-weighted rates.
+#' @param lra_adjusted Optional adjusted long-run average proposed by the
+#'   analyst, in `[0, 1]`; benchmarked and flagged, never applied.
 #' @param config A [scr_config()]; only `pd_dr_by` is read (the default of
 #'   `by`).
 #'
 #' @return An object of class `scr_dr`: `table` (cohort rates, by grade or
 #'   segment when given), `portfolio` (one row per cohort: `n`, `defaults`,
-#'   `dr`), `lra` (`mean`, `weighted_mean`, `recent5_mean`, `all_mean`,
-#'   `benchmark`, `flag_below_benchmark`, `min`, `max`, `sd`, `n_cohorts`,
+#'   `dr`), `lra` (`mean`, `weighted_mean`, `recent5_mean`, `benchmark`,
+#'   `adjusted`, `flag_below_benchmark`, `min`, `max`, `sd`, `n_cohorts`,
 #'   `years`), `horizon` and `by`.
 #'
 #' @family irb-parameters
@@ -241,8 +245,13 @@ print.scr_default <- function(x, ...) {
 #' dr$table
 #' @export
 scr_default_rate <- function(x, id = "id", date = "date", default = "default", horizon = 12L,
-                             by = NULL, grade = NULL, segment = NULL, exposure = NULL, config = scr_config()) {
+                             by = NULL, grade = NULL, segment = NULL, exposure = NULL, lra_adjusted = NULL,
+                             config = scr_config()) {
   check_config(config, "scr_default_rate")
+  if (!is.null(lra_adjusted)) .scr_num1(lra_adjusted, "lra_adjusted", lower = 0, upper = 1)
+  if (!is.numeric(horizon) || length(horizon) != 1L || is.na(horizon) || horizon < 1L) {
+    stop("scr_default_rate(): `horizon` must be a positive number of months.", call. = FALSE)
+  }
   by <- by %||% config$pd_dr_by
   by <- match.arg(by, c("month", "quarter", "year"))
   horizon <- as.integer(horizon)
@@ -300,10 +309,12 @@ scr_default_rate <- function(x, id = "id", date = "date", default = "default", h
   yrs <- as.numeric(difftime(max(port$cohort), min(port$cohort), units = "days")) / 365.25
   recent <- port[cohort > .add_months(max(cohort), -60L)]
   lra <- list(mean = mean(port$dr), weighted_mean = sum(port$defaults) / sum(port$n),
-              recent5_mean = mean(recent$dr), all_mean = mean(port$dr),
-              n_cohorts = nrow(port), years = yrs)
-  lra$benchmark <- max(lra$recent5_mean, lra$all_mean)
-  lra$flag_below_benchmark <- lra$mean < lra$benchmark - 1e-12
+              recent5_mean = mean(recent$dr), n_cohorts = nrow(port), years = yrs)
+  # the benchmark of an adjusted long-run average: the larger of the last
+  # five years' mean and the whole period's mean
+  lra$benchmark <- max(lra$recent5_mean, lra$mean)
+  lra$adjusted <- lra_adjusted
+  lra$flag_below_benchmark <- !is.null(lra_adjusted) && lra_adjusted < lra$benchmark - 1e-12
   lra$min <- min(port$dr); lra$max <- max(port$dr); lra$sd <- stats::sd(port$dr)
   structure(list(table = tab, portfolio = port, lra = lra, horizon = horizon, by = by),
             class = c("scr_dr", "list"))
@@ -328,9 +339,12 @@ print.scr_dr <- function(x, ...) {
   cat(sprintf("<scr_dr> %d %sly cohorts over %.1f years | horizon %d months\n", l$n_cohorts, x$by, l$years, x$horizon))
   cat(sprintf("  default rate: mean %s | weighted %s | min %s | max %s | sd %s\n",
               fmt_pct(l$mean, 2), fmt_pct(l$weighted_mean, 2), fmt_pct(l$min, 2), fmt_pct(l$max, 2), fmt_pct(l$sd, 2)))
-  cat(sprintf("  long-run average %s vs benchmark %s (max of last-5-years %s and all-years %s)%s\n",
-              fmt_pct(l$mean, 2), fmt_pct(l$benchmark, 2), fmt_pct(l$recent5_mean, 2), fmt_pct(l$all_mean, 2),
-              if (isTRUE(l$flag_below_benchmark)) " - BELOW the benchmark" else ""))
+  cat(sprintf("  long-run average %s | benchmark %s (max of last-5-years %s and all-years %s)\n",
+              fmt_pct(l$mean, 2), fmt_pct(l$benchmark, 2), fmt_pct(l$recent5_mean, 2), fmt_pct(l$mean, 2)))
+  if (!is.null(l$adjusted)) {
+    cat(sprintf("  adjusted long-run average %s%s\n", fmt_pct(l$adjusted, 2),
+                if (isTRUE(l$flag_below_benchmark)) " - BELOW the benchmark, justify and cover with a margin" else " - at or above the benchmark"))
+  }
   if (l$years < 5) cat("  note: fewer than five years of cohorts; the average is not a long-run one yet\n")
   invisible(x)
 }

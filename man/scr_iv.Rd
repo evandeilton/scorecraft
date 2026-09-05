@@ -7,9 +7,8 @@
 scr_iv(g, y, laplace = 0.5)
 }
 \arguments{
-\item{g}{Group vector (any coercible type). For a character or factor
-\code{g}, \code{NA} forms a group of its own; for integer codes, \code{NA} rows are
-dropped.}
+\item{g}{Group vector (any coercible type). Rows where \code{g} or \code{y} is
+\code{NA} are ignored, whatever the type of \code{g}.}
 
 \item{y}{0/1 outcome vector.}
 

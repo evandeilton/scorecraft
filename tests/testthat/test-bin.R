@@ -22,8 +22,8 @@ test_that("screening, hold-out and pruning each leave a verdict with a reason", 
   h <- bn$holdout
   expect_true(all(c("iv_holdout", "psi", "psi_critical", "psi_flag_adjusted", "holdout_ok", "holdout_reason") %in% names(h)))
   expect_true(all(h$psi_flag_adjusted[!is.na(h$psi)] %in% c("stable", "shift")))
-  # vl_score_02 and vl_redundante are near copies: at most one survives
-  expect_lte(sum(c("vl_score_02", "vl_redundante") %in% bn$prune$keep), 1L)
+  # vl_score_02 and vl_redundant are near copies: at most one survives
+  expect_lte(sum(c("vl_score_02", "vl_redundant") %in% bn$prune$keep), 1L)
   expect_true(all(bn$pool %in% bn$prune$keep))
   expect_false(any(bn$derived_excluded %in% bn$pool))
 })

@@ -65,8 +65,9 @@ follows the connection class: `rand(seed)` on Spark, Databricks and MySQL,
 `random()` on PostgreSQL, Redshift and DuckDB, and an integer-modulo
 expression on SQLite, whose `random()` returns a signed 64-bit integer and
 cannot be seeded. `sample_expr` overrides the choice for a dialect the
-package does not know. The query is echoed while `scr_verbose()` is on;
-`config$verbose` does not reach the database functions.
+package does not know. The query is echoed while messages are on:
+`scr_fetch()` follows `scr_verbose()` unless its own `verbose` argument
+says otherwise, and `scr_run()` follows `config$verbose`.
 
 ```{r fetch, eval = requireNamespace("RSQLite", quietly = TRUE) && requireNamespace("DBI", quietly = TRUE)}
 half <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
@@ -384,12 +385,12 @@ in bin shares weighted by the points of each bin, which is the amount by which
 the variable moved the mean score, with its sign, and it is additive across
 variables.
 
-`vl_tardio` is built to degrade in the last period only, and the monitor
+`vl_late` is built to degrade in the last period only, and the monitor
 finds it: stable for five periods, then a CSI far above both thresholds
 and the largest points shift of the run.
 
 ```{r monitor-csi}
-mo$csi[variable == "vl_tardio", .(period, n, csi, flag_fixed, critical, flag_adjusted, points_shift)]
+mo$csi[variable == "vl_late", .(period, n, csi, flag_fixed, critical, flag_adjusted, points_shift)]
 mo$csi[period == max(period)][order(-abs(points_shift))][1:5,
        .(variable, csi, flag_fixed, flag_adjusted, points_shift)]
 ```

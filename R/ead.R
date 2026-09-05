@@ -944,7 +944,8 @@ scr_ead_downturn <- function(x, periods = NULL, method = NULL, add_on = 0.15, re
 
 #' @rdname scr_apply
 #' @export
-scr_apply.scr_ead <- function(x, newdata, ...) {
+scr_apply.scr_ead <- function(x, newdata, what = c("all", "ead", "pool"), ...) {
+  what <- match.arg(what)
   dt <- data.table::as.data.table(newdata)
   cols <- x$meta$cols
   need <- c(cols$limit, cols$drawn, setdiff(x$survivors, "utilisation_ref"))
@@ -961,7 +962,11 @@ scr_apply.scr_ead <- function(x, newdata, ...) {
   out <- data.table::data.table(pool = d$pool, measure = d$measure, utilisation = d$utilisation, undrawn = d$undrawn,
                                 ccf_applied = pr$ccf_applied, ead_model = pr$ead_model, ead_floor = pr$ead_floor,
                                 ead_predicted = pr$ead_predicted, ead_floor_binding = pr$ead_floor_binding)
-  out[]
+  keep <- switch(what,
+    pool = c("pool", "measure"),
+    ead  = c("pool", "measure", "ccf_applied", "ead_predicted", "ead_floor_binding"),
+    all  = names(out))
+  out[, keep, with = FALSE][]
 }
 
 # -- 5. Production SQL -------------------------------------------------------- #

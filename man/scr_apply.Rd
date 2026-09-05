@@ -21,7 +21,7 @@ scr_apply(x, newdata, ...)
 
 \method{scr_apply}{scr_scorecard}(x, newdata, what = c("score", "points", "woe", "all"), ...)
 
-\method{scr_apply}{scr_ead}(x, newdata, ...)
+\method{scr_apply}{scr_ead}(x, newdata, what = c("all", "ead", "pool"), ...)
 
 \method{scr_apply}{scr_lgd}(x, newdata, what = c("pool", "lgd", "all"), ...)
 
@@ -42,7 +42,9 @@ the approved ones.}
 \item{what}{For \code{scr_result}: \code{"woe"}, \code{"bin"} or \code{"both"}. For
 \code{scr_scorecard}: \code{"score"}, \code{"points"}, \code{"woe"} or \code{"all"}. For
 \code{scr_lgd}: \code{"pool"} (pool and pool LGDs), \code{"lgd"} (adds the predicted
-LGD) or \code{"all"} (adds the cure probability and the severity).}
+LGD) or \code{"all"} (adds the cure probability and the severity). For
+\code{scr_ead}: \code{"all"} (default), \code{"ead"} (pool, measure, applied CCF,
+predicted EAD and the floor flag) or \code{"pool"} (pool and measure).}
 }
 \value{
 A \code{data.table} with one row per row of \code{newdata}.

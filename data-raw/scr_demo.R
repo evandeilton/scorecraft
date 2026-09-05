@@ -45,7 +45,7 @@ for (i in seq_along(mass)) {
 for (i in 1:3) {
   x <- round(stats::rnorm(n), 3)
   x[stats::runif(n) < c(0.12, 0.40, 0.82)[i]] <- NA_real_
-  dt[[sprintf("vl_parcial_%02d", i)]] <- x
+  dt[[sprintf("vl_partial_%02d", i)]] <- x
 }
 
 # a column that only degrades in the hold-out (last period)
@@ -54,30 +54,30 @@ xs <- round(stats::rnorm(n), 3)
 lin <- lin + 0.45 * xs
 xs[late & stats::runif(n) < 0.30] <- NA_real_
 xs[late & stats::runif(n) < 0.20] <- -999
-dt$vl_tardio <- xs
+dt$vl_late <- xs
 
 # pure noise
-for (i in 1:6) dt[[sprintf("vl_ruido_%02d", i)]] <- round(stats::rnorm(n), 3)
+for (i in 1:6) dt[[sprintf("vl_noise_%02d", i)]] <- round(stats::rnorm(n), 3)
 
 # structural pathologies
-dt$vl_constante   <- 7
+dt$vl_constant   <- 7
 qc <- rep(1, n); qc[sample.int(n, 5L)] <- 2
-dt$vl_quase_const <- qc
-dt$ds_constante   <- "UNICO"
-dt$vl_duplicada   <- dt$vl_score_01
-dt$vl_redundante  <- round(dt$vl_score_02 + stats::rnorm(n, 0, 0.1), 2)
-dt$ds_alta_card   <- sprintf("CEP%05d", sample.int(900L, n, replace = TRUE))
+dt$vl_near_const <- qc
+dt$ds_constant   <- "SINGLE"
+dt$vl_duplicate   <- dt$vl_score_01
+dt$vl_redundant  <- round(dt$vl_score_02 + stats::rnorm(n, 0, 0.1), 2)
+dt$ds_high_card   <- sprintf("PC%05d", sample.int(900L, n, replace = TRUE))
 
 # categoricals
-reg <- sample(c("SP", "RJ", "MG", "BA", "RS"), n, replace = TRUE, prob = c(.40, .20, .20, .12, .08))
-dt$ds_regiao <- reg
-lin <- lin + ifelse(reg %in% c("BA", "RS"), 0.65, -0.15)
+reg <- sample(c("EAST", "WEST", "CENTRE", "NORTH", "SOUTH"), n, replace = TRUE, prob = c(.40, .20, .20, .12, .08))
+dt$ds_region <- reg
+lin <- lin + ifelse(reg %in% c("NORTH", "SOUTH"), 0.65, -0.15)
 fx <- sample(c("A", "B", "C", "D"), n, replace = TRUE)
-dt$ds_faixa <- fx
+dt$ds_band <- fx
 lin <- lin + c(A = 0.45, B = 0.15, C = -0.15, D = -0.45)[fx]
-dt$ds_canal <- sample(c("APP", "WEB", "LOJA"), n, replace = TRUE, prob = c(.5, .3, .2))
-lin <- lin + ifelse(dt$ds_canal == "APP", 0.40, 0)
-with_na <- sample(c("SIM", "NAO", NA_character_), n, replace = TRUE, prob = c(.45, .45, .10))
+dt$ds_channel <- sample(c("APP", "WEB", "STORE"), n, replace = TRUE, prob = c(.5, .3, .2))
+lin <- lin + ifelse(dt$ds_channel == "APP", 0.40, 0)
+with_na <- sample(c("YES", "NO", NA_character_), n, replace = TRUE, prob = c(.45, .45, .10))
 dt$ds_optin <- with_na
 lin <- lin + ifelse(is.na(with_na), 0.40, 0)
 

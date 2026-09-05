@@ -120,8 +120,9 @@ test_that("default rates by cohort, grade and exposure, with the long-run averag
   expect_true(all(dr$table$dr >= 0 & dr$table$dr <= 1))
   expect_equal(dr$table$defaults / dr$table$n, dr$table$dr)
   expect_equal(dr$lra$mean, mean(dr$table$dr))
-  expect_equal(dr$lra$benchmark, max(dr$lra$recent5_mean, dr$lra$all_mean))
+  expect_equal(dr$lra$benchmark, max(dr$lra$recent5_mean, dr$lra$mean))
   expect_false(dr$lra$flag_below_benchmark)
+  expect_null(dr$lra$adjusted)
   expect_output(print(dr), "long-run average")
   # a unit counted at most once per cohort and only if not in default at the start
   t0 <- dr$table$cohort[1]

@@ -208,7 +208,7 @@ strip_failed_features <- function(fit) {
 screen_features <- function(fit, cfg) {
   arg <- list(obj = fit, iv_min = cfg$iv_min, iv_max = cfg$iv_max,
               require_monotonic = cfg$require_monotonic, monotonicity = cfg$monotonicity,
-              min_bins = cfg$screen_min_bins, max_bins = Inf, min_bin_pct = cfg$min_bin_pct,
+              min_bins = cfg$screen_min_bins, max_bins = cfg$max_bins, min_bin_pct = cfg$min_bin_pct,
               allow_degenerate = cfg$allow_degenerate, sort_by = "iv",
               bin_separator = cfg$bin_separator)
   if (!is.null(cfg$screen_top_n)) arg$top_n <- as.integer(cfg$screen_top_n)

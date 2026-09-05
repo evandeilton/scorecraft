@@ -13,12 +13,12 @@ out-of-time split.}
 \item{\code{vl_score_01} to \code{vl_score_12}}{Numerics with decreasing signal.}
 \item{\code{vl_hist_01} to \code{vl_hist_05}}{Numerics with an increasing mass of
 sentinel \code{-999}; the signal is in the absence.}
-\item{\code{vl_parcial_01} to \code{vl_parcial_03}}{Numerics with genuine \code{NA}.}
-\item{\code{vl_tardio}}{Numeric with \code{NA}/sentinel in the last period only.}
-\item{\code{vl_ruido_01} to \code{vl_ruido_06}}{Pure noise.}
-\item{\code{vl_constante}, \code{vl_quase_const}, \code{ds_constante}, \code{vl_duplicada},
-\code{vl_redundante}, \code{ds_alta_card}}{Structural pathologies.}
-\item{\code{ds_regiao}, \code{ds_faixa}, \code{ds_canal}, \code{ds_optin}}{Categoricals with
+\item{\code{vl_partial_01} to \code{vl_partial_03}}{Numerics with genuine \code{NA}.}
+\item{\code{vl_late}}{Numeric with \code{NA}/sentinel in the last period only.}
+\item{\code{vl_noise_01} to \code{vl_noise_06}}{Pure noise.}
+\item{\code{vl_constant}, \code{vl_near_const}, \code{ds_constant}, \code{vl_duplicate},
+\code{vl_redundant}, \code{ds_high_card}}{Structural pathologies.}
+\item{\code{ds_region}, \code{ds_band}, \code{ds_channel}, \code{ds_optin}}{Categoricals with
 signal; \code{ds_optin} has \code{NA}.}
 \item{\code{default}}{Risk target (0/1, about 14\% events).}
 \item{\code{churn}}{Propensity target (0/1, about 29\% events), for the
@@ -34,8 +34,8 @@ scr_demo
 \description{
 A fabricated table so that every example and every vignette runs without
 a database. On purpose, it carries the defects real data has: sentinel
-\code{-999} in several masses (\verb{vl_hist_*}), missing values (\verb{vl_parcial_*}),
-a column that only degrades in the last period (\code{vl_tardio}), constant,
+\code{-999} in several masses (\verb{vl_hist_*}), missing values (\verb{vl_partial_*}),
+a column that only degrades in the last period (\code{vl_late}), constant,
 near-constant, exact duplicate, high cardinality, a redundant pair and
 pure noise. Without them, the audit funnel would have nothing to show.
 }

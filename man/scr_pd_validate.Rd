@@ -45,8 +45,9 @@ from \code{score} with the cut points of \code{x}.}
 
 \item{alpha}{Significance level of the binomial critical count.}
 
-\item{lights}{Two p-value thresholds (red below the first, amber below
-the second); \code{NULL} reads \code{config$pd_lights}.}
+\item{lights}{Two p-value thresholds (red at or below the first, amber at
+or below the second, green above; the convention shared with the LGD
+and EAD validations); \code{NULL} reads \code{config$pd_lights}.}
 
 \item{pd_column}{Grade PD tested: \code{"pd_final"} (default), \code{"pd_moc"} or \code{"pd_be"}.}
 

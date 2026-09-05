@@ -10,7 +10,8 @@ scr_fetch(
   sample_frac = 1,
   seed = NULL,
   max_rows = NULL,
-  sample_expr = NULL
+  sample_expr = NULL,
+  verbose = NULL
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ scr_fetch(
 
 \item{sample_expr}{Optional SQL expression yielding a uniform number in
 \verb{[0, 1)}, used as \verb{WHERE <sample_expr> <= sample_frac}.}
+
+\item{verbose}{\code{TRUE}/\code{FALSE} to echo (or not) the query for this call;
+\code{NULL} follows \code{\link[=scr_verbose]{scr_verbose()}}.}
 }
 \value{
 A \code{data.table} with the fetched table.
