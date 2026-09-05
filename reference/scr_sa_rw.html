@@ -81,6 +81,7 @@ provision ratio (or the mortgage row). Arguments are recycled.</p>
 <span>  defaulted <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  provision_ratio <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sme <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  granular <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  params <span class="op">=</span> <span class="fu"><a href="scr_irb_params.html">scr_irb_params</a></span><span class="op">(</span><span class="st">"bcb"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -119,6 +120,12 @@ provision ratio (or the mortgage row). Arguments are recycled.</p>
 <dt id="arg-sme">sme<a class="anchor" aria-label="anchor" href="#arg-sme"></a></dt>
 <dd><p>Logical: corporate small or medium enterprise (also implied by
 <code>asset_class = "corporate_sme"</code>).</p></dd>
+
+
+<dt id="arg-granular">granular<a class="anchor" aria-label="anchor" href="#arg-granular"></a></dt>
+<dd><p>Logical (scalar or per exposure): whether the retail
+exposure belongs to a granular regulatory retail pool; <code>FALSE</code> applies
+the non-granular retail weight.</p></dd>
 
 
 <dt id="arg-params">params<a class="anchor" aria-label="anchor" href="#arg-params"></a></dt>

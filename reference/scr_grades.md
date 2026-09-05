@@ -131,7 +131,7 @@ sc <- scr_scorecard(res)
 cal <- scr_calibrate(sc, target = 0.06)
 gr <- scr_grades(sc, cal, n_grades = 7, min_defaults = 10)
 gr
-#> <scr_grades> target "default" | 5 grades (geometric) on holdout | PD source: lra | higher_is_safer
+#> <scr_grades> target "default" | 5 grades (geometric) on holdout | PD source: lra (sample default rate; pass `dr` for the series) | higher_is_safer
 #>   concentration: HHI 0.250 | CV 0.500 | HI 0.139 | repairs 2 | calibrated to CT 6.000%
 #>   grade label    score_lo  score_hi      n  share   def       dr  pd_mean    pd_be
 #>   1     1+2+3      569.06       Inf    369  26.4%    13    3.52%    1.14%    3.52%

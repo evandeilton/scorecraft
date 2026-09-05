@@ -136,7 +136,7 @@ the system user.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span>, author <span class="op">=</span> <span class="st">"analyst"</span><span class="op">)</span></span>
 <span><span class="va">lab</span></span>
-<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-04 23:21 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded</span></span>
+<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-05 03:34 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded</span></span>
 <span><span class="co">#&gt;   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)</span></span></code></pre></div>
 <p>Without a variable, <code><a href="../reference/scr_classing_view.html">scr_classing_view()</a></code> prints one line
 per variable: its current source (optimal or manual), the number of
@@ -245,7 +245,7 @@ below 40, 40 to 55, 55 to 70 and above 70.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"vl_score_01"</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">55</span>, <span class="fl">70</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_breaks</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-04 23:21</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-05 03:34</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          4         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.2993    -0.0471</span></span>
@@ -281,7 +281,7 @@ points, which is what the header shows.</p>
 <span><span class="va">p_split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"vl_score_01"</span>,</span>
 <span>                                split <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">res</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">vl_score_01</span><span class="op">$</span><span class="va">cutpoints</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_split</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P003 vl_score_01 | split = c(1, 28.36) | 2026-09-04 23:21</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P003 vl_score_01 | split = c(1, 28.36) | 2026-09-05 03:34</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          8          1</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.3561     0.0098</span></span>
@@ -331,7 +331,7 @@ it.</p>
 <span>                                 groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>south <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BA"</span>, <span class="st">"RS"</span><span class="op">)</span>,</span>
 <span>                                               north <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SP"</span>, <span class="st">"RJ"</span>, <span class="st">"MG"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_groups</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P004 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-04 23:21</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P004 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-05 03:34</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      5          2         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.0846     0.0739    -0.0107</span></span>
@@ -368,7 +368,7 @@ it into another bin.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_missing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_optin"</span>, missing_to <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">p_missing</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P006 ds_optin | missing_to = 1 | 2026-09-04 23:21</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P006 ds_optin | missing_to = 1 | 2026-09-05 03:34</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      3          2         -1</span></span>
 <span><span class="co">#&gt;   iv_train               0.0065     0.0000    -0.0065</span></span>
@@ -519,7 +519,7 @@ bins and IV before and after, the verdicts, the reasons, the discards
 and the final choice.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lab</span></span>
-<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-04 23:21 by analyst | 37 variables | 9 proposals: 2 accepted, 1 discarded</span></span>
+<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-05 03:34 by analyst | 37 variables | 9 proposals: 2 accepted, 1 discarded</span></span>
 <span><span class="co">#&gt;   variable                   action      bins          IV train       IV hold-out verdict     reason</span></span>
 <span><span class="co">#&gt;   vl_score_01                accepted  7-&gt;4     0.3464-&gt;0.2993     0.2877-&gt;0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti</span></span>
 <span><span class="co">#&gt;   ds_regiao                  accepted  5-&gt;2     0.0846-&gt;0.0739     0.0971-&gt;0.0786   REVIEW      north/south is what pricing uses</span></span>
@@ -592,7 +592,7 @@ is regenerated on read. Open ends are written as empty cells. A
 <span><span class="co">#&gt;   ... (+137 rows)</span></span>
 <span><span class="va">spec_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"classing_default.csv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/scr_classing_spec.html">scr_classing_spec</a></span><span class="op">(</span><span class="va">lab</span>, file <span class="op">=</span> <span class="va">spec_file</span><span class="op">)</span></span>
-<span><span class="co">#&gt; classing spec written to /tmp/RtmpprIIby/classing_default.csv</span></span></code></pre></div>
+<span><span class="co">#&gt; classing spec written to /tmp/RtmpYrcmPd/classing_default.csv</span></span></code></pre></div>
 <p>A reviewer opens the file, moves the first cut of
 <code>vl_score_01</code> from 40 to 42 and writes why in
 <code>reason</code>. Done in R, as it would be done in a spreadsheet
@@ -632,7 +632,7 @@ accepted on the analyst’s behalf.</p>
 <span><span class="va">imported</span><span class="op">$</span><span class="va">vl_score_01</span><span class="op">$</span><span class="va">imported_reason</span></span>
 <span><span class="co">#&gt; [1] "reviewer: first cut moved to 42 to match the bureau band"</span></span>
 <span><span class="va">imported</span><span class="op">$</span><span class="va">vl_score_01</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P010 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-04 23:21</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P010 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-05 03:34</span></span>
 <span><span class="co">#&gt;                         optimal    current     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          4          4         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.2993     0.2990    -0.0474</span></span>
@@ -678,7 +678,7 @@ rebuilt.</p>
 <span><span class="va">res2</span></span>
 <span><span class="co">#&gt; &lt;scr_result&gt; target "default"</span></span>
 <span><span class="co">#&gt;   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span></span>
-<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 1.3s</span></span>
+<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 0.8s</span></span>
 <span><span class="co">#&gt;   convention: risk (target=1 is the bad case)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Funnel</span></span>

@@ -260,7 +260,7 @@ it is not monotone. Every merge is recorded in <code>repairs</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_grades.html">scr_grades</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">cal</span>, n_grades <span class="op">=</span> <span class="fl">7</span>, min_obligors <span class="op">=</span> <span class="fl">30</span>, min_defaults <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">gr</span></span>
-<span><span class="co">#&gt; &lt;scr_grades&gt; target "default" | 5 grades (geometric) on holdout | PD source: lra | higher_is_safer</span></span>
+<span><span class="co">#&gt; &lt;scr_grades&gt; target "default" | 5 grades (geometric) on holdout | PD source: lra (sample default rate; pass `dr` for the series) | higher_is_safer</span></span>
 <span><span class="co">#&gt;   concentration: HHI 0.241 | CV 0.452 | HI 0.116 | repairs 2 | calibrated to CT 9.632%</span></span>
 <span><span class="co">#&gt;   grade label    score_lo  score_hi      n  share   def       dr  pd_mean    pd_be</span></span>
 <span><span class="co">#&gt;   1     1+2+3      571.27       Inf    341  24.4%    13    3.81%    1.85%    3.81%</span></span>
@@ -476,8 +476,8 @@ another for the final PD.</p>
 <span><span class="co">#&gt; -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)</span></span>
 <span><span class="co">#&gt; SELECT</span></span>
 <span><span class="co">#&gt;     s.*,</span></span>
-<span><span class="co">#&gt;     CASE WHEN score &lt;= 497.65810792199238 THEN 5 WHEN score &lt;= 525.006786354523 THEN 4 WHEN score &lt;= 548.82434894947983 THEN 3 WHEN score &lt;= 571.2740854703145 THEN 2 ELSE 1 END AS grade,</span></span>
-<span><span class="co">#&gt;     CASE WHEN score &lt;= 497.65810792199238 THEN 0.44534566116911861 WHEN score &lt;= 525.006786354523 THEN 0.24662988720215417 WHEN score &lt;= 548.82434894947983 THEN 0.1873880268001506 WHEN score &lt;= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final</span></span>
+<span><span class="co">#&gt;     CASE WHEN score &lt;= 497.65810792199238 THEN 5 WHEN score &lt;= 525.006786354523 THEN 4 WHEN score &lt;= 548.82434894947994 THEN 3 WHEN score &lt;= 571.2740854703145 THEN 2 ELSE 1 END AS grade,</span></span>
+<span><span class="co">#&gt;     CASE WHEN score &lt;= 497.65810792199238 THEN 0.44534566116911861 WHEN score &lt;= 525.006786354523 THEN 0.24662988720215417 WHEN score &lt;= 548.82434894947994 THEN 0.1873880268001506 WHEN score &lt;= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final</span></span>
 <span><span class="co">#&gt; FROM score_scr s;</span></span></code></pre></div>
 <p>When DuckDB is installed the SQL is run on a few hundred rows and
 compared with <code><a href="../reference/scr_apply.html">scr_apply()</a></code>: the score, the grade and the
@@ -551,7 +551,7 @@ light; the overall light is the worst of them.</p>
 <span><span class="co">#&gt;  2: jeffreys_grades_red     grade   0.00000000 0.790585046  green</span></span>
 <span><span class="co">#&gt;  3:            binomial portfolio 549.00000000 0.999513515  green</span></span>
 <span><span class="co">#&gt;  4:              normal portfolio  -3.21341063 0.999344157  green</span></span>
-<span><span class="co">#&gt;  5:     hosmer_lemeshow portfolio  12.51211309 0.005819772    red</span></span>
+<span><span class="co">#&gt;  5:     hosmer_lemeshow portfolio  12.51211309 0.005819772  green</span></span>
 <span><span class="co">#&gt;  6:        multi_period portfolio -10.09450041 1.000000000  green</span></span>
 <span><span class="co">#&gt;  7:      auc_vs_initial portfolio  -1.23990837 0.892495357  green</span></span>
 <span><span class="co">#&gt;  8:          psi_grades portfolio   0.96337125          NA    red</span></span>
@@ -670,8 +670,8 @@ number.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-pd-vignette"</span><span class="op">)</span></span>
 <span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">pd</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span>, validation <span class="op">=</span> <span class="va">v</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   /tmp/RtmperiP2v/scorecraft-pd-vignette/pd_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmperiP2v/scorecraft-pd-vignette/sql_pd_default.sql</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmp1ezfsQ/scorecraft-pd-vignette/pd_default.xlsx</span></span>
+<span><span class="co">#&gt;   /tmp/Rtmp1ezfsQ/scorecraft-pd-vignette/sql_pd_default.sql</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">ex</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "pd_default.xlsx"    "sql_pd_default.sql"</span></span>
 <span><span class="fu">openxlsx</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/openxlsx/man/getSheetNames.html" class="external-link">getSheetNames</a></span><span class="op">(</span><span class="va">ex</span><span class="op">$</span><span class="va">files</span><span class="op">$</span><span class="va">pd</span><span class="op">)</span></span>

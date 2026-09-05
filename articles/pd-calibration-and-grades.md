@@ -197,7 +197,7 @@ in `repairs`.
 
 gr <- scr_grades(sc, cal, n_grades = 7, min_obligors = 30, min_defaults = 10)
 gr
-#> <scr_grades> target "default" | 5 grades (geometric) on holdout | PD source: lra | higher_is_safer
+#> <scr_grades> target "default" | 5 grades (geometric) on holdout | PD source: lra (sample default rate; pass `dr` for the series) | higher_is_safer
 #>   concentration: HHI 0.241 | CV 0.452 | HI 0.116 | repairs 2 | calibrated to CT 9.632%
 #>   grade label    score_lo  score_hi      n  share   def       dr  pd_mean    pd_be
 #>   1     1+2+3      571.27       Inf    341  24.4%    13    3.81%    1.85%    3.81%
@@ -440,8 +440,8 @@ cat(tail(sql, 6), sep = "\n")
 #> -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)
 #> SELECT
 #>     s.*,
-#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947983 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
-#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947983 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
+#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947994 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
+#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947994 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
 #> FROM score_scr s;
 ```
 
@@ -521,7 +521,7 @@ v$summary
 #>  2: jeffreys_grades_red     grade   0.00000000 0.790585046  green
 #>  3:            binomial portfolio 549.00000000 0.999513515  green
 #>  4:              normal portfolio  -3.21341063 0.999344157  green
-#>  5:     hosmer_lemeshow portfolio  12.51211309 0.005819772    red
+#>  5:     hosmer_lemeshow portfolio  12.51211309 0.005819772  green
 #>  6:        multi_period portfolio -10.09450041 1.000000000  green
 #>  7:      auc_vs_initial portfolio  -1.23990837 0.892495357  green
 #>  8:          psi_grades portfolio   0.96337125          NA    red
@@ -653,8 +653,8 @@ an availability row, never a fabricated number.
 
 out <- file.path(tempdir(), "scorecraft-pd-vignette")
 ex <- scr_export(pd, out, stamp = FALSE, validation = v)
-#>   /tmp/RtmperiP2v/scorecraft-pd-vignette/pd_default.xlsx
-#>   /tmp/RtmperiP2v/scorecraft-pd-vignette/sql_pd_default.sql
+#>   /tmp/Rtmp1ezfsQ/scorecraft-pd-vignette/pd_default.xlsx
+#>   /tmp/Rtmp1ezfsQ/scorecraft-pd-vignette/sql_pd_default.sql
 basename(unlist(ex$files))
 #> [1] "pd_default.xlsx"    "sql_pd_default.sql"
 openxlsx::getSheetNames(ex$files$pd)

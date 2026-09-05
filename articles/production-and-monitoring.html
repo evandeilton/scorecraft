@@ -140,7 +140,7 @@ is echoed when verbose messages are on.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">half</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "data.table" "data.frame"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">half</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2063</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 2090</span></span></code></pre></div>
 <p><code>max_rows</code> is a memory guard rather than a second sampler.
 When it binds, the function counts the table first, reduces the fraction
 on the server so that the expected number of rows fits under the cap,
@@ -150,7 +150,7 @@ and reports the reduction:</p>
 <span><span class="co">#&gt;   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.238095</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">capped</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1006</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 978</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="several-targets-straight-from-the-connection">Several targets straight from the connection<a class="anchor" aria-label="anchor" href="#several-targets-straight-from-the-connection"></a>
@@ -510,7 +510,7 @@ script.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sql_woe</span>, <span class="fl">24</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- =============================================================</span></span>
 <span><span class="co">#&gt; -- scorecraft | target: default | 12 approved variables | dialect: ansi</span></span>
-<span><span class="co">#&gt; -- Generated on 2026-09-04 23:22:34</span></span>
+<span><span class="co">#&gt; -- Generated on 2026-09-05 03:35:01</span></span>
 <span><span class="co">#&gt; -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing</span></span>
 <span><span class="co">#&gt; --   and sentinel values by the TRAINING median, special-population flags.</span></span>
 <span><span class="co">#&gt; -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().</span></span>
@@ -563,9 +563,9 @@ configuration; the dialects available are <code>ansi</code>,
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sql_sc</span>, <span class="fl">12</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- =============================================================</span></span>
 <span><span class="co">#&gt; -- scorecraft | scorecard of target: default | 12 variables | dialect: databricks</span></span>
-<span><span class="co">#&gt; -- Generated on 2026-09-04 23:22:35</span></span>
+<span><span class="co">#&gt; -- Generated on 2026-09-05 03:35:02</span></span>
 <span><span class="co">#&gt; -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer</span></span>
-<span><span class="co">#&gt; -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538</span></span>
+<span><span class="co">#&gt; -- score = 491.19665800103655 + -26.318891476654567 * logit | base_points = 538</span></span>
 <span><span class="co">#&gt; -- Block 1 (CTE base_scr): pre-processing frozen on train.</span></span>
 <span><span class="co">#&gt; -- Block 2 (CTE woe_scr): WOE and bin index, emitted by OptimalBinningWoE::obwoe_sql().</span></span>
 <span><span class="co">#&gt; -- Block 3: exact score (from the WOE) and whole points (from the bin index).</span></span>
@@ -578,18 +578,18 @@ configuration; the dialects available are <code>ansi</code>,
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">sql_sc</span><span class="op">[</span><span class="va">i</span><span class="op">:</span><span class="op">(</span><span class="va">i</span> <span class="op">+</span> <span class="fl">15</span><span class="op">)</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SELECT</span></span>
 <span><span class="co">#&gt;     538.30012744760336</span></span>
-<span><span class="co">#&gt;       + -29.701043763446282 * vl_score_01_woe</span></span>
-<span><span class="co">#&gt;       + -27.130718819754311 * vl_score_02_woe</span></span>
-<span><span class="co">#&gt;       + -26.649286859941228 * vl_score_04_woe</span></span>
-<span><span class="co">#&gt;       + -30.277321636127542 * ds_faixa_woe</span></span>
-<span><span class="co">#&gt;       + -29.966768640958328 * vl_tardio_woe</span></span>
-<span><span class="co">#&gt;       + -28.964890297230774 * ds_regiao_woe</span></span>
-<span><span class="co">#&gt;       + -28.874743439251926 * vl_score_06_woe</span></span>
-<span><span class="co">#&gt;       + -26.679330009797006 * vl_score_07_woe</span></span>
-<span><span class="co">#&gt;       + -35.128873453122381 * vl_score_05_woe</span></span>
-<span><span class="co">#&gt;       + -33.247622050806406 * ds_canal_woe</span></span>
-<span><span class="co">#&gt;       + -30.803729315270584 * vl_hist_04_woe</span></span>
-<span><span class="co">#&gt;       + -35.878212555936543 * vl_score_10_woe AS score,</span></span>
+<span><span class="co">#&gt;       + -29.70104376344629 * vl_score_01_woe</span></span>
+<span><span class="co">#&gt;       + -27.130718819754303 * vl_score_02_woe</span></span>
+<span><span class="co">#&gt;       + -26.64928685994122 * vl_score_04_woe</span></span>
+<span><span class="co">#&gt;       + -30.277321636127535 * ds_faixa_woe</span></span>
+<span><span class="co">#&gt;       + -29.966768640958321 * vl_tardio_woe</span></span>
+<span><span class="co">#&gt;       + -28.964890297230781 * ds_regiao_woe</span></span>
+<span><span class="co">#&gt;       + -28.874743439251922 * vl_score_06_woe</span></span>
+<span><span class="co">#&gt;       + -26.679330009796985 * vl_score_07_woe</span></span>
+<span><span class="co">#&gt;       + -35.128873453122374 * vl_score_05_woe</span></span>
+<span><span class="co">#&gt;       + -33.247622050806385 * ds_canal_woe</span></span>
+<span><span class="co">#&gt;       + -30.803729315270559 * vl_hist_04_woe</span></span>
+<span><span class="co">#&gt;       + -35.878212555936535 * vl_score_10_woe AS score,</span></span>
 <span><span class="co">#&gt;     vl_score_01_points,</span></span>
 <span><span class="co">#&gt;     vl_score_02_points,</span></span>
 <span><span class="co"># ... the whole points, and one of the CASE expressions behind them</span></span>

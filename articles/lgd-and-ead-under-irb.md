@@ -473,7 +473,7 @@ pool parameters and the floored result.
 sql <- scr_sql(m, table = "prd.defaults", dialect = "duckdb")
 sql_lines <- unlist(strsplit(sql, "\n", fixed = TRUE))
 cat(grep("AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$", sql_lines, value = TRUE), sep = "\n")
-#>     CASE WHEN lgd_pred <= 0.37690454385294914 THEN 1 WHEN lgd_pred <= 0.45265644452998083 THEN 2 ELSE 3 END AS pool
+#>     CASE WHEN lgd_pred <= 0.37690454385294914 THEN 1 WHEN lgd_pred <= 0.45265644452998077 THEN 2 ELSE 3 END AS pool
 #>     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,
 #>     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor
 #>     GREATEST(lgd_dt, lgd_floor) AS lgd_final

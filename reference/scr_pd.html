@@ -176,8 +176,8 @@ through-the-cycle <code>pd_moc</code> is converted with the one-factor bridge of
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- Block 4: rating grade and final PD from the score cut points (4 grades, higher_is_safer)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SELECT</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     s.*,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN score &lt;= 503.11688107909112 THEN 4 WHEN score &lt;= 535.6113744573629 THEN 3 WHEN score &lt;= 562.8474695224495 THEN 2 ELSE 1 END AS grade,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN score &lt;= 503.11688107909112 THEN 0.45234017577521279 WHEN score &lt;= 535.6113744573629 THEN 0.3053654350250784 WHEN score &lt;= 562.8474695224495 THEN 0.15257567651855442 ELSE 0.04749931808441589 END AS pd_final</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN score &lt;= 503.11688107909117 THEN 4 WHEN score &lt;= 535.6113744573629 THEN 3 WHEN score &lt;= 562.84746952244961 THEN 2 ELSE 1 END AS grade,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN score &lt;= 503.11688107909117 THEN 0.45234017577521279 WHEN score &lt;= 535.6113744573629 THEN 0.3053654350250784 WHEN score &lt;= 562.84746952244961 THEN 0.15257567651855442 ELSE 0.04749931808441589 END AS pd_final</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> FROM score_scr s;</span>
 </code></pre></div>
     </div>

@@ -90,7 +90,8 @@ when missing or under the foundation approach) and</p>
 <span>  approach <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"airb"</span>, <span class="st">"firb"</span><span class="op">)</span>,</span>
 <span>  apply_floors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  collateral <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  secured_share <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  secured_share <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  claim <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -158,6 +159,13 @@ collateral type of each exposure (<code>"financial"</code>, <code>"receivables"<
 <dd><p>Optional secured share in <code>[0, 1]</code> blending the
 unsecured and the collateral floors.</p></dd>
 
+
+<dt id="arg-claim">claim<a class="anchor" aria-label="anchor" href="#arg-claim"></a></dt>
+<dd><p>Under <code>"firb"</code>, an optional claim type per exposure naming a
+row of <code>params$lgd_firb</code> (for example <code>"senior_unsecured"</code> or
+<code>"subordinated"</code>); the supervisory LGD of that row replaces <code>lgd</code>.
+<code>NULL</code> keeps the caller's <code>lgd</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -211,6 +219,15 @@ functions</em>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2: lgd_floor     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3:   m_floor     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:     m_cap     0</span>
+<span class="r-in"><span><span class="co"># foundation approach: the supervisory LGD of the claim type</span></span></span>
+<span class="r-in"><span><span class="fu">scr_irb_rw</span><span class="op">(</span><span class="fl">0.01</span>, lgd <span class="op">=</span> <span class="fl">0</span>, m <span class="op">=</span> <span class="fl">2.5</span>, asset_class <span class="op">=</span> <span class="st">"corporate"</span>, approach <span class="op">=</span> <span class="st">"firb"</span>,</span></span>
+<span class="r-in"><span>           claim <span class="op">=</span> <span class="st">"senior_unsecured"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    pd_used lgd_used     m         r         b      ma         k       rw</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;num&gt;    &lt;num&gt; &lt;num&gt;     &lt;num&gt;     &lt;num&gt;   &lt;num&gt;     &lt;num&gt;    &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:    0.01     0.75   2.5 0.1927837 0.1374861 1.25981 0.1230891 1.538613</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         rwa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 1.538613</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

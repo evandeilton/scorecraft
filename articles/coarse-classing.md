@@ -61,7 +61,7 @@ defaults to the system user.
 
 lab <- scr_coarse_classing(res, author = "analyst")
 lab
-#> <scr_classing> target "default" | opened 2026-09-04 23:21 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 03:34 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)
 ```
 
@@ -183,7 +183,7 @@ Suppose underwriting quotes `vl_score_01` in the bands below 40, 40 to
 
 p_breaks <- scr_classing_propose(lab, "vl_score_01", breaks = c(40, 55, 70))
 p_breaks
-#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-04 23:21
+#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-05 03:34
 #>                         optimal     manual      delta
 #>   n_bins                      7          4         -3
 #>   iv_train               0.3464     0.2993    -0.0471
@@ -223,7 +223,7 @@ p_merge$entry$cutpoints
 p_split <- scr_classing_propose(lab, "vl_score_01",
                                 split = c(1, res$fit$results$vl_score_01$cutpoints[1] - 5))
 p_split
-#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-04 23:21
+#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-05 03:34
 #>                         optimal     manual      delta
 #>   n_bins                      7          8          1
 #>   iv_train               0.3464     0.3561     0.0098
@@ -274,7 +274,7 @@ p_groups <- scr_classing_propose(lab, "ds_regiao",
                                  groups = list(south = c("BA", "RS"),
                                                north = c("SP", "RJ", "MG")))
 p_groups
-#> <scr_classing_proposal> P004 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-04 23:21
+#> <scr_classing_proposal> P004 ds_regiao | groups = list(south = c("BA", "RS"), north = c("SP", "RJ", "MG")) | 2026-09-05 03:34
 #>                         optimal     manual      delta
 #>   n_bins                      5          2         -3
 #>   iv_train               0.0846     0.0739    -0.0107
@@ -318,7 +318,7 @@ kept on its own. `missing_to` folds it into another bin.
 
 p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
 p_missing
-#> <scr_classing_proposal> P006 ds_optin | missing_to = 1 | 2026-09-04 23:21
+#> <scr_classing_proposal> P006 ds_optin | missing_to = 1 | 2026-09-05 03:34
 #>                         optimal     manual      delta
 #>   n_bins                      3          2         -1
 #>   iv_train               0.0065     0.0000    -0.0065
@@ -483,7 +483,7 @@ final choice.
 ``` r
 
 lab
-#> <scr_classing> target "default" | opened 2026-09-04 23:21 by analyst | 37 variables | 9 proposals: 2 accepted, 1 discarded
+#> <scr_classing> target "default" | opened 2026-09-05 03:34 by analyst | 37 variables | 9 proposals: 2 accepted, 1 discarded
 #>   variable                   action      bins          IV train       IV hold-out verdict     reason
 #>   vl_score_01                accepted  7->4     0.3464->0.2993     0.2877->0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti
 #>   ds_regiao                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      north/south is what pricing uses
@@ -562,7 +562,7 @@ spec
 #>   ... (+137 rows)
 spec_file <- file.path(tempdir(), "classing_default.csv")
 scr_classing_spec(lab, file = spec_file)
-#> classing spec written to /tmp/RtmpprIIby/classing_default.csv
+#> classing spec written to /tmp/RtmpYrcmPd/classing_default.csv
 ```
 
 A reviewer opens the file, moves the first cut of `vl_score_01` from 40
@@ -616,7 +616,7 @@ names(imported)
 imported$vl_score_01$imported_reason
 #> [1] "reviewer: first cut moved to 42 to match the bureau band"
 imported$vl_score_01
-#> <scr_classing_proposal> P010 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-04 23:21
+#> <scr_classing_proposal> P010 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-05 03:34
 #>                         optimal    current     manual      delta
 #>   n_bins                      7          4          4         -3
 #>   iv_train               0.3464     0.2993     0.2990    -0.0474
@@ -667,7 +667,7 @@ res2 <- scr_classing_apply(lab)
 res2
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
+#>   event: 14.25% on train, 14.50% on hold-out | 0.8s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel

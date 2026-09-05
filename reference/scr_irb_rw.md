@@ -27,7 +27,8 @@ scr_irb_rw(
   approach = c("airb", "firb"),
   apply_floors = TRUE,
   collateral = NULL,
-  secured_share = NULL
+  secured_share = NULL,
+  claim = NULL
 )
 ```
 
@@ -96,6 +97,13 @@ scr_irb_rw(
   Optional secured share in `[0, 1]` blending the unsecured and the
   collateral floors.
 
+- claim:
+
+  Under `"firb"`, an optional claim type per exposure naming a row of
+  `params$lgd_firb` (for example `"senior_unsecured"` or
+  `"subordinated"`); the supervisory LGD of that row replaces `lgd`.
+  `NULL` keeps the caller's `lgd`.
+
 ## Value
 
 A `data.table` with one row per exposure: `pd_used`, `lgd_used` (after
@@ -153,4 +161,13 @@ attr(r, "floors_hit")
 #> 2: lgd_floor     0
 #> 3:   m_floor     0
 #> 4:     m_cap     0
+# foundation approach: the supervisory LGD of the claim type
+scr_irb_rw(0.01, lgd = 0, m = 2.5, asset_class = "corporate", approach = "firb",
+           claim = "senior_unsecured")
+#>    pd_used lgd_used     m         r         b      ma         k       rw
+#>      <num>    <num> <num>     <num>     <num>   <num>     <num>    <num>
+#> 1:    0.01     0.75   2.5 0.1927837 0.1374861 1.25981 0.1230891 1.538613
+#>         rwa
+#>       <num>
+#> 1: 1.538613
 ```

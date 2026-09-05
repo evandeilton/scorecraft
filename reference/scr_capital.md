@@ -31,6 +31,8 @@ scr_capital(
   transactor = NULL,
   grade = NULL,
   id = NULL,
+  claim = NULL,
+  granular = TRUE,
   params = scr_irb_params(config$framework),
   config = scr_config(),
   keep_rows = FALSE
@@ -66,6 +68,18 @@ scr_capital(
   annual sales, financial-institution flag, transactor flag, PD grade
   (defines the SQL pools together with `segment`) and exposure
   identifier.
+
+- claim:
+
+  Optional column name: the claim type of each exposure under the
+  foundation approach (a row of `params$lgd_firb`); the supervisory LGD
+  then replaces `lgd`.
+
+- granular:
+
+  `TRUE`, `FALSE` or a column name: whether the retail exposures belong
+  to a granular regulatory retail pool (the standardised comparison uses
+  the non-granular weight otherwise).
 
 - params:
 

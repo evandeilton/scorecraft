@@ -110,6 +110,19 @@ are parameter tables selected by a preset, never prose.
   (constants per pool, no normal quantile at run time) and
   [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
   methods.
+- [`scr_irb_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_rw.md)
+  and
+  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md)
+  read the supervisory LGD of the foundation approach from
+  `params$lgd_firb` through a `claim` type;
+  [`scr_sa_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_sa_rw.md)
+  and
+  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md)
+  apply the non-granular retail weight with `granular = FALSE`; the
+  Hosmer-Lemeshow light of
+  [`scr_pd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_validate.md)
+  is green when every grade sits on the conservative side (the PD above
+  the observed rate), since the statistic is two-sided.
 - `betareg` joins Suggests for the beta severity engine of the LGD
   model.
 

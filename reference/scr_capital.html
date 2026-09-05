@@ -91,6 +91,8 @@ whether they were edited.</p>
 <span>  transactor <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  grade <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  claim <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  granular <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  params <span class="op">=</span> <span class="fu"><a href="scr_irb_params.html">scr_irb_params</a></span><span class="op">(</span><span class="va">config</span><span class="op">$</span><span class="va">framework</span><span class="op">)</span>,</span>
 <span>  config <span class="op">=</span> <span class="fu"><a href="scr_config.html">scr_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  keep_rows <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -126,6 +128,18 @@ of expected loss, provision stock, loan-to-value, external rating,
 annual sales, financial-institution flag, transactor flag, PD grade
 (defines the SQL pools together with <code>segment</code>) and exposure
 identifier.</p></dd>
+
+
+<dt id="arg-claim">claim<a class="anchor" aria-label="anchor" href="#arg-claim"></a></dt>
+<dd><p>Optional column name: the claim type of each exposure under
+the foundation approach (a row of <code>params$lgd_firb</code>); the supervisory
+LGD then replaces <code>lgd</code>.</p></dd>
+
+
+<dt id="arg-granular">granular<a class="anchor" aria-label="anchor" href="#arg-granular"></a></dt>
+<dd><p><code>TRUE</code>, <code>FALSE</code> or a column name: whether the retail
+exposures belong to a granular regulatory retail pool (the standardised
+comparison uses the non-granular weight otherwise).</p></dd>
 
 
 <dt id="arg-params">params<a class="anchor" aria-label="anchor" href="#arg-params"></a></dt>
