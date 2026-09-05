@@ -28,7 +28,8 @@ in SQL natively.
 \details{
 Failures at this stage: \code{CONSTANT}, \code{NEAR_CONSTANT}, \code{TOO_MANY_MISSING},
 \code{HIGH_CARDINALITY}, \code{NO_SIGNAL} (coarse IV below \code{min_iv_quick}) and
-\verb{DUPLICATE_OF:<column>}.
+\verb{DUPLICATE_OF:<column>}. A failed numeric whose special-population flag
+survives carries the suffix \verb{;RESCUED_AS_FLAG}.
 }
 \examples{
 sp <- scr_split(scr_demo, "default", date_col = "ref_date", drop = "id")
@@ -38,15 +39,11 @@ table(tr$profile$triage_reason)
 }
 \seealso{
 Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_align]{scr_align()}},
 \code{\link[=scr_bin]{scr_bin()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},
 \code{\link[=scr_select]{scr_select()}},
 \code{\link[=scr_split]{scr_split()}},

@@ -62,6 +62,8 @@ scr_selected <- function(x, which = c("final", "consensus", "manual")) {
 #'     pipeline created and `allow_derived_final = FALSE`.}
 #'   \item{`06.consensus`}{Not enough votes, or outside the top-N.}
 #'   \item{`07.approved`}{Entered the shortlist.}
+#'   \item{`08.manual_drop`}{In the automatic consensus, but removed by the
+#'     analyst in the coarse classing lab ([scr_classing_choose()]).}
 #' }
 #'
 #' @param x An object from [scr_select()].

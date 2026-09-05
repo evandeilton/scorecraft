@@ -13,16 +13,19 @@ scr_irb_params(framework = c("bcb", "basel3_final", "crr3"))
 An object of class \code{scr_irb_params}: a list with \code{framework},
 \code{source} (one line), \code{pd_floor}, \code{lgd_floor}, \code{lgd_firb}, \code{ccf_sa},
 \code{ccf_floor_fraction}, \code{correlation}, \code{scaling_factor}, \code{confidence},
-\code{m_default}, \code{m_range}, \code{output_floor} and \code{sa_rw}.
+\code{m_default}, \code{m_range}, \code{output_floor}, \code{sa_rw} and \code{modified} (logical,
+set by the functions that receive the object when its tables were
+edited).
 }
 \description{
-Returns the numeric tables the IRB functions read: probability of default
-(PD) floors, loss given default (LGD) input floors for own estimates,
+Returns the numeric tables the internal ratings-based (IRB) functions
+read: probability of default (PD) floors, loss given default (LGD) input
+floors for own estimates,
 supervisory LGD values of the foundation approach, standardised credit
 conversion factors (CCF), asset-correlation parameters of the risk-weight
 function, maturity rules, the output floor and the standardised risk
 weights used for the floor comparison. Three presets ship: \code{"bcb"}
-(Brazil, Resolução BCB 303/2023 and 229/2022), \code{"basel3_final"} (the
+(Brazil, BCB Resolutions 303/2023 and 229/2022), \code{"basel3_final"} (the
 consolidated Basel Framework in force from 2023) and \code{"crr3"} (the EU
 text applicable from 2025). The presets differ in a handful of cells, all
 visible with \code{print()}; users who need another jurisdiction edit the

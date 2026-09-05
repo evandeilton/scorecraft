@@ -32,7 +32,9 @@
 #' @param date_col Date column of the out-of-time cut. `NULL` uses a random
 #'   stratified split.
 #' @param ratio Target hold-out fraction.
-#' @param seed Seed of the random split.
+#' @param seed Seed of the random split. `NULL` leaves the random number
+#'   generator untouched, so the split is reproducible only through the
+#'   `seed` of [scr_config()].
 #' @param event_level Which target value counts as the event. `NULL` uses
 #'   the convention (`1`, or the second alphabetical level).
 #' @param drop Columns that are never candidates (identifiers, sibling

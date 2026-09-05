@@ -40,6 +40,9 @@ A list of class \code{scr_metrics} with \code{auc}, \code{ks}, \code{gini}, the
 bounds \code{auc_lo}/\code{auc_hi}, \code{ks_lo}/\code{ks_hi}, \code{gini_lo}/\code{gini_hi} (\code{NA}
 when \code{ci = FALSE}), \code{n}, \code{events}, \code{n_boot} and \code{level}. Everything is
 \code{NA_real_} when only one class is present or no valid case exists.
+
+DeLong's analytic variance is not used: the interval is a stratified
+percentile bootstrap, which also covers KS.
 }
 \description{
 AUC through the Mann-Whitney U statistic with tie correction, computed on
@@ -49,8 +52,8 @@ counts, \code{n1 * n0} overflows \code{2^31} from about 46 thousand observations
 class and returns \code{NA}.
 }
 \details{
-The confidence interval is \strong{always} computed by default (project
-decision D18): a bootstrap stratified by outcome, percentile method, with
+The confidence interval is \strong{always} computed by default: a bootstrap
+stratified by outcome, percentile method, with
 \code{n_boot} resamples. Gini is derived from AUC (\code{2 * AUC - 1}) inside each
 resample, never bootstrapped separately. The cost is absorbed by
 \code{nthread} (parallelism by resample).

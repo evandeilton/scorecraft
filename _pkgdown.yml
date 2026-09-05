@@ -5,7 +5,7 @@ template:
     primary: "#0b1220"
 
 home:
-  title: scorecraft - scorecard engine with alignment, coarse classing, IRB risk parameters and production SQL
+  title: scorecraft - scorecard engine with scale alignment, cut-off strategy, IRB risk parameters and production SQL
   links:
   - text: Binning engine (OptimalBinningWoE)
     href: https://github.com/evandeilton/OptimalBinningWoE

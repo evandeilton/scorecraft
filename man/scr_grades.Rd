@@ -49,13 +49,16 @@ when a series is given), \code{breaks} (ascending score cut points),
 \code{hi}, \code{k}), \code{repairs}, \code{ledger}, \code{moc} (empty, filled by
 \code{\link[=scr_moc]{scr_moc()}}), \code{dr} (the pooled series), \code{rows} (score, outcome and
 grade of the sample), \code{scorecard}, \code{sample}, \code{ct}, \code{sample_rate}.
+Also \code{calibration} (the \code{scr_pd_calibration} when one was given),
+\code{n_grades_requested}, \code{min_obligors}, \code{min_defaults}, \code{target} and
+\code{config}.
 }
 \description{
 Cuts the production score into grades whose PD is monotone. The grade
 boundaries are score cut points, direction-aware: grade 1 is the safest
 (the highest scores under \code{higher_is_safer}). Three constructions:
-\code{"geometric"} builds a \code{\link[=scr_master_scale]{scr_master_scale()}} between the 1st and 99th
-percentiles of the calibrated PD and converts its PD bounds into scores
+\code{"geometric"} builds a \code{\link[=scr_master_scale]{scr_master_scale()}} between percentiles 1
+and 99 of the calibrated PD and converts its PD bounds into scores
 through the calibrated alignment; \code{"quantile"} cuts equal-count score
 bands (cut points moved half-way between neighbouring scores, so a
 boundary never sits on an observed value); \code{"supplied"} grades by the PD
@@ -93,7 +96,8 @@ cal <- scr_calibrate(sc, target = 0.06)
 gr <- scr_grades(sc, cal, n_grades = 7, min_defaults = 10)
 gr
 gr$table[, c("grade", "score_lo", "score_hi", "n", "dr", "pd_be")]
-# grade a cohort panel with the score cut points
+# grade a cohort panel with the score cut points (the panel score is a
+# different scale; the demo only shows the mechanics)
 head(predict(gr, score = scr_demo_panel$score))
 }
 \seealso{

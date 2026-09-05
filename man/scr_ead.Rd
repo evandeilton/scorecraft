@@ -29,6 +29,9 @@ the hold-out), \code{rds} (the reference rows with \code{sample} and \code{pool}
 \code{spearman}, \code{ead_rmse}, \code{ead_mae}, \code{adequacy}, \code{cear}), \code{split},
 \code{funnel}, \code{data_summary}, \code{downturn}, \code{ledger}, \code{model_card},
 \code{params}, \code{config}, \code{meta}.
+Also \code{survivors} (the admitted drivers) and \code{lra} (the long-run averages
+of the data set); \code{metrics} also carries \code{n}, \code{n_main}, \code{gauc_se},
+\code{somers_d} and \code{share_floor_binding}.
 }
 \description{
 Splits the reference data set by reference date (the most recent

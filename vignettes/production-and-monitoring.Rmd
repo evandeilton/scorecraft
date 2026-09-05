@@ -1,8 +1,8 @@
 ---
-title: "From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables"
+title: "From database to production"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{From database to production: fetching, cut-off strategy, SQL equivalence, monitoring and deliverables}
+  %\VignetteIndexEntry{From database to production}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -65,7 +65,8 @@ follows the connection class: `rand(seed)` on Spark, Databricks and MySQL,
 `random()` on PostgreSQL, Redshift and DuckDB, and an integer-modulo
 expression on SQLite, whose `random()` returns a signed 64-bit integer and
 cannot be seeded. `sample_expr` overrides the choice for a dialect the
-package does not know. The query is echoed when verbose messages are on.
+package does not know. The query is echoed while `scr_verbose()` is on;
+`config$verbose` does not reach the database functions.
 
 ```{r fetch, eval = requireNamespace("RSQLite", quietly = TRUE) && requireNamespace("DBI", quietly = TRUE)}
 half <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
@@ -93,9 +94,11 @@ run set while the loop continues. Two details matter for what follows:
 * `scr_run()` records the table name in the configuration, so the SQL
   generated later already points at `dtm` rather than at the placeholder
   `your_table`;
-* it has no `date_col` argument, so the split it performs is random by row.
-  For an out-of-time split, fetch the table and call `scr_select()` with
-  `date_col`, as in section 2.
+* its `date_col` defaults to `config$oot_date_col`, which is `NULL` here,
+  and `ref_date` is dropped from the candidates, so the split is random by
+  row. For an out-of-time split pass `date_col = "ref_date"` (and keep the
+  column out of `drop`), or fetch the table and call `scr_select()` as in
+  section 2.
 
 ```{r run, eval = requireNamespace("RSQLite", quietly = TRUE) && requireNamespace("DBI", quietly = TRUE)}
 rs <- scr_run(con, "dtm", targets = c("default", "churn"), config = cfg,

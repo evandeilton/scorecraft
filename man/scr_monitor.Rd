@@ -47,8 +47,8 @@ Recomputes, per period of \code{date_col} (or for the whole data), the score
 PSI against train with frozen bands, the CSI of every variable with
 frozen bins plus the signed points shift and, when the target is
 present, the performance by vintage (event rate, AUC/KS/Gini with CI).
-Always reports both thresholds (fixed and n-adjusted, D17). Schedules
-nothing: the analyst calls it when needed (D19).
+Always reports both thresholds (fixed and n-adjusted). Schedules
+nothing: the analyst calls it when needed.
 }
 \examples{
 cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
@@ -62,19 +62,12 @@ mo$psi
 head(mo$csi)
 }
 \seealso{
-Other stages:
+Other production:
 \code{\link[=predict.scr_align]{predict.scr_align()}},
-\code{\link[=scr_align]{scr_align()}},
-\code{\link[=scr_bin]{scr_bin()}},
-\code{\link[=scr_cutoff]{scr_cutoff()}},
-\code{\link[=scr_model]{scr_model()}},
+\code{\link[=scr_apply]{scr_apply()}},
+\code{\link[=scr_export]{scr_export()}},
 \code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
-\code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
-\code{\link[=scr_scorecard]{scr_scorecard()}},
-\code{\link[=scr_select]{scr_select()}},
-\code{\link[=scr_split]{scr_split()}},
-\code{\link[=scr_strategy]{scr_strategy()}},
-\code{\link[=scr_triage]{scr_triage()}}
+\code{\link[=scr_reasons]{scr_reasons()}},
+\code{\link[=scr_sql]{scr_sql()}}
 }
-\concept{stages}
+\concept{production}

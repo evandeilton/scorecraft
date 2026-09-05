@@ -1,8 +1,8 @@
 ---
-title: "Coarse classing: manual bins and manual variable choice with an audit trail"
+title: "Coarse classing with an audit trail"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Coarse classing: manual bins and manual variable choice with an audit trail}
+  %\VignetteIndexEntry{Coarse classing with an audit trail}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -71,7 +71,7 @@ Without a variable, `scr_classing_view()` prints one line per variable:
 its current source (optimal or manual), the number of bins, the train and
 hold-out IV, the PSI and a verdict computed with the same rules a proposal
 will face. The last column says whether the variable is currently in the
-final shortlist.
+final shortlist (`yes`, or `-`).
 
 ```{r overview}
 ov <- scr_classing_view(lab)
@@ -133,15 +133,12 @@ p_split
 The split proposal is a `REVIEW`: the new first bin holds 2% of the
 training rows and breaks the monotone pattern of the event rate, so the
 engine's `NOT_MONOTONIC` rule fires. A `REVIEW` verdict is advisory: the
-proposal can be accepted with a reason or discarded. Note that the three
-proposals above all print as `P001`: a proposal takes the next free id at
-the moment it is made, and the id is only reserved when the proposal is
-accepted or discarded. Competing proposals made against the same
-untouched lab therefore share an id, and once one of them is acted on the
-lab refuses the others (it will not act twice on `P001`). The idiom to
-remember is *propose, decide, propose*: proposals made side by side are
-for comparison, and the one to be kept is remade right before it is
-decided.
+proposal can be accepted with a reason or discarded. Every proposal takes
+the next id from the lab's counter (`P001`, `P002`, ...), whether or not
+it is later acted on, so the ids in a session count the proposals made,
+not the decisions taken. A proposal is a value and can be kept for as long
+as the lab is open; the lab only refuses a proposal that has already been
+accepted or discarded.
 
 ### Categorical: groups, other_to, missing_to
 
@@ -210,15 +207,10 @@ verbs return the updated lab, so the idiom is to reassign.
 lab <- scr_classing_accept(lab, p_breaks, reason = "policy bands 40/55/70 used by underwriting")
 ```
 
-The categorical proposals of the previous section were made against the
-untouched lab and share the id just consumed, so the grouping is remade
-(it now takes `P002`) and accepted in turn.
+The grouping proposed in the previous section is still valid and is
+accepted in turn.
 
 ```{r accept-groups}
-p_groups <- scr_classing_propose(lab, "ds_regiao",
-                                 groups = list(south = c("BA", "RS"),
-                                               north = c("SP", "RJ", "MG")))
-p_groups$id
 lab <- scr_classing_accept(lab, p_groups, reason = "north/south is what pricing uses")
 ```
 

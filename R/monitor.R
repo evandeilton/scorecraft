@@ -2,7 +2,7 @@
 # monitor.R - PSI/CSI over time (D19: exported, never runs by itself)
 # ============================================================================ #
 
-#' The monitoring plan: the contract scr_monitor() reads
+#' Monitoring plan read by scr_monitor()
 #'
 #' A small `item`/`value` table with the thresholds and the frozen score
 #' bands of a scorecard. It is created by [scr_scorecard()] from the
@@ -20,7 +20,7 @@
 #'   `csi_variable_fixed_moderate`, `csi_variable_fixed_action`,
 #'   `score_bands`, `min_events_per_period` and `threshold_source`.
 #'
-#' @family stages
+#' @family production
 #' @examples
 #' plan <- scr_monitoring_plan(scr_config(), breaks = c(-Inf, 500, 550, 600, Inf))
 #' plan
@@ -98,8 +98,8 @@ scr_monitoring_plan <- function(x, breaks = NULL) {
 #' PSI against train with frozen bands, the CSI of every variable with
 #' frozen bins plus the signed points shift and, when the target is
 #' present, the performance by vintage (event rate, AUC/KS/Gini with CI).
-#' Always reports both thresholds (fixed and n-adjusted, D17). Schedules
-#' nothing: the analyst calls it when needed (D19).
+#' Always reports both thresholds (fixed and n-adjusted). Schedules
+#' nothing: the analyst calls it when needed.
 #'
 #' @param x An object from [scr_scorecard()].
 #' @param newdata New table with the source columns.
@@ -121,7 +121,7 @@ scr_monitoring_plan <- function(x, breaks = NULL) {
 #'   `"insufficient"` when a period has fewer events than the plan requires)
 #'   and `plan` (the contract actually used).
 #'
-#' @family stages
+#' @family production
 #' @examples
 #' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
 #'                   xgb_rounds = 60, n_boot = 20)

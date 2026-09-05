@@ -40,7 +40,9 @@ variables. The target column is not needed.}
 the approved ones.}
 
 \item{what}{For \code{scr_result}: \code{"woe"}, \code{"bin"} or \code{"both"}. For
-\code{scr_scorecard}: \code{"score"}, \code{"points"}, \code{"woe"} or \code{"all"}.}
+\code{scr_scorecard}: \code{"score"}, \code{"points"}, \code{"woe"} or \code{"all"}. For
+\code{scr_lgd}: \code{"pool"} (pool and pool LGDs), \code{"lgd"} (adds the predicted
+LGD) or \code{"all"} (adds the cure probability and the severity).}
 }
 \value{
 A \code{data.table} with one row per row of \code{newdata}.
@@ -52,14 +54,28 @@ Materialises in R exactly what the production SQL does: the frozen Stage
 by the points. Nothing is refitted. The two paths, R and SQL, produce the
 same numbers, and a test guarantees it.
 }
-\section{Method arguments}{
+\section{Output columns}{
 
 
-For \code{scr_result}: \code{features} (default: the approved ones) and \code{what}
-(\code{"woe"}, \code{"bin"} or \code{"both"}). For \code{scr_scorecard}: \code{what} (\code{"score"},
-\code{"points"}, \code{"woe"} or \code{"all"}). The score output carries \code{link}
-(logit), \code{prob} (model probability), \code{score} (exact, \code{a + b * logit}) and
-\code{score_points} (the sum of the whole points per bin plus the base).
+For \code{scr_result}: \verb{<f>_woe} and/or \verb{<f>_bin} per variable. For
+\code{scr_scorecard}, \code{"score"} gives \code{link} (logit), \code{prob} (model
+probability), \code{score} (exact, \code{a + b * logit}) and \code{score_points} (base
+plus the whole points per bin); \code{"points"} gives \code{score}, \code{score_points}
+and \verb{<f>_points}; \code{"woe"} gives \code{link}, \code{score} and \verb{<f>_woe}; \code{"all"}
+gives everything.
+}
+
+\section{IRB models}{
+
+
+\code{scr_pd} returns \code{score}, \code{score_points}, \code{grade}, \code{pd} (calibrated
+individual PD), \code{pd_be} and \code{pd_final} of the grade. \code{scr_lgd} returns
+\code{pool}, \code{lgd_lra}, \code{lgd_dt}, \code{lgd_final} and, with \code{what}, \code{p_cure},
+\code{severity} and \code{lgd_pred}. \code{scr_ead} returns \code{pool}, \code{measure},
+\code{utilisation}, \code{undrawn}, \code{ccf_applied}, \code{ead_model}, \code{ead_floor},
+\code{ead_predicted} and \code{ead_floor_binding}; the predicted EAD is never below
+the drawn amount. \code{\link[=scr_capital]{scr_capital()}} reads \code{pd_final}, \code{lgd_final} and
+\code{ead_predicted} from these outputs in its list form.
 }
 
 \examples{
@@ -75,8 +91,11 @@ head(scr_apply(sc, new, what = "points"))
 }
 \seealso{
 Other production:
-\code{\link[=scr_export.scr_capital]{scr_export.scr_capital()}},
+\code{\link[=predict.scr_align]{predict.scr_align()}},
+\code{\link[=scr_export]{scr_export()}},
+\code{\link[=scr_monitor]{scr_monitor()}},
+\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reasons]{scr_reasons()}},
-\code{\link[=scr_sql.scr_capital]{scr_sql.scr_capital()}}
+\code{\link[=scr_sql]{scr_sql()}}
 }
 \concept{production}

@@ -9,13 +9,14 @@
 
 #' IRB parameter tables by framework preset
 #'
-#' Returns the numeric tables the IRB functions read: probability of default
-#' (PD) floors, loss given default (LGD) input floors for own estimates,
+#' Returns the numeric tables the internal ratings-based (IRB) functions
+#' read: probability of default (PD) floors, loss given default (LGD) input
+#' floors for own estimates,
 #' supervisory LGD values of the foundation approach, standardised credit
 #' conversion factors (CCF), asset-correlation parameters of the risk-weight
 #' function, maturity rules, the output floor and the standardised risk
 #' weights used for the floor comparison. Three presets ship: `"bcb"`
-#' (Brazil, Resolução BCB 303/2023 and 229/2022), `"basel3_final"` (the
+#' (Brazil, BCB Resolutions 303/2023 and 229/2022), `"basel3_final"` (the
 #' consolidated Basel Framework in force from 2023) and `"crr3"` (the EU
 #' text applicable from 2025). The presets differ in a handful of cells, all
 #' visible with `print()`; users who need another jurisdiction edit the
@@ -26,7 +27,9 @@
 #' @return An object of class `scr_irb_params`: a list with `framework`,
 #'   `source` (one line), `pd_floor`, `lgd_floor`, `lgd_firb`, `ccf_sa`,
 #'   `ccf_floor_fraction`, `correlation`, `scaling_factor`, `confidence`,
-#'   `m_default`, `m_range`, `output_floor` and `sa_rw`.
+#'   `m_default`, `m_range`, `output_floor`, `sa_rw` and `modified` (logical,
+#'   set by the functions that receive the object when its tables were
+#'   edited).
 #'
 #' @family irb-parameters
 #' @examples

@@ -6,22 +6,24 @@
 #'
 #' Fits a logistic regression on the WOE columns of the shortlist, checks
 #' the sign of the coefficients, aligns the logit to the declared scale with
-#' [scr_align()] (always, decision D9) and distributes the points per bin.
-#' Measures the score on train and hold-out with a bootstrap CI (always,
-#' D18), builds the gains with bands **frozen on train**, the score PSI and
-#' the CSI per variable (fixed and n-adjusted thresholds, D17), the
+#' [scr_align()] (always) and distributes the points per bin. Measures the
+#' score on train and hold-out with a bootstrap CI (always), builds the
+#' gains with bands **frozen on train**, the score PSI and the CSI per
+#' variable (fixed and n-adjusted thresholds), the
 #' calibration and the rank-order diagnostics. Optionally fits a tree
 #' challenger on the same WOE columns, aligned to the same scale, with an
-#' explicit `supports_scorecard = FALSE` (D10): it compares, it never
+#' explicit `supports_scorecard = FALSE`: it compares, it never
 #' produces points or reason codes.
 #'
 #' @section Sign check:
 #'
 #' The engine's WOE is event-oriented, so every glm coefficient must be
-#' positive. A variable with a negative coefficient (or above `max_abs_coef`
-#' in absolute value) is explaining what another already explained, with
-#' the sign reversed; it is removed and the model refitted, one at a time,
-#' the most negative first, and each removal is recorded in `sign_check`.
+#' positive. A variable with a non-positive coefficient (or above
+#' `max_abs_coef` in absolute value) is explaining what another already
+#' explained, with the sign reversed; it is removed and the model refitted,
+#' one at a time, the most negative first, and each removal is recorded in
+#' `sign_check`. The last remaining variable is never removed: it is kept
+#' and flagged `NON_POSITIVE_COEF_KEPT_LAST`.
 #' The final shortlist of the scorecard (`features`) is what [scr_sql()]
 #' covers.
 #'
@@ -52,7 +54,12 @@
 #'   `base_points`, `samples` (train and hold-out: `link`, `prob`, `score`,
 #'   `score_points`, `y`, `date`), `metrics`, `gains`, `stability` (`score`
 #'   and `variables`), `calibration`, `rank_order`, `challenger`,
-#'   `model_card` and `sql`.
+#'   `model_card` and `sql`. Also `scale` (`base_score`, `base_odds`, `pdo`,
+#'   `factor`, `offset`, `direction`, `odds_orientation`), `breaks` (the
+#'   score bands frozen on train), `monitoring_plan` (see
+#'   [scr_monitoring_plan()]), `holdout_bins`, `fit` and `ledger` (the frozen
+#'   binning and pre-processing that [scr_apply()] and [scr_sql()]
+#'   reproduce) and, after a lab commit, `decisions` and `provenance`.
 #'
 #' @family stages
 #' @examples

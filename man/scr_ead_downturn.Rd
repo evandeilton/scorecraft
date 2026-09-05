@@ -30,6 +30,8 @@ The \code{scr_ead} object with \code{downturn} (a list with \code{method},
 \code{periods}, \code{add_on} and the per-pool \code{table}: \code{pool}, \code{lra},
 \code{n_downturn}, \code{dt_observed}, \code{dt_type3}, \code{ccf_dt}), the updated
 \code{pools} and a new ledger row.
+The table also carries \code{ccf_final} and \code{ccf_applied}; the object
+\code{n_rows_in_periods} and \code{reason}.
 }
 \description{
 Quantifies the downturn component of the CCF from user-supplied downturn

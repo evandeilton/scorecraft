@@ -105,8 +105,10 @@ print.scr_cutoff <- function(x, ...) {
 #' @param breaks Band cut points. `NULL` uses the deciles frozen on train.
 #' @param decisions Vector of decisions, one per band (from the safest to
 #'   the riskiest). `NULL` derives them from break-even.
-#' @param revenue_good Expected revenue per account without the event.
-#' @param loss_bad Expected loss per account with the event.
+#' @param revenue_good Expected revenue per account without the event
+#'   (default `1`).
+#' @param loss_bad Expected loss per account with the event (default `1`;
+#'   with both defaults the break-even event rate is 50%).
 #' @param sample `"holdout"` (default) or `"train"`.
 #'
 #' @return An `scr_strategy` object with `table`, `breakeven` and the parameters.
@@ -162,7 +164,7 @@ print.scr_strategy <- function(x, ...) {
 
 #' Stage 6: honest reject inference through a sensitivity band
 #'
-#' Does not ship parcelling as the default behaviour (decision D16): instead
+#' Does not ship parcelling as the default behaviour: instead
 #' of inventing a single multiplier and reweighting, it declares the
 #' **population scope** of the scorecard, measures the **coverage per band**
 #' (where an observed outcome exists, and in what volume) and presents a

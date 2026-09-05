@@ -1,8 +1,8 @@
 ---
-title: "Scale alignment: making scorecards comparable across targets, engines and conventions"
+title: "Scale alignment across targets, engines and conventions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Scale alignment: making scorecards comparable across targets, engines and conventions}
+  %\VignetteIndexEntry{Scale alignment across targets, engines and conventions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -193,8 +193,8 @@ so intercept and slope should both be near $-1.67$. The regression lands at
 about $-1.4$ and $-1.5$, attenuated by the banding as above but in the
 right place, and its mean predicted probability matches the observed event
 rate; the direct map reports whatever the raw score claims, here a third
-too low. This is why `scr_scorecard()` always aligns (decision D9) and
-defaults to `"regression"`.
+too low. This is why `scr_scorecard()` always aligns and defaults to
+`"regression"`.
 
 ## 3. Two targets, two conventions, one scale
 
@@ -266,7 +266,7 @@ A gradient-boosted model can be fitted on the same WOE columns as the
 scorecard and aligned to the same scale by the same regression. That makes
 its output comparable point for point with the champion; it does **not**
 make it a scorecard. The object says so explicitly: no points, no reason
-codes, `supports_scorecard = FALSE` (decision D10).
+codes, `supports_scorecard = FALSE`.
 
 ```{r challenger, results = "hide"}
 sc_x <- scr_scorecard(res_risk, challenger = "xgboost")

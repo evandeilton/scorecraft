@@ -39,9 +39,11 @@ category not listed in \code{groups}.}
 \item{reset}{\code{TRUE} proposes a return to the optimal bins.}
 }
 \value{
-An \code{scr_classing_proposal} with \code{id}, \code{variable}, \code{spec},
-\code{entry}, \code{checks}, \code{compare}, \code{verdict} (\code{ACCEPTABLE}, \code{REVIEW} or
-\code{BLOCKED}) and \code{warnings}.
+An \code{scr_classing_proposal} with \code{id}, \code{variable}, \code{instruction}
+(the resolved instruction as text), \code{entry} (the hand-built bins),
+\code{checks}, \code{optimal} (the checks of the optimal bins), \code{compare},
+\code{verdict} (\code{ACCEPTABLE}, \code{REVIEW} or \code{BLOCKED}), \code{warnings} and
+\code{blocking}.
 }
 \description{
 Exactly one of \code{breaks}, \code{groups}, \code{merge}, \code{split} or \code{reset} per call;
@@ -53,6 +55,9 @@ bins is printed. The proposal is a value: nothing changes in the lab
 until \code{\link[=scr_classing_accept]{scr_classing_accept()}}.
 }
 \seealso{
+\code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
+scorecard.
+
 Other classing:
 \code{\link[=scr_classing_accept]{scr_classing_accept()}},
 \code{\link[=scr_classing_apply]{scr_classing_apply()}},

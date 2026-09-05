@@ -31,7 +31,8 @@ scr_moc(
 \item{reason}{Justification (mandatory for \code{"A"}/\code{"B"}).}
 
 \item{dr}{Optional \code{scr_dr} by grade for \code{"ci_timeseries"}, keyed by the
-final grades of \code{x} (stored in \code{x$dr} when absent).}
+final grades of \code{x}; \code{NULL} uses the series already stored in \code{x$dr} by
+\code{\link[=scr_grades]{scr_grades()}}.}
 
 \item{n_boot, seed}{Bootstrap resamples and seed for \code{"bootstrap"}.}
 }

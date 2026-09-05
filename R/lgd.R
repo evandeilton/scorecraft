@@ -173,6 +173,10 @@
 #'   `cure_rate`, `lra_default_weighted`, `lra_exposure_weighted`,
 #'   `share_incomplete`, `discount_rate_mean`, `by_product`, `by_year`),
 #'   `ledger`, `config`, `obs_date`, and `cashflows` with `keep_rows`.
+#'   `rds` also carries `year`, `close_date`, `recovery_nominal`,
+#'   `recovery_artificial`, `cost_nominal`, `drawing_nominal`,
+#'   `closed_at_t_max`, `absorbed`, `n_cashflows` and `last_month`; `funnel`
+#'   has `kept`; `summary` has `n_cure`, `lra_raw`, `ead_total` and `years`.
 #'
 #' @family irb-lgd
 #' @examples
@@ -1246,7 +1250,8 @@ scr_sql.scr_lgd <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
 #'   that still discriminates) and heterogeneity between adjacent pools
 #'   (Welch test; a large p-value means pools that do not differ).
 #'
-#' Traffic lights use the p-value thresholds of `pd_lights` (red below the
+#' Traffic lights use the p-value thresholds of `config$pd_lights` (shared
+#' with the PD validation) (red below the
 #' first, amber below the second) and the fixed PSI thresholds.
 #'
 #' @param x An [scr_lgd()] object.
@@ -1409,8 +1414,10 @@ print.scr_lgd_validation <- function(x, ...) {
 #'   matching validation object ([scr_pd_validate()], [scr_lgd_validate()],
 #'   [scr_ead_validate()]); `NULL` runs it on the hold-out where possible.
 #' @param elbe For `scr_lgd`: an [scr_elbe()] object; `NULL` computes it.
-#' @param tag For the IRB models: the file tag (`pd_<tag>.xlsx`,
-#'   `lgd_<tag>.xlsx`, `ead_<tag>.xlsx`, `capital_<tag>.xlsx`).
+#' @param tag For `scr_lgd` and `scr_ead`: the file tag (`lgd_<tag>.xlsx`,
+#'   `ead_<tag>.xlsx`). `scr_pd` names its files after the target
+#'   (`pd_<target>.xlsx`) and `scr_capital` after the framework
+#'   (`capital_<framework>.xlsx`).
 #' @export
 scr_export.scr_lgd <- function(x, dir, stamp = TRUE, validation = NULL, elbe = NULL, tag = "model", ...) {
   .need_openxlsx()

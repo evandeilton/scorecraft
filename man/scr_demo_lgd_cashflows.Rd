@@ -5,7 +5,7 @@
 \alias{scr_demo_lgd_cashflows}
 \title{Synthetic post-default cash flows of \code{scr_demo_lgd}}
 \format{
-A \code{data.frame} with 5,743 rows and 4 columns:
+A \code{data.frame} with 5,737 rows and 4 columns:
 \describe{
 \item{\code{default_id}}{Default event identifier, matching \link{scr_demo_lgd}.}
 \item{\code{date}}{Date of the cash flow.}

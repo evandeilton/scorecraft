@@ -4,11 +4,12 @@
 \name{scorecraft-package}
 \alias{scorecraft}
 \alias{scorecraft-package}
-\title{scorecraft: scorecard engine with alignment, cut-off strategy and production SQL}
+\title{scorecraft: scorecard engine with alignment, cut-off strategy, IRB risk parameters and production SQL}
 \description{
-A professional scorecard is born of seven chained stages, and this package
-exposes each of them as a function of its own, next to the shortcut
-\code{\link[=scr_select]{scr_select()}} that chains them for the common case:
+A professional scorecard is born of eight chained stages, numbered 0 to 7
+in every message and in \code{\link[=scr_config_keys]{scr_config_keys()}}, and this package exposes each
+of them as a function of its own, next to the shortcut \code{\link[=scr_select]{scr_select()}} that
+chains them for the common case:
 }
 \details{
 \enumerate{
@@ -42,9 +43,10 @@ schedules anything by itself.
 \section{IRB risk parameters}{
 
 
-The IRB layer turns the scorecard into regulatory parameters and keeps
-the same contracts (one configuration, ledgers, hold-out revalidation,
-workbooks, production SQL). \code{\link[=scr_irb_params]{scr_irb_params()}} holds every regime-specific
+The IRB (internal ratings-based) layer, stages 8 to 12 of
+\code{\link[=scr_config_keys]{scr_config_keys()}}, turns the scorecard into regulatory parameters and
+keeps the same contracts (one configuration, ledgers, hold-out
+revalidation, workbooks, production SQL). \code{\link[=scr_irb_params]{scr_irb_params()}} holds every regime-specific
 number as a table selected by preset (\code{"bcb"}, \code{"basel3_final"},
 \code{"crr3"}); \code{\link[=scr_default]{scr_default()}} builds the default flag from a monthly panel and
 \code{\link[=scr_default_rate]{scr_default_rate()}} the default rates by cohort with the long-run average.
@@ -52,13 +54,18 @@ PD: \code{\link[=scr_calibrate]{scr_calibrate()}} anchors the scorecard to a cen
 \code{\link[=scr_grades]{scr_grades()}} cuts the score into rating grades, \code{\link[=scr_moc]{scr_moc()}} and
 \code{\link[=scr_pd]{scr_pd()}} add the margin of conservatism and the floor, and
 \code{\link[=scr_pd_validate]{scr_pd_validate()}} runs the calibration, discrimination and stability
-tests with traffic lights. LGD: \code{\link[=scr_workout]{scr_workout()}} discounts recovery cash
+tests with traffic lights; \code{\link[=scr_master_scale]{scr_master_scale()}}, \code{\link[=scr_migration]{scr_migration()}} and
+\code{\link[=scr_pd_pit_ttc]{scr_pd_pit_ttc()}} support the grade structure, the migration analysis
+and the point-in-time bridge. LGD: \code{\link[=scr_workout]{scr_workout()}} discounts recovery cash
 flows into realised LGD, \code{\link[=scr_lgd]{scr_lgd()}} fits the cure and severity stages
 and the pools, \code{\link[=scr_lgd_downturn]{scr_lgd_downturn()}}, \code{\link[=scr_lgd_floor]{scr_lgd_floor()}} and \code{\link[=scr_elbe]{scr_elbe()}}
-complete the estimate. EAD: \code{\link[=scr_ead_data]{scr_ead_data()}} builds the realised
-conversion factors from facility snapshots and \code{\link[=scr_ead]{scr_ead()}} the pools.
-\code{\link[=scr_el]{scr_el()}}, \code{\link[=scr_irb_rw]{scr_irb_rw()}}, \code{\link[=scr_capital]{scr_capital()}} and \code{\link[=scr_ecl]{scr_ecl()}} compute
-expected loss, risk weights, capital and expected credit loss. Binning
+complete the estimate, \code{\link[=scr_lgd_pools]{scr_lgd_pools()}} and \code{\link[=scr_lgd_validate]{scr_lgd_validate()}} close
+the pools and the validation. EAD: \code{\link[=scr_ead_data]{scr_ead_data()}} builds the realised
+conversion factors from facility snapshots and \code{\link[=scr_ead]{scr_ead()}} the pools;
+\code{\link[=scr_ead_downturn]{scr_ead_downturn()}} and \code{\link[=scr_ead_validate]{scr_ead_validate()}} add the downturn and the
+validation. \code{\link[=scr_el]{scr_el()}}, \code{\link[=scr_irb_rw]{scr_irb_rw()}}, \code{\link[=scr_sa_rw]{scr_sa_rw()}}, \code{\link[=scr_capital]{scr_capital()}},
+\code{\link[=scr_pd_stress]{scr_pd_stress()}} and \code{\link[=scr_ecl]{scr_ecl()}} compute expected loss, risk weights,
+capital and expected credit loss. Binning
 against a continuous target goes through \code{\link[=scr_bin_continuous]{scr_bin_continuous()}}, whose
 result the engine reproduces in R and in SQL.
 }

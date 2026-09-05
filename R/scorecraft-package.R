@@ -1,8 +1,9 @@
-#' scorecraft: scorecard engine with alignment, cut-off strategy and production SQL
+#' scorecraft: scorecard engine with alignment, cut-off strategy, IRB risk parameters and production SQL
 #'
-#' A professional scorecard is born of seven chained stages, and this package
-#' exposes each of them as a function of its own, next to the shortcut
-#' [scr_select()] that chains them for the common case:
+#' A professional scorecard is born of eight chained stages, numbered 0 to 7
+#' in every message and in [scr_config_keys()], and this package exposes each
+#' of them as a function of its own, next to the shortcut [scr_select()] that
+#' chains them for the common case:
 #'
 #' \enumerate{
 #'   \item **Split** ([scr_split()]): train/hold-out by whole periods
@@ -34,9 +35,10 @@
 #'
 #' @section IRB risk parameters:
 #'
-#' The IRB layer turns the scorecard into regulatory parameters and keeps
-#' the same contracts (one configuration, ledgers, hold-out revalidation,
-#' workbooks, production SQL). [scr_irb_params()] holds every regime-specific
+#' The IRB (internal ratings-based) layer, stages 8 to 12 of
+#' [scr_config_keys()], turns the scorecard into regulatory parameters and
+#' keeps the same contracts (one configuration, ledgers, hold-out
+#' revalidation, workbooks, production SQL). [scr_irb_params()] holds every regime-specific
 #' number as a table selected by preset (`"bcb"`, `"basel3_final"`,
 #' `"crr3"`); [scr_default()] builds the default flag from a monthly panel and
 #' [scr_default_rate()] the default rates by cohort with the long-run average.
@@ -44,13 +46,18 @@
 #' [scr_grades()] cuts the score into rating grades, [scr_moc()] and
 #' [scr_pd()] add the margin of conservatism and the floor, and
 #' [scr_pd_validate()] runs the calibration, discrimination and stability
-#' tests with traffic lights. LGD: [scr_workout()] discounts recovery cash
+#' tests with traffic lights; [scr_master_scale()], [scr_migration()] and
+#' [scr_pd_pit_ttc()] support the grade structure, the migration analysis
+#' and the point-in-time bridge. LGD: [scr_workout()] discounts recovery cash
 #' flows into realised LGD, [scr_lgd()] fits the cure and severity stages
 #' and the pools, [scr_lgd_downturn()], [scr_lgd_floor()] and [scr_elbe()]
-#' complete the estimate. EAD: [scr_ead_data()] builds the realised
-#' conversion factors from facility snapshots and [scr_ead()] the pools.
-#' [scr_el()], [scr_irb_rw()], [scr_capital()] and [scr_ecl()] compute
-#' expected loss, risk weights, capital and expected credit loss. Binning
+#' complete the estimate, [scr_lgd_pools()] and [scr_lgd_validate()] close
+#' the pools and the validation. EAD: [scr_ead_data()] builds the realised
+#' conversion factors from facility snapshots and [scr_ead()] the pools;
+#' [scr_ead_downturn()] and [scr_ead_validate()] add the downturn and the
+#' validation. [scr_el()], [scr_irb_rw()], [scr_sa_rw()], [scr_capital()],
+#' [scr_pd_stress()] and [scr_ecl()] compute expected loss, risk weights,
+#' capital and expected credit loss. Binning
 #' against a continuous target goes through [scr_bin_continuous()], whose
 #' result the engine reproduces in R and in SQL.
 #'
@@ -109,8 +116,8 @@ utils::globalVariables(c(
   "max_score", "mean_score", "ep_per_account", "band_profit", "cum_event_rate",
   "cum_profit", "n_dev", "events_dev", "rate_dev", "n_pop", "n_unknown",
   "coverage", "coverage_flag", "multiplier", "rate_unknown", "events_implied",
-  "rate_implied", "points_shift", "Feature", "Gain", ".tmp", ".linha", ".i",
-  "i.corr_com", "n_vote", "count_train", "pct_train", "observed", "expected",
+  "rate_implied", "points_shift", "Feature", "Gain", ".tmp", ".i",
+  "n_vote", "count_train", "pct_train", "observed", "expected",
   "psi_critical", "psi_flag_adjusted", "provenance", "manual_reason", "status", "pct_shift",
   "pct_holdout", "current", "metric", "optimal", "manual", "delta", "blocking"
 ))

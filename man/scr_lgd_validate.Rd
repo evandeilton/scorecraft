@@ -41,7 +41,8 @@ that still discriminates) and heterogeneity between adjacent pools
 (Welch test; a large p-value means pools that do not differ).
 }
 
-Traffic lights use the p-value thresholds of \code{pd_lights} (red below the
+Traffic lights use the p-value thresholds of \code{config$pd_lights} (shared
+with the PD validation) (red below the
 first, amber below the second) and the fixed PSI thresholds.
 }
 \examples{

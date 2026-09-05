@@ -29,8 +29,8 @@ scr_run(
 \item{drop}{Columns that are never candidates.}
 
 \item{date_col}{Date column of the out-of-time split, passed on to
-\code{\link[=scr_select]{scr_select()}}. \code{NULL} uses \code{config$oot_date_col} (a random stratified
-split when that is \code{NULL} too).}
+\code{\link[=scr_select]{scr_select()}}. Defaults to \code{config$oot_date_col}; an explicit \code{NULL}
+forces a random stratified split.}
 
 \item{event_level}{Passed on to \code{\link[=scr_select]{scr_select()}}.}
 
@@ -71,21 +71,11 @@ DBI::dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=scr_compare]{scr_compare()}}, \code{\link[=scr_core]{scr_core()}}
+\code{\link[=scr_compare]{scr_compare()}} and \code{\link[=scr_core]{scr_core()}} to read the run set.
 
-Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
-\code{\link[=scr_align]{scr_align()}},
-\code{\link[=scr_bin]{scr_bin()}},
-\code{\link[=scr_cutoff]{scr_cutoff()}},
-\code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
-\code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_scorecard]{scr_scorecard()}},
-\code{\link[=scr_select]{scr_select()}},
-\code{\link[=scr_split]{scr_split()}},
-\code{\link[=scr_strategy]{scr_strategy()}},
-\code{\link[=scr_triage]{scr_triage()}}
+Other portfolio:
+\code{\link[=scr_compare]{scr_compare()}},
+\code{\link[=scr_core]{scr_core()}},
+\code{\link{scr_runset}}
 }
-\concept{stages}
+\concept{portfolio}

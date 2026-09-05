@@ -36,8 +36,9 @@
 #'
 #' @return An `scr_bins` object with `fit` (an `obwoe` object), `screen`
 #'   (`summary` and `full`), `holdout`, `prune`, `pool` (eligible for the
-#'   models), `derived_excluded`, the WOE matrices `woe_train`/`woe_holdout`
-#'   and the originating `triage`.
+#'   models), `derived_excluded`, the counts `binned`, `pos_screen` and
+#'   `pos_holdout` (the survivors of each gate, in order), the WOE matrices
+#'   `woe_train`/`woe_holdout`, the originating `triage` and the `config`.
 #'
 #' @family stages
 #' @examples

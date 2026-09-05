@@ -66,7 +66,7 @@ and that one, unlike this, rewrites everything.
 
 
 \code{"jedi"} is the default and stays exposed side by side with the
-alternatives (decision D6), never hidden behind an \code{"auto"}. Choices with
+alternatives, never hidden behind an \code{"auto"}. Choices with
 distinct properties: \code{"ivb"}, \code{"dp"} and \code{"sblp"} are provably optimal for
 categoricals; \code{"cm"} (ChiMerge) and \code{"fetb"} have a principled stopping
 rule; \code{"ir"} (isotonic) guarantees monotone WOE; \code{"fast_mdlp"} is the

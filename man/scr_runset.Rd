@@ -23,6 +23,7 @@ table and \code{\link[=scr_core]{scr_core()}} for the variables that cross sever
 \seealso{
 Other portfolio:
 \code{\link[=scr_compare]{scr_compare()}},
-\code{\link[=scr_core]{scr_core()}}
+\code{\link[=scr_core]{scr_core()}},
+\code{\link[=scr_run]{scr_run()}}
 }
 \concept{portfolio}

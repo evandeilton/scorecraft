@@ -39,6 +39,8 @@ the hold-out falls in no bin.}
 pipeline created and \code{allow_derived_final = FALSE}.}
 \item{\verb{06.consensus}}{Not enough votes, or outside the top-N.}
 \item{\verb{07.approved}}{Entered the shortlist.}
+\item{\verb{08.manual_drop}}{In the automatic consensus, but removed by the
+analyst in the coarse classing lab (\code{\link[=scr_classing_choose]{scr_classing_choose()}}).}
 }
 }
 

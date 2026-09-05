@@ -2,7 +2,7 @@
 % Please edit documentation in R/monitor.R
 \name{scr_monitoring_plan}
 \alias{scr_monitoring_plan}
-\title{The monitoring plan: the contract scr_monitor() reads}
+\title{Monitoring plan read by scr_monitor()}
 \usage{
 scr_monitoring_plan(x, breaks = NULL)
 }
@@ -31,19 +31,12 @@ plan <- scr_monitoring_plan(scr_config(), breaks = c(-Inf, 500, 550, 600, Inf))
 plan
 }
 \seealso{
-Other stages:
+Other production:
 \code{\link[=predict.scr_align]{predict.scr_align()}},
-\code{\link[=scr_align]{scr_align()}},
-\code{\link[=scr_bin]{scr_bin()}},
-\code{\link[=scr_cutoff]{scr_cutoff()}},
-\code{\link[=scr_model]{scr_model()}},
+\code{\link[=scr_apply]{scr_apply()}},
+\code{\link[=scr_export]{scr_export()}},
 \code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
-\code{\link[=scr_scorecard]{scr_scorecard()}},
-\code{\link[=scr_select]{scr_select()}},
-\code{\link[=scr_split]{scr_split()}},
-\code{\link[=scr_strategy]{scr_strategy()}},
-\code{\link[=scr_triage]{scr_triage()}}
+\code{\link[=scr_reasons]{scr_reasons()}},
+\code{\link[=scr_sql]{scr_sql()}}
 }
-\concept{stages}
+\concept{production}

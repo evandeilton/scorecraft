@@ -49,6 +49,7 @@ An object of class \code{scr_pd_calibration}: \code{alignment} (the new
 \code{mean_pd_before}, \code{mean_pd_after}, \code{ar_before}, \code{ar_after} (observed),
 \code{ar_implied_before}, \code{ar_implied_after}, \code{n}, \code{segments} (table and
 alignments when \code{segment} is given), \code{ledger}.
+Also \code{ar_target}, \code{note} and \code{sample}.
 }
 \description{
 Re-anchors the probability of default of a scorecard to a long-run

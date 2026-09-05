@@ -47,7 +47,7 @@ Shortcut that chains \code{\link[=scr_split]{scr_split()}}, \code{\link[=scr_tri
 \code{\link[=scr_model]{scr_model()}} on a table and a binary target, and returns an object with
 the shortlist, the complete audit funnel, the gains table and the
 production SQL of the approved variables. Every stage remains callable on
-its own for whoever wants more control (hybrid interface, decision D13).
+its own for whoever wants more control (hybrid interface).
 }
 \section{Reproducibility}{
 
@@ -72,15 +72,11 @@ head(scr_funnel(res, only_selected = TRUE))
 \code{\link[=scr_scorecard]{scr_scorecard()}} for the next step.
 
 Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_align]{scr_align()}},
 \code{\link[=scr_bin]{scr_bin()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},
 \code{\link[=scr_split]{scr_split()}},
 \code{\link[=scr_strategy]{scr_strategy()}},

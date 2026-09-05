@@ -32,7 +32,7 @@ An \code{scr_reject} object with \code{scope}, \code{coverage} (per band) and
 \code{sensitivity} (per band and multiplier, plus the \code{TOTAL} row).
 }
 \description{
-Does not ship parcelling as the default behaviour (decision D16): instead
+Does not ship parcelling as the default behaviour: instead
 of inventing a single multiplier and reweighting, it declares the
 \strong{population scope} of the scorecard, measures the \strong{coverage per band}
 (where an observed outcome exists, and in what volume) and presents a
@@ -54,14 +54,10 @@ scr_reject(sc, population = scr_demo, accepted = acc)
 }
 \seealso{
 Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_align]{scr_align()}},
 \code{\link[=scr_bin]{scr_bin()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
-\code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},
 \code{\link[=scr_select]{scr_select()}},
 \code{\link[=scr_split]{scr_split()}},

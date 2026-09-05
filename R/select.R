@@ -8,7 +8,7 @@
 #' [scr_model()] on a table and a binary target, and returns an object with
 #' the shortlist, the complete audit funnel, the gains table and the
 #' production SQL of the approved variables. Every stage remains callable on
-#' its own for whoever wants more control (hybrid interface, decision D13).
+#' its own for whoever wants more control (hybrid interface).
 #'
 #' @section Reproducibility:
 #'
@@ -128,8 +128,8 @@ scr_select <- function(data, target, config = scr_config(), drop = character(),
 #' @param config An object from [scr_config()], used for every target.
 #' @param drop Columns that are never candidates.
 #' @param date_col Date column of the out-of-time split, passed on to
-#'   [scr_select()]. `NULL` uses `config$oot_date_col` (a random stratified
-#'   split when that is `NULL` too).
+#'   [scr_select()]. Defaults to `config$oot_date_col`; an explicit `NULL`
+#'   forces a random stratified split.
 #' @param event_level Passed on to [scr_select()].
 #' @param sample_frac Sampling fraction. A scalar or a list named by target.
 #' @param max_rows Row cap per target. `NULL` switches it off.
@@ -138,8 +138,8 @@ scr_select <- function(data, target, config = scr_config(), drop = character(),
 #' @return An `scr_runset` object: a named list of `scr_result` (or, for the
 #'   targets that failed, a list with `error`).
 #'
-#' @seealso [scr_compare()], [scr_core()]
-#' @family stages
+#' @seealso [scr_compare()] and [scr_core()] to read the run set.
+#' @family portfolio
 #' @examplesIf requireNamespace("RSQLite", quietly = TRUE)
 #' con <- scr_connect(driver = RSQLite::SQLite(), dbname = ":memory:")
 #' d <- scr_demo; d$ref_date <- as.character(d$ref_date)   # SQLite has no Date type

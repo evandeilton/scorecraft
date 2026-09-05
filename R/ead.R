@@ -24,7 +24,8 @@
 #'
 #' One row per default event (or per event and reference date under the
 #' variable-horizon comparison), with the facility as it stood at the
-#' reference date and the realised exposure at the default date. The
+#' reference date and the realised exposure at default (EAD) at the default
+#' date, from which the realised credit conversion factor (CCF) follows. The
 #' reference date follows `config$ccf_horizon`: `"fixed"` takes the
 #' snapshot `ccf_horizon_months` before the default month (the nearest
 #' earlier snapshot when that month is missing; the first snapshot for a
@@ -431,6 +432,9 @@ print.scr_ead_data <- function(x, ...) {
 #'   `spearman`, `ead_rmse`, `ead_mae`, `adequacy`, `cear`), `split`,
 #'   `funnel`, `data_summary`, `downturn`, `ledger`, `model_card`,
 #'   `params`, `config`, `meta`.
+#'   Also `survivors` (the admitted drivers) and `lra` (the long-run averages
+#'   of the data set); `metrics` also carries `n`, `n_main`, `gauc_se`,
+#'   `somers_d` and `share_floor_binding`.
 #'
 #' @family irb-ead
 #' @examples
@@ -873,6 +877,8 @@ print.scr_ead <- function(x, ...) {
 #'   `periods`, `add_on` and the per-pool `table`: `pool`, `lra`,
 #'   `n_downturn`, `dt_observed`, `dt_type3`, `ccf_dt`), the updated
 #'   `pools` and a new ledger row.
+#'   The table also carries `ccf_final` and `ccf_applied`; the object
+#'   `n_rows_in_periods` and `reason`.
 #'
 #' @family irb-ead
 #' @examples
@@ -1090,8 +1096,9 @@ scr_sql.scr_ead <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
 #' exposure-weighted averages, the one-sided t-test of realised above
 #' predicted (under-estimation) with its p-value, the EAD adequacy ratio
 #' (sum of realised EAD over sum of predicted EAD) and traffic lights
-#' (green when p > 0.05, amber when 0.01 < p <= 0.05, red when p <= 0.01;
-#' adequacy green at or below 1, amber up to 1.05, red above). Adds the
+#' (red at or below `lights[1]`, amber at or below `lights[2]`, green above;
+#' adequacy green at or below `adequacy_lights[1]`, amber up to
+#' `adequacy_lights[2]`, red above). Adds the
 #' discrimination block (gAUC with a bootstrap interval against the
 #' development value, Spearman correlation, cumulative EAD accuracy
 #' ratio), the back-test by cohort and the stability of the pool

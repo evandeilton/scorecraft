@@ -28,11 +28,14 @@ scr_pd_stress(0.02, rho = 0.15, q = c(0.5, 0.95, 0.99, 0.999))
 }
 \references{
 Vasicek, O. (2002). The distribution of loan portfolio value. \emph{Risk},
-December, 160-162. Gordy, M. B. (2003). A risk-factor model foundation
+15(12), 160-162. Gordy, M. B. (2003). A risk-factor model foundation
 for ratings-based bank capital rules. \emph{Journal of Financial
 Intermediation}, 12(3), 199-232.
 }
 \seealso{
+\code{\link[=scr_pd_pit_ttc]{scr_pd_pit_ttc()}}, the same bridge with the systematic factor
+given as a value of \code{z} rather than a quantile \code{q}.
+
 Other irb-capital:
 \code{\link[=scr_capital]{scr_capital()}},
 \code{\link[=scr_ecl]{scr_ecl()}},

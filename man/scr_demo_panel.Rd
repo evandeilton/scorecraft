@@ -9,7 +9,7 @@ A \code{data.frame} with 21,600 rows and 7 columns:
 \describe{
 \item{\code{id}}{Obligor identifier.}
 \item{\code{ref_date}}{Month (first day), 36 periods from 2023-01.}
-\item{\code{dpd}}{Days past due at the month end (multiples of 30).}
+\item{\code{dpd}}{Days past due at the snapshot (multiples of 30).}
 \item{\code{arrears}}{Overdue amount.}
 \item{\code{exposure}}{Total exposure of the obligor (constant).}
 \item{\code{restructured}}{Logical distressed-restructuring flag.}

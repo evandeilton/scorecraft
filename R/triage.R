@@ -20,7 +20,8 @@
 #'
 #' Failures at this stage: `CONSTANT`, `NEAR_CONSTANT`, `TOO_MANY_MISSING`,
 #' `HIGH_CARDINALITY`, `NO_SIGNAL` (coarse IV below `min_iv_quick`) and
-#' `DUPLICATE_OF:<column>`.
+#' `DUPLICATE_OF:<column>`. A failed numeric whose special-population flag
+#' survives carries the suffix `;RESCUED_AS_FLAG`.
 #'
 #' @param split An object from [scr_split()].
 #' @param config An object from [scr_config()].

@@ -10,8 +10,8 @@
 #' counts, `n1 * n0` overflows `2^31` from about 46 thousand observations per
 #' class and returns `NA`.
 #'
-#' The confidence interval is **always** computed by default (project
-#' decision D18): a bootstrap stratified by outcome, percentile method, with
+#' The confidence interval is **always** computed by default: a bootstrap
+#' stratified by outcome, percentile method, with
 #' `n_boot` resamples. Gini is derived from AUC (`2 * AUC - 1`) inside each
 #' resample, never bootstrapped separately. The cost is absorbed by
 #' `nthread` (parallelism by resample).
@@ -32,6 +32,9 @@
 #'   bounds `auc_lo`/`auc_hi`, `ks_lo`/`ks_hi`, `gini_lo`/`gini_hi` (`NA`
 #'   when `ci = FALSE`), `n`, `events`, `n_boot` and `level`. Everything is
 #'   `NA_real_` when only one class is present or no valid case exists.
+#'
+#' DeLong's analytic variance is not used: the interval is a stratified
+#' percentile bootstrap, which also covers KS.
 #'
 #' @references
 #' DeLong, E. R., DeLong, D. M. and Clarke-Pearson, D. L. (1988). Comparing
@@ -140,7 +143,9 @@ as.data.frame.scr_metrics <- function(x, ...) {
 #' aggregation: this function is called once per candidate variable, hundreds
 #' of times per run, and the fixed cost dominated the triage.
 #'
-#' @param g Group vector (any coercible type; `NA` is ignored).
+#' @param g Group vector (any coercible type). For a character or factor
+#'   `g`, `NA` forms a group of its own; for integer codes, `NA` rows are
+#'   dropped.
 #' @param y 0/1 outcome vector.
 #' @param laplace Smoothing constant added to each count. `0` switches it off.
 #'
@@ -184,8 +189,8 @@ woe_subpop <- function(mask, y, laplace = 0.5) {
 #' Population stability index, with the fixed and the sample-size-adjusted threshold
 #'
 #' `PSI = sum((p - q) * ln(p / q))` over bins frozen on the base. Reports
-#' both thresholds side by side (project decision D17): the traditional fixed
-#' one (`< 0.10` stable, `0.10-0.25` moderate, `>= 0.25` act) and the
+#' both thresholds side by side: the traditional fixed one (`< 0.10`
+#' `"stable"`, `0.10-0.25` `"moderate"`, `>= 0.25` `"shift"`) and the
 #' sample-size-adjusted critical value of Yurdakul and Naranjo (2020), under
 #' which the PSI is asymptotically `(1/n + 1/m) * chi-squared(B - 1)`. With
 #' `n = m = 1000` and ten bins the 5% critical value is 0.034, not 0.10; on a
@@ -201,7 +206,8 @@ woe_subpop <- function(mask, y, laplace = 0.5) {
 #'   `n_groups` quantiles of `base`.
 #' @param n_groups Number of bands when `breaks = NULL`.
 #' @param alpha Significance level of the adjusted threshold.
-#' @param thresholds The two fixed thresholds (moderate, act).
+#' @param thresholds The two fixed thresholds: below the first the flag is
+#'   `"stable"`, below the second `"moderate"`, otherwise `"shift"`.
 #'
 #' @return A list of class `scr_psi` with `psi`, `flag_fixed`, `critical`
 #'   (adjusted critical value), `flag_adjusted` (`"stable"` or `"shift"`),

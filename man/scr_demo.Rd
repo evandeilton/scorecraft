@@ -20,8 +20,8 @@ sentinel \code{-999}; the signal is in the absence.}
 \code{vl_redundante}, \code{ds_alta_card}}{Structural pathologies.}
 \item{\code{ds_regiao}, \code{ds_faixa}, \code{ds_canal}, \code{ds_optin}}{Categoricals with
 signal; \code{ds_optin} has \code{NA}.}
-\item{\code{default}}{Risk target (0/1, about 10\% events).}
-\item{\code{churn}}{Propensity target (0/1, about 25\% events), for the
+\item{\code{default}}{Risk target (0/1, about 14\% events).}
+\item{\code{churn}}{Propensity target (0/1, about 29\% events), for the
 portfolio examples.}
 }
 }

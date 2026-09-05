@@ -26,7 +26,8 @@ scr_demo_ead
 }
 \description{
 1,200 revolving facilities (cards, overdrafts and revolving lines) of
-about 950 obligors, observed at month ends over 30 months. Utilisation
+950 obligors, observed monthly (snapshots dated the first day of the
+month) over 30 months. Utilisation
 follows a facility-specific level with a mild drift; about 10\% of the
 facilities default, with the utilisation ramping up over the twelve
 months before the default month at an intensity that depends on the

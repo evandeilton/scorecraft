@@ -62,7 +62,8 @@ exposure-weighted averages by cohort and measure, with a total row),
 \description{
 One row per default event (or per event and reference date under the
 variable-horizon comparison), with the facility as it stood at the
-reference date and the realised exposure at the default date. The
+reference date and the realised exposure at default (EAD) at the default
+date, from which the realised credit conversion factor (CCF) follows. The
 reference date follows \code{config$ccf_horizon}: \code{"fixed"} takes the
 snapshot \code{ccf_horizon_months} before the default month (the nearest
 earlier snapshot when that month is missing; the first snapshot for a

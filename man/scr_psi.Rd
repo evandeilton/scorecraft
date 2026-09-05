@@ -29,7 +29,8 @@ uses the union of the observed ones.}
 
 \item{alpha}{Significance level of the adjusted threshold.}
 
-\item{thresholds}{The two fixed thresholds (moderate, act).}
+\item{thresholds}{The two fixed thresholds: below the first the flag is
+\code{"stable"}, below the second \code{"moderate"}, otherwise \code{"shift"}.}
 }
 \value{
 A list of class \code{scr_psi} with \code{psi}, \code{flag_fixed}, \code{critical}
@@ -39,8 +40,8 @@ A list of class \code{scr_psi} with \code{psi}, \code{flag_fixed}, \code{critica
 }
 \description{
 \code{PSI = sum((p - q) * ln(p / q))} over bins frozen on the base. Reports
-both thresholds side by side (project decision D17): the traditional fixed
-one (\verb{< 0.10} stable, \code{0.10-0.25} moderate, \verb{>= 0.25} act) and the
+both thresholds side by side: the traditional fixed one (\verb{< 0.10}
+\code{"stable"}, \code{0.10-0.25} \code{"moderate"}, \verb{>= 0.25} \code{"shift"}) and the
 sample-size-adjusted critical value of Yurdakul and Naranjo (2020), under
 which the PSI is asymptotically \code{(1/n + 1/m) * chi-squared(B - 1)}. With
 \code{n = m = 1000} and ten bins the 5\% critical value is 0.034, not 0.10; on a

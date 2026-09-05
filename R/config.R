@@ -50,7 +50,7 @@
 #' @section Binning algorithm (`algorithm`):
 #'
 #' `"jedi"` is the default and stays exposed side by side with the
-#' alternatives (decision D6), never hidden behind an `"auto"`. Choices with
+#' alternatives, never hidden behind an `"auto"`. Choices with
 #' distinct properties: `"ivb"`, `"dp"` and `"sblp"` are provably optimal for
 #' categoricals; `"cm"` (ChiMerge) and `"fetb"` have a principled stopping
 #' rule; `"ir"` (isotonic) guarantees monotone WOE; `"fast_mdlp"` is the
@@ -445,8 +445,9 @@ print.scr_config <- function(x, ...) {
 
 #' Selection presets, side by side
 #'
-#' Returns the keys a preset changes, resolved, to compare before choosing.
-#' Every other configuration key is identical across presets.
+#' Returns the funnel keys resolved per preset, to compare before choosing.
+#' `target_min` and `iv_max` are shown for context; the presets leave them
+#' unchanged, as they do every other configuration key.
 #'
 #' @return A `data.frame` with one row per preset.
 #'
@@ -469,7 +470,8 @@ scr_presets <- function() {
 #' One row per [scr_config()] key, with the stage it acts on, the default
 #' value and what it controls.
 #'
-#' @param stage Optional filter by stage (`0` to `7` for the scorecard pipeline, `8` to `12` for the IRB models). `NULL` returns everything.
+#' @param stage Optional filter by stage: `0` to `7` for the scorecard
+#'   pipeline, `8` to `12` for the IRB models. `NULL` returns everything.
 #'
 #' @return A `data.frame` with `key`, `stage`, `default` and `description`.
 #'
@@ -498,7 +500,7 @@ scr_config_keys <- function(stage = NULL) {
     .ck("special_min_woe", 1, "0.05", "Minimum |WOE| to create the flag"),
     .ck("flag_suffix", 1, "__sp", "Suffix of the special-population flag"),
     .ck("allow_derived_final", 1, "FALSE", "A derived flag may enter the deliverable"),
-    .ck("min_bins", 2, "3", "Bins requested from the algorithm"),
+    .ck("min_bins", 2, "3", "Minimum bins requested from the algorithm"),
     .ck("max_bins", 2, "7", "Maximum bins requested from the algorithm"),
     .ck("algorithm", 2, "jedi", "Binning algorithm (see obwoe_algorithms())"),
     .ck("bin_cutoff", 2, "0.03", "Minimum fraction per bin inside the algorithm"),
@@ -578,7 +580,7 @@ scr_config_keys <- function(stage = NULL) {
     .ck("pd_moc_method", 9, "ci_timeseries", "Estimation-error margin of conservatism: ci_timeseries, ci_binomial, bootstrap"),
     .ck("pd_moc_level", 9, "0.95", "One-sided confidence level of the estimation-error margin"),
     .ck("pd_asset_class", 9, "retail_other", "Asset class for the PD floor"),
-    .ck("pd_lights", 9, "0.01, 0.05", "Traffic-light p-value thresholds (red, amber)"),
+    .ck("pd_lights", 9, "0.01, 0.05", "Traffic-light p-value thresholds (red, amber) of the PD and LGD validation"),
     .ck("pd_dr_by", 9, "quarter", "Cohort frequency of the default-rate series"),
     .ck("lgd_discount_add_on", 10, "0.05", "Add-on over the reference rate in the workout discount rate"),
     .ck("lgd_discount_rate", 10, "NA", "Flat annual discount rate when no rates table is given"),
@@ -606,7 +608,7 @@ scr_config_keys <- function(stage = NULL) {
     .ck("ccf_sa_ccf", 11, "0.40", "Standardised CCF used for the own-estimate floor"),
     .ck("post_default_drawings_in", 11, "lgd", "Where drawings after default are booked: lgd or ccf"),
     .ck("framework", 12, "bcb", "Parameter preset: bcb, basel3_final, crr3"),
-    .ck("capital_approach", 12, "airb", "airb or firb"),
+    .ck("capital_approach", 12, "airb", "Capital approach: airb (own LGD, floored) or firb (supervisory LGD, fixed maturity)"),
     .ck("capital_asset_class", 12, "retail_other", "Default asset class of the risk-weight function"),
     .ck("capital_target_ratio", 12, "0.08", "Capital ratio applied to the reported RWA"),
     .ck("capital_output_floor", 12, "TRUE", "Compute the standardised comparison and the output floor"),

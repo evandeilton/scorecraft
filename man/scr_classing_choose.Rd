@@ -39,6 +39,9 @@ variables that reached binning; a variable failed for \code{IV_SUSPICIOUS}
 named by variable.
 }
 \seealso{
+\code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
+scorecard.
+
 Other classing:
 \code{\link[=scr_classing_accept]{scr_classing_accept()}},
 \code{\link[=scr_classing_apply]{scr_classing_apply()}},

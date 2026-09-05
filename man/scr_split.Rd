@@ -26,7 +26,9 @@ stratified split.}
 
 \item{ratio}{Target hold-out fraction.}
 
-\item{seed}{Seed of the random split.}
+\item{seed}{Seed of the random split. \code{NULL} leaves the random number
+generator untouched, so the split is reproducible only through the
+\code{seed} of \code{\link[=scr_config]{scr_config()}}.}
 
 \item{event_level}{Which target value counts as the event. \code{NULL} uses
 the convention (\code{1}, or the second alphabetical level).}
@@ -75,15 +77,11 @@ length(sp$train_idx); length(sp$holdout_idx)
 }
 \seealso{
 Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_align]{scr_align()}},
 \code{\link[=scr_bin]{scr_bin()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},
 \code{\link[=scr_select]{scr_select()}},
 \code{\link[=scr_strategy]{scr_strategy()}},

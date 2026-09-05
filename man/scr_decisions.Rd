@@ -15,9 +15,14 @@ A \code{data.table}, one row per decision (append-only), or an empty
 one when no manual decision exists.
 }
 \description{
-Decision ledger of a lab, a result or a scorecard
+Returns the append-only ledger of manual decisions: every proposal
+accepted, discarded or superseded, every forced or dropped variable and
+every override, each with its reason.
 }
 \seealso{
+\code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
+scorecard.
+
 Other classing:
 \code{\link[=scr_classing_accept]{scr_classing_accept()}},
 \code{\link[=scr_classing_apply]{scr_classing_apply()}},

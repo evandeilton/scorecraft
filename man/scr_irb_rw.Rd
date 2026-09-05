@@ -63,7 +63,9 @@ unsecured and the collateral floors.}
 \item{claim}{Under \code{"firb"}, an optional claim type per exposure naming a
 row of \code{params$lgd_firb} (for example \code{"senior_unsecured"} or
 \code{"subordinated"}); the supervisory LGD of that row replaces \code{lgd}.
-\code{NULL} keeps the caller's \code{lgd}.}
+\code{NULL} keeps the caller's \code{lgd}. The row names differ by preset
+(\code{"senior_unsecured"} under \code{"bcb"}, \code{"senior_unsecured_corporate"} and
+\code{"senior_unsecured_fi"} otherwise); see \code{params$lgd_firb}.}
 }
 \value{
 A \code{data.table} with one row per exposure: \code{pd_used}, \code{lgd_used}

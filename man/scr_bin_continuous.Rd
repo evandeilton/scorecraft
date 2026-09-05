@@ -50,13 +50,16 @@ An object of class \code{scr_cbins}: \code{fit} (the \code{obwoe}-shaped
 object), \code{summary} (one row per driver: \code{feature}, \code{type}, \code{n_bins},
 \code{eta2}, \code{direction}, \code{converged}, and after revalidation \code{eta2_holdout},
 \code{psi}, \code{psi_flag}, \code{holdout_ok}, \code{holdout_reason}), \code{holdout} (bin
-table per driver with train and hold-out means), \code{scale}.
+table per driver with train and hold-out means), \code{scale} and \code{target}.
+\code{summary} keeps the engine columns (\code{algorithm}, \code{total_iv},
+\code{iterations}, \code{error}) and, after revalidation, \code{psi_critical},
+\code{psi_flag_adjusted} and \code{pct_unbinned}.
 }
 \description{
 Supervised binning for a bounded continuous target, with the result in
-the shape of an \code{obwoe} object so that \code{\link[=scr_apply]{scr_apply()}} and \code{\link[=scr_sql]{scr_sql()}}
-machinery, \code{OptimalBinningWoE::obwoe_apply()} and
-\code{OptimalBinningWoE::obwoe_sql()} reproduce the bin statistic unchanged.
+the shape of an \code{obwoe} object, so that the \code{\link[=scr_apply]{scr_apply()}} and \code{\link[=scr_sql]{scr_sql()}}
+machinery (\code{OptimalBinningWoE::obwoe_apply()} and
+\code{OptimalBinningWoE::obwoe_sql()}) reproduces the bin statistic unchanged.
 The \code{woe} slot of every bin carries the target mean of the bin (or its
 logit with \code{scale = "logit"}); \code{iv} carries the bin's share of the
 between-bin sum of squares, so \code{total_iv} is the eta-squared of the

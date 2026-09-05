@@ -51,7 +51,7 @@ Takes the raw score of \strong{any} engine (the scorecard logit, the output of
 a tree challenger, a legacy score) to the scale defined by \code{base_score},
 \code{base_odds} and \code{pdo}, recording \code{odds_orientation} on the object. This is
 what makes two scorecards directly comparable. It runs automatically
-inside \code{\link[=scr_scorecard]{scr_scorecard()}} (decision D9); it is exposed to align other
+inside \code{\link[=scr_scorecard]{scr_scorecard()}}; it is exposed to align other
 scores to the same scale.
 }
 \section{Mechanism}{
@@ -102,14 +102,10 @@ Siddiqi, N. (2006). \emph{Credit Risk Scorecards}. Wiley, chapter 6.
 }
 \seealso{
 Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_bin]{scr_bin()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},
 \code{\link[=scr_select]{scr_select()}},
 \code{\link[=scr_split]{scr_split()}},

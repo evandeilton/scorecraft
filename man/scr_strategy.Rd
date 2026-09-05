@@ -21,9 +21,11 @@ scr_strategy(
 \item{decisions}{Vector of decisions, one per band (from the safest to
 the riskiest). \code{NULL} derives them from break-even.}
 
-\item{revenue_good}{Expected revenue per account without the event.}
+\item{revenue_good}{Expected revenue per account without the event
+(default \code{1}).}
 
-\item{loss_bad}{Expected loss per account with the event.}
+\item{loss_bad}{Expected loss per account with the event (default \code{1};
+with both defaults the break-even event rate is 50\%).}
 
 \item{sample}{\code{"holdout"} (default) or \code{"train"}.}
 }
@@ -53,15 +55,11 @@ scr_strategy(sc, revenue_good = 1080, loss_bad = 4500)
 }
 \seealso{
 Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_align]{scr_align()}},
 \code{\link[=scr_bin]{scr_bin()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},
 \code{\link[=scr_select]{scr_select()}},
 \code{\link[=scr_split]{scr_split()}},

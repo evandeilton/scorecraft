@@ -14,8 +14,9 @@ scr_bin(triage, config = scr_config())
 \value{
 An \code{scr_bins} object with \code{fit} (an \code{obwoe} object), \code{screen}
 (\code{summary} and \code{full}), \code{holdout}, \code{prune}, \code{pool} (eligible for the
-models), \code{derived_excluded}, the WOE matrices \code{woe_train}/\code{woe_holdout}
-and the originating \code{triage}.
+models), \code{derived_excluded}, the counts \code{binned}, \code{pos_screen} and
+\code{pos_holdout} (the survivors of each gate, in order), the WOE matrices
+\code{woe_train}/\code{woe_holdout}, the originating \code{triage} and the \code{config}.
 }
 \description{
 Fits the bins \strong{on the training rows only} (cut points and WOE use the
@@ -50,14 +51,10 @@ head(bn$holdout)
 }
 \seealso{
 Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_align]{scr_align()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_scorecard]{scr_scorecard()}},
 \code{\link[=scr_select]{scr_select()}},
 \code{\link[=scr_split]{scr_split()}},

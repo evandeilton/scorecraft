@@ -27,6 +27,10 @@ harbour referenced to the average) or the maximum points of the variable
 (\code{"max"}). Only applies to the additive scorecard; a tree challenger has
 no reason codes.
 }
+\details{
+Under \code{higher_is_riskier} the shortfall is measured the other way round:
+the reasons are the variables that added the most points.
+}
 \examples{
 cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
                   xgb_rounds = 60, n_boot = 20)
@@ -40,8 +44,11 @@ scr_reasons(sc, head(scr_demo, 5), k = 3)
 }
 \seealso{
 Other production:
+\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_apply]{scr_apply()}},
-\code{\link[=scr_export.scr_capital]{scr_export.scr_capital()}},
-\code{\link[=scr_sql.scr_capital]{scr_sql.scr_capital()}}
+\code{\link[=scr_export]{scr_export()}},
+\code{\link[=scr_monitor]{scr_monitor()}},
+\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
+\code{\link[=scr_sql]{scr_sql()}}
 }
 \concept{production}

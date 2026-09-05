@@ -378,6 +378,8 @@ check_lab <- function(lab, fn) {
 #'
 #' @return Invisibly, the bins table (`variable` given) or the overview table.
 #'
+#' @seealso [scr_coarse_classing()] for a complete session, from lab to
+#'   scorecard.
 #' @family classing
 #' @export
 scr_classing_view <- function(lab, variable = NULL) {
@@ -455,10 +457,14 @@ scr_classing_view <- function(lab, variable = NULL) {
 #'   category not listed in `groups`.
 #' @param reset `TRUE` proposes a return to the optimal bins.
 #'
-#' @return An `scr_classing_proposal` with `id`, `variable`, `spec`,
-#'   `entry`, `checks`, `compare`, `verdict` (`ACCEPTABLE`, `REVIEW` or
-#'   `BLOCKED`) and `warnings`.
+#' @return An `scr_classing_proposal` with `id`, `variable`, `instruction`
+#'   (the resolved instruction as text), `entry` (the hand-built bins),
+#'   `checks`, `optimal` (the checks of the optimal bins), `compare`,
+#'   `verdict` (`ACCEPTABLE`, `REVIEW` or `BLOCKED`), `warnings` and
+#'   `blocking`.
 #'
+#' @seealso [scr_coarse_classing()] for a complete session, from lab to
+#'   scorecard.
 #' @family classing
 #' @export
 scr_classing_propose <- function(lab, variable, breaks = NULL, groups = NULL, merge = NULL, split = NULL,
@@ -584,6 +590,8 @@ print.scr_classing_proposal <- function(x, ...) {
 #'
 #' @return The updated lab, invisibly.
 #'
+#' @seealso [scr_coarse_classing()] for a complete session, from lab to
+#'   scorecard.
 #' @family classing
 #' @export
 scr_classing_accept <- function(lab, proposal, reason, override = FALSE) {
@@ -665,6 +673,8 @@ scr_classing_discard <- function(lab, proposal, reason) {
 #'
 #' @return The updated lab, invisibly.
 #'
+#' @seealso [scr_coarse_classing()] for a complete session, from lab to
+#'   scorecard.
 #' @family classing
 #' @export
 scr_classing_choose <- function(lab, keep = NULL, drop = NULL, force = NULL, reason = NULL, override = FALSE) {
@@ -712,7 +722,7 @@ scr_classing_choose <- function(lab, keep = NULL, drop = NULL, force = NULL, rea
 
 # -- spec: long format, read and import ------------------------------------- #
 
-#' The classing specification as a long table (and its file round trip)
+#' Classing specification as a long table, with its file round trip
 #'
 #' One row per bin of every variable in the lab, optimal and manual, with
 #' the authoritative columns a reviewer may edit (`lower`/`upper` for
@@ -725,10 +735,14 @@ scr_classing_choose <- function(lab, keep = NULL, drop = NULL, force = NULL, rea
 #'
 #' @param lab An object from [scr_coarse_classing()], or an `scr_result`
 #'   returned by [scr_classing_apply()].
-#' @param file Optional `.csv` or `.xlsx` path to write the table to.
+#' @param file For `scr_classing_spec()`, an optional `.csv` or `.xlsx` path
+#'   to write the table to. For `scr_classing_read()`, the path to read.
+#'   For `scr_classing_import()`, a path or an `scr_classing_spec` object.
 #'
 #' @return A `data.frame` of class `scr_classing_spec`.
 #'
+#' @seealso [scr_coarse_classing()] for a complete session, from lab to
+#'   scorecard.
 #' @family classing
 #' @export
 scr_classing_spec <- function(lab, file = NULL) {
@@ -870,6 +884,8 @@ scr_classing_import <- function(lab, file) {
 #' @return An `scr_result` with a `lab` component (`ledger`, `spec`,
 #'   `shortlist`, `source`).
 #'
+#' @seealso [scr_coarse_classing()] for a complete session, from lab to
+#'   scorecard.
 #' @family classing
 #' @export
 scr_classing_apply <- function(lab) {
@@ -952,12 +968,18 @@ scr_classing_apply <- function(lab) {
 
 #' Decision ledger of a lab, a result or a scorecard
 #'
+#' Returns the append-only ledger of manual decisions: every proposal
+#' accepted, discarded or superseded, every forced or dropped variable and
+#' every override, each with its reason.
+#'
 #' @param x An `scr_classing` lab, an `scr_result` from
 #'   [scr_classing_apply()] or an `scr_scorecard` fitted on one.
 #'
 #' @return A `data.table`, one row per decision (append-only), or an empty
 #'   one when no manual decision exists.
 #'
+#' @seealso [scr_coarse_classing()] for a complete session, from lab to
+#'   scorecard.
 #' @family classing
 #' @export
 scr_decisions <- function(x) {
@@ -990,6 +1012,7 @@ print.scr_classing <- function(x, ...) {
   invisible(x)
 }
 
+#' @rdname scr_export
 #' @export
 scr_export.scr_classing <- function(x, dir, stamp = TRUE, ...) {
   .need_openxlsx()

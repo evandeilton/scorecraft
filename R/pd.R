@@ -227,6 +227,7 @@ print.scr_master_scale <- function(x, ...) {
 #'   `mean_pd_before`, `mean_pd_after`, `ar_before`, `ar_after` (observed),
 #'   `ar_implied_before`, `ar_implied_after`, `n`, `segments` (table and
 #'   alignments when `segment` is given), `ledger`.
+#'   Also `ar_target`, `note` and `sample`.
 #'
 #' @references
 #' King, G. and Zeng, L. (2001). Logistic regression in rare events data.
@@ -386,8 +387,8 @@ print.scr_pd_calibration <- function(x, ...) {
 #' Cuts the production score into grades whose PD is monotone. The grade
 #' boundaries are score cut points, direction-aware: grade 1 is the safest
 #' (the highest scores under `higher_is_safer`). Three constructions:
-#' `"geometric"` builds a [scr_master_scale()] between the 1st and 99th
-#' percentiles of the calibrated PD and converts its PD bounds into scores
+#' `"geometric"` builds a [scr_master_scale()] between percentiles 1
+#' and 99 of the calibrated PD and converts its PD bounds into scores
 #' through the calibrated alignment; `"quantile"` cuts equal-count score
 #' bands (cut points moved half-way between neighbouring scores, so a
 #' boundary never sits on an observed value); `"supplied"` grades by the PD
@@ -435,6 +436,9 @@ print.scr_pd_calibration <- function(x, ...) {
 #'   `hi`, `k`), `repairs`, `ledger`, `moc` (empty, filled by
 #'   [scr_moc()]), `dr` (the pooled series), `rows` (score, outcome and
 #'   grade of the sample), `scorecard`, `sample`, `ct`, `sample_rate`.
+#'   Also `calibration` (the `scr_pd_calibration` when one was given),
+#'   `n_grades_requested`, `min_obligors`, `min_defaults`, `target` and
+#'   `config`.
 #'
 #' @family irb-pd
 #' @examples
@@ -447,7 +451,8 @@ print.scr_pd_calibration <- function(x, ...) {
 #' gr <- scr_grades(sc, cal, n_grades = 7, min_defaults = 10)
 #' gr
 #' gr$table[, c("grade", "score_lo", "score_hi", "n", "dr", "pd_be")]
-#' # grade a cohort panel with the score cut points
+#' # grade a cohort panel with the score cut points (the panel score is a
+#' # different scale; the demo only shows the mechanics)
 #' head(predict(gr, score = scr_demo_panel$score))
 #' @export
 scr_grades <- function(x, calibration = NULL, master_scale = NULL, n_grades = NULL, method = NULL,
@@ -778,7 +783,8 @@ print.scr_grades <- function(x, ...) {
 #' @param value For `"A"`/`"B"`: the add-on in PD units, length 1 or one per grade.
 #' @param reason Justification (mandatory for `"A"`/`"B"`).
 #' @param dr Optional `scr_dr` by grade for `"ci_timeseries"`, keyed by the
-#'   final grades of `x` (stored in `x$dr` when absent).
+#'   final grades of `x`; `NULL` uses the series already stored in `x$dr` by
+#'   [scr_grades()].
 #' @param n_boot,seed Bootstrap resamples and seed for `"bootstrap"`.
 #'
 #' @return The `scr_grades` object with the entries appended to `moc`.
@@ -881,6 +887,9 @@ scr_moc <- function(x, category = c("A", "B", "C"), method = NULL, level = NULL,
 #'   `calibration`, `concentration`, `portfolio` (weighted `pd_be`,
 #'   `pd_moc`, `pd_final`, `moc_bp`, `share_at_floor`), `scorecard`,
 #'   `ledger`, `model_card`.
+#'   Also `params_modified`, `repairs`, `dr`, `rows`, `pd_source`,
+#'   `grade_method`, `sample`, `target`, `config` and, after [scr_export()],
+#'   `files`.
 #'
 #' @family irb-pd
 #' @examples
@@ -1075,6 +1084,8 @@ scr_sql.scr_pd <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
 #' Vasicek, O. (2002). The distribution of loan portfolio value. *Risk*,
 #' 15(12), 160-162.
 #'
+#' @seealso [scr_pd_stress()], the same bridge with the systematic factor
+#'   given as a quantile `q` rather than a value of `z`.
 #' @family irb-pd
 #' @examples
 #' scr_pd_pit_ttc(c(0.01, 0.05), z = -2, rho = 0.15)
@@ -1120,6 +1131,7 @@ scr_pd_pit_ttc <- function(pd, z, rho, to = c("pit", "ttc")) {
 #'   `mwb_upper`, `mwb_lower`, `z` (`K x K`), `n_significant` (cells with
 #'   `z > 1.645`), `mobility` (`share_stable`, `share_up`, `share_down`,
 #'   `mean_distance`, `share_default`, `share_closed`).
+#'   Also `K`, the number of grades.
 #'
 #' @family irb-pd
 #' @examples
@@ -1300,6 +1312,9 @@ print.scr_migration <- function(x, ...) {
 #'   `stability` (`psi` table, `migration`, `concentration`), `summary`
 #'   (one row per test with `statistic`, `p_value`, `light`), `light`
 #'   (the worst light of the summary), `n_cohorts`, `alpha`, `lights`.
+#'   `portfolio_tests` also carries `critical`, `z`, `p_normal`, `n_cohorts`
+#'   and `pd_column`; the object also has `horizon`, `by`, `pd_column` and
+#'   `target`.
 #'
 #' @family irb-pd
 #' @examples

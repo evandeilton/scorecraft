@@ -63,6 +63,9 @@ grade, pooled), \code{calibration_cohort} (per cohort and grade),
 \code{stability} (\code{psi} table, \code{migration}, \code{concentration}), \code{summary}
 (one row per test with \code{statistic}, \code{p_value}, \code{light}), \code{light}
 (the worst light of the summary), \code{n_cohorts}, \code{alpha}, \code{lights}.
+\code{portfolio_tests} also carries \code{critical}, \code{z}, \code{p_normal}, \code{n_cohorts}
+and \code{pd_column}; the object also has \code{horizon}, \code{by}, \code{pd_column} and
+\code{target}.
 }
 \description{
 Runs the standard battery on a monthly panel with the default flag and

@@ -18,15 +18,29 @@
 #' @param features For `scr_result`: which variables to transform. Defaults to
 #'   the approved ones.
 #' @param what For `scr_result`: `"woe"`, `"bin"` or `"both"`. For
-#'   `scr_scorecard`: `"score"`, `"points"`, `"woe"` or `"all"`.
+#'   `scr_scorecard`: `"score"`, `"points"`, `"woe"` or `"all"`. For
+#'   `scr_lgd`: `"pool"` (pool and pool LGDs), `"lgd"` (adds the predicted
+#'   LGD) or `"all"` (adds the cure probability and the severity).
 #'
-#' @section Method arguments:
+#' @section Output columns:
 #'
-#' For `scr_result`: `features` (default: the approved ones) and `what`
-#' (`"woe"`, `"bin"` or `"both"`). For `scr_scorecard`: `what` (`"score"`,
-#' `"points"`, `"woe"` or `"all"`). The score output carries `link`
-#' (logit), `prob` (model probability), `score` (exact, `a + b * logit`) and
-#' `score_points` (the sum of the whole points per bin plus the base).
+#' For `scr_result`: `<f>_woe` and/or `<f>_bin` per variable. For
+#' `scr_scorecard`, `"score"` gives `link` (logit), `prob` (model
+#' probability), `score` (exact, `a + b * logit`) and `score_points` (base
+#' plus the whole points per bin); `"points"` gives `score`, `score_points`
+#' and `<f>_points`; `"woe"` gives `link`, `score` and `<f>_woe`; `"all"`
+#' gives everything.
+#'
+#' @section IRB models:
+#'
+#' `scr_pd` returns `score`, `score_points`, `grade`, `pd` (calibrated
+#' individual PD), `pd_be` and `pd_final` of the grade. `scr_lgd` returns
+#' `pool`, `lgd_lra`, `lgd_dt`, `lgd_final` and, with `what`, `p_cure`,
+#' `severity` and `lgd_pred`. `scr_ead` returns `pool`, `measure`,
+#' `utilisation`, `undrawn`, `ccf_applied`, `ead_model`, `ead_floor`,
+#' `ead_predicted` and `ead_floor_binding`; the predicted EAD is never below
+#' the drawn amount. [scr_capital()] reads `pd_final`, `lgd_final` and
+#' `ead_predicted` from these outputs in its list form.
 #'
 #' @return A `data.table` with one row per row of `newdata`.
 #'
@@ -126,6 +140,9 @@ scr_apply.scr_scorecard <- function(x, newdata, what = c("score", "points", "woe
 #' harbour referenced to the average) or the maximum points of the variable
 #' (`"max"`). Only applies to the additive scorecard; a tree challenger has
 #' no reason codes.
+#'
+#' Under `higher_is_riskier` the shortfall is measured the other way round:
+#' the reasons are the variables that added the most points.
 #'
 #' @param x An object from [scr_scorecard()].
 #' @param newdata New table.

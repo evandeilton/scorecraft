@@ -25,6 +25,9 @@ automatic one). The ledger travels with the result and into
 \code{\link[=scr_scorecard]{scr_scorecard()}} and \code{\link[=scr_export]{scr_export()}}. The input result is not modified.
 }
 \seealso{
+\code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
+scorecard.
+
 Other classing:
 \code{\link[=scr_classing_accept]{scr_classing_accept()}},
 \code{\link[=scr_classing_choose]{scr_classing_choose()}},

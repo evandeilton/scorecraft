@@ -42,28 +42,35 @@ An \code{scr_scorecard} object. Main components: \code{features}, \code{coef},
 \code{base_points}, \code{samples} (train and hold-out: \code{link}, \code{prob}, \code{score},
 \code{score_points}, \code{y}, \code{date}), \code{metrics}, \code{gains}, \code{stability} (\code{score}
 and \code{variables}), \code{calibration}, \code{rank_order}, \code{challenger},
-\code{model_card} and \code{sql}.
+\code{model_card} and \code{sql}. Also \code{scale} (\code{base_score}, \code{base_odds}, \code{pdo},
+\code{factor}, \code{offset}, \code{direction}, \code{odds_orientation}), \code{breaks} (the
+score bands frozen on train), \code{monitoring_plan} (see
+\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}}), \code{holdout_bins}, \code{fit} and \code{ledger} (the frozen
+binning and pre-processing that \code{\link[=scr_apply]{scr_apply()}} and \code{\link[=scr_sql]{scr_sql()}}
+reproduce) and, after a lab commit, \code{decisions} and \code{provenance}.
 }
 \description{
 Fits a logistic regression on the WOE columns of the shortlist, checks
 the sign of the coefficients, aligns the logit to the declared scale with
-\code{\link[=scr_align]{scr_align()}} (always, decision D9) and distributes the points per bin.
-Measures the score on train and hold-out with a bootstrap CI (always,
-D18), builds the gains with bands \strong{frozen on train}, the score PSI and
-the CSI per variable (fixed and n-adjusted thresholds, D17), the
+\code{\link[=scr_align]{scr_align()}} (always) and distributes the points per bin. Measures the
+score on train and hold-out with a bootstrap CI (always), builds the
+gains with bands \strong{frozen on train}, the score PSI and the CSI per
+variable (fixed and n-adjusted thresholds), the
 calibration and the rank-order diagnostics. Optionally fits a tree
 challenger on the same WOE columns, aligned to the same scale, with an
-explicit \code{supports_scorecard = FALSE} (D10): it compares, it never
+explicit \code{supports_scorecard = FALSE}: it compares, it never
 produces points or reason codes.
 }
 \section{Sign check}{
 
 
 The engine's WOE is event-oriented, so every glm coefficient must be
-positive. A variable with a negative coefficient (or above \code{max_abs_coef}
-in absolute value) is explaining what another already explained, with
-the sign reversed; it is removed and the model refitted, one at a time,
-the most negative first, and each removal is recorded in \code{sign_check}.
+positive. A variable with a non-positive coefficient (or above
+\code{max_abs_coef} in absolute value) is explaining what another already
+explained, with the sign reversed; it is removed and the model refitted,
+one at a time, the most negative first, and each removal is recorded in
+\code{sign_check}. The last remaining variable is never removed: it is kept
+and flagged \code{NON_POSITIVE_COEF_KEPT_LAST}.
 The final shortlist of the scorecard (\code{features}) is what \code{\link[=scr_sql]{scr_sql()}}
 covers.
 }
@@ -95,15 +102,11 @@ sc$alignment
 }
 \seealso{
 Other stages:
-\code{\link[=predict.scr_align]{predict.scr_align()}},
 \code{\link[=scr_align]{scr_align()}},
 \code{\link[=scr_bin]{scr_bin()}},
 \code{\link[=scr_cutoff]{scr_cutoff()}},
 \code{\link[=scr_model]{scr_model()}},
-\code{\link[=scr_monitor]{scr_monitor()}},
-\code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
 \code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
 \code{\link[=scr_select]{scr_select()}},
 \code{\link[=scr_split]{scr_split()}},
 \code{\link[=scr_strategy]{scr_strategy()}},

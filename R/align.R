@@ -16,7 +16,7 @@
 #' a tree challenger, a legacy score) to the scale defined by `base_score`,
 #' `base_odds` and `pdo`, recording `odds_orientation` on the object. This is
 #' what makes two scorecards directly comparable. It runs automatically
-#' inside [scr_scorecard()] (decision D9); it is exposed to align other
+#' inside [scr_scorecard()]; it is exposed to align other
 #' scores to the same scale.
 #'
 #' @section Mechanism:
@@ -161,7 +161,14 @@ scr_align <- function(raw, y, base_score = 600, base_odds = 50, pdo = 20,
 #'
 #' @return A numeric vector of the length of `raw`.
 #'
-#' @family stages
+#' @family production
+#' @examples
+#' set.seed(3)
+#' y   <- stats::rbinom(2000, 1, 0.15)
+#' raw <- stats::qlogis(0.15) + 1.3 * y + stats::rnorm(2000)
+#' al  <- scr_align(raw, y)
+#' head(predict(al, raw))
+#' head(predict(al, raw, type = "prob"))
 #' @export
 predict.scr_align <- function(object, raw, type = c("score", "prob"), ...) {
   type <- match.arg(type)

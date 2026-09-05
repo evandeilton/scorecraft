@@ -223,11 +223,14 @@ print.scr_default <- function(x, ...) {
 #' @param by Cohort frequency: `"month"`, `"quarter"` or `"year"`.
 #' @param grade,segment Optional column names observed at the cohort start.
 #' @param exposure Optional column name; adds exposure-weighted rates.
-#' @param config A [scr_config()] (only `pd_dr_by` and `verbose` are read).
+#' @param config A [scr_config()]; only `pd_dr_by` is read (the default of
+#'   `by`).
 #'
-#' @return An object of class `scr_dr`: `table` (cohort rates), `lra`
-#'   (`mean`, `weighted_mean`, `recent5_mean`, `all_mean`, `benchmark`,
-#'   `n_cohorts`, `years`, `flag_below_benchmark`), `horizon`, `by`.
+#' @return An object of class `scr_dr`: `table` (cohort rates, by grade or
+#'   segment when given), `portfolio` (one row per cohort: `n`, `defaults`,
+#'   `dr`), `lra` (`mean`, `weighted_mean`, `recent5_mean`, `all_mean`,
+#'   `benchmark`, `flag_below_benchmark`, `min`, `max`, `sd`, `n_cohorts`,
+#'   `years`), `horizon` and `by`.
 #'
 #' @family irb-parameters
 #' @examples

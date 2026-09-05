@@ -20,9 +20,9 @@
 #' Bin drivers against a continuous target (LGD, CCF)
 #'
 #' Supervised binning for a bounded continuous target, with the result in
-#' the shape of an `obwoe` object so that [scr_apply()] and [scr_sql()]
-#' machinery, `OptimalBinningWoE::obwoe_apply()` and
-#' `OptimalBinningWoE::obwoe_sql()` reproduce the bin statistic unchanged.
+#' the shape of an `obwoe` object, so that the [scr_apply()] and [scr_sql()]
+#' machinery (`OptimalBinningWoE::obwoe_apply()` and
+#' `OptimalBinningWoE::obwoe_sql()`) reproduces the bin statistic unchanged.
 #' The `woe` slot of every bin carries the target mean of the bin (or its
 #' logit with `scale = "logit"`); `iv` carries the bin's share of the
 #' between-bin sum of squares, so `total_iv` is the eta-squared of the
@@ -54,7 +54,10 @@
 #'   object), `summary` (one row per driver: `feature`, `type`, `n_bins`,
 #'   `eta2`, `direction`, `converged`, and after revalidation `eta2_holdout`,
 #'   `psi`, `psi_flag`, `holdout_ok`, `holdout_reason`), `holdout` (bin
-#'   table per driver with train and hold-out means), `scale`.
+#'   table per driver with train and hold-out means), `scale` and `target`.
+#'   `summary` keeps the engine columns (`algorithm`, `total_iv`,
+#'   `iterations`, `error`) and, after revalidation, `psi_critical`,
+#'   `psi_flag_adjusted` and `pct_unbinned`.
 #'
 #' @family irb-ead
 #' @examples

@@ -37,6 +37,9 @@ An object of class \code{scr_pd}: \code{table} (\code{grade}, \code{label},
 \code{calibration}, \code{concentration}, \code{portfolio} (weighted \code{pd_be},
 \code{pd_moc}, \code{pd_final}, \code{moc_bp}, \code{share_at_floor}), \code{scorecard},
 \code{ledger}, \code{model_card}.
+Also \code{params_modified}, \code{repairs}, \code{dr}, \code{rows}, \code{pd_source},
+\code{grade_method}, \code{sample}, \code{target}, \code{config} and, after \code{\link[=scr_export]{scr_export()}},
+\code{files}.
 }
 \description{
 Assembles the final grade table: \code{pd_be} from \code{\link[=scr_grades]{scr_grades()}}, the active

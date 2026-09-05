@@ -4,7 +4,7 @@
 \alias{scr_classing_spec}
 \alias{scr_classing_read}
 \alias{scr_classing_import}
-\title{The classing specification as a long table (and its file round trip)}
+\title{Classing specification as a long table, with its file round trip}
 \usage{
 scr_classing_spec(lab, file = NULL)
 
@@ -16,7 +16,9 @@ scr_classing_import(lab, file)
 \item{lab}{An object from \code{\link[=scr_coarse_classing]{scr_coarse_classing()}}, or an \code{scr_result}
 returned by \code{\link[=scr_classing_apply]{scr_classing_apply()}}.}
 
-\item{file}{Optional \code{.csv} or \code{.xlsx} path to write the table to.}
+\item{file}{For \code{scr_classing_spec()}, an optional \code{.csv} or \code{.xlsx} path
+to write the table to. For \code{scr_classing_read()}, the path to read.
+For \code{scr_classing_import()}, a path or an \code{scr_classing_spec} object.}
 
 \item{sep}{Bin separator used in \code{categories} (the configuration's \code{bin_separator}).}
 }
@@ -38,6 +40,9 @@ lab's current ones into a proposal, so a spreadsheet edit never enters
 silently.
 }
 \seealso{
+\code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
+scorecard.
+
 Other classing:
 \code{\link[=scr_classing_accept]{scr_classing_accept()}},
 \code{\link[=scr_classing_apply]{scr_classing_apply()}},

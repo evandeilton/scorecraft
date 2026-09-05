@@ -17,6 +17,7 @@ An object of class \code{scr_migration}: \code{matrix} (counts, \code{K} rows,
 \code{mwb_upper}, \code{mwb_lower}, \code{z} (\verb{K x K}), \code{n_significant} (cells with
 \code{z > 1.645}), \code{mobility} (\code{share_stable}, \code{share_up}, \code{share_down},
 \code{mean_distance}, \code{share_default}, \code{share_closed}).
+Also \code{K}, the number of grades.
 }
 \description{
 Counts \code{N_ij} of obligors in grade \code{i} at the first date and grade \code{j}

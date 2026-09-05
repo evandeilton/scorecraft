@@ -78,10 +78,12 @@ scr_el <- function(pd, lgd, ead, defaulted = NULL, elbe = NULL) {
 #'
 #' @references
 #' Vasicek, O. (2002). The distribution of loan portfolio value. *Risk*,
-#' December, 160-162. Gordy, M. B. (2003). A risk-factor model foundation
+#' 15(12), 160-162. Gordy, M. B. (2003). A risk-factor model foundation
 #' for ratings-based bank capital rules. *Journal of Financial
 #' Intermediation*, 12(3), 199-232.
 #'
+#' @seealso [scr_pd_pit_ttc()], the same bridge with the systematic factor
+#'   given as a value of `z` rather than a quantile `q`.
 #' @family irb-capital
 #' @examples
 #' scr_pd_stress(0.02, rho = 0.15, q = c(0.5, 0.95, 0.99, 0.999))
@@ -275,7 +277,9 @@ scr_pd_stress <- function(pd, rho, q) {
 #' @param claim Under `"firb"`, an optional claim type per exposure naming a
 #'   row of `params$lgd_firb` (for example `"senior_unsecured"` or
 #'   `"subordinated"`); the supervisory LGD of that row replaces `lgd`.
-#'   `NULL` keeps the caller's `lgd`.
+#'   `NULL` keeps the caller's `lgd`. The row names differ by preset
+#'   (`"senior_unsecured"` under `"bcb"`, `"senior_unsecured_corporate"` and
+#'   `"senior_unsecured_fi"` otherwise); see `params$lgd_firb`.
 #'
 #' @return A `data.table` with one row per exposure: `pd_used`, `lgd_used`
 #'   (after floors; PD one on defaulted rows), `m` (after clipping), `r`,
@@ -484,6 +488,10 @@ scr_sa_rw <- function(asset_class, ltv = NULL, rating = NULL, transactor = NULL,
 #'   `concentration` (share of EAD and RWA by segment), `framework`,
 #'   `approach`, `params`, `config`, `ledger`, `model_card` and, after
 #'   [scr_export()], `files`.
+#'   `segments` and `totals` also carry `n_defaulted`; `totals` also
+#'   `el_rate` and `rwa_irb_no_floors`; `concentration` has `segment`, `n`,
+#'   `ead`, `rwa`, `ead_share`, `rwa_share` and `hhi_contribution`; `columns`
+#'   records the column names the SQL reads.
 #'
 #' @references
 #' Basel Committee on Banking Supervision (2023). *The Basel Framework*,

@@ -33,6 +33,9 @@ Vasicek, O. (2002). The distribution of loan portfolio value. \emph{Risk},
 15(12), 160-162.
 }
 \seealso{
+\code{\link[=scr_pd_stress]{scr_pd_stress()}}, the same bridge with the systematic factor
+given as a quantile \code{q} rather than a value of \code{z}.
+
 Other irb-pd:
 \code{\link[=predict.scr_grades]{predict.scr_grades()}},
 \code{\link[=predict.scr_pd]{predict.scr_pd()}},

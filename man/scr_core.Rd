@@ -30,6 +30,7 @@ scr_core(list(default = r1, churn = r2), min_targets = 2)
 \seealso{
 Other portfolio:
 \code{\link[=scr_compare]{scr_compare()}},
+\code{\link[=scr_run]{scr_run()}},
 \code{\link{scr_runset}}
 }
 \concept{portfolio}

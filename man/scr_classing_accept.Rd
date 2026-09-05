@@ -27,6 +27,9 @@ the previous accepted proposal is marked \code{superseded}. A \code{BLOCKED}
 proposal needs \code{override = TRUE}, and the override is itself a ledger row.
 }
 \seealso{
+\code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
+scorecard.
+
 Other classing:
 \code{\link[=scr_classing_apply]{scr_classing_apply()}},
 \code{\link[=scr_classing_choose]{scr_classing_choose()}},

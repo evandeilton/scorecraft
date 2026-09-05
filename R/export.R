@@ -12,24 +12,34 @@
 #' For an `scr_result`: the selection workbook (`selection_<target>.xlsx`:
 #' funnel, gains, screening, hold-out, models, votes, consensus, ledger,
 #' redundancy), the WOE SQL and the executive summary in Markdown. For an
-#' `scr_scorecard`: three workbooks (the detailing decision of SPEC section 7
-#' resolved as separate files) plus the score SQL:
+#' `scr_scorecard`: three workbooks, as separate files, plus the score SQL:
 #'
 #' \describe{
 #'   \item{`scorecard_<target>.xlsx`}{`Score_Summary` (with `odds_orientation`),
 #'     `Final_Scorecard`, `Coefficients`, `Sign_Check`, `Alignment`,
-#'     `Model_Card`, `Challenger` and `Swap_Set` (when a challenger exists).}
+#'     `Alignment_Bands`, `Model_Card`, `Challenger` and `Swap_Set` (when a
+#'     challenger exists), `Coarse_Classing` and `Decision_Ledger` (after a
+#'     lab commit).}
 #'   \item{`validation_<target>.xlsx`}{`Score_Gains_Frozen`, `Variable_Gains_IV`,
 #'     `Discrimination_CI`, `Stability_PSI_Timeline`, `Stability_CSI_Timeline`,
-#'     `Calibration`, `Performance_By_Vintage`, `Rank_Order_Diagnostics`.}
-#'   \item{`strategy_<target>.xlsx`}{`Population_Scope`, `Cutoff_Sweep`,
-#'     `Strategy_Bands`, `Reject_Sensitivity`, `Monitoring_Plan`.}
+#'     `Stability_Variables`, `Calibration`, `Calibration_Bands`,
+#'     `Performance_By_Vintage`, `Rank_Order_Diagnostics`.}
+#'   \item{`strategy_<target>.xlsx`}{`Population_Scope`, `Band_Coverage`,
+#'     `Cutoff_Sweep`, `Strategy_Bands`, `Reject_Sensitivity`, `Monitoring_Plan`.}
 #' }
+#'
+#' For an `scr_classing` lab: one workbook (`classing_<target>.xlsx`) with
+#' the specification, the bins, the checks and the decision ledger. The IRB
+#' models write one workbook and one SQL file each (`pd_<target>.xlsx`,
+#' `lgd_<tag>.xlsx`, `ead_<tag>.xlsx`, `capital_<framework>.xlsx`), with the
+#' validation, the ledger and the model card as sheets.
 #'
 #' The timeline and vintage sheets need the date column of the split; when it
 #' is absent they carry an availability row instead of a fabricated number.
 #'
-#' @param x An object from [scr_select()] or [scr_scorecard()].
+#' @param x An object from [scr_select()], [scr_scorecard()],
+#'   [scr_coarse_classing()], [scr_pd()], [scr_lgd()], [scr_ead()] or
+#'   [scr_capital()].
 #' @param dir Output directory. Created if it does not exist.
 #' @param stamp If `TRUE` (default), writes to a timestamped subdirectory,
 #'   preserving earlier runs.
@@ -50,6 +60,7 @@
 #' basename(unlist(res$files))
 #' sc <- scr_export(scr_scorecard(res), out, stamp = FALSE)
 #' basename(unlist(sc$files))
+#' @order 1
 #' @export
 scr_export <- function(x, dir, stamp = TRUE, ...) UseMethod("scr_export")
 

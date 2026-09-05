@@ -14,7 +14,7 @@ Description: Production-grade scorecard engine for binary targets (credit risk,
     score composed with the PDO map); sweeps cut-offs with frozen cuts; performs
     honest reject inference through a sensitivity band; monitors PSI/CSI with
     both the fixed and the sample-size-adjusted threshold; and emits production
-    SQL in several dialects, with R-SQL equivalence verified by test. The audit
+    SQL in fourteen dialects, with R-SQL equivalence verified by test. The audit
     funnel never drops a candidate from the report. The IRB layer builds the
     default flag, calibrates the scorecard to a long-run default rate with
     rating grades, margins of conservatism and floors (PD), models workout

@@ -16,6 +16,11 @@ synthetic dataset fabricated with the defects real data has: sentinel
 `-999`, missing values, constants, duplicates, a redundant pair, high
 cardinality, pure noise and a column that only degrades in the last period.
 
+The `"moderate"` preset sets the admission rules of the funnel; the
+overrides below only make the run light (one thread, two consensus
+voters, a short boosting schedule, thirty resamples) and are not what a
+development run would use.
+
 ```{r setup}
 library(scorecraft)
 cfg <- scr_config("moderate", objective = "risk", verbose = FALSE, nthread = 1,
@@ -23,15 +28,17 @@ cfg <- scr_config("moderate", objective = "risk", verbose = FALSE, nthread = 1,
 cfg
 ```
 
-## Stages 0 to 4: selection
+## Selection: split, triage, binning and consensus
 
 `scr_select()` chains the split (out-of-time by whole periods), the triage,
 the optimal binning with screening and hold-out revalidation, and the
 multi-strategy consensus. Each stage is also exported on its own
 (`scr_split()`, `scr_triage()`, `scr_bin()`, `scr_model()`).
 
+The sibling target is dropped so that it cannot become a candidate.
+
 ```{r select}
-res <- scr_select(scr_demo, "default", config = cfg, drop = "id", date_col = "ref_date")
+res <- scr_select(scr_demo, "default", config = cfg, drop = c("id", "churn"), date_col = "ref_date")
 res
 ```
 
@@ -43,7 +50,7 @@ table(scr_funnel(res, cols = "all")$exit_stage)
 head(scr_funnel(res, only_selected = TRUE)[, .(feature, total_iv, iv_holdout, ks, psi, psi_flag_adjusted)])
 ```
 
-## Stages 4 and 5: scorecard and alignment
+## Scorecard and alignment
 
 `scr_scorecard()` fits the logistic regression on the WOE columns, checks
 the signs, and aligns the logit to the declared scale by regressing
@@ -66,7 +73,7 @@ scr_score_metrics(sc)[, .(sample, auc, auc_lo, auc_hi, ks, gini)]
 sc$stability$score
 ```
 
-## Stage 6: cut-off, strategy and reject inference
+## Cut-off, strategy and reject inference
 
 ```{r strategy}
 scr_cutoff(sc, n_cuts = 8)

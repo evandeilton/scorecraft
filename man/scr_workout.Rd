@@ -47,6 +47,10 @@ event: identifiers, \code{default_date}, \code{ead}, \code{product}, drivers,
 \code{cure_rate}, \code{lra_default_weighted}, \code{lra_exposure_weighted},
 \code{share_incomplete}, \code{discount_rate_mean}, \code{by_product}, \code{by_year}),
 \code{ledger}, \code{config}, \code{obs_date}, and \code{cashflows} with \code{keep_rows}.
+\code{rds} also carries \code{year}, \code{close_date}, \code{recovery_nominal},
+\code{recovery_artificial}, \code{cost_nominal}, \code{drawing_nominal},
+\code{closed_at_t_max}, \code{absorbed}, \code{n_cashflows} and \code{last_month}; \code{funnel}
+has \code{kept}; \code{summary} has \code{n_cure}, \code{lra_raw}, \code{ead_total} and \code{years}.
 }
 \description{
 Builds the reference data set (RDS) of realised loss given default, one

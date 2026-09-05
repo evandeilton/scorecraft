@@ -80,6 +80,10 @@ segment and grade with the constants the SQL emits), \code{totals} (\code{n},
 \code{concentration} (share of EAD and RWA by segment), \code{framework},
 \code{approach}, \code{params}, \code{config}, \code{ledger}, \code{model_card} and, after
 \code{\link[=scr_export]{scr_export()}}, \code{files}.
+\code{segments} and \code{totals} also carry \code{n_defaulted}; \code{totals} also
+\code{el_rate} and \code{rwa_irb_no_floors}; \code{concentration} has \code{segment}, \code{n},
+\code{ead}, \code{rwa}, \code{ead_share}, \code{rwa_share} and \code{hhi_contribution}; \code{columns}
+records the column names the SQL reads.
 }
 \description{
 Runs \code{\link[=scr_irb_rw]{scr_irb_rw()}} on every exposure, aggregates by segment, compares

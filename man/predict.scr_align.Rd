@@ -22,20 +22,21 @@ A numeric vector of the length of \code{raw}.
 \description{
 Apply an alignment to raw scores
 }
+\examples{
+set.seed(3)
+y   <- stats::rbinom(2000, 1, 0.15)
+raw <- stats::qlogis(0.15) + 1.3 * y + stats::rnorm(2000)
+al  <- scr_align(raw, y)
+head(predict(al, raw))
+head(predict(al, raw, type = "prob"))
+}
 \seealso{
-Other stages:
-\code{\link[=scr_align]{scr_align()}},
-\code{\link[=scr_bin]{scr_bin()}},
-\code{\link[=scr_cutoff]{scr_cutoff()}},
-\code{\link[=scr_model]{scr_model()}},
+Other production:
+\code{\link[=scr_apply]{scr_apply()}},
+\code{\link[=scr_export]{scr_export()}},
 \code{\link[=scr_monitor]{scr_monitor()}},
 \code{\link[=scr_monitoring_plan]{scr_monitoring_plan()}},
-\code{\link[=scr_reject]{scr_reject()}},
-\code{\link[=scr_run]{scr_run()}},
-\code{\link[=scr_scorecard]{scr_scorecard()}},
-\code{\link[=scr_select]{scr_select()}},
-\code{\link[=scr_split]{scr_split()}},
-\code{\link[=scr_strategy]{scr_strategy()}},
-\code{\link[=scr_triage]{scr_triage()}}
+\code{\link[=scr_reasons]{scr_reasons()}},
+\code{\link[=scr_sql]{scr_sql()}}
 }
-\concept{stages}
+\concept{production}

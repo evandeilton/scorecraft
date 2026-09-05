@@ -10,8 +10,9 @@ scr_presets()
 A \code{data.frame} with one row per preset.
 }
 \description{
-Returns the keys a preset changes, resolved, to compare before choosing.
-Every other configuration key is identical across presets.
+Returns the funnel keys resolved per preset, to compare before choosing.
+\code{target_min} and \code{iv_max} are shown for context; the presets leave them
+unchanged, as they do every other configuration key.
 }
 \examples{
 scr_presets()

@@ -30,12 +30,15 @@ scr_default_rate(
 
 \item{exposure}{Optional column name; adds exposure-weighted rates.}
 
-\item{config}{A \code{\link[=scr_config]{scr_config()}} (only \code{pd_dr_by} and \code{verbose} are read).}
+\item{config}{A \code{\link[=scr_config]{scr_config()}}; only \code{pd_dr_by} is read (the default of
+\code{by}).}
 }
 \value{
-An object of class \code{scr_dr}: \code{table} (cohort rates), \code{lra}
-(\code{mean}, \code{weighted_mean}, \code{recent5_mean}, \code{all_mean}, \code{benchmark},
-\code{n_cohorts}, \code{years}, \code{flag_below_benchmark}), \code{horizon}, \code{by}.
+An object of class \code{scr_dr}: \code{table} (cohort rates, by grade or
+segment when given), \code{portfolio} (one row per cohort: \code{n}, \code{defaults},
+\code{dr}), \code{lra} (\code{mean}, \code{weighted_mean}, \code{recent5_mean}, \code{all_mean},
+\code{benchmark}, \code{flag_below_benchmark}, \code{min}, \code{max}, \code{sd}, \code{n_cohorts},
+\code{years}), \code{horizon} and \code{by}.
 }
 \description{
 From a flagged panel (an \code{\link[=scr_default]{scr_default()}} object or any table with a 0/1

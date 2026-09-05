@@ -33,8 +33,9 @@ validation rows (the hold-out of the model by default): simple and
 exposure-weighted averages, the one-sided t-test of realised above
 predicted (under-estimation) with its p-value, the EAD adequacy ratio
 (sum of realised EAD over sum of predicted EAD) and traffic lights
-(green when p > 0.05, amber when 0.01 < p <= 0.05, red when p <= 0.01;
-adequacy green at or below 1, amber up to 1.05, red above). Adds the
+(red at or below \code{lights[1]}, amber at or below \code{lights[2]}, green above;
+adequacy green at or below \code{adequacy_lights[1]}, amber up to
+\code{adequacy_lights[2]}, red above). Adds the
 discrimination block (gAUC with a bootstrap interval against the
 development value, Spearman correlation, cumulative EAD accuracy
 ratio), the back-test by cohort and the stability of the pool
