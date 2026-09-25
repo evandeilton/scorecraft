@@ -18,7 +18,8 @@ scr_metrics(
 \arguments{
 \item{score}{Numeric vector with the score.}
 
-\item{y}{0/1 outcome vector, same length as \code{score}.}
+\item{y}{0/1 outcome vector (numeric or logical), same length as
+\code{score}. \code{NA} rows are dropped; any other value is an error.}
 
 \item{higher_is_event}{If \code{TRUE} (default), a higher score means a higher
 probability of the event (logit, probability, propensity score). Pass
@@ -31,7 +32,8 @@ reported above 0.5 when the score ranks correctly.}
 
 \item{level}{Confidence level.}
 
-\item{seed}{Bootstrap seed; \code{NULL} leaves it unset.}
+\item{seed}{Bootstrap seed, local to the call (the user's random stream
+is restored on exit); \code{NULL} draws from the user's stream.}
 
 \item{nthread}{Parallel workers for the resamples.}
 }
@@ -40,9 +42,6 @@ A list of class \code{scr_metrics} with \code{auc}, \code{ks}, \code{gini}, the
 bounds \code{auc_lo}/\code{auc_hi}, \code{ks_lo}/\code{ks_hi}, \code{gini_lo}/\code{gini_hi} (\code{NA}
 when \code{ci = FALSE}), \code{n}, \code{events}, \code{n_boot} and \code{level}. Everything is
 \code{NA_real_} when only one class is present or no valid case exists.
-
-DeLong's analytic variance is not used: the interval is a stratified
-percentile bootstrap, which also covers KS.
 }
 \description{
 AUC through the Mann-Whitney U statistic with tie correction, computed on
@@ -56,7 +55,13 @@ The confidence interval is \strong{always} computed by default: a bootstrap
 stratified by outcome, percentile method, with
 \code{n_boot} resamples. Gini is derived from AUC (\code{2 * AUC - 1}) inside each
 resample, never bootstrapped separately. The cost is absorbed by
-\code{nthread} (parallelism by resample).
+\code{nthread} (parallelism by resample). DeLong's analytic variance is not
+used: the interval is a stratified percentile bootstrap, which also
+covers KS.
+
+The AUC is computed from the counts per unique score after one sort, so
+its cost is \eqn{O(n \log n)}, never the \eqn{O(n_1 n_0)} of the pairwise
+definition.
 }
 \examples{
 set.seed(1)

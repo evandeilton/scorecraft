@@ -91,6 +91,7 @@ scr_el <- function(pd, lgd, ead, defaulted = NULL, elbe = NULL) {
 scr_pd_stress <- function(pd, rho, q) {
   q <- as.double(q)
   if (any(is.na(q) | q <= 0 | q >= 1)) stop("`q` must be in (0, 1).", call. = FALSE)
+  if (any(!is.na(pd) & (pd < 0 | pd > 1))) stop("`pd` must be in [0, 1].", call. = FALSE)
   .vasicek_pit(pd, -stats::qnorm(q), rho)
 }
 
@@ -115,7 +116,9 @@ scr_pd_stress <- function(pd, rho, q) {
   if (any(sme)) {
     s <- co$sme
     S <- if (is.null(sales)) rep(NA_real_, length(pd)) else rep_len(as.double(sales), length(pd))
-    S[is.na(S)] <- s$lo
+    # the firm-size adjustment needs reported sales (CRE31.9, CRR Art. 153(4)):
+    # without them the obligor is treated as a large corporate (no adjustment)
+    S[is.na(S)] <- s$hi
     S <- pmin(s$hi, pmax(s$lo, S))
     r[sme] <- r[sme] - s$adj * (1 - (S[sme] - s$lo) / (s$hi - s$lo))
   }
@@ -123,6 +126,18 @@ scr_pd_stress <- function(pd, rho, q) {
   if (any(f)) r[f] <- pmin(0.999, r[f] * co$fi_multiplier)
   r
 }
+
+#' Lowest PD at which the maturity slope b(PD) is evaluated
+#'
+#' `1 - 1.5 b(PD)` reaches zero at PD of about 2.9e-6, so the maturity
+#' adjustment explodes and changes sign there, and K stops being increasing
+#' in PD below about 1e-5 for any M in `[0, 5]` and R in `[0.03, 0.5]`. Only
+#' rows without a PD floor (sovereigns, or `apply_floors` without `"pd"`)
+#' reach that region; b is held at its value at this PD below it, which
+#' leaves every PD at or above 0.001 % unchanged.
+#' @keywords internal
+#' @noRd
+.irb_b_pd_min <- 1e-5
 
 #' Capital requirement K of the asymptotic single risk factor model
 #' @keywords internal
@@ -156,6 +171,7 @@ scr_pd_stress <- function(pd, rho, q) {
   d <- if (is.null(defaulted)) rep(FALSE, n) else rep_len(isTRUE_vec(defaulted), n)
   e <- if (is.null(elbe)) rep(NA_real_, n) else rep_len(as.double(elbe), n)
   m <- if (is.null(m)) rep(NA_real_, n) else rep_len(as.double(m), n)
+  if (any(!is.na(m) & m < 0)) stop("`m` must be non-negative (years).", call. = FALSE)
   firb <- identical(approach, "firb")
   hit <- c(pd_floor = 0L, lgd_floor = 0L, m_floor = 0L, m_cap = 0L)
 
@@ -192,7 +208,11 @@ scr_pd_stress <- function(pd, rho, q) {
     col <- if (is.null(collateral)) rep("unsecured", n) else rep_len(as.character(collateral), n)
     badc <- setdiff(unique(col[!is.na(col)]), setdiff(names(lf), "asset_class"))
     if (length(badc)) stop("unknown `collateral`: ", lst(badc), ". Use one of ", lst(setdiff(names(lf), "asset_class")), ".", call. = FALSE)
-    sec <- vapply(seq_len(n), function(i) if (is.na(row[i]) || is.na(col[i])) NA_real_ else lf[[col[i]]][row[i]], numeric(1))
+    sec <- rep(NA_real_, n)
+    for (cc in unique(col[!is.na(col)])) {
+      ix <- which(col == cc & !is.na(row))
+      sec[ix] <- lf[[cc]][row[ix]]
+    }
     # mortgages have a real-estate floor only: fall back to it when unsecured is absent
     fb <- is.na(unsec) & !is.na(row)
     unsec[fb] <- lf$real_estate[row[fb]]
@@ -209,20 +229,20 @@ scr_pd_stress <- function(pd, rho, q) {
   if (!identical(r_mult, 1)) r <- pmin(0.999, r * r_mult)
   whole <- ac %in% .irb_wholesale
   b <- rep(NA_real_, n); ma <- rep(1, n)
+  mm <- rep(NA_real_, n)                     # maturity is reported for wholesale rows only
   if (any(whole)) {
-    mm <- m
+    mm[whole] <- if (firb) params$m_default else m[whole]
     mm[whole & is.na(mm)] <- params$m_default
-    if ("m" %in% floors) {
+    if ("m" %in% floors && !firb) {
       lo <- whole & mm < params$m_range[1]; hi <- whole & mm > params$m_range[2]
       hit[["m_floor"]] <- sum(lo); hit[["m_cap"]] <- sum(hi)
       mm[lo] <- params$m_range[1]; mm[hi] <- params$m_range[2]
     }
-    if (firb) mm[whole] <- params$m_default
-    pdw <- pmax(pd_used, 1e-12)
+    pdw <- pmax(pd_used, .irb_b_pd_min)
     b[whole] <- (0.11852 - 0.05478 * log(pdw[whole]))^2
     ma[whole] <- (1 + (mm[whole] - 2.5) * b[whole]) / (1 - 1.5 * b[whole])
-    m <- mm
   }
+  m <- mm
   k <- .irb_k_core(pd_used, lgd_used, r, ma, params)
   if (any(d)) {
     ed <- e; ed[is.na(ed)] <- lgd[is.na(ed)]
@@ -249,19 +269,27 @@ scr_pd_stress <- function(pd, rho, q) {
 #'
 #' \deqn{K = \left[LGD \cdot N\left(\frac{G(PD) + \sqrt{R}\,G(0.999)}{\sqrt{1-R}}\right) - PD \cdot LGD\right] \cdot MA \cdot s}
 #'
-#' with `s = params$scaling_factor`. Defaulted rows carry `K = max(0, LGD -
+#' with `s = params$scaling_factor` and, for wholesale classes,
+#' \eqn{MA = (1 + (M - 2.5)\,b) / (1 - 1.5\,b)},
+#' \eqn{b = (0.11852 - 0.05478 \ln PD)^2} (`MA = 1` for retail). Below
+#' `PD = 1e-5`, reachable only without a PD floor (sovereigns), `b` is
+#' held at its value at `1e-5`: the regulatory `b` makes `1 - 1.5 b` vanish
+#' near `PD = 2.9e-6`, where the adjustment would explode and change sign.
+#' Defaulted rows carry `K = max(0, LGD -
 #' ELBE)` under `"airb"` and zero under `"firb"`; a missing `elbe` is taken
 #' equal to `lgd`. `RW = 12.5 K` and `RWA = RW * ead`.
 #'
 #' @inheritParams scr_el
-#' @param m Effective maturity in years (wholesale classes only; `NULL` or
-#'   `NA` uses `params$m_default`).
+#' @param m Effective maturity in years, non-negative (wholesale classes
+#'   only, ignored and reported as `NA` on retail rows; `NULL` or `NA` uses
+#'   `params$m_default`).
 #' @param asset_class One of `"corporate"`, `"corporate_sme"`, `"bank"`,
 #'   `"sovereign"`, `"hvcre"`, `"retail_mortgage"`, `"qrre_revolver"`,
 #'   `"qrre_transactor"`, `"retail_other"`; a scalar or a vector.
 #' @param sales Annual sales of `corporate_sme` obligors, in the unit of
-#'   `params$correlation$sme` (missing values take the lower bound, the
-#'   largest adjustment).
+#'   `params$correlation$sme`, clipped to its bounds. A missing value takes
+#'   the upper bound, i.e. no firm-size adjustment: the adjustment requires
+#'   reported sales (Basel Framework CRE31.9; CRR Article 153(4)).
 #' @param fi Logical: regulated financial institution above the size
 #'   threshold, or unregulated one (correlation multiplier).
 #' @param params An [scr_irb_params()] object.
@@ -282,7 +310,8 @@ scr_pd_stress <- function(pd, rho, q) {
 #'   `"senior_unsecured_fi"` otherwise); see `params$lgd_firb`.
 #'
 #' @return A `data.table` with one row per exposure: `pd_used`, `lgd_used`
-#'   (after floors; PD one on defaulted rows), `m` (after clipping), `r`,
+#'   (after floors; PD one on defaulted rows), `m` (after clipping;
+#'   `params$m_default` under `"firb"`; `NA` on retail rows), `r`,
 #'   `b`, `ma`, `k`, `rw`, `rwa`; attribute `floors_hit` counts the rows
 #'   where each floor was binding.
 #'
@@ -385,7 +414,11 @@ scr_sa_rw <- function(asset_class, ltv = NULL, rating = NULL, transactor = NULL,
   if (any(mo)) {
     bands <- tab[tab$asset_class == "retail_mortgage" & tab$sub_class == "standard", ]
     l <- ltv[mo]; l[is.na(l)] <- Inf
-    idx <- vapply(l, function(v) { i <- which(v > bands$ltv_lo & v <= bands$ltv_hi); if (length(i)) i[1] else if (v <= 0) 1L else nrow(bands) }, integer(1))
+    # first band with lo < ltv <= hi (loop over the few bands, not the rows);
+    # ltv <= 0 takes the first band, anything unmatched the last
+    idx <- rep(NA_integer_, length(l))
+    for (i in seq_len(nrow(bands))) idx[is.na(idx) & l > bands$ltv_lo[i] & l <= bands$ltv_hi[i]] <- i
+    idx[is.na(idx)] <- ifelse(l[is.na(idx)] <= 0, 1L, nrow(bands))
     rw[mo] <- bands$rw[idx]
   }
   wh <- ac %in% .irb_wholesale
@@ -864,7 +897,7 @@ scr_sql.scr_capital <- function(x, table = NULL, dialect = NULL, file = NULL, le
 scr_export.scr_capital <- function(x, dir, stamp = TRUE, ...) {
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
-  tag <- tolower(x$framework)
+  tag <- .file_tag(x$framework)
   t <- x$totals
   p <- x$params
   cfg_rows <- c(list(framework = p$framework, source = p$source, approach = x$approach, params_modified = isTRUE(p$modified),

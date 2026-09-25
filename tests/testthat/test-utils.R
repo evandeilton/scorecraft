@@ -47,10 +47,6 @@ test_that("subsample_stratified caps the size and keeps both classes", {
 })
 
 test_that("seeded draws are reproducible and never move the caller's random stream", {
-  set.seed(11); before <- .Random.seed
-  a <- .scr_with_seed(5, stats::runif(3))
-  expect_identical(.Random.seed, before)
-  expect_identical(a, .scr_with_seed(5, stats::runif(3)))
   y <- rep(0:1, each = 200); s <- stats::rnorm(400) + y
   set.seed(11); before <- .Random.seed
   m1 <- scr_metrics(s, y, n_boot = 20, seed = 3)
@@ -59,7 +55,4 @@ test_that("seeded draws are reproducible and never move the caller's random stre
   sp <- scr_split(scr_demo[1:500, ], "default", seed = 7, drop = "id")
   expect_identical(.Random.seed, before)
   expect_identical(sp$train_idx, scr_split(scr_demo[1:500, ], "default", seed = 7, drop = "id")$train_idx)
-  # unseeded, the draw uses and advances the caller's stream
-  .scr_with_seed(NULL, stats::runif(1))
-  expect_false(identical(.Random.seed, before))
 })

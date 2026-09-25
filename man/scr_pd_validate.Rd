@@ -80,13 +80,15 @@ cohort start form the population, the outcome is a default within
 grade: Jeffreys \verb{p = F_Beta(PD; D + 1/2, N - D + 1/2)}, the binomial
 \code{P(X >= D)} with its critical count at \code{alpha}, the normal \code{z}, and
 the traffic light on the Jeffreys p-value. Portfolio: the same tests
-on the totals, Hosmer-Lemeshow over the grades (\code{K - 2} degrees of
-freedom), the multi-period normal test over the cohort default rates
-and the Brier score.}
+on the totals, Hosmer-Lemeshow over the grades (\code{K} degrees of
+freedom: the grade PDs are not fitted on the validation sample), the
+multi-period normal test over the cohort differences \code{DR_t - PD_t}
+(BCBS Working Paper 14, 2005) and the Brier score.}
 \item{Discrimination}{AUC, Gini and KS with a bootstrap interval
 (\code{\link[=scr_metrics]{scr_metrics()}}) on the score when a \code{score} column exists,
 otherwise on the grade; the \code{S} statistic against \code{auc_init}
-(\code{(AUC_init - AUC_curr) / se}, Hanley-McNeil), \code{p = 1 - Phi(S)}.}
+(\code{(AUC_init - AUC_curr) / se}, with the DeLong standard error of
+the current AUC), \code{p = 1 - Phi(S)}.}
 \item{Stability}{PSI of the grade distribution against the development
 sample per cohort (\code{\link[=scr_psi]{scr_psi()}}); the migration matrix pooled over
 the cohorts whose end date is observed (\code{\link[=scr_migration]{scr_migration()}}); the

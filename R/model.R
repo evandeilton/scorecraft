@@ -59,7 +59,11 @@ scr_model <- function(bins, config = scr_config()) {
     if (length(i_tr) < length(y_tr) || length(i_ho) < length(y_ho))
       msg("  stratified subsample for the models: train %s, hold-out %s (cap %s)",
           n_fmt(length(i_tr)), n_fmt(length(i_ho)), n_fmt(cfg$model_max_rows))
-    models <- run_classifiers(bins$woe_train[i_tr], bins$woe_holdout[i_ho], y_tr[i_tr], y_ho[i_ho], pool, cfg)
+    # rows AND columns in one subset: the WOE tables hold every binned
+    # feature, the classifiers only need the pool
+    wc <- intersect(paste0(pool, "_woe"), names(bins$woe_train))
+    models <- run_classifiers(bins$woe_train[i_tr, wc, with = FALSE], bins$woe_holdout[i_ho, wc, with = FALSE],
+                              y_tr[i_tr], y_ho[i_ho], pool, cfg)
   } else {
     msg("  pool with %d feature(s): classifiers do not run - consensus degenerates to the IV.", length(pool))
     iv <- bins$holdout[feature %in% pool, iv_holdout]
@@ -147,8 +151,9 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
 #' @noRd
 .fit_glmnet <- function(x_tr, y_tr, x_ho, y_ho, cfg) {
   if (!requireNamespace("glmnet", quietly = TRUE)) stop("package 'glmnet' is not installed")
-  cv <- .scr_with_seed(cfg$seed, glmnet::cv.glmnet(x_tr, y_tr, family = "binomial", alpha = cfg$en_alpha,
-                                                   nfolds = cfg$cv_folds, standardize = TRUE))
+  .scr_local_seed(cfg$seed)   # the folds are random; the user's stream is restored on exit
+  cv <- glmnet::cv.glmnet(x_tr, y_tr, family = "binomial", alpha = cfg$en_alpha,
+                          nfolds = cfg$cv_folds, standardize = TRUE)
   s <- "lambda.1se"; b <- as.numeric(stats::coef(cv, s = s))[-1L]; note <- ""
   if (all(b == 0)) {
     s <- "lambda.min"; b <- as.numeric(stats::coef(cv, s = s))[-1L]
@@ -164,25 +169,34 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
 #' @keywords internal
 #' @noRd
 .fit_xgboost <- function(x_tr, y_tr, x_ho, y_ho, cfg) {
+  # xgboost draws its own seed from R's generator when `seed` is not a
+  # parameter (>= 2.0) and subsamples with it (1.7): seed it, locally
+  .scr_local_seed(cfg$seed)
   p <- list(objective = "binary:logistic", eval_metric = "auc", eta = cfg$xgb_eta,
             max_depth = cfg$xgb_max_depth, subsample = cfg$xgb_subsample,
             colsample_bytree = cfg$xgb_colsample, min_child_weight = cfg$xgb_min_child_weight,
             nthread = cfg$nthread)
   d_tr <- xgboost::xgb.DMatrix(data = x_tr, label = y_tr)
   d_ho <- xgboost::xgb.DMatrix(data = x_ho, label = y_ho)
-  arg_eval <- if (utils::packageVersion("xgboost") >= "2.0.0") "evals" else "watchlist"
+  # `watchlist` was renamed `evals` in the reworked R interface: ask the
+  # function itself rather than guess the version that did it
+  arg_eval <- if ("evals" %in% names(formals(xgboost::xgb.train))) "evals" else "watchlist"
   args <- list(params = p, data = d_tr, nrounds = cfg$xgb_rounds,
                early_stopping_rounds = cfg$xgb_early_stopping, verbose = 0L)
   args[[arg_eval]] <- list(valid = d_ho)
-  m <- .scr_with_seed(cfg$seed, do.call(xgboost::xgb.train, args))
+  m <- do.call(xgboost::xgb.train, args)
   imp <- data.table::as.data.table(xgboost::xgb.importance(model = m))
   imp <- if (nrow(imp)) imp[, .(feature = Feature, importance = Gain)] else
     data.table::data.table(feature = character(), importance = numeric())
   absent <- setdiff(colnames(x_tr), imp$feature)
   if (length(absent)) imp <- data.table::rbindlist(list(imp, data.table::data.table(feature = absent, importance = 0)))
+  # the booster attribute is the 0-based index of the best round (1.7 and
+  # >= 2.0 alike); predict() already stops there
   best <- tryCatch(xgboost::xgb.attr(m, "best_iteration"), error = function(e) NULL)
+  n_trees <- if (length(best) && is.finite(suppressWarnings(as.numeric(best[1]))))
+    as.integer(as.numeric(best[1])) + 1L else m$best_iteration %||% m$niter %||% cfg$xgb_rounds
   list(importance = imp, vote = NULL, score = as.numeric(stats::predict(m, d_ho)),
-       note = sprintf("%s trees", best %||% m$best_iteration %||% m$niter %||% cfg$xgb_rounds), model = m)
+       note = sprintf("%s trees", n_trees), model = m)
 }
 
 #' Random forest: permutation importance
@@ -192,12 +206,12 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
   if (!requireNamespace("ranger", quietly = TRUE)) stop("package 'ranger' is not installed")
   df <- as.data.frame(x_tr, check.names = FALSE)
   df[["target__"]] <- factor(y_tr, levels = c(0L, 1L))
-  # ranger draws from the R stream even when `seed` is given, and so does its predict()
-  m <- .scr_keep_rng(ranger::ranger(dependent.variable.name = "target__", data = df, num.trees = cfg$rf_trees,
-                                    importance = cfg$rf_importance, probability = TRUE, num.threads = cfg$nthread,
-                                    seed = cfg$seed, respect.unordered.factors = "order"))
+  .scr_rng_guard()   # ranger and its predict() draw from the R stream even with `seed`
+  m <- ranger::ranger(dependent.variable.name = "target__", data = df, num.trees = cfg$rf_trees,
+                      importance = cfg$rf_importance, probability = TRUE, num.threads = cfg$nthread,
+                      seed = cfg$seed, respect.unordered.factors = "order")
   imp <- ranger::importance(m)
-  pr  <- .scr_keep_rng(stats::predict(m, data = as.data.frame(x_ho, check.names = FALSE)))$predictions
+  pr  <- stats::predict(m, data = as.data.frame(x_ho, check.names = FALSE))$predictions
   list(importance = data.table::data.table(feature = names(imp), importance = as.numeric(imp)),
        vote = NULL, score = as.numeric(pr[, "1"]), note = sprintf("importance=%s", cfg$rf_importance))
 }
@@ -207,13 +221,17 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
 #' @noRd
 .fit_lightgbm <- function(x_tr, y_tr, x_ho, y_ho, cfg) {
   if (!requireNamespace("lightgbm", quietly = TRUE)) stop("package 'lightgbm' is not installed")
+  .scr_local_seed(cfg$seed)
   d_tr <- lightgbm::lgb.Dataset(data = x_tr, label = y_tr)
   d_ho <- lightgbm::lgb.Dataset.create.valid(d_tr, data = x_ho, label = y_ho)
   m <- lightgbm::lgb.train(
     params = list(objective = "binary", metric = "auc", learning_rate = cfg$xgb_eta,
                   max_depth = cfg$xgb_max_depth, feature_fraction = cfg$xgb_colsample,
                   bagging_fraction = cfg$xgb_subsample, bagging_freq = 1L,
-                  min_data_in_leaf = cfg$xgb_min_child_weight, num_threads = cfg$nthread,
+                  # xgboost's min_child_weight is a sum of hessians, not a row
+                  # count: its LightGBM counterpart is min_sum_hessian_in_leaf
+                  # (documented alias `min_child_weight`), not min_data_in_leaf
+                  min_sum_hessian_in_leaf = cfg$xgb_min_child_weight, num_threads = cfg$nthread,
                   verbosity = -1L, seed = cfg$seed),
     data = d_tr, nrounds = cfg$xgb_rounds, valids = list(valid = d_ho),
     early_stopping_rounds = cfg$xgb_early_stopping, verbose = -1L)

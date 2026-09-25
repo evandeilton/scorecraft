@@ -22,9 +22,11 @@ loss best estimate is the mean realised LGD of the training defaults of
 the pool that were still in workout at \code{tau} (so that at \code{tau = 0} it
 equals the pool's long-run average), and the in-default LGD adds the
 unexpected-loss increment
-\deqn{\Delta^{UL}(\tau) = (\mathrm{LGD}^{DT} - \mathrm{LRA})\;\frac{\rho(T_{\max}) - \rho(\tau)}{\rho(T_{\max})}}
-read from the recovery profile of the pool's product mix: the downturn
-uplift shrinks as the recoveries come in. The consistency table checks
+\deqn{\Delta^{UL}(\tau) = \max(0,\ \mathrm{LGD}^{DT} - \mathrm{LRA})\;\frac{\rho(T_{\max}) - \rho(\tau - 1)}{\rho(T_{\max})}}
+read from the recovery profile of the pool's product mix, where
+\eqn{\rho(\tau - 1)} is the cumulative discounted recovery rate of the
+months before age \code{tau} (zero at \code{tau = 0}): the downturn uplift
+shrinks as the recoveries come in. The consistency table checks
 that \code{lgd_in_default} at \code{tau = 0} reproduces the pool's \code{lgd_dt}.
 }
 \examples{

@@ -77,7 +77,7 @@ test_that("floors, maturity, defaulted rows, SME and FI adjustments behave as sp
   expect_true(all(rs[1:2] < rc))
   expect_equal(rs[1], rc - 0.04, tolerance = 1e-12)
   expect_equal(rs[3], rc, tolerance = 1e-12); expect_equal(rs[4], rc, tolerance = 1e-12)
-  expect_equal(rs[5], rs[1])
+  expect_equal(rs[5], rc, tolerance = 1e-12)   # missing sales: no firm-size relief (CRE31.9)
   expect_true(rs[1] < rs[2])
   rf <- scr_irb_rw(0.01, 0.45, asset_class = "bank", fi = TRUE, params = p)$r
   expect_equal(rf, 1.25 * rc, tolerance = 1e-12)

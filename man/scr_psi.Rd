@@ -35,8 +35,9 @@ uses the union of the observed ones.}
 \value{
 A list of class \code{scr_psi} with \code{psi}, \code{flag_fixed}, \code{critical}
 (adjusted critical value), \code{flag_adjusted} (\code{"stable"} or \code{"shift"}),
-\code{n_base}, \code{n_compare}, \code{n_bins} and \code{table} (per band: \code{pct_base},
-\code{pct_compare}, \code{psi_band}).
+\code{n_base}, \code{n_compare}, \code{n_bins} (bands declared; the degrees of
+freedom count only the populated ones) and \code{table} (per band: \code{n_base},
+\code{n_compare}, \code{pct_base}, \code{pct_compare}, \code{psi_band}).
 The \code{thresholds} and \code{alpha} used are stored and printed.
 }
 \description{
@@ -49,6 +50,13 @@ which the PSI is asymptotically \code{(1/n + 1/m) * chi-squared(B - 1)}. With
 monthly base of a hundred thousand rows, \code{PSI = 0.01} is already
 significant. The fixed threshold remains what the market knows; the
 adjusted one is what the statistics support.
+}
+\details{
+Rows where \code{base} or \code{compare} is \code{NA}, or that fall outside \code{breaks} or
+\code{levels}, are not counted. A band empty in both samples is left out of
+the index and of the degrees of freedom \code{B - 1}; when a populated band is
+empty on one side only, 0.5 is added to every populated band of both
+samples.
 }
 \examples{
 set.seed(2)

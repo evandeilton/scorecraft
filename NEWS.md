@@ -84,6 +84,98 @@ parameter tables selected by a preset, never prose.
   `vl_constant`, `vl_near_const`, `vl_duplicate`, `vl_redundant`,
   `vl_late`, `ds_region`, `ds_band`, `ds_channel`, `ds_high_card`).
 
+## Compiled kernels and big tables
+
+* The package now compiles C++ code ('Rcpp' and 'RcppArmadillo'). Thin
+  internal R wrappers validate the input and call the kernels, which take
+  plain vectors and matrices (never a `data.table`) and read the columns
+  without copying them. The kernels are tested against their reference R
+  implementations.
+* Redundancy pruning in `scr_bin()` (Pearson or Spearman): each WOE
+  column is ranked once and the correlation matrix comes from one BLAS
+  cross-product, instead of ranking both columns of every pair. The greedy
+  sweep gives exactly the same result as
+  `OptimalBinningWoE::obwoe_prune()`, and is about 50 times faster at 150
+  columns.
+* Somers' D of LGD and EAD models is counted exactly in
+  `O(n log n)` (Knight's algorithm). It replaces an `O(n^2)` Kendall
+  computation inside a 200-resample bootstrap. The EAD version is also
+  exact now: it no longer groups the prediction into 60 quantile buckets.
+* `scr_ecl()` streams the survival-weighted loss row by row and applies
+  the scenario shocks on the fly. Memory is `O(n)` whatever the term (the
+  matrix version built several `n x T` copies, about 2.9 GB each at
+  `n = 1e6, T = 360`). Results are the same to 1e-15.
+* `scr_metrics()` ranks the scores once; each bootstrap resample then
+  re-tabulates counts, with no sort and no grouping by a double key. The
+  cut-off sweep sorts once per sample. The monitor tabulates the base
+  once for every period. Default rates by cohort use one rolling join.
+  Every LGD cash-flow aggregation and EAD reference date is vectorised.
+* Kernel threads follow `config$nthread`.
+
+## Correctness and numerical stability
+
+* Wide tables: `scr_triage()` and the R pre-processing of `scr_apply()`
+  reserve column slots before adding columns, so they no longer fail past
+  about 1024 columns.
+* Random numbers: seeds are local to the call. `.Random.seed` is restored
+  on exit, and a bootstrap advances the user's stream only by the
+  replicate seeds it draws. Results for a given seed are
+  unchanged.
+* `scr_split()`:
+  * the target is checked for 0/1 before integer coercion (0.5 was
+    truncated to 0);
+  * text dates (as DBI returns them) and `integer64` columns are read
+    correctly;
+  * rows with a missing date are reported.
+* `scr_bin()`: under `allow_derived_final = FALSE`, derived flags leave
+  before the redundancy pruning, so a flag can no longer remove a real
+  column. The Rcpp subset-proxy warnings of
+  `OptimalBinningWoE::obwoe_gains_score()` are muffled; its values are
+  correct, and the fix belongs upstream.
+* `scr_config()` validates every key of stages 0 to 7.
+* LightGBM receives `min_sum_hessian_in_leaf`. The xgboost API is detected
+  from `xgb.train()` (it works with xgboost 3).
+* SQL string literals follow the dialect: backslashes are escaped only in
+  MySQL, Spark/Hive/Databricks and BigQuery. A line break in a name can no
+  longer escape an SQL comment. The scorecard's SQL quotes identifiers as
+  `obwoe_sql()` does. A row that falls in no fitted bin takes the points
+  of WOE 0, in R and in SQL.
+* Metrics and monitoring:
+  * `scr_metrics()` refuses a factor or a non-0/1 outcome, and counts are
+    kept in double to avoid integer overflow;
+  * `scr_psi()` leaves bands empty in both samples out of the index and
+    out of the degrees of freedom;
+  * `scr_monitor()` keeps undated rows as a period;
+  * a classing spec survives the CSV and xlsx round trips;
+  * an export cannot be written outside the given directory.
+* PD:
+  * `scr_default()` could assign one unit's flags to another under
+    locales where the grouping order differed from the C-locale sort; it
+    is fixed, and the state machine is now vectorised;
+  * the `PSI_ACTION` gate of the LGD and EAD drivers compared against a
+    flag `scr_psi()` never returns, so it never fired; it now does;
+  * Hosmer-Lemeshow on fixed PDs uses `K` degrees of freedom;
+  * the multi-period test is scaled by `sd(DR_t - PD_t)` (BCBS WP 14);
+  * the AUC test uses the DeLong variance;
+  * `scr_moc()` no longer edits the caller's ledger;
+  * point-in-time PDs accept a grade at zero.
+* LGD and EAD:
+  * `scr_ead_data()` paired default dates with facilities after a sort,
+    so unsorted input put defaults on the wrong facility; it is fixed;
+  * `scr_ead()` no longer needs data.table 1.15;
+  * `ccf_measure = "lf"` keeps its pools;
+  * a cure recovers `ead + drawings - recovered`;
+  * the `scr_elbe()` uplift starts at zero at the date of default;
+  * `scr_lgd_downturn()`, `scr_lgd_floor()` and `scr_ead_validate()` no
+    longer modify their input.
+* Capital and ECL:
+  * the maturity adjustment is held at `PD = 1e-5` below that point,
+    where `1 - 1.5 b` approaches zero and the risk weight exploded or
+    turned negative without a PD floor;
+  * a missing SME sales figure gets no firm-size adjustment (CRE31.9);
+  * the ECL exit probability is capped at one, the LGD floored at zero,
+    and scenario shocks and input lengths are validated.
+
 ## Scorecard pipeline hardening
 
 * `scr_monitoring_plan()` is the monitoring contract: created by
@@ -105,9 +197,6 @@ parameter tables selected by a preset, never prose.
 * `options(scorecraft.fork_mem_fraction = 0.75)` caps the fork workers by
   the memory available on Linux (`Inf` to disable), since forked workers
   duplicate the parent heap once the garbage collector runs.
-* Seeded steps (the split, the consensus classifiers, every bootstrap) no
-  longer change the random-number stream of the session: `.Random.seed` is
-  restored on exit.
 
 # scorecraft 0.1.0
 

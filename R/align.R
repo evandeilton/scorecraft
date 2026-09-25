@@ -47,7 +47,7 @@
 #'
 #' @param raw Raw score: an event logit (or any score on which a higher
 #'   value means a higher probability of the event).
-#' @param y 0/1 outcome vector, same length as `raw`.
+#' @param y 0/1 outcome vector (numeric or logical), same length as `raw`.
 #' @param base_score Score at which the odds are `base_odds`.
 #' @param base_odds Odds at `base_score`, positive, in the orientation of `direction`.
 #' @param pdo Points that double the odds, positive.
@@ -55,7 +55,8 @@
 #' @param method `"regression"` (default) or `"direct"`.
 #' @param n_bands Bands of the calibration regression.
 #' @param laplace Smoothing of the counts per band.
-#' @param weights Optional weights per observation (sample reweighting).
+#' @param weights Optional non-negative weights per observation (sample
+#'   reweighting), of the length of `raw`.
 #'
 #' @return An `scr_align` object with `base_score`, `base_odds`, `pdo`,
 #'   `direction`, `odds_orientation`, `factor`, `offset`, `sign`,
@@ -88,8 +89,17 @@ scr_align <- function(raw, y, base_score = 600, base_odds = 50, pdo = 20,
   .scr_num1(base_score, "base_score"); .scr_num1(base_odds, "base_odds", lower = 0, open_lower = TRUE)
   .scr_num1(pdo, "pdo", lower = 0, open_lower = TRUE)
   if (length(raw) != length(y)) stop("`raw` and `y` must have the same length.", call. = FALSE)
+  if (!is.null(weights) && (!is.numeric(weights) || length(weights) != length(raw))) {
+    stop("`weights` must be a numeric vector of the length of `raw`.", call. = FALSE)
+  }
+  y <- .scr_y01(y, "scr_align")
   ok <- is.finite(raw) & !is.na(y)
-  raw <- as.double(raw[ok]); y <- as.integer(y[ok])
+  if (!is.null(weights)) {
+    if (any(weights[ok] < 0, na.rm = TRUE)) stop("`weights` must be non-negative.", call. = FALSE)
+    ok <- ok & is.finite(weights)
+  }
+  if (!any(ok)) stop("scr_align(): no row with a finite `raw` and a non-missing `y`.", call. = FALSE)
+  raw <- as.double(raw[ok]); y <- y[ok]
   w <- if (is.null(weights)) rep(1, length(raw)) else as.double(weights[ok])
   sgn <- if (identical(direction, "higher_is_safer")) -1 else 1
 

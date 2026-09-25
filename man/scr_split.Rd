@@ -26,9 +26,10 @@ stratified split.}
 
 \item{ratio}{Target hold-out fraction.}
 
-\item{seed}{Seed of the random split. \code{NULL} leaves the random number
-generator untouched, so the split is reproducible only through the
-\code{seed} of \code{\link[=scr_config]{scr_config()}}.}
+\item{seed}{Seed of the random split. \code{NULL} draws from the session's
+random stream (reproducible only through a \code{set.seed()} of your own;
+\code{\link[=scr_select]{scr_select()}} passes the \code{seed} of \code{\link[=scr_config]{scr_config()}}). A seed is applied
+locally: the session's random stream is restored on exit.}
 
 \item{event_level}{Which target value counts as the event. \code{NULL} uses
 the convention (\code{1}, or the second alphabetical level).}
@@ -37,7 +38,8 @@ the convention (\code{1}, or the second alphabetical level).}
 targets, free text). They stay in the funnel as \verb{00.config}.}
 
 \item{copy}{If \code{TRUE} (default), works on a copy of \code{data}. \code{FALSE}
-modifies \code{data} by reference (typing), saving memory.}
+modifies a \code{data.table} by reference (target and typing), saving
+memory; a \code{data.frame} is always converted, hence copied.}
 }
 \value{
 An \code{scr_split} object with \code{data} (typed), \code{target}, \code{train_idx},
@@ -57,7 +59,10 @@ tests generalisation to a future period. The cut is made on the
 of most recent periods that already reaches \code{ratio} of the population.
 Without a date column, or with a single period, it falls back to random
 stratified by the target. The date column is never a candidate: it is the
-key of the split and leaves the contest.
+key of the split and leaves the contest. A text date column is read as an
+ISO date (\code{YYYY-MM-DD}, \code{YYYY/MM/DD}, \code{YYYY-MM}) or as all-digit periods
+(\code{YYYYMM}); rows with a missing date belong to no period and are left out
+of both train and hold-out, with a warning in the log.
 }
 \section{Event orientation}{
 

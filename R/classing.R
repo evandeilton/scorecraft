@@ -103,7 +103,7 @@ scr_coarse_classing <- function(x, features = NULL, laplace = 0, max_iv_loss = N
     accepted = list(), proposals = list(), n_proposals = 0L, ids = .lab_counter(),
     ledger = .empty_ledger(),
     choice = list(keep = NULL, drop = character(), force = character(), reasons = list()),
-    checks_cache = list()
+    checks_cache = .lab_cache()
   ), class = c("scr_classing", "list"))
   lab
 }
@@ -113,6 +113,12 @@ scr_coarse_classing <- function(x, features = NULL, laplace = 0, max_iv_loss = N
 #' @keywords internal
 #' @noRd
 .lab_counter <- function() { e <- new.env(parent = emptyenv()); e$n <- 0L; e }
+
+#' Memo of the checks of the optimal entries, shared by every copy of a lab
+#' (they depend only on the frozen result, never on the lab's decisions)
+#' @keywords internal
+#' @noRd
+.lab_cache <- function() new.env(parent = emptyenv())
 
 #' @keywords internal
 #' @noRd
@@ -277,20 +283,27 @@ check_lab <- function(lab, fn) {
 
 # -- checks and comparison -------------------------------------------------- #
 
-#' Train/hold-out data of the lab
+#' Train/hold-out data of the lab, restricted to the columns `cols`
+#'
+#' Only the variables a check reads are copied: subsetting the rows of the
+#' whole `data_clean` (thousands of columns) for every proposal was the
+#' dominant cost of a lab session.
 #' @keywords internal
 #' @noRd
-.lab_data <- function(lab) {
+.lab_data <- function(lab, cols) {
   x <- lab$result
-  list(tr = x$data_clean[x$split$train_idx], ho = x$data_clean[x$split$holdout_idx],
-       y_tr = x$data_clean[[x$target]][x$split$train_idx], y_ho = x$data_clean[[x$target]][x$split$holdout_idx])
+  dc <- x$data_clean
+  tr <- x$split$train_idx; ho <- x$split$holdout_idx
+  cols <- intersect(cols, names(dc))
+  list(tr = dc[tr, cols, with = FALSE], ho = dc[ho, cols, with = FALSE],
+       y_tr = dc[[x$target]][tr], y_ho = dc[[x$target]][ho])
 }
 
 #' Full quality assessment of one entry: engine screening, hold-out, bin tables, lab codes
 #' @keywords internal
 #' @noRd
 .classing_checks <- function(lab, f, entry, optimal_checks = NULL) {
-  x <- lab$result; cfg <- x$config; d <- .lab_data(lab)
+  x <- lab$result; cfg <- x$config; d <- .lab_data(lab, f)
   fit <- .mini_fit(x, stats::setNames(list(entry), f))
   # a degenerate bin has infinite WOE under laplace = 0; the engine's monotonicity
   # test cannot read it, so screening sees a clamped copy (the bin is blocked anyway)
@@ -349,7 +362,11 @@ check_lab <- function(lab, fn) {
 #' @keywords internal
 #' @noRd
 .optimal_checks <- function(lab, f) {
-  lab$checks_cache[[f]] %||% .classing_checks(lab, f, lab$optimal[[f]])
+  memo <- lab$checks_cache
+  if (is.environment(memo) && !is.null(memo[[f]])) return(memo[[f]])
+  ck <- .classing_checks(lab, f, lab$optimal[[f]])
+  if (is.environment(memo)) assign(f, ck, envir = memo)
+  ck
 }
 
 #' Side-by-side comparison of two check summaries
@@ -486,7 +503,7 @@ scr_classing_propose <- function(lab, variable, breaks = NULL, groups = NULL, me
     stop("scr_classing_propose(): give exactly one of `breaks`, `groups`, `merge`, `split`, `reset` (or `missing_to` alone).", call. = FALSE)
   }
   x <- lab$result; cfg <- x$config; sep <- cfg$bin_separator
-  d <- .lab_data(lab)
+  d <- .lab_data(lab, variable)
   cur <- lab$current[[variable]]
   xv <- d$tr[[variable]]; y <- d$y_tr
   is_num <- identical(cur$type, "numerical")
@@ -864,9 +881,21 @@ scr_classing_read <- function(file, sep = "%;%") {
   if (!is.character(file) || length(file) != 1L || !file.exists(file)) {
     stop("scr_classing_read(): `file` must be the path of an existing .csv or .xlsx file.", call. = FALSE)
   }
+  # the text columns are read as text, and only an empty cell is missing: a
+  # category "NA" or "01" must come back as written, not as NA or 1
+  txt <- c("variable", "type", "bin_label", "categories", "reason")
   d <- if (grepl("\\.xlsx$", file, ignore.case = TRUE)) {
-    .need_openxlsx(); openxlsx::read.xlsx(file, sheet = 1)
-  } else utils::read.csv(file, stringsAsFactors = FALSE, na.strings = c("", "NA"))
+    .need_openxlsx(); openxlsx::read.xlsx(file, sheet = 1, na.strings = "")
+  } else {
+    hdr <- names(utils::read.csv(file, nrows = 1L, check.names = FALSE))
+    cc <- stats::setNames(rep("character", length(intersect(txt, hdr))), intersect(txt, hdr))
+    utils::read.csv(file, stringsAsFactors = FALSE, na.strings = "", colClasses = cc, check.names = FALSE)
+  }
+  for (cn in intersect(c("bin_label", "categories"), names(d))) {
+    v <- as.character(d[[cn]])
+    # undo the formula-injection guard of the xlsx writer ("'-1" was "-1")
+    d[[cn]] <- sub("^'(?=[=+@-])", "", v, perl = TRUE)
+  }
   need <- c("variable", "type", "bin_id")
   miss <- setdiff(need, names(d))
   if (length(miss)) stop("scr_classing_read(): missing column(s): ", lst(miss), call. = FALSE)
@@ -889,6 +918,10 @@ scr_classing_read <- function(file, sep = "%;%") {
       if (anyNA(up) || is.unsorted(up, strictly = TRUE)) errs <- c(errs, sprintf("%s: `upper` must be finite and strictly increasing except on the last bin", v))
       lo <- r$lower[-1]
       if (!isTRUE(all.equal(lo, up))) errs <- c(errs, sprintf("%s: `lower` of bin i must equal `upper` of bin i-1 (contiguity)", v))
+      # the outer bins are open: a bound written there would be silently ignored
+      if (!is.na(r$lower[1]) || !is.na(r$upper[nrow(r)])) {
+        errs <- c(errs, sprintf("%s: the first `lower` and the last `upper` must be empty (open ends, -Inf/+Inf)", v))
+      }
     } else {
       if (anyNA(r$categories) || any(!nzchar(r$categories))) errs <- c(errs, sprintf("%s: every categorical bin needs `categories`", v))
       else {
@@ -1001,7 +1034,7 @@ scr_classing_apply <- function(lab) {
     scr <- screen_features(fit_m, cfg)
     res$screen$summary <- data.table::rbindlist(list(x$screen$summary[!feature %in% manual], scr$summary), use.names = TRUE, fill = TRUE)
     res$screen$full    <- data.table::rbindlist(list(x$screen$full[!feature %in% manual], scr$full), use.names = TRUE, fill = TRUE)
-    d <- .lab_data(lab)
+    d <- .lab_data(lab, manual)
     w_tr <- apply_woe(fit_m, d$tr, manual, "both"); w_ho <- apply_woe(fit_m, d$ho, manual, "both")
     ho <- holdout_check(w_tr, w_ho, d$y_tr, d$y_ho, manual, cfg)
     res$holdout <- data.table::rbindlist(list(x$holdout[!feature %in% manual], ho), use.names = TRUE, fill = TRUE)
@@ -1123,7 +1156,7 @@ print.scr_classing <- function(x, ...) {
 scr_export.scr_classing <- function(x, dir, stamp = TRUE, ...) {
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
-  tag <- tolower(x$target)
+  tag <- .file_tag(x$target)
   checks <- data.table::rbindlist(lapply(x$features, function(f) {
     ck <- if (identical(x$source[[f]], "manual")) x$accepted[[f]]$checks else .optimal_checks(x, f)
     cbind(source = x$source[[f]], ck$summary)

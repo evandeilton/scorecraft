@@ -14,3 +14,6 @@
 ^data-raw$
 ^[DS][A-Z]{3,5}\.md$
 ^Rplots\.pdf$
+^src/.*\.o$
+^src/.*\.so$
+^src/.*\.dll$

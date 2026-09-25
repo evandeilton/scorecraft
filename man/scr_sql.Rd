@@ -43,7 +43,9 @@ scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
 \item{x}{An object from \code{\link[=scr_select]{scr_select()}}, \code{\link[=scr_scorecard]{scr_scorecard()}}, \code{\link[=scr_pd]{scr_pd()}},
 \code{\link[=scr_lgd]{scr_lgd()}}, \code{\link[=scr_ead]{scr_ead()}} or \code{\link[=scr_capital]{scr_capital()}}.}
 
-\item{table}{Source table name. \code{NULL} uses \code{config$sql_table}.}
+\item{table}{Source table name, written verbatim (it may be qualified,
+\code{schema.table}, and is never quoted: pass only a trusted name). \code{NULL}
+uses \code{config$sql_table}.}
 
 \item{dialect}{Dialect (\code{"ansi"}, \code{"databricks"}, \code{"spark"}, \code{"hive"},
 \code{"mysql"}, \code{"mariadb"}, \code{"sqlserver"}, \code{"bigquery"}, \code{"postgres"},
@@ -93,7 +95,12 @@ per variable and \code{score_points} (whole points).
 }
 
 The order matters: without the first block, the WOE would be applied to
-data different from what was binned. The score computed by the SQL
+data different from what was binned. Column names are quoted with the
+dialect's delimiters only when they are not plain identifiers or are
+reserved words, the same rule \code{\link[OptimalBinningWoE:obwoe_sql]{OptimalBinningWoE::obwoe_sql()}} applies,
+so every block names a column the same way. A row whose value falls in
+no fitted bin (a category never seen on train) takes a WOE of 0 and the
+points of a WOE of 0, in the SQL as in \code{\link[=scr_apply]{scr_apply()}}. The score computed by the SQL
 matches \code{\link[=scr_apply]{scr_apply()}} numerically, by an automated test that runs both
 paths.
 }

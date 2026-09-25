@@ -37,7 +37,10 @@
 #' exact points stay in `points_raw`; `points` is the rounded version when
 #' `points_round = TRUE`. The exact score (`score`) and the whole-points
 #' score (`score_points`) are both returned by [scr_apply()] and both
-#' emitted by [scr_sql()].
+#' emitted by [scr_sql()]. A row that falls in no fitted bin (a category
+#' never seen on train, a missing value without a missing bin) gets a WOE of
+#' 0 from the binning engine, hence the points of a WOE of 0: `0`, or
+#' `base / k` under `"distributed"`.
 #'
 #' @param x An object from [scr_select()].
 #' @param features Variables of the scorecard. Defaults to [scr_selected()].
@@ -245,7 +248,32 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   tb <- data.table::rbindlist(rows)
   base_points_raw <- if (distrib) 0 else base_raw
   list(table = tb[], base_points_raw = base_points_raw,
-       base_points = if (isTRUE(cfg$points_round)) round(base_points_raw) else base_points_raw)
+       base_points = if (isTRUE(cfg$points_round)) round(base_points_raw) else base_points_raw,
+       unbinned_points = .unbinned_points(distrib, base_raw, k, cfg$points_round))
+}
+
+#' Points of a row that falls in no fitted bin (an unseen category, a
+#' missing value without a missing bin)
+#'
+#' The binning engine gives such a row a WOE of 0 (its `na_woe`), so its
+#' exact contribution to the score is the distributed share of the base,
+#' `base / k`, under `points_style = "distributed"` and 0 otherwise. The
+#' whole-points score must add the same, in R and in SQL, or `score` and
+#' `score_points` part ways on exactly those rows.
+#' @keywords internal
+#' @noRd
+.unbinned_points <- function(distrib, base_raw, k, round_pts) {
+  v <- if (isTRUE(distrib)) base_raw / k else 0
+  if (isTRUE(round_pts)) round(v) else v
+}
+
+#' The same value, read from a fitted scorecard
+#' @keywords internal
+#' @noRd
+.sc_unbinned_points <- function(sc) {
+  .unbinned_points(identical(sc$points_style, "distributed"),
+                   sc$alignment$a + sc$alignment$b * unname(sc$coef["(Intercept)"]),
+                   length(sc$features), sc$points_round)
 }
 
 #' Score a sample: link, prob, exact score and whole-points score
@@ -256,7 +284,9 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   sp <- rep(pts$base_points, length(link))
   for (f in unique(pts$table$variable)) {
     p <- pts$table[variable == f]
-    sp <- sp + p$points[match(w[[paste0(f, "_bin")]], p$bin)]
+    pf <- p$points[match(w[[paste0(f, "_bin")]], p$bin)]
+    pf[is.na(pf)] <- pts$unbinned_points
+    sp <- sp + pf
   }
   out <- data.table::data.table(link = link, prob = stats::plogis(link), score = score, score_points = sp, y = y)
   if (!is.null(date)) out[, date := date]
@@ -325,8 +355,11 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   p <- .score_to_prob(al, s$score)
   y <- s$y
   band <- cut(s$score, breaks = breaks, include.lowest = TRUE)
-  tb <- data.table::data.table(band = as.character(band), p = p, y = y)[
+  # ordered by the band factor (numeric order), not by its label: "(1e+03,Inf]"
+  # would otherwise sort before "(512,530]"
+  tb <- data.table::data.table(band = band, p = p, y = y)[
     , .(n = .N, expected = mean(p), observed = mean(y)), by = band][order(band)]
+  tb[, band := as.character(band)]
   tb[, gap := observed - expected]
   ece <- sum(tb$n / sum(tb$n) * abs(tb$gap))
   lo <- suppressWarnings(stats::glm(y ~ stats::qlogis(pmin(pmax(p, 1e-6), 1 - 1e-6)), family = stats::binomial()))

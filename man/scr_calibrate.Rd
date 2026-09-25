@@ -69,10 +69,16 @@ refined by a one-dimensional root so that the mean PD equals the CT
 exactly (the closed form is reported as \code{shift_prior}).}
 \item{\code{"logodds_ab"}}{Tasche (2013): \verb{ln(odds*) = a + b ln(odds)}, with
 \verb{(a, b)} solving \verb{mean(PD*) = CT} and implied accuracy ratio equal to
-\code{ar_target} (default: the accuracy ratio observed on the sample).}
-\item{\code{"qmm"}}{Quasi-moment matching: the same two equations, with the
-target accuracy ratio taken from the PD distribution itself
-(the implied AR of the current PDs), so no outcome is needed.}
+\code{ar_target} (default: the accuracy ratio observed on the sample).
+With the observed accuracy ratio this is Tasche's quasi-moment
+matching (QMM) proper. The implied AUC is the probability that a
+default has a higher PD than a non-default when the PDs are true:
+each score carries weight \verb{PD*} among the defaults and \verb{1 - PD*}
+among the non-defaults, ties counted one half.}
+\item{\code{"qmm"}}{The outcome-free variant of the same two equations: the
+target accuracy ratio is the implied AR of the current PDs, so no
+outcome is needed and the implied discriminatory power of the
+uncalibrated curve is carried over to the new level.}
 \item{\code{"scaling"}}{\verb{PD* = PD * CT / ybar}. The proportional rescaling is
 not a logit map, so the slope is the least-squares projection of
 \verb{logit(PD*)} on the ln(odds) and the intercept is solved to the CT.}

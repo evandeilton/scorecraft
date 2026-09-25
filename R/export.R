@@ -69,7 +69,7 @@ scr_export <- function(x, dir, stamp = TRUE, ...) UseMethod("scr_export")
 scr_export.scr_result <- function(x, dir, stamp = TRUE, ...) {
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
-  tag <- tolower(x$target)
+  tag <- .file_tag(x$target)
   sheets <- list(
     "01_Funnel"      = x$funnel,
     "02_Gains"       = x$gains,
@@ -99,7 +99,7 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
   .need_openxlsx()
   extra <- list(...)
   out_dir <- .export_dir(dir, stamp)
-  tag <- tolower(x$target)
+  tag <- .file_tag(x$target)
   ct <- extra$cutoff %||% scr_cutoff(x)
   st <- extra$strategy %||% scr_strategy(x, revenue_good = extra$revenue_good %||% 1, loss_bad = extra$loss_bad %||% 1)
   rj <- extra$reject %||% scr_reject(x)
@@ -168,30 +168,37 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
   # rebuild newdata-free timelines from the scored samples: the hold-out
   # periods against the training distribution
   s <- x$samples$holdout; tr <- x$samples$train
-  periods <- sort(unique(as.character(s$date)))
+  pd <- as.character(s$date)
+  periods <- sort(unique(pd))
+  # rows of every period grouped once (rows without a date are left out, as before)
+  rows <- split(seq_along(pd), factor(match(pd, periods), levels = seq_along(periods)))
   hie <- identical(x$direction, "higher_is_riskier")
   pl <- .read_plan(x$monitoring_plan %||% scr_monitoring_plan(x))$thresholds
-  psi <- data.table::rbindlist(lapply(periods, function(p) {
-    i <- as.character(s$date) == p
-    r <- scr_psi(tr$score, s$score[i], breaks = x$breaks, alpha = pl$alpha, thresholds = pl$psi)
-    data.table::data.table(period = p, n = sum(i), mean_score = mean(s$score[i]), psi = r$psi,
+  gb <- cut(tr$score, breaks = x$breaks, include.lowest = TRUE)
+  lv <- levels(gb)
+  nb <- tabulate(as.integer(gb), nbins = length(lv))
+  band_ho <- as.integer(cut(s$score, breaks = x$breaks, include.lowest = TRUE))
+  psi <- data.table::rbindlist(lapply(seq_along(periods), function(k) {
+    i <- rows[[k]]
+    r <- .psi_counts(nb, tabulate(band_ho[i], nbins = length(lv)), lv, pl$alpha, pl$psi)
+    data.table::data.table(period = periods[k], n = length(i), mean_score = mean(s$score[i]), psi = r$psi,
                            flag_fixed = r$flag_fixed, critical = r$critical, flag_adjusted = r$flag_adjusted)
   }))
-  vintage <- data.table::rbindlist(lapply(periods, function(p) {
-    i <- as.character(s$date) == p
+  vintage <- data.table::rbindlist(lapply(seq_along(periods), function(k) {
+    i <- rows[[k]]
     m <- scr_metrics(s$score[i], s$y[i], higher_is_event = hie, ci = TRUE, n_boot = x$config$n_boot,
                      level = x$config$ci_level, seed = x$config$seed, nthread = x$config$nthread)
-    data.table::data.table(period = p, n = sum(i), events = sum(s$y[i]), event_rate = mean(s$y[i]),
+    data.table::data.table(period = periods[k], n = length(i), events = sum(s$y[i]), event_rate = mean(s$y[i]),
                            mean_score = mean(s$score[i]), auc = m$auc, auc_lo = m$auc_lo, auc_hi = m$auc_hi,
                            ks = m$ks, ks_lo = m$ks_lo, ks_hi = m$ks_hi, gini = m$gini)
   }))
   csi <- if (is.null(x$holdout_bins)) data.table::copy(x$stability$variables)[, period := "holdout"] else
-    data.table::rbindlist(lapply(periods, function(p) {
-      i <- as.character(s$date) == p
+    data.table::rbindlist(lapply(seq_along(periods), function(k) {
+      i <- rows[[k]]
       data.table::rbindlist(lapply(x$features, function(f) {
         pt <- x$points[variable == f]
         cmp <- tabulate(x$holdout_bins[[f]][i], nbins = nrow(pt))
-        .csi_dt(p, f, .csi_row(pt, cmp, pl$alpha, pl$csi))
+        .csi_dt(periods[k], f, .csi_row(pt, cmp, pl$alpha, pl$csi))
       }))
     }))
   list(psi = psi, csi = csi, vintage = vintage)
@@ -208,7 +215,20 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
 #' @keywords internal
 #' @noRd
 .need_openxlsx <- function() {
-  if (!requireNamespace("openxlsx", quietly = TRUE)) stop("scr_export() needs the 'openxlsx' package.", call. = FALSE)
+  if (!requireNamespace("openxlsx", quietly = TRUE)) stop("reading or writing .xlsx needs the 'openxlsx' package.", call. = FALSE)
+}
+
+#' File-name tag from a target or model name
+#'
+#' The tag becomes part of a file name inside `dir`: a separator or a `..`
+#' in a column name must never take the write outside the directory the
+#' user gave.
+#' @keywords internal
+#' @noRd
+.file_tag <- function(x) {
+  tag <- gsub("[^a-z0-9_.-]+", "_", tolower(as.character(x)[1]))
+  tag <- gsub("\\.{2,}", "_", tag)
+  if (is.na(tag) || !nzchar(gsub("[_.]", "", tag))) "target" else tag
 }
 
 #' @keywords internal
@@ -228,13 +248,21 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
   tmp <- file.path(dirname(file), paste0(".", basename(file), ".tmp"))
   on.exit(if (file.exists(tmp)) unlink(tmp), add = TRUE)
   openxlsx::write.xlsx(clean, file = tmp, asTable = TRUE, overwrite = TRUE, tableStyle = "TableStyleLight10")
-  # reopen and verify: every sheet present, every row count as written
+  # reopen and verify: every sheet present, every row count as written. The
+  # count is read from the range of the sheet's table, not from read.xlsx(),
+  # which skips a row whose cells are all empty (a legitimate all-NA row)
   got <- openxlsx::getSheetNames(tmp)
   if (!identical(got, names(clean))) stop("xlsx verification failed: sheet names differ in ", file, call. = FALSE)
+  wb <- openxlsx::loadWorkbook(tmp)
   for (nm in names(clean)) {
-    back <- openxlsx::read.xlsx(tmp, sheet = nm)
-    if (nrow(back) != nrow(clean[[nm]])) {
-      stop("xlsx verification failed: sheet '", nm, "' has ", nrow(back), " rows, expected ", nrow(clean[[nm]]), call. = FALSE)
+    ref <- attr(openxlsx::getTables(wb, nm), "refs")[1]
+    n_back <- if (is.null(ref) || is.na(ref)) NA_integer_ else as.integer(sub("^.*[A-Z]+([0-9]+)$", "\\1", ref)) - 1L
+    if (!identical(n_back, nrow(clean[[nm]]))) {
+      stop("xlsx verification failed: sheet '", nm, "' has ", n_back, " rows, expected ", nrow(clean[[nm]]), call. = FALSE)
+    }
+    hdr <- names(openxlsx::read.xlsx(tmp, sheet = nm, rows = 1:2, check.names = FALSE, sep.names = " "))
+    if (length(hdr) != ncol(clean[[nm]])) {
+      stop("xlsx verification failed: sheet '", nm, "' has ", length(hdr), " columns, expected ", ncol(clean[[nm]]), call. = FALSE)
     }
   }
   if (file.exists(file)) unlink(file)

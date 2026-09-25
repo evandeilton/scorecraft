@@ -104,6 +104,7 @@ scr_monitoring_plan <- function(x, breaks = NULL) {
 #' @param x An object from [scr_scorecard()].
 #' @param newdata New table with the source columns.
 #' @param date_col Period column. `NULL` treats `newdata` as a single period.
+#'   Rows with a missing date form a period of their own (`NA`, last).
 #' @param target Target column in `newdata`, for the performance by vintage.
 #'   `NULL` skips it.
 #' @param alpha Level of the adjusted threshold. `NULL` (default) takes it
@@ -139,6 +140,7 @@ scr_monitor <- function(x, newdata, date_col = NULL, target = NULL, alpha = NULL
   pl <- .read_plan(plan %||% x$monitoring_plan %||% scr_monitoring_plan(x))
   th <- pl$thresholds
   alpha <- alpha %||% th$alpha
+  .scr_num1(alpha, "alpha", lower = 0, upper = 1, open_lower = TRUE)
   dt <- data.table::as.data.table(newdata)
   if (!is.null(date_col) && !date_col %in% names(dt)) stop("`date_col` does not exist in newdata.", call. = FALSE)
   if (!is.null(target) && !target %in% names(dt)) stop("`target` does not exist in newdata.", call. = FALSE)
@@ -147,34 +149,46 @@ scr_monitor <- function(x, newdata, date_col = NULL, target = NULL, alpha = NULL
   link <- .glm_link(x$coef, w, x$features)
   score <- x$alignment$a + x$alignment$b * link
   period <- if (is.null(date_col)) rep("all", nrow(dt)) else as.character(dt[[date_col]])
-  periods <- sort(unique(period))
+  # rows without a date form their own period (NA, listed last) instead of
+  # silently leaving every table
+  periods <- sort(unique(period), na.last = TRUE)
   tr_score <- x$samples$train$score
+  # rows of every period, grouped once; the training bands, the score band
+  # of every new row and the bin index of every variable are also computed
+  # once, and each period only re-tabulates its rows
+  rows <- split(seq_along(period), factor(match(period, periods), levels = seq_along(periods)))
+  gb <- cut(tr_score, breaks = x$breaks, include.lowest = TRUE)
+  lv <- levels(gb)
+  nb <- tabulate(as.integer(gb), nbins = length(lv))
+  band_new <- as.integer(cut(score, breaks = x$breaks, include.lowest = TRUE))
 
-  psi <- data.table::rbindlist(lapply(periods, function(p) {
-    i <- period == p
-    r <- scr_psi(tr_score, score[i], breaks = x$breaks, alpha = alpha, thresholds = th$psi)
-    data.table::data.table(period = p, n = sum(i), mean_score = mean(score[i]), psi = r$psi,
+  psi <- data.table::rbindlist(lapply(seq_along(periods), function(k) {
+    i <- rows[[k]]
+    r <- .psi_counts(nb, tabulate(band_new[i], nbins = length(lv)), lv, alpha, th$psi)
+    data.table::data.table(period = periods[k], n = length(i), mean_score = mean(score[i]), psi = r$psi,
                            flag_fixed = r$flag_fixed, critical = r$critical, flag_adjusted = r$flag_adjusted)
   }))
-  csi <- data.table::rbindlist(lapply(periods, function(p) {
-    i <- period == p
+  pts_f <- lapply(stats::setNames(x$features, x$features), function(f) x$points[variable == f])
+  # the base distribution is the training bin share stored in the points
+  # table; the adjusted critical value uses the real training size
+  bin_idx <- lapply(x$features, function(f) match(w[[paste0(f, "_bin")]], pts_f[[f]]$bin))
+  names(bin_idx) <- x$features
+  csi <- data.table::rbindlist(lapply(seq_along(periods), function(k) {
+    i <- rows[[k]]
     data.table::rbindlist(lapply(x$features, function(f) {
-      pt <- x$points[variable == f]
-      # the base distribution is the training bin share stored in the points
-      # table; the adjusted critical value uses the real training size
-      cmp <- tabulate(match(w[[paste0(f, "_bin")]][i], pt$bin), nbins = nrow(pt))
-      .csi_dt(p, f, .csi_row(pt, cmp, alpha, th$csi))
+      pt <- pts_f[[f]]
+      .csi_dt(periods[k], f, .csi_row(pt, tabulate(bin_idx[[f]][i], nbins = nrow(pt)), alpha, th$csi))
     }))
   }))
   vintage <- NULL
   if (!is.null(target)) {
     y <- .target_as_int(dt[[target]], target, if (isTRUE(x$event$inverted)) 0L else NULL)$y
     hie <- identical(x$direction, "higher_is_riskier")
-    vintage <- data.table::rbindlist(lapply(periods, function(p) {
-      i <- period == p
+    vintage <- data.table::rbindlist(lapply(seq_along(periods), function(k) {
+      i <- rows[[k]]
       m <- scr_metrics(score[i], y[i], higher_is_event = hie, ci = TRUE, n_boot = n_boot,
                        level = x$config$ci_level, seed = x$config$seed, nthread = x$config$nthread)
-      data.table::data.table(period = p, n = sum(i), events = sum(y[i]), event_rate = mean(y[i]),
+      data.table::data.table(period = periods[k], n = length(i), events = sum(y[i]), event_rate = mean(y[i]),
                              mean_score = mean(score[i]), auc = m$auc, auc_lo = m$auc_lo, auc_hi = m$auc_hi,
                              ks = m$ks, ks_lo = m$ks_lo, ks_hi = m$ks_hi, gini = m$gini,
                              status = if (sum(y[i]) < th$min_events) "insufficient" else "ok")

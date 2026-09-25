@@ -20,13 +20,19 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          # R-devel has no binaries: every dependency compiles from source. The
+          # heavy optional Suggests (duckdb, lightgbm) are left out there; the
+          # tests and vignettes that need them skip themselves.
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release', skip-pkgs: 'duckdb=?ignore, lightgbm=?ignore', force-suggests: 'false'}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      # dependencies built from source use every core of the runner
+      MAKEFLAGS: -j4
+      _R_CHECK_FORCE_SUGGESTS_: ${{ matrix.config.force-suggests || 'true' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +47,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, github::evandeilton/OptimalBinningWoE
+          extra-packages: any::rcmdcheck, github::evandeilton/OptimalBinningWoE ${{ matrix.config.skip-pkgs && format(', {0}', matrix.config.skip-pkgs) || '' }}
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2

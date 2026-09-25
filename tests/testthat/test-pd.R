@@ -290,12 +290,13 @@ test_that("the calibration tests are pinned: Jeffreys, binomial critical count, 
   # a grade with more defaults than the critical count is rejected: D = 16 gives p <= alpha
   expect_lte(.pd_cal_tests(1000, 16, 0.01, 0.05)$p_binomial, 0.05)
   expect_gt(.pd_cal_tests(1000, 15, 0.01, 0.05)$p_binomial, 0.05)
-  # Hosmer-Lemeshow on a hand table: only the third grade deviates, (40 - 30)^2 / (500 * 0.06 * 0.94)
+  # Hosmer-Lemeshow on a hand table: only the third grade deviates, (40 - 30)^2 / (500 * 0.06 * 0.94);
+  # the PDs are fixed before the validation sample is seen, so the reference is chi-square with K df
   hl <- .pd_hl(n = c(1000, 800, 500), d = c(10, 24, 40), pd = c(0.01, 0.03, 0.06))
   expect_equal(hl$chi2, 100 / 28.2)
-  expect_equal(hl$df, 1L)
-  expect_equal(hl$p, stats::pchisq(100 / 28.2, 1, lower.tail = FALSE))
-  expect_true(is.na(.pd_hl(c(100, 100), c(1, 2), c(0.01, 0.02))$p))
+  expect_equal(hl$df, 3L)
+  expect_equal(hl$p, stats::pchisq(100 / 28.2, 3, lower.tail = FALSE))
+  expect_equal(.pd_hl(c(100, 100), c(1, 2), c(0.01, 0.02))$df, 2L)
   expect_equal(.pd_light(c(0.005, 0.03, 0.2, NA), c(0.01, 0.05)), c("red", "amber", "green", NA))
 })
 
@@ -362,8 +363,9 @@ test_that("the validation battery runs on the cohort panel with lights, discrimi
   expect_equal(pt$n, sum(s$n)); expect_equal(pt$dr, sum(s$defaults) / sum(s$n))
   expect_equal(pt$p_jeffreys, stats::pbeta(pt$pd, pt$d + 0.5, pt$n - pt$d + 0.5))
   hl <- .pd_hl(v$calibration$n, v$calibration$d, v$calibration$pd)
-  expect_equal(pt$hl_chi2, hl$chi2); expect_equal(pt$hl_df, K - 2L)
-  expect_equal(pt$multi_period_z, (mean(v$portfolio$dr) - mean(v$portfolio$pd)) / (stats::sd(v$portfolio$dr) / sqrt(8)))
+  expect_equal(pt$hl_chi2, hl$chi2); expect_equal(pt$hl_df, K)
+  dd <- v$portfolio$dr - v$portfolio$pd
+  expect_equal(pt$multi_period_z, mean(dd) / (stats::sd(dd) / sqrt(8)))
   expect_equal(pt$brier, sum(v$calibration$d * (1 - v$calibration$pd)^2 + (v$calibration$n - v$calibration$d) * v$calibration$pd^2) / pt$n)
   # the tested PD is the final one by default
   expect_equal(v$calibration$pd, pd$table$pd_final)
