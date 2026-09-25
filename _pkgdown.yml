@@ -23,13 +23,12 @@ articles:
   - scorecraft
   - coarse-classing
   - alignment-and-portfolio
-  - production-and-monitoring
 - title: IRB risk parameters
   navbar: IRB
   contents:
-  - pd-calibration-and-grades
-  - lgd-and-ead-under-irb
-  - expected-loss-and-capital
+  - articles/pd-calibration-and-grades
+  - articles/lgd-and-ead-under-irb
+  - articles/expected-loss-and-capital
 
 reference:
 - title: Configuration

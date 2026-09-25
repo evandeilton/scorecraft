@@ -8,7 +8,9 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+has_glmnet <- requireNamespace("glmnet", quietly = TRUE)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = has_glmnet)
+old_dt <- data.table::setDTthreads(2)
 ```
 
 ## Why manual coarse classing still matters
@@ -41,14 +43,14 @@ is no second implementation to keep in step.
 
 ## A fast selection run
 
-The lab opens on an `scr_select()` result. The configuration below is the
-quick one used in the package tests: single thread, two consensus voters
-and a light bootstrap, enough for a few seconds of run time on
-`scr_demo`.
+The lab opens on an `scr_select()` result. The configuration below is a
+light one: a single thread, two consensus voters (elastic net and xgboost)
+and a short bootstrap. The selection itself is described in
+`vignette("scorecraft", package = "scorecraft")`.
 
 ```{r setup}
 library(scorecraft)
-cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_glmnet = TRUE, use_ranger = FALSE,
                   use_lightgbm = FALSE, xgb_rounds = 60, n_boot = 20)
 res <- scr_select(scr_demo, "default", config = cfg,
                   drop = c("id", "churn"), date_col = "ref_date")
@@ -130,9 +132,10 @@ p_split <- scr_classing_propose(lab, "vl_score_01",
 p_split
 ```
 
-The split proposal is a `REVIEW`: the new first bin holds 2% of the
-training rows and breaks the monotone pattern of the event rate, so the
-engine's `NOT_MONOTONIC` rule fires. A `REVIEW` verdict is advisory: the
+The split proposal is a `REVIEW` on two counts: the new first bin holds 2%
+of the training rows and breaks the monotone pattern of the event rate
+(`NOT_MONOTONIC`), and eight bins exceed the configured maximum of seven
+(`TOO_MANY_BINS`). A `REVIEW` verdict is advisory: the
 proposal can be accepted with a reason or discarded. Every proposal takes
 the next id from the lab's counter (`P001`, `P002`, ...), whether or not
 it is later acted on, so the ids in a session count the proposals made,
@@ -172,8 +175,14 @@ on its own. `missing_to` folds it into another bin.
 
 ```{r propose-missing}
 p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
-p_missing
+p_missing$entry$bin
+p_missing$verdict
+p_missing$warnings
 ```
+
+The optimal bins of `ds_optin` carried a training IV of 0.0065 (see the
+overview); folding `"MISSING"` into `YES` leaves almost none, below the
+admission minimum, and loses more than the lab allows on hold-out.
 
 ### Reading the warnings and the verdict
 
@@ -214,12 +223,11 @@ accepted in turn.
 lab <- scr_classing_accept(lab, p_groups, reason = "edge/core is what pricing uses")
 ```
 
-The `ds_optin` proposal erased what little signal the variable had
-(`IV_BELOW_MIN`), so it is discarded, with a reason, and the variable
-keeps its optimal bins. A discarded proposal is a ledger row too.
+The `ds_optin` proposal erased what little signal the variable had, so it
+is discarded, with a reason, and the variable keeps its optimal bins. A
+discarded proposal is a ledger row too.
 
 ```{r discard}
-p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
 lab <- scr_classing_discard(lab, p_missing, reason = "folding MISSING into YES erases the signal")
 ```
 
@@ -301,7 +309,7 @@ everything else (counts, rates, WOE) is context and is regenerated on
 read. Open ends are written as empty cells. A `.xlsx` path writes a
 workbook through openxlsx; a `.csv` path needs nothing.
 
-```{r spec}
+```{r spec, message = FALSE}
 spec <- scr_classing_spec(lab)
 spec
 spec_file <- file.path(tempdir(), "classing_default.csv")
@@ -420,6 +428,22 @@ sc$points[variable == "vl_score_01", .(variable, bin, woe, points)]
 sc$points[variable == "ds_region", .(variable, bin, woe, points)]
 ```
 
+The manual decisions have a price, and the committee should see it. The
+scorecard fitted on the optimal bins and the consensus shortlist is the
+benchmark:
+
+```{r price}
+sc_auto <- scr_scorecard(res)
+rbind(scr_score_metrics(sc_auto)[, .(card = "optimal", sample, auc, auc_lo, auc_hi, ks)],
+      scr_score_metrics(sc)[, .(card = "manual", sample, auc, auc_lo, auc_hi, ks)])
+```
+
+On hold-out the manual card gives up about 0.005 of AUC and 0.03 of KS,
+well inside the bootstrap interval of either card. Whether policy bands,
+a two-region grouping, a forced bureau variable and a dropped unavailable
+one are worth that is a business decision; the lab makes sure it is taken
+with the numbers on the table.
+
 The model card states the provenance in words: which binning algorithms
 the card mixes, whether the shortlist came from the consensus or from the
 lab, how many manual bins it carries and which variables were forced in
@@ -465,32 +489,18 @@ rows. This vignette does not need a database to run.
 
 ## Governance
 
-The lab is designed so that a reviewer can reconstruct every manual
-decision from the deliverables alone.
+A reviewer can reconstruct every manual decision from the deliverables. The
+ledger is append-only, with one row per `accept`, `discard`, `supersede`,
+`restore` (a `reset = TRUE` proposal that takes a variable back to its
+optimal bins), `override`, `force`, `drop` and `keep`, and it travels from
+the lab into the result, the scorecard and the workbooks written by
+`scr_export()`. Four conditions block a proposal: an empty bin, a
+degenerate bin without smoothing, a bin below the hard minimum share and a
+manual IV above the leakage ceiling. Accepting a blocked proposal, forcing
+a variable failed for `IV_SUSPICIOUS` and forcing a derived `__sp` flag
+under `allow_derived_final = FALSE` each need `override = TRUE`, which adds
+its own ledger row.
 
-* **What the ledger records.** One row per decision, in order:
-  `accept`, `discard`, `supersede`, `restore` (a `reset = TRUE` proposal
-  taking a variable back to its optimal bins), `override`, `force`,
-  `drop` and `keep`. Each row carries the author, the timestamp, the
-  instruction as typed, the number of bins and the train and hold-out IV
-  before and after, the PSI, the verdict, the codes and the reason. The
-  ledger is append-only and travels unchanged from the lab into the
-  result, into the scorecard and into the `.xlsx` workbooks written by
-  `scr_export()`, next to the classing spec.
-* **What is blocked.** An empty bin, a degenerate bin without smoothing, a
-  bin below the hard minimum share, a manual IV above the leakage ceiling,
-  a category left unassigned, a proposal without a reason, a `force` of a
-  variable that never reached binning. The first four block a proposal
-  (`BLOCKED`); the last three are errors that never produce a proposal at
-  all.
-* **What needs an override.** Accepting a `BLOCKED` proposal, forcing a
-  variable failed for `IV_SUSPICIOUS`, and forcing a derived `__sp` flag
-  under `allow_derived_final = FALSE`. An override is not a way round the
-  rule; it is a documented exception, with its own ledger row, that the
-  model card and the SQL header will point to.
-
-Everything a manual decision touches remains reproducible: the optimal
-artefacts are frozen alongside, the manual bins are recomputed on the
-training rows with the engine's own WOE formula, and the scorecard, the
-R scoring and the SQL read them through the same contract as any optimal
-bin.
+```{r, include = FALSE, eval = TRUE}
+data.table::setDTthreads(old_dt)
+```
