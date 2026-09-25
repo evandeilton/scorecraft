@@ -118,8 +118,15 @@ scr_default <- function(data, id, date, dpd = NULL, arrears = NULL, exposure = N
 
   p[, event_id := data.table::fifelse(ev > 0L, paste0(id, "#", ev), NA_character_)]
   # grouped aggregates GForce can run (no per-event R call), then the trigger
-  events <- p[default == 1L, list(id = id[1L], start = min(date), end = max(date), months = .N,
-                                  cured = max(cured)), by = "event_id"]
+  # a panel with no default month gives an empty table (j is not evaluated on
+  # an empty subset, so min()/max() never see a zero-length Date)
+  events <- if (any(p$default == 1L)) {
+    p[default == 1L, list(id = id[1L], start = min(date), end = max(date), months = .N,
+                          cured = max(cured)), by = "event_id"]
+  } else {
+    data.table::data.table(event_id = character(), id = p$id[0L], start = p$date[0L], end = p$date[0L],
+                           months = integer(), cured = p$cured[0L])
+  }
   ev_trig <- p[default == 1L & trigger != "", list(trigger = trigger[1L]), by = "event_id"]
   events[, trigger := ev_trig$trigger[match(event_id, ev_trig$event_id)]]
   data.table::setcolorder(events, c("event_id", "id", "start", "end", "trigger", "months", "cured"))
