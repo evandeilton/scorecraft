@@ -301,11 +301,11 @@ strategy), the SQL files and a Markdown summary.
 
 out <- file.path(tempdir(), "scorecraft-vignette")
 basename(unlist(scr_export(sc, out, stamp = FALSE)$files))
-#>   /tmp/RtmpJvGLZr/scorecraft-vignette/scorecard_default.xlsx
-#>   /tmp/RtmpJvGLZr/scorecraft-vignette/validation_default.xlsx
-#>   /tmp/RtmpJvGLZr/scorecraft-vignette/strategy_default.xlsx
-#>   /tmp/RtmpJvGLZr/scorecraft-vignette/sql_score_default.sql
-#>   /tmp/RtmpJvGLZr/scorecraft-vignette/sql_woe_default.sql
+#>   /tmp/RtmpDGzMBF/scorecraft-vignette/scorecard_default.xlsx
+#>   /tmp/RtmpDGzMBF/scorecraft-vignette/validation_default.xlsx
+#>   /tmp/RtmpDGzMBF/scorecraft-vignette/strategy_default.xlsx
+#>   /tmp/RtmpDGzMBF/scorecraft-vignette/sql_score_default.sql
+#>   /tmp/RtmpDGzMBF/scorecraft-vignette/sql_woe_default.sql
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  
 #> [5] "sql_woe_default.sql"

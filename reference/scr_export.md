@@ -145,17 +145,17 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
                   date_col = "ref_date")
 out <- file.path(tempdir(), "scorecraft-example")
 res <- scr_export(res, out, stamp = FALSE)
-#>   /tmp/Rtmp3yCHO7/scorecraft-example/selection_default.xlsx
-#>   /tmp/Rtmp3yCHO7/scorecraft-example/sql_woe_default.sql
-#>   /tmp/Rtmp3yCHO7/scorecraft-example/summary_default.md
+#>   /tmp/Rtmpgribf9/scorecraft-example/selection_default.xlsx
+#>   /tmp/Rtmpgribf9/scorecraft-example/sql_woe_default.sql
+#>   /tmp/Rtmpgribf9/scorecraft-example/summary_default.md
 basename(unlist(res$files))
 #> [1] "selection_default.xlsx" "sql_woe_default.sql"    "summary_default.md"    
 sc <- scr_export(scr_scorecard(res), out, stamp = FALSE)
-#>   /tmp/Rtmp3yCHO7/scorecraft-example/scorecard_default.xlsx
-#>   /tmp/Rtmp3yCHO7/scorecraft-example/validation_default.xlsx
-#>   /tmp/Rtmp3yCHO7/scorecraft-example/strategy_default.xlsx
-#>   /tmp/Rtmp3yCHO7/scorecraft-example/sql_score_default.sql
-#>   /tmp/Rtmp3yCHO7/scorecraft-example/sql_woe_default.sql
+#>   /tmp/Rtmpgribf9/scorecraft-example/scorecard_default.xlsx
+#>   /tmp/Rtmpgribf9/scorecraft-example/validation_default.xlsx
+#>   /tmp/Rtmpgribf9/scorecraft-example/strategy_default.xlsx
+#>   /tmp/Rtmpgribf9/scorecraft-example/sql_score_default.sql
+#>   /tmp/Rtmpgribf9/scorecraft-example/sql_woe_default.sql
 basename(unlist(sc$files))
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  
