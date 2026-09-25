@@ -25,11 +25,17 @@
 #' `config$ecl_sicr_ratio`, else stage 1.
 #'
 #' Scenarios are a named list of shocks applied to the base inputs, each a
-#' list with any of `pd_mult` (multiplier of the hazards, capped at one),
-#' `z` (systematic factor of the one-factor model applied to the hazards
-#' with correlation `rho`, negative in a bad year), `lgd_add` (added to the
-#' LGD) and `ead_mult`; `weights` (normalised to one) give the
-#' probability-weighted result.
+#' list with any of `pd_mult` (non-negative multiplier of the hazards,
+#' capped at one), `z` (systematic factor of the one-factor model applied to
+#' the hazards with correlation `rho`, negative in a bad year), `lgd_add`
+#' (added to the LGD, the result floored at zero) and `ead_mult`
+#' (non-negative); `weights` (normalised to one) give the
+#' probability-weighted result. When a shocked hazard plus the prepayment
+#' hazard exceeds one, the exit probability of that month is capped at one.
+#' The `z` shock is applied to each monthly hazard, not to the annual PD;
+#' because the Vasicek map is non-linear, the implied 12-month stressed PD
+#' is higher than the one obtained by stressing the annual PD with the same
+#' `z` and `rho` (convert the annual PD yourself when that is wanted).
 #'
 #' @param pd_term Marginal monthly PDs: a matrix `n x T`, or a vector of
 #'   length `n` (a flat hazard recycled over `t_max` months), or a single
@@ -100,6 +106,7 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
       if (nrow(v) == 1L) return(matrix(v, n, H, byrow = TRUE))
       stop(sprintf("scr_ecl(): `%s` has %d rows, expected %d.", what, nrow(v), n), call. = FALSE)
     }
+    if (!length(v) %in% c(1L, n)) stop(sprintf("scr_ecl(): `%s` has length %d, expected 1 or %d.", what, length(v), n), call. = FALSE)
     matrix(rep_len(as.double(v), n), n, H)
   }
   h <- mat(pd_term, "pd_term"); L <- mat(lgd, "lgd"); E <- mat(ead, "ead")
@@ -115,7 +122,7 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
   hz <- min(horizon, H)
 
   # -- stage ------------------------------------------------------------------ #
-  pd12 <- 1 - .row_prod(1 - h[, seq_len(hz), drop = FALSE])
+  pd12 <- .cum_pd(h[, seq_len(hz), drop = FALSE])
   rule <- NULL
   if (is.null(stage)) {
     st <- rep(1L, n)
@@ -134,8 +141,9 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
                  dpd_stage2 = thr[1], dpd_stage3 = thr[2], sicr_ratio = cfg$ecl_sicr_ratio,
                  uses_dpd = !is.null(dpd), uses_pd_orig = !is.null(pd_orig))
   } else {
-    st <- as.integer(rep_len(stage, n))
+    st <- rep_len(stage, n)
     if (anyNA(st) || !all(st %in% 1:3)) stop("scr_ecl(): `stage` must be 1, 2 or 3.", call. = FALSE)
+    st <- as.integer(st)
     rule <- list(source = "supplied")
   }
 
@@ -153,10 +161,18 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
   runs <- lapply(scenarios, function(s) {
     bad <- setdiff(names(s), ok_keys)
     if (length(bad)) stop("scr_ecl(): unknown scenario key(s): ", lst(bad), ". Use ", lst(ok_keys), ".", call. = FALSE)
+    for (k in c("pd_mult", "ead_mult")) {
+      if (!is.null(s[[k]]) && (!is.numeric(s[[k]]) || anyNA(s[[k]]) || any(s[[k]] < 0))) {
+        stop(sprintf("scr_ecl(): scenario `%s` must be non-negative.", k), call. = FALSE)
+      }
+    }
+    for (k in c("z", "lgd_add")) {
+      if (!is.null(s[[k]]) && (!is.numeric(s[[k]]) || anyNA(s[[k]]))) stop(sprintf("scr_ecl(): scenario `%s` must be numeric.", k), call. = FALSE)
+    }
     hs <- h
     if (!is.null(s$z)) hs <- .vasicek_pit(hs, s$z, rho)
     if (!is.null(s$pd_mult)) hs <- pmin(hs * s$pd_mult, 1)   # first argument keeps the dims
-    Ls <- if (is.null(s$lgd_add)) L else L + s$lgd_add
+    Ls <- if (is.null(s$lgd_add)) L else pmax(L + s$lgd_add, 0)   # a favourable shock cannot make LGD negative
     Es <- if (is.null(s$ead_mult)) E else E * s$ead_mult
     .ecl_paths(hs, Ls, Es, P, DF, hz, st)
   })
@@ -173,7 +189,7 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
   ead1 <- E[, 1]
   ex <- data.table::data.table(id = if (is.null(id)) seq_len(n) else rep_len(id, n),
                                segment = if (is.null(segment)) NA_character_ else as.character(rep_len(segment, n)),
-                               stage = st, ead = ead1, pd_12m = pd12, pd_life = 1 - .row_prod(1 - h),
+                               stage = st, ead = ead1, pd_12m = pd12, pd_life = .cum_pd(h),
                                ecl_12m = ecl12, ecl_life = ecll, ecl = ecl)
   stages <- ex[, list(n = .N, ead = sum(ead), ecl_12m = sum(ecl_12m), ecl_life = sum(ecl_life), ecl = sum(ecl)), by = "stage"]
   stages <- merge(data.table::data.table(stage = 1:3), stages, by = "stage", all.x = TRUE)
@@ -208,22 +224,29 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
             class = c("scr_ecl", "list"))
 }
 
-#' Row-wise product of a matrix
+#' Cumulative PD `1 - prod(1 - h)` of each row of a hazard matrix
+#'
+#' Vectorised through `log1p` / `expm1`, accurate for small hazards and
+#' exact (one) when a hazard equals one.
 #' @keywords internal
 #' @noRd
-.row_prod <- function(M) if (ncol(M) == 1L) M[, 1] else apply(M, 1L, prod)
+.cum_pd <- function(h) 0 - expm1(rowSums(log1p(-h)))   # 0 - x: no signed zero
 
 #' Survival-weighted ECL over the horizon and the lifetime; stage 3 rows carry LGD_1 * EAD_1
+#'
+#' One pass over the months with a running survival vector (no `n x T`
+#' survival or loss matrix). The exit hazard (default plus prepayment) is
+#' capped at one so that a scenario shock cannot make the survival negative.
 #' @keywords internal
 #' @noRd
 .ecl_paths <- function(h, L, E, P, DF, hz, st) {
   n <- nrow(h); H <- ncol(h)
-  exit <- if (is.null(P)) h else h + P
-  S_prev <- matrix(1, n, H)
-  if (H > 1L) for (j in 2:H) S_prev[, j] <- S_prev[, j - 1L] * (1 - exit[, j - 1L])
-  loss <- S_prev * h * L * E * DF
-  life <- rowSums(loss)
-  m12 <- rowSums(loss[, seq_len(hz), drop = FALSE])
+  S <- rep(1, n); life <- numeric(n); m12 <- numeric(n)
+  for (j in seq_len(H)) {
+    life <- life + S * h[, j] * L[, j] * E[, j] * DF[, j]
+    if (j == hz) m12 <- life
+    S <- S * (1 - pmin(if (is.null(P)) h[, j] else h[, j] + P[, j], 1))
+  }
   s3 <- st == 3L
   if (any(s3)) { v <- L[s3, 1] * E[s3, 1]; life[s3] <- v; m12[s3] <- v }
   list(ecl_12m = m12, ecl_life = life)
