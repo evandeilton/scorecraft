@@ -41,8 +41,9 @@ scr_irb_rw(
 
 - m:
 
-  Effective maturity in years (wholesale classes only; `NULL` or `NA`
-  uses `params$m_default`).
+  Effective maturity in years, non-negative (wholesale classes only,
+  ignored and reported as `NA` on retail rows; `NULL` or `NA` uses
+  `params$m_default`).
 
 - asset_class:
 
@@ -53,8 +54,9 @@ scr_irb_rw(
 - sales:
 
   Annual sales of `corporate_sme` obligors, in the unit of
-  `params$correlation$sme` (missing values take the lower bound, the
-  largest adjustment).
+  `params$correlation$sme`, clipped to its bounds. A missing value takes
+  the upper bound, i.e. no firm-size adjustment: the adjustment requires
+  reported sales (Basel Framework CRE31.9; CRR Article 153(4)).
 
 - fi:
 
@@ -109,7 +111,8 @@ scr_irb_rw(
 ## Value
 
 A `data.table` with one row per exposure: `pd_used`, `lgd_used` (after
-floors; PD one on defaulted rows), `m` (after clipping), `r`, `b`, `ma`,
+floors; PD one on defaulted rows), `m` (after clipping;
+`params$m_default` under `"firb"`; `NA` on retail rows), `r`, `b`, `ma`,
 `k`, `rw`, `rwa`; attribute `floors_hit` counts the rows where each
 floor was binding.
 
@@ -119,7 +122,12 @@ floor was binding.
 \sqrt{R}\\G(0.999)}{\sqrt{1-R}}\right) - PD \cdot LGD\right\] \cdot MA
 \cdot s\$\$
 
-with `s = params$scaling_factor`. Defaulted rows carry
+with `s = params$scaling_factor` and, for wholesale classes, \\MA = (1 +
+(M - 2.5)\\b) / (1 - 1.5\\b)\\, \\b = (0.11852 - 0.05478 \ln PD)^2\\
+(`MA = 1` for retail). Below `PD = 1e-5`, reachable only without a PD
+floor (sovereigns), `b` is held at its value at `1e-5`: the regulatory
+`b` makes `1 - 1.5 b` vanish near `PD = 2.9e-6`, where the adjustment
+would explode and change sign. Defaulted rows carry
 `K = max(0, LGD - ELBE)` under `"airb"` and zero under `"firb"`; a
 missing `elbe` is taken equal to `lgd`. `RW = 12.5 K` and
 `RWA = RW * ead`.

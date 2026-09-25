@@ -8,12 +8,13 @@ of the long-run average from the cohort series, \\t\_{q, T-1}\\
 sd(DR_t)/\sqrt{T}\\ per grade; `"ci_binomial"` uses \\z_q
 \sqrt{PD(1-PD)/n}\\ on the obligors (or obligor-years when a series
 exists); `"bootstrap"` resamples the outcomes of the sample within each
-grade and takes the `level` quantile of the default rate above the
-estimate. Categories `"A"` (data and methodological deficiencies) and
-`"B"` (changes in standards or environment) are expert quantities:
-`value` (one number or one per grade, in PD units) and a non-empty
-`reason` are mandatory. The ledger is append-only: `A` and `B` entries
-accumulate, a new `C` supersedes the previous one (kept with
+grade (drawn as the resampled default rate, Binomial(n, DR) / n, its
+exact distribution) and takes the `level` quantile of the default rate
+above the estimate. Categories `"A"` (data and methodological
+deficiencies) and `"B"` (changes in standards or environment) are expert
+quantities: `value` (one number or one per grade, in PD units) and a
+non-empty `reason` are mandatory. The ledger is append-only: `A` and `B`
+entries accumulate, a new `C` supersedes the previous one (kept with
 `active = FALSE`).
 
 ## Usage

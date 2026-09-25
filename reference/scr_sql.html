@@ -44,7 +44,7 @@ variables (or those of the scorecard), in blocks in this order:"><meta property=
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Production SQL</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/sql.R" class="external-link"><code>R/sql.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/capital.R" class="external-link"><code>R/capital.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/ead.R" class="external-link"><code>R/ead.R</code></a>, and 2 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/sql.R" class="external-link"><code>R/sql.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/capital.R" class="external-link"><code>R/capital.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/ead.R" class="external-link"><code>R/ead.R</code></a>, and 2 more</small>
       <div class="d-none name"><code>scr_sql.Rd</code></div>
     </div>
 
@@ -101,7 +101,9 @@ variables (or those of the scorecard), in blocks in this order:</p>
 
 
 <dt id="arg-table">table<a class="anchor" aria-label="anchor" href="#arg-table"></a></dt>
-<dd><p>Source table name. <code>NULL</code> uses <code>config$sql_table</code>.</p></dd>
+<dd><p>Source table name, written verbatim (it may be qualified,
+<code>schema.table</code>, and is never quoted: pass only a trusted name). <code>NULL</code>
+uses <code>config$sql_table</code>.</p></dd>
 
 
 <dt id="arg-dialect">dialect<a class="anchor" aria-label="anchor" href="#arg-dialect"></a></dt>
@@ -162,7 +164,12 @@ with full precision.</p></li>
 final <code>SELECT</code> with <code>score</code> (exact, <code>a + b * logit</code>), <code>&lt;f&gt;_points</code>
 per variable and <code>score_points</code> (whole points).</p></li>
 </ol><p>The order matters: without the first block, the WOE would be applied to
-data different from what was binned. The score computed by the SQL
+data different from what was binned. Column names are quoted with the
+dialect's delimiters only when they are not plain identifiers or are
+reserved words, the same rule <code><a href="https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_sql.html" class="external-link">OptimalBinningWoE::obwoe_sql()</a></code> applies,
+so every block names a column the same way. A row whose value falls in
+no fitted bin (a category never seen on train) takes a WOE of 0 and the
+points of a WOE of 0, in the SQL as in <code><a href="scr_apply.html">scr_apply()</a></code>. The score computed by the SQL
 matches <code><a href="scr_apply.html">scr_apply()</a></code> numerically, by an automated test that runs both
 paths.</p>
     </div>
@@ -202,7 +209,7 @@ or the portfolio output.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">scr_sql</span><span class="op">(</span><span class="va">res</span>, table <span class="op">=</span> <span class="st">"prd.customers"</span>, dialect <span class="op">=</span> <span class="st">"databricks"</span><span class="op">)</span>, <span class="fl">20</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- =============================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- scorecraft | target: default | 12 approved variables | dialect: databricks</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -- Generated on 2026-09-25 20:45:45</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -- Generated on 2026-09-25 20:58:53</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> --   and sentinel values by the TRAINING median, special-population flags.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().</span>
@@ -230,8 +237,8 @@ or the portfolio output.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       CASE vl_score_07_idx WHEN 1 THEN 14 WHEN 2 THEN 6 WHEN 3 THEN 6 WHEN 4 THEN 1 WHEN 5 THEN -2 WHEN 6 THEN -7 ELSE 0 END AS vl_score_07_points,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       CASE vl_score_05_idx WHEN 1 THEN 6 WHEN 2 THEN -3 WHEN 3 THEN -9 WHEN 4 THEN -9 WHEN 5 THEN -14 ELSE 0 END AS vl_score_05_points,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       CASE ds_channel_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_channel_points,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       CASE vl_score_10_idx WHEN 1 THEN 2 WHEN 2 THEN -6 WHEN 3 THEN -21 ELSE 0 END AS vl_score_10_points,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       CASE vl_score_10_idx WHEN 1 THEN 2 WHEN 2 THEN -6 WHEN 3 THEN -21 ELSE 0 END AS vl_score_10_points</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   FROM woe_scr</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ) pts;</span>
 </code></pre></div>

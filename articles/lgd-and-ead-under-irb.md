@@ -434,9 +434,9 @@ e
 #>   consistency at tau = 0: ELBE equals the LRA and the in-default LGD equals the downturn LGD
 #>   in-default LGD by pool and age
 #>   pool       m0      m6     m12     m24     m36
-#>   1       31.5%   50.8%   50.0%   51.4%   54.3%
-#>   2       50.6%   70.9%   70.3%   67.3%   69.3%
-#>   3       67.4%   84.5%   84.5%   81.6%   82.6%
+#>   1       31.5%   50.9%   50.1%   51.5%   54.4%
+#>   2       50.6%   71.2%   70.8%   67.6%   69.4%
+#>   3       67.4%   84.8%   84.9%   81.8%   82.7%
 e$consistency
 #>     pool       lra    lgd_dt    elbe_0 lgd_in_default_0     ok
 #>    <int>     <num>     <num>     <num>            <num> <lgcl>
@@ -478,7 +478,7 @@ pool parameters and the floored result.
 sql <- scr_sql(m, table = "prd.defaults", dialect = "duckdb")
 sql_lines <- unlist(strsplit(sql, "\n", fixed = TRUE))
 cat(grep("AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$", sql_lines, value = TRUE), sep = "\n")
-#>     CASE WHEN lgd_pred <= 0.37690454385294914 THEN 1 WHEN lgd_pred <= 0.45265644452998083 THEN 2 ELSE 3 END AS pool
+#>     CASE WHEN lgd_pred <= 0.37690454385294925 THEN 1 WHEN lgd_pred <= 0.45265644452998088 THEN 2 ELSE 3 END AS pool
 #>     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,
 #>     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor
 #>     GREATEST(lgd_dt, lgd_floor) AS lgd_final
@@ -701,12 +701,12 @@ m_ead
 #>   train    n   126 | RMSE 0.3628 | MAE 0.2884 | gAUC 0.5582 [0.5068, 0.5935] | EAD adequacy 0.8485 | CEAR 0.1181
 #>   holdout  n    71 | RMSE 0.4035 | MAE 0.2728 | gAUC 0.5708 [0.5392, 0.6340] | EAD adequacy 0.7905 | CEAR 0.4077
 m_ead$drivers[, .(feature, n_bins, eta2, direction, p_anova, eta2_holdout, psi_flag, admitted, reason)]
-#>            feature n_bins       eta2       direction    p_anova eta2_holdout
-#>             <char>  <int>      <num>          <char>      <num>        <num>
-#> 1: utilisation_ref      2 0.04934431      decreasing 0.01433303   0.03634314
-#> 2:         product      3 0.02890852 ordered_by_mean 0.17715296   0.05268658
-#> 3:  months_on_book      4 0.08125227      decreasing 0.01893577   0.07602372
-#> 4:             dpd      1 0.00000000            none         NA   0.00000000
+#>            feature n_bins         eta2       direction    p_anova eta2_holdout
+#>             <char>  <int>        <num>          <char>      <num>        <num>
+#> 1: utilisation_ref      2 4.934431e-02      decreasing 0.01433303 3.634314e-02
+#> 2:         product      3 2.890852e-02 ordered_by_mean 0.17715296 5.268658e-02
+#> 3:  months_on_book      4 8.125227e-02      decreasing 0.01893577 7.602372e-02
+#> 4:             dpd      1 2.225959e-32            none         NA 1.830249e-32
 #>    psi_flag admitted        reason
 #>      <char>   <lgcl>        <char>
 #> 1:   stable     TRUE            OK
@@ -926,22 +926,22 @@ m$ledger[, .(action, detail, reason)]
 #> 12:            downturn
 #> 13:            downturn
 #> 14:               floor
-#>                                                                                                         detail
-#>                                                                                                         <char>
-#>  1:                            reference rate at default + add-on 5.00%, monthly compounding over whole months
-#>  2:        outstanding at the cure date (ead net of cash recovered) as an artificial recovery on the cure date
-#>  3:                                               15 event(s) merged: gap below 9 months or overlapping spells
-#>  4:      160 open event(s) extrapolated from the product recovery profile (lambda = 1); 2 closed at t_max = 60
-#>  5:                                                                          indirect costs 0 allocated by ead
-#>  6:                                                                    floor at zero: TRUE | cap at one: FALSE
-#>  7:                                                           cohort split, hold-out 30.0%, cut-off 2024-01-01
-#>  8:                                                                                                         OK
-#>  9:                                                                                       fractional_logit: OK
-#> 10:                                                                                                        ltv
-#> 11:                                 4 band(s) below 100 defaults merged into the neighbour with the closer LRA
-#> 12:                         provisional: type 3 add-on 15.0%; run scr_lgd_downturn() with the downturn periods
-#> 13:                                    type1; add-on 15.0%; periods 2022-01-01 to 2023-12-31; mean impact 4.1%
-#> 14: bcb retail_other: unsecured 30.0%, real_estate 10.0%, secured share 40.0%; binding in 0.0% of the defaults
+#>                                                                                                                 detail
+#>                                                                                                                 <char>
+#>  1:                                    reference rate at default + add-on 5.00%, monthly compounding over whole months
+#>  2: outstanding at the cure date (ead plus drawings, net of cash recovered) as an artificial recovery on the cure date
+#>  3:                                                       15 event(s) merged: gap below 9 months or overlapping spells
+#>  4:              160 open event(s) extrapolated from the product recovery profile (lambda = 1); 2 closed at t_max = 60
+#>  5:                                                                                  indirect costs 0 allocated by ead
+#>  6:                                                                            floor at zero: TRUE | cap at one: FALSE
+#>  7:                                                                   cohort split, hold-out 30.0%, cut-off 2024-01-01
+#>  8:                                                                                                                 OK
+#>  9:                                                                                               fractional_logit: OK
+#> 10:                                                                                                                ltv
+#> 11:                                         4 band(s) below 100 defaults merged into the neighbour with the closer LRA
+#> 12:                                 provisional: type 3 add-on 15.0%; run scr_lgd_downturn() with the downturn periods
+#> 13:                                            type1; add-on 15.0%; periods 2022-01-01 to 2023-12-31; mean impact 4.1%
+#> 14:         bcb retail_other: unsecured 30.0%, real_estate 10.0%, secured share 40.0%; binding in 0.0% of the defaults
 #>                                    reason
 #>                                    <char>
 #>  1:                                      

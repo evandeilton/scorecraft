@@ -58,7 +58,7 @@ adjusted one is what the statistics support.'><meta property="og:image" content=
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Population stability index, with the fixed and the sample-size-adjusted threshold</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/metrics.R" class="external-link"><code>R/metrics.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/metrics.R" class="external-link"><code>R/metrics.R</code></a></small>
       <div class="d-none name"><code>scr_psi.Rd</code></div>
     </div>
 
@@ -126,9 +126,18 @@ uses the union of the observed ones.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list of class <code>scr_psi</code> with <code>psi</code>, <code>flag_fixed</code>, <code>critical</code>
 (adjusted critical value), <code>flag_adjusted</code> (<code>"stable"</code> or <code>"shift"</code>),
-<code>n_base</code>, <code>n_compare</code>, <code>n_bins</code> and <code>table</code> (per band: <code>pct_base</code>,
-<code>pct_compare</code>, <code>psi_band</code>).
+<code>n_base</code>, <code>n_compare</code>, <code>n_bins</code> (bands declared; the degrees of
+freedom count only the populated ones) and <code>table</code> (per band: <code>n_base</code>,
+<code>n_compare</code>, <code>pct_base</code>, <code>pct_compare</code>, <code>psi_band</code>).
 The <code>thresholds</code> and <code>alpha</code> used are stored and printed.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Rows where <code>base</code> or <code>compare</code> is <code>NA</code>, or that fall outside <code>breaks</code> or
+<code>levels</code>, are not counted. A band empty in both samples is left out of
+the index and of the degrees of freedom <code>B - 1</code>; when a populated band is
+empty on one side only, 0.5 is added to every populated band of both
+samples.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

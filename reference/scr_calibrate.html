@@ -50,7 +50,7 @@ scorecard keeps its own alignment for the score. Four methods:'><meta property="
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Calibrate the alignment to a central tendency</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/pd.R" class="external-link"><code>R/pd.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/pd.R" class="external-link"><code>R/pd.R</code></a></small>
       <div class="d-none name"><code>scr_calibrate.Rd</code></div>
     </div>
 
@@ -147,12 +147,18 @@ exactly (the closed form is reported as <code>shift_prior</code>).</p></dd>
 <dt><code>"logodds_ab"</code></dt>
 <dd><p>Tasche (2013): <code>ln(odds*) = a + b ln(odds)</code>, with
 <code>(a, b)</code> solving <code>mean(PD*) = CT</code> and implied accuracy ratio equal to
-<code>ar_target</code> (default: the accuracy ratio observed on the sample).</p></dd>
+<code>ar_target</code> (default: the accuracy ratio observed on the sample).
+With the observed accuracy ratio this is Tasche's quasi-moment
+matching (QMM) proper. The implied AUC is the probability that a
+default has a higher PD than a non-default when the PDs are true:
+each score carries weight <code>PD*</code> among the defaults and <code>1 - PD*</code>
+among the non-defaults, ties counted one half.</p></dd>
 
 <dt><code>"qmm"</code></dt>
-<dd><p>Quasi-moment matching: the same two equations, with the
-target accuracy ratio taken from the PD distribution itself
-(the implied AR of the current PDs), so no outcome is needed.</p></dd>
+<dd><p>The outcome-free variant of the same two equations: the
+target accuracy ratio is the implied AR of the current PDs, so no
+outcome is needed and the implied discriminatory power of the
+uncalibrated curve is carried over to the new level.</p></dd>
 
 <dt><code>"scaling"</code></dt>
 <dd><p><code>PD* = PD * CT / ybar</code>. The proportional rescaling is

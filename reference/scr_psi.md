@@ -62,8 +62,18 @@ scr_psi(
 
 A list of class `scr_psi` with `psi`, `flag_fixed`, `critical` (adjusted
 critical value), `flag_adjusted` (`"stable"` or `"shift"`), `n_base`,
-`n_compare`, `n_bins` and `table` (per band: `pct_base`, `pct_compare`,
-`psi_band`). The `thresholds` and `alpha` used are stored and printed.
+`n_compare`, `n_bins` (bands declared; the degrees of freedom count only
+the populated ones) and `table` (per band: `n_base`, `n_compare`,
+`pct_base`, `pct_compare`, `psi_band`). The `thresholds` and `alpha`
+used are stored and printed.
+
+## Details
+
+Rows where `base` or `compare` is `NA`, or that fall outside `breaks` or
+`levels`, are not counted. A band empty in both samples is left out of
+the index and of the degrees of freedom `B - 1`; when a populated band
+is empty on one side only, 0.5 is added to every populated band of both
+samples.
 
 ## References
 

@@ -42,7 +42,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Expected credit loss with stage allocation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/ecl.R" class="external-link"><code>R/ecl.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/ecl.R" class="external-link"><code>R/ecl.R</code></a></small>
       <div class="d-none name"><code>scr_ecl.Rd</code></div>
     </div>
 
@@ -166,11 +166,17 @@ and 3 the lifetime loss; stage 3 exposures are credit-impaired and carry
 the 12-month PD now over the one at origination (<code>pd_orig</code>) is at least
 <code>config$ecl_sicr_ratio</code>, else stage 1.</p>
 <p>Scenarios are a named list of shocks applied to the base inputs, each a
-list with any of <code>pd_mult</code> (multiplier of the hazards, capped at one),
-<code>z</code> (systematic factor of the one-factor model applied to the hazards
-with correlation <code>rho</code>, negative in a bad year), <code>lgd_add</code> (added to the
-LGD) and <code>ead_mult</code>; <code>weights</code> (normalised to one) give the
-probability-weighted result.</p>
+list with any of <code>pd_mult</code> (non-negative multiplier of the hazards,
+capped at one), <code>z</code> (systematic factor of the one-factor model applied to
+the hazards with correlation <code>rho</code>, negative in a bad year), <code>lgd_add</code>
+(added to the LGD, the result floored at zero) and <code>ead_mult</code>
+(non-negative); <code>weights</code> (normalised to one) give the
+probability-weighted result. When a shocked hazard plus the prepayment
+hazard exceeds one, the exit probability of that month is capped at one.
+The <code>z</code> shock is applied to each monthly hazard, not to the annual PD;
+because the Vasicek map is non-linear, the implied 12-month stressed PD
+is higher than the one obtained by stressing the annual PD with the same
+<code>z</code> and <code>rho</code> (convert the annual PD yourself when that is wanted).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

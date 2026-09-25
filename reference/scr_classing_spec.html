@@ -56,7 +56,7 @@ silently."><meta property="og:image" content="https://evandeilton.github.io/scor
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Classing specification as a long table, with its file round trip</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
       <div class="d-none name"><code>scr_classing_spec.Rd</code></div>
     </div>
 
@@ -169,7 +169,7 @@ scorecard.</p>
 <span class="r-in"><span><span class="co"># round trip through a file: a fresh lab receives the manual bins as proposals</span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".csv"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">scr_classing_spec</span><span class="op">(</span><span class="va">lab</span>, file <span class="op">=</span> <span class="va">f</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> classing spec written to /tmp/Rtmp9oX73c/file1aa1e41edd0.csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> classing spec written to /tmp/Rtmp3yCHO7/file1b2f73773521.csv</span>
 <span class="r-in"><span><span class="va">props</span> <span class="op">&lt;-</span> <span class="fu">scr_classing_import</span><span class="op">(</span><span class="fu"><a href="scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span>, <span class="fu">scr_classing_read</span><span class="op">(</span><span class="va">f</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">props</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ds_region"</span>

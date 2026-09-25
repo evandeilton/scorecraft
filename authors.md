@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/evandeilton/scorecraft/blob/v0.2.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/evandeilton/scorecraft/blob/main/DESCRIPTION)
 
 Lopes J (2026). *scorecraft: Scorecard Development and Internal
 Ratings-Based Risk Parameters*. R package version 0.2.0,

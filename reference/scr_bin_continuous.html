@@ -56,7 +56,7 @@ driver, in [0, 1]."><meta property="og:image" content="https://evandeilton.githu
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Bin drivers against a continuous target (LGD, CCF)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/irb-binning.R" class="external-link"><code>R/irb-binning.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/irb-binning.R" class="external-link"><code>R/irb-binning.R</code></a></small>
       <div class="d-none name"><code>scr_bin_continuous.Rd</code></div>
     </div>
 
@@ -158,8 +158,11 @@ impute) first, exactly as the scorecard pipeline does. Categorical
 missing values become the level <code>"NA"</code>, as in the engine. When a
 <code>holdout_idx</code> is given, the frozen bins are revalidated: the hold-out
 bin means are recomputed, the PSI of the bin shares is reported with the
-sample-size-adjusted critical value, and a driver whose hold-out means
-break the training order is flagged <code>UNSTABLE_HOLDOUT</code>.</p>
+sample-size-adjusted critical value, a driver whose hold-out means
+break the training order is flagged <code>UNSTABLE_HOLDOUT</code>, one whose bin
+shares shift (fixed PSI flag <code>"shift"</code>, PSI at or above 0.25) is flagged
+<code>PSI_ACTION</code>, and one with more than 1% of hold-out rows outside the
+bins <code>UNBINNED_HOLDOUT</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -121,11 +121,17 @@ origination (`pd_orig`) is at least `config$ecl_sicr_ratio`, else stage
 1.
 
 Scenarios are a named list of shocks applied to the base inputs, each a
-list with any of `pd_mult` (multiplier of the hazards, capped at one),
-`z` (systematic factor of the one-factor model applied to the hazards
-with correlation `rho`, negative in a bad year), `lgd_add` (added to the
-LGD) and `ead_mult`; `weights` (normalised to one) give the
-probability-weighted result.
+list with any of `pd_mult` (non-negative multiplier of the hazards,
+capped at one), `z` (systematic factor of the one-factor model applied
+to the hazards with correlation `rho`, negative in a bad year),
+`lgd_add` (added to the LGD, the result floored at zero) and `ead_mult`
+(non-negative); `weights` (normalised to one) give the
+probability-weighted result. When a shocked hazard plus the prepayment
+hazard exceeds one, the exit probability of that month is capped at one.
+The `z` shock is applied to each monthly hazard, not to the annual PD;
+because the Vasicek map is non-linear, the implied 12-month stressed PD
+is higher than the one obtained by stressing the annual PD with the same
+`z` and `rho` (convert the annual PD yourself when that is wanted).
 
 ## References
 

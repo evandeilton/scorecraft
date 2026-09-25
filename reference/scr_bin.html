@@ -44,7 +44,7 @@ target), in parallel by column, and applies in sequence:"><meta property="og:ima
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Stage 2: optimal binning, screening, hold-out revalidation and pruning</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/bin.R" class="external-link"><code>R/bin.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/bin.R" class="external-link"><code>R/bin.R</code></a></small>
       <div class="d-none name"><code>scr_bin.Rd</code></div>
     </div>
 
@@ -88,7 +88,9 @@ models), <code>derived_excluded</code>, the counts <code>binned</code>, <code>po
 same labels, train/hold-out PSI (the fixed threshold decides; the
 n-adjusted one is reported) and the fraction of hold-out without a bin.</p></li>
 <li><p><strong>Redundancy pruning</strong> by rank correlation on the WOE space,
-ranked by hold-out IV.</p></li>
+ranked by hold-out IV. Under <code>allow_derived_final = FALSE</code> the derived
+flags leave before this step (<code>derived_excluded</code>), so that a flag
+that cannot be delivered never prunes a real column.</p></li>
 </ol></div>
     <div class="section level2">
     <h2 id="parallelism">Parallelism<a class="anchor" aria-label="anchor" href="#parallelism"></a></h2>
@@ -120,7 +122,7 @@ worker and the fits are merged. The result is identical to the serial one
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   OOT: 4 period(s) in train, 2 in hold-out (hold-out starts at 2026-05-01, 33.3% of rows)</span>
 <span class="r-in"><span><span class="va">bn</span> <span class="op">&lt;-</span> <span class="fu">scr_bin</span><span class="op">(</span><span class="fu"><a href="scr_triage.html">scr_triage</a></span><span class="op">(</span><span class="va">sp</span>, <span class="va">cfg</span><span class="op">)</span>, <span class="va">cfg</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">bn</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_bins&gt; 37 binned | screening 20 | hold-out 16 | pruning 15 | pool 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_bins&gt; 37 binned | screening 20 | hold-out 16 | pruning 12 | pool 12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   screening: IV_BELOW_MIN               12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   screening: IV_BELOW_MIN;NOT_MONOTONIC 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   screening: NOT_MONOTONIC              1</span>

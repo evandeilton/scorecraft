@@ -64,7 +64,7 @@ lgd_cost_allocation."><meta property="og:image" content="https://evandeilton.git
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Workout LGD: the reference data set from default events and cash flows</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/lgd.R" class="external-link"><code>R/lgd.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/lgd.R" class="external-link"><code>R/lgd.R</code></a></small>
       <div class="d-none name"><code>scr_workout.Rd</code></div>
     </div>
 
@@ -157,9 +157,10 @@ has <code>kept</code>; <code>summary</code> has <code>n_cure</code>, <code>lra_r
 
 
 <ul><li><p><strong>Cures.</strong> An event with <code>status == "cured"</code> returns to performing: the
-balance outstanding at the cure date (<code>ead</code> net of the cash recovered)
-enters as an artificial recovery on the cure date, so the cure carries
-its costs and the discount effect, never a zero loss by decree.</p></li>
+balance outstanding at the cure date (<code>ead</code> plus the drawings after
+default, net of the cash recovered) enters as an artificial recovery
+on the cure date, so the cure carries its costs and the discount
+effect, never a zero loss by decree.</p></li>
 <li><p><strong>Multiple defaults.</strong> Two defaults of one facility separated by fewer
 than <code>lgd_cure_window</code> months (from the close of the first to the start
 of the second), or a new default while the first is still open, are

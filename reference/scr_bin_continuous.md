@@ -101,8 +101,11 @@ Numeric drivers must not contain missing values: run
 missing values become the level `"NA"`, as in the engine. When a
 `holdout_idx` is given, the frozen bins are revalidated: the hold-out
 bin means are recomputed, the PSI of the bin shares is reported with the
-sample-size-adjusted critical value, and a driver whose hold-out means
-break the training order is flagged `UNSTABLE_HOLDOUT`.
+sample-size-adjusted critical value, a driver whose hold-out means break
+the training order is flagged `UNSTABLE_HOLDOUT`, one whose bin shares
+shift (fixed PSI flag `"shift"`, PSI at or above 0.25) is flagged
+`PSI_ACTION`, and one with more than 1% of hold-out rows outside the
+bins `UNBINNED_HOLDOUT`.
 
 ## See also
 

@@ -50,7 +50,7 @@ class and returns NA."><meta property="og:image" content="https://evandeilton.gi
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>AUC, KS and Gini of a score, with a bootstrap confidence interval</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/metrics.R" class="external-link"><code>R/metrics.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/metrics.R" class="external-link"><code>R/metrics.R</code></a></small>
       <div class="d-none name"><code>scr_metrics.Rd</code></div>
     </div>
 
@@ -85,7 +85,8 @@ class and returns <code>NA</code>.</p>
 
 
 <dt id="arg-y">y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
-<dd><p>0/1 outcome vector, same length as <code>score</code>.</p></dd>
+<dd><p>0/1 outcome vector (numeric or logical), same length as
+<code>score</code>. <code>NA</code> rows are dropped; any other value is an error.</p></dd>
 
 
 <dt id="arg-higher-is-event">higher_is_event<a class="anchor" aria-label="anchor" href="#arg-higher-is-event"></a></dt>
@@ -108,7 +109,8 @@ reported above 0.5 when the score ranks correctly.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Bootstrap seed; <code>NULL</code> leaves it unset.</p></dd>
+<dd><p>Bootstrap seed, local to the call (the user's random stream
+is restored on exit); <code>NULL</code> draws from the user's stream.</p></dd>
 
 
 <dt id="arg-nthread">nthread<a class="anchor" aria-label="anchor" href="#arg-nthread"></a></dt>
@@ -121,8 +123,6 @@ reported above 0.5 when the score ranks correctly.</p></dd>
 bounds <code>auc_lo</code>/<code>auc_hi</code>, <code>ks_lo</code>/<code>ks_hi</code>, <code>gini_lo</code>/<code>gini_hi</code> (<code>NA</code>
 when <code>ci = FALSE</code>), <code>n</code>, <code>events</code>, <code>n_boot</code> and <code>level</code>. Everything is
 <code>NA_real_</code> when only one class is present or no valid case exists.</p>
-<p>DeLong's analytic variance is not used: the interval is a stratified
-percentile bootstrap, which also covers KS.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -130,7 +130,12 @@ percentile bootstrap, which also covers KS.</p>
 stratified by outcome, percentile method, with
 <code>n_boot</code> resamples. Gini is derived from AUC (<code>2 * AUC - 1</code>) inside each
 resample, never bootstrapped separately. The cost is absorbed by
-<code>nthread</code> (parallelism by resample).</p>
+<code>nthread</code> (parallelism by resample). DeLong's analytic variance is not
+used: the interval is a stratified percentile bootstrap, which also
+covers KS.</p>
+<p>The AUC is computed from the counts per unique score after one sort, so
+its cost is \(O(n \log n)\), never the \(O(n_1 n_0)\) of the pairwise
+definition.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

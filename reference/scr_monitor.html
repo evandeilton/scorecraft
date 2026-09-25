@@ -52,7 +52,7 @@ nothing: the analyst calls it when needed."><meta property="og:image" content="h
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Monitor the scorecard on new data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/monitor.R" class="external-link"><code>R/monitor.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/monitor.R" class="external-link"><code>R/monitor.R</code></a></small>
       <div class="d-none name"><code>scr_monitor.Rd</code></div>
     </div>
 
@@ -91,7 +91,8 @@ nothing: the analyst calls it when needed.</p>
 
 
 <dt id="arg-date-col">date_col<a class="anchor" aria-label="anchor" href="#arg-date-col"></a></dt>
-<dd><p>Period column. <code>NULL</code> treats <code>newdata</code> as a single period.</p></dd>
+<dd><p>Period column. <code>NULL</code> treats <code>newdata</code> as a single period.
+Rows with a missing date form a period of their own (<code>NA</code>, last).</p></dd>
 
 
 <dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
