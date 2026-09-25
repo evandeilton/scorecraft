@@ -114,6 +114,10 @@ returned by
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
 and both emitted by
 [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md).
+A row that falls in no fitted bin (a category never seen on train, a
+missing value without a missing bin) gets a WOE of 0 from the binning
+engine, hence the points of a WOE of 0: `0`, or `base / k` under
+`"distributed"`.
 
 ## See also
 

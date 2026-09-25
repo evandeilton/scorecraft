@@ -69,7 +69,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = c("id", "churn"), da
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.7s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.6s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -92,7 +92,7 @@ res
 #> Models (hold-out)
 #>   glmnet    AUC 0.7345 [0.7029, 0.7715]  KS 0.3842
 #>   xgboost   AUC 0.7375 [0.7067, 0.7752]  KS 0.3695
-#>   lightgbm  AUC 0.7236 [0.6916, 0.7563]  KS 0.3641
+#>   lightgbm  AUC 0.7342 [0.7020, 0.7734]  KS 0.3699
 #> 
 #> Warnings
 #>   - 3 derived flag(s) outside the deliverable by policy (allow_derived_final)
@@ -252,8 +252,8 @@ cat(tail(scr_sql(sc, table = "prd.customers", dialect = "databricks"), 8), sep =
 #>       CASE vl_score_07_idx WHEN 1 THEN 14 WHEN 2 THEN 6 WHEN 3 THEN 6 WHEN 4 THEN 1 WHEN 5 THEN -2 WHEN 6 THEN -7 ELSE 0 END AS vl_score_07_points,
 #>       CASE vl_score_05_idx WHEN 1 THEN 6 WHEN 2 THEN -3 WHEN 3 THEN -9 WHEN 4 THEN -9 WHEN 5 THEN -14 ELSE 0 END AS vl_score_05_points,
 #>       CASE ds_channel_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_channel_points,
-#>       CASE vl_score_10_idx WHEN 1 THEN 2 WHEN 2 THEN -6 WHEN 3 THEN -21 ELSE 0 END AS vl_score_10_points,
-#>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points
+#>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points,
+#>       CASE vl_score_10_idx WHEN 1 THEN 2 WHEN 2 THEN -6 WHEN 3 THEN -21 ELSE 0 END AS vl_score_10_points
 #>   FROM woe_scr
 #> ) pts;
 ```
@@ -301,11 +301,11 @@ strategy), the SQL files and a Markdown summary.
 
 out <- file.path(tempdir(), "scorecraft-vignette")
 basename(unlist(scr_export(sc, out, stamp = FALSE)$files))
-#>   /tmp/Rtmpn8o6yx/scorecraft-vignette/scorecard_default.xlsx
-#>   /tmp/Rtmpn8o6yx/scorecraft-vignette/validation_default.xlsx
-#>   /tmp/Rtmpn8o6yx/scorecraft-vignette/strategy_default.xlsx
-#>   /tmp/Rtmpn8o6yx/scorecraft-vignette/sql_score_default.sql
-#>   /tmp/Rtmpn8o6yx/scorecraft-vignette/sql_woe_default.sql
+#>   /tmp/RtmpOahE8s/scorecraft-vignette/scorecard_default.xlsx
+#>   /tmp/RtmpOahE8s/scorecraft-vignette/validation_default.xlsx
+#>   /tmp/RtmpOahE8s/scorecraft-vignette/strategy_default.xlsx
+#>   /tmp/RtmpOahE8s/scorecraft-vignette/sql_score_default.sql
+#>   /tmp/RtmpOahE8s/scorecraft-vignette/sql_woe_default.sql
 #> [1] "scorecard_default.xlsx"  "validation_default.xlsx"
 #> [3] "strategy_default.xlsx"   "sql_score_default.sql"  
 #> [5] "sql_woe_default.sql"

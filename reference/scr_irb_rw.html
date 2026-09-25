@@ -105,8 +105,9 @@ default (decimals) and exposure at default (currency).</p></dd>
 
 
 <dt id="arg-m">m<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
-<dd><p>Effective maturity in years (wholesale classes only; <code>NULL</code> or
-<code>NA</code> uses <code>params$m_default</code>).</p></dd>
+<dd><p>Effective maturity in years, non-negative (wholesale classes
+only, ignored and reported as <code>NA</code> on retail rows; <code>NULL</code> or <code>NA</code> uses
+<code>params$m_default</code>).</p></dd>
 
 
 <dt id="arg-asset-class">asset_class<a class="anchor" aria-label="anchor" href="#arg-asset-class"></a></dt>
@@ -117,8 +118,9 @@ default (decimals) and exposure at default (currency).</p></dd>
 
 <dt id="arg-sales">sales<a class="anchor" aria-label="anchor" href="#arg-sales"></a></dt>
 <dd><p>Annual sales of <code>corporate_sme</code> obligors, in the unit of
-<code>params$correlation$sme</code> (missing values take the lower bound, the
-largest adjustment).</p></dd>
+<code>params$correlation$sme</code>, clipped to its bounds. A missing value takes
+the upper bound, i.e. no firm-size adjustment: the adjustment requires
+reported sales (Basel Framework CRE31.9; CRR Article 153(4)).</p></dd>
 
 
 <dt id="arg-fi">fi<a class="anchor" aria-label="anchor" href="#arg-fi"></a></dt>
@@ -172,14 +174,21 @@ row of <code>params$lgd_firb</code> (for example <code>"senior_unsecured"</code>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>data.table</code> with one row per exposure: <code>pd_used</code>, <code>lgd_used</code>
-(after floors; PD one on defaulted rows), <code>m</code> (after clipping), <code>r</code>,
+(after floors; PD one on defaulted rows), <code>m</code> (after clipping;
+<code>params$m_default</code> under <code>"firb"</code>; <code>NA</code> on retail rows), <code>r</code>,
 <code>b</code>, <code>ma</code>, <code>k</code>, <code>rw</code>, <code>rwa</code>; attribute <code>floors_hit</code> counts the rows
 where each floor was binding.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>$$K = \left[LGD \cdot N\left(\frac{G(PD) + \sqrt{R}\,G(0.999)}{\sqrt{1-R}}\right) - PD \cdot LGD\right] \cdot MA \cdot s$$</p>
-<p>with <code>s = params$scaling_factor</code>. Defaulted rows carry <code>K = max(0, LGD - ELBE)</code> under <code>"airb"</code> and zero under <code>"firb"</code>; a missing <code>elbe</code> is taken
+<p>with <code>s = params$scaling_factor</code> and, for wholesale classes,
+\(MA = (1 + (M - 2.5)\,b) / (1 - 1.5\,b)\),
+\(b = (0.11852 - 0.05478 \ln PD)^2\) (<code>MA = 1</code> for retail). Below
+<code>PD = 1e-5</code>, reachable only without a PD floor (sovereigns), <code>b</code> is
+held at its value at <code>1e-5</code>: the regulatory <code>b</code> makes <code>1 - 1.5 b</code> vanish
+near <code>PD = 2.9e-6</code>, where the adjustment would explode and change sign.
+Defaulted rows carry <code>K = max(0, LGD - ELBE)</code> under <code>"airb"</code> and zero under <code>"firb"</code>; a missing <code>elbe</code> is taken
 equal to <code>lgd</code>. <code>RW = 12.5 K</code> and <code>RWA = RW * ead</code>.</p>
     </div>
     <div class="section level2">

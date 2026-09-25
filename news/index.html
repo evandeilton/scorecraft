@@ -70,6 +70,72 @@
 <code><a href="../reference/scr_sql.html">scr_sql()</a></code> on a scorecard gains <code>what = "all"</code> (bin label, WOE and points of every variable next to the exact score and the whole-points score) and <code>keep_columns</code> (key columns carried into the output), for a deployment that reports the band of each variable with the score.</li>
 <li>After the documentation audit: <code><a href="../reference/scr_iv.html">scr_iv()</a></code> ignores <code>NA</code> for every group type; <code><a href="../reference/scr_classing_spec.html">scr_classing_read()</a></code> validates the separator and the spec carries it into <code><a href="../reference/scr_classing_spec.html">scr_classing_import()</a></code>; the <code>TOO_MANY_BINS</code> screening rule can fire (the screen reads <code>max_bins</code>); <code><a href="../reference/scr_psi.html">scr_psi()</a></code> stores and prints its thresholds; <code><a href="../reference/scr_default_rate.html">scr_default_rate()</a></code> reports one long-run mean and benchmarks an optional <code>lra_adjusted</code>; one <code>asset_class</code> configuration key replaces <code>pd_asset_class</code> and <code>capital_asset_class</code>; <code><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn()</a></code> always records a reason; the traffic-light convention is red at or below the first threshold in PD, LGD and EAD; <code><a href="../reference/scr_apply.html">scr_apply()</a></code> on an <code>scr_ead</code> takes <code>what</code>; <code><a href="../reference/scr_fetch.html">scr_fetch()</a></code> gains <code>verbose</code> and <code><a href="../reference/scr_run.html">scr_run()</a></code> follows <code>config$verbose</code>; the <code>scr_demo</code> columns carry English names (<code>vl_partial_*</code>, <code>vl_noise_*</code>, <code>vl_constant</code>, <code>vl_near_const</code>, <code>vl_duplicate</code>, <code>vl_redundant</code>, <code>vl_late</code>, <code>ds_region</code>, <code>ds_band</code>, <code>ds_channel</code>, <code>ds_high_card</code>).</li>
 </ul><div class="section level3">
+<h3 id="compiled-kernels-and-big-tables-0-2-0">Compiled kernels and big tables<a class="anchor" aria-label="anchor" href="#compiled-kernels-and-big-tables-0-2-0"></a></h3>
+<ul><li>The package now compiles C++ code (‘Rcpp’ and ‘RcppArmadillo’). Thin internal R wrappers validate the input and call the kernels, which take plain vectors and matrices (never a <code>data.table</code>) and read the columns without copying them. The kernels are tested against their reference R implementations.</li>
+<li>Redundancy pruning in <code><a href="../reference/scr_bin.html">scr_bin()</a></code> (Pearson or Spearman): each WOE column is ranked once and the correlation matrix comes from one BLAS cross-product, instead of ranking both columns of every pair. The greedy sweep gives exactly the same result as <code><a href="https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_prune.html" class="external-link">OptimalBinningWoE::obwoe_prune()</a></code>, and is about 50 times faster at 150 columns.</li>
+<li>Somers’ D of LGD and EAD models is counted exactly in <code>O(n log n)</code> (Knight’s algorithm). It replaces an <code>O(n^2)</code> Kendall computation inside a 200-resample bootstrap. The EAD version is also exact now: it no longer groups the prediction into 60 quantile buckets.</li>
+<li>
+<code><a href="../reference/scr_ecl.html">scr_ecl()</a></code> streams the survival-weighted loss row by row and applies the scenario shocks on the fly. Memory is <code>O(n)</code> whatever the term (the matrix version built several <code>n x T</code> copies, about 2.9 GB each at <code>n = 1e6, T = 360</code>). Results are the same to 1e-15.</li>
+<li>
+<code><a href="../reference/scr_metrics.html">scr_metrics()</a></code> ranks the scores once; each bootstrap resample then re-tabulates counts, with no sort and no grouping by a double key. The cut-off sweep sorts once per sample. The monitor tabulates the base once for every period. Default rates by cohort use one rolling join. Every LGD cash-flow aggregation and EAD reference date is vectorised.</li>
+<li>Kernel threads follow <code>config$nthread</code> and are capped at two under <code>R CMD check --as-cran</code> (<code>_R_CHECK_LIMIT_CORES_</code>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="triage-correctness-and-numerical-stability-0-2-0">Triage: correctness and numerical stability<a class="anchor" aria-label="anchor" href="#triage-correctness-and-numerical-stability-0-2-0"></a></h3>
+<ul><li>Wide tables: <code><a href="../reference/scr_triage.html">scr_triage()</a></code> and the R pre-processing of <code><a href="../reference/scr_apply.html">scr_apply()</a></code> reserve column slots before adding columns, so they no longer fail past about 1024 columns.</li>
+<li>Random numbers: seeds are local to the call. <code>.Random.seed</code> is restored on exit, and a bootstrap advances the user’s stream only by the replicate seeds it draws (CRAN policy). Results for a given seed are unchanged.</li>
+<li>
+<code><a href="../reference/scr_split.html">scr_split()</a></code>:
+<ul><li>the target is checked for 0/1 before integer coercion (0.5 was truncated to 0);</li>
+<li>text dates (as DBI returns them) and <code>integer64</code> columns are read correctly;</li>
+<li>rows with a missing date are reported.</li>
+</ul></li>
+<li>
+<code><a href="../reference/scr_bin.html">scr_bin()</a></code>: under <code>allow_derived_final = FALSE</code>, derived flags leave before the redundancy pruning, so a flag can no longer remove a real column. The Rcpp subset-proxy warnings of <code><a href="https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_gains_score.html" class="external-link">OptimalBinningWoE::obwoe_gains_score()</a></code> are muffled; its values are correct, and the fix belongs upstream.</li>
+<li>
+<code><a href="../reference/scr_config.html">scr_config()</a></code> validates every key of stages 0 to 7.</li>
+<li>LightGBM receives <code>min_sum_hessian_in_leaf</code>. The xgboost API is detected from <code>xgb.train()</code> (it works with xgboost 3).</li>
+<li>SQL string literals follow the dialect: backslashes are escaped only in MySQL, Spark/Hive/Databricks and BigQuery. A line break in a name can no longer escape an SQL comment. The scorecard’s SQL quotes identifiers as <code>obwoe_sql()</code> does. A row that falls in no fitted bin takes the points of WOE 0, in R and in SQL.</li>
+<li>Metrics and monitoring:
+<ul><li>
+<code><a href="../reference/scr_metrics.html">scr_metrics()</a></code> refuses a factor or a non-0/1 outcome, and counts are kept in double to avoid integer overflow;</li>
+<li>
+<code><a href="../reference/scr_psi.html">scr_psi()</a></code> leaves bands empty in both samples out of the index and out of the degrees of freedom;</li>
+<li>
+<code><a href="../reference/scr_monitor.html">scr_monitor()</a></code> keeps undated rows as a period;</li>
+<li>a classing spec survives the CSV and xlsx round trips;</li>
+<li>an export cannot be written outside the given directory.</li>
+</ul></li>
+<li>PD:
+<ul><li>
+<code><a href="../reference/scr_default.html">scr_default()</a></code> could assign one unit’s flags to another under locales where the grouping order differed from the C-locale sort; it is fixed, and the state machine is now vectorised;</li>
+<li>the <code>PSI_ACTION</code> gate of the LGD and EAD drivers compared against a flag <code><a href="../reference/scr_psi.html">scr_psi()</a></code> never returns, so it never fired; it now does;</li>
+<li>Hosmer-Lemeshow on fixed PDs uses <code>K</code> degrees of freedom;</li>
+<li>the multi-period test is scaled by <code>sd(DR_t - PD_t)</code> (BCBS WP 14);</li>
+<li>the AUC test uses the DeLong variance;</li>
+<li>
+<code><a href="../reference/scr_moc.html">scr_moc()</a></code> no longer edits the caller’s ledger;</li>
+<li>point-in-time PDs accept a grade at zero.</li>
+</ul></li>
+<li>LGD and EAD:
+<ul><li>
+<code><a href="../reference/scr_ead_data.html">scr_ead_data()</a></code> paired default dates with facilities after a sort, so unsorted input put defaults on the wrong facility; it is fixed;</li>
+<li>
+<code><a href="../reference/scr_ead.html">scr_ead()</a></code> no longer needs data.table 1.15;</li>
+<li>
+<code>ccf_measure = "lf"</code> keeps its pools;</li>
+<li>a cure recovers <code>ead + drawings - recovered</code>;</li>
+<li>the <code><a href="../reference/scr_elbe.html">scr_elbe()</a></code> uplift starts at zero at the date of default;</li>
+<li>
+<code><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn()</a></code>, <code><a href="../reference/scr_lgd_floor.html">scr_lgd_floor()</a></code> and <code><a href="../reference/scr_ead_validate.html">scr_ead_validate()</a></code> no longer modify their input.</li>
+</ul></li>
+<li>Capital and ECL:
+<ul><li>the maturity adjustment is held at <code>PD = 1e-5</code> below that point, where <code>1 - 1.5 b</code> approaches zero and the risk weight exploded or turned negative without a PD floor;</li>
+<li>a missing SME sales figure gets no firm-size adjustment (CRE31.9);</li>
+<li>the ECL exit probability is capped at one, the LGD floored at zero, and scenario shocks and input lengths are validated.</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
 <h3 id="scorecard-pipeline-hardening-0-2-0">Scorecard pipeline hardening<a class="anchor" aria-label="anchor" href="#scorecard-pipeline-hardening-0-2-0"></a></h3>
 <ul><li>
 <code><a href="../reference/scr_monitoring_plan.html">scr_monitoring_plan()</a></code> is the monitoring contract: created by <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code>, written to the <code>Monitoring_Plan</code> sheet, and read back by <code>scr_monitor(plan = )</code> (a table or the strategy workbook), which now takes its PSI/CSI thresholds, alpha and <code>min_events_per_period</code> from it.</li>

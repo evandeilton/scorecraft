@@ -5,8 +5,9 @@ the upper bound of a one-sided level interval of the long-run average
 from the cohort series, \(t_{q, T-1}\, sd(DR_t)/\sqrt{T}\) per grade;
 "ci_binomial" uses \(z_q \sqrt{PD(1-PD)/n}\) on the obligors (or
 obligor-years when a series exists); "bootstrap" resamples the
-outcomes of the sample within each grade and takes the level quantile
-of the default rate above the estimate. Categories "A" (data and
+outcomes of the sample within each grade (drawn as the resampled default
+rate, Binomial(n, DR) / n, its exact distribution) and takes the level
+quantile of the default rate above the estimate. Categories "A" (data and
 methodological deficiencies) and "B" (changes in standards or
 environment) are expert quantities: value (one number or one per
 grade, in PD units) and a non-empty reason are mandatory. The ledger
@@ -17,8 +18,9 @@ the upper bound of a one-sided level interval of the long-run average
 from the cohort series, \(t_{q, T-1}\, sd(DR_t)/\sqrt{T}\) per grade;
 "ci_binomial" uses \(z_q \sqrt{PD(1-PD)/n}\) on the obligors (or
 obligor-years when a series exists); "bootstrap" resamples the
-outcomes of the sample within each grade and takes the level quantile
-of the default rate above the estimate. Categories "A" (data and
+outcomes of the sample within each grade (drawn as the resampled default
+rate, Binomial(n, DR) / n, its exact distribution) and takes the level
+quantile of the default rate above the estimate. Categories "A" (data and
 methodological deficiencies) and "B" (changes in standards or
 environment) are expert quantities: value (one number or one per
 grade, in PD units) and a non-empty reason are mandatory. The ledger
@@ -77,8 +79,9 @@ the upper bound of a one-sided <code>level</code> interval of the long-run avera
 from the cohort series, \(t_{q, T-1}\, sd(DR_t)/\sqrt{T}\) per grade;
 <code>"ci_binomial"</code> uses \(z_q \sqrt{PD(1-PD)/n}\) on the obligors (or
 obligor-years when a series exists); <code>"bootstrap"</code> resamples the
-outcomes of the sample within each grade and takes the <code>level</code> quantile
-of the default rate above the estimate. Categories <code>"A"</code> (data and
+outcomes of the sample within each grade (drawn as the resampled default
+rate, Binomial(n, DR) / n, its exact distribution) and takes the <code>level</code>
+quantile of the default rate above the estimate. Categories <code>"A"</code> (data and
 methodological deficiencies) and <code>"B"</code> (changes in standards or
 environment) are expert quantities: <code>value</code> (one number or one per
 grade, in PD units) and a non-empty <code>reason</code> are mandatory. The ledger
@@ -181,14 +184,14 @@ final grades of <code>x</code>; <code>NULL</code> uses the series already stored
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8:     2        A      manual    NA     4 0.36956522 0.00200000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                             reason active       date</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                             &lt;char&gt; &lt;lgcl&gt;     &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-25</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

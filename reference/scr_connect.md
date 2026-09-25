@@ -57,8 +57,8 @@ con <- scr_connect(driver = RSQLite::SQLite(), dbname = ":memory:")
 d <- scr_demo; d$ref_date <- as.character(d$ref_date)   # SQLite has no Date type
 DBI::dbWriteTable(con, "dtm", d)
 dt <- scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42)
-#> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.500000
+#> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.5
 nrow(dt)
-#> [1] 2097
+#> [1] 2059
 DBI::dbDisconnect(con)
 ```

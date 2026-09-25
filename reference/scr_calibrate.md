@@ -94,13 +94,19 @@ and `sample`.
 
   Tasche (2013): `ln(odds*) = a + b ln(odds)`, with `(a, b)` solving
   `mean(PD*) = CT` and implied accuracy ratio equal to `ar_target`
-  (default: the accuracy ratio observed on the sample).
+  (default: the accuracy ratio observed on the sample). With the
+  observed accuracy ratio this is Tasche's quasi-moment matching (QMM)
+  proper. The implied AUC is the probability that a default has a higher
+  PD than a non-default when the PDs are true: each score carries weight
+  `PD*` among the defaults and `1 - PD*` among the non-defaults, ties
+  counted one half.
 
 - `"qmm"`:
 
-  Quasi-moment matching: the same two equations, with the target
-  accuracy ratio taken from the PD distribution itself (the implied AR
-  of the current PDs), so no outcome is needed.
+  The outcome-free variant of the same two equations: the target
+  accuracy ratio is the implied AR of the current PDs, so no outcome is
+  needed and the implied discriminatory power of the uncalibrated curve
+  is carried over to the new level.
 
 - `"scaling"`:
 

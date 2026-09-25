@@ -34,7 +34,7 @@ scr_align(
 
 - y:
 
-  0/1 outcome vector, same length as `raw`.
+  0/1 outcome vector (numeric or logical), same length as `raw`.
 
 - base_score:
 
@@ -66,7 +66,8 @@ scr_align(
 
 - weights:
 
-  Optional weights per observation (sample reweighting).
+  Optional non-negative weights per observation (sample reweighting), of
+  the length of `raw`.
 
 ## Value
 

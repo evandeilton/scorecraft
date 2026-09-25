@@ -157,9 +157,10 @@ has <code>kept</code>; <code>summary</code> has <code>n_cure</code>, <code>lra_r
 
 
 <ul><li><p><strong>Cures.</strong> An event with <code>status == "cured"</code> returns to performing: the
-balance outstanding at the cure date (<code>ead</code> net of the cash recovered)
-enters as an artificial recovery on the cure date, so the cure carries
-its costs and the discount effect, never a zero loss by decree.</p></li>
+balance outstanding at the cure date (<code>ead</code> plus the drawings after
+default, net of the cash recovered) enters as an artificial recovery
+on the cure date, so the cure carries its costs and the discount
+effect, never a zero loss by decree.</p></li>
 <li><p><strong>Multiple defaults.</strong> Two defaults of one facility separated by fewer
 than <code>lgd_cure_window</code> months (from the close of the first to the start
 of the second), or a new default while the first is still open, are

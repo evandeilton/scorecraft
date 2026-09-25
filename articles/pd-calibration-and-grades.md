@@ -440,8 +440,8 @@ cat(tail(sql, 6), sep = "\n")
 #> -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)
 #> SELECT
 #>     s.*,
-#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947994 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
-#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947994 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
+#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947983 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
+#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947983 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
 #> FROM score_scr s;
 ```
 
@@ -498,14 +498,14 @@ v <- scr_pd_validate(pd, pnl, id = "id", date = "date", default = "default",
                      grade = "grade", score = "score", by = "quarter")
 v
 #> <scr_pd_validation> target "default" | 8 quarterly cohorts, 12-month window | overall light: RED
-#>   portfolio: N 4,608 | D 444 | DR 9.64% vs pd_final 11.12% | Jeffreys p 0.9995 | binomial p 0.9995 (critical 549) | HL chi2 12.51 (p 0.0058) | multi-period z -10.09
+#>   portfolio: N 4,608 | D 444 | DR 9.64% vs pd_final 11.12% | Jeffreys p 0.9995 | binomial p 0.9995 (critical 549) | HL chi2 12.51 (p 0.0284) | multi-period z -11.19
 #>   grade       n     d       dr       pd    p_jeff   p_binom light 
 #>   1        3151   147    4.67%    5.42%    0.9711    0.9737 green 
 #>   2         557    80   14.36%   18.38%    0.9940    0.9949 green 
 #>   3         324    55   16.98%   18.74%    0.7906    0.8110 green 
 #>   4         391    86   21.99%   24.66%    0.8905    0.9014 green 
 #>   5         185    76   41.08%   44.53%    0.8276    0.8459 green 
-#>   discrimination (score): AUC 0.7564 [0.7308, 0.7723] vs initial 0.7394 | S -1.24, p 0.8925 | KS 0.4027
+#>   discrimination (score): AUC 0.7564 [0.7308, 0.7723] vs initial 0.7394 | S -1.44, p 0.9250 | KS 0.4027
 #>   stability: grade PSI 0.9634 (shift, adjusted shift) at cohort 2024-10-01 | MWB up - / down - | CV 1.245 vs 0.452 (p 0.1869)
 ```
 
@@ -515,18 +515,18 @@ the overall light is the worst of them.
 ``` r
 
 v$summary
-#>                    test     level    statistic     p_value  light
-#>                  <char>    <char>        <num>       <num> <char>
-#>  1:            jeffreys portfolio   0.09635417 0.999469436  green
-#>  2: jeffreys_grades_red     grade   0.00000000 0.790585046  green
-#>  3:            binomial portfolio 549.00000000 0.999513515  green
-#>  4:              normal portfolio  -3.21341063 0.999344157  green
-#>  5:     hosmer_lemeshow portfolio  12.51211309 0.005819772  green
-#>  6:        multi_period portfolio -10.09450041 1.000000000  green
-#>  7:      auc_vs_initial portfolio  -1.23990837 0.892495357  green
-#>  8:          psi_grades portfolio   0.96337125          NA    red
-#>  9: migration_mwb_upper portfolio           NA          NA   <NA>
-#> 10:    concentration_cv portfolio   1.24524312 0.186941092  green
+#>                    test     level    statistic    p_value  light
+#>                  <char>    <char>        <num>      <num> <char>
+#>  1:            jeffreys portfolio   0.09635417 0.99946944  green
+#>  2: jeffreys_grades_red     grade   0.00000000 0.79058505  green
+#>  3:            binomial portfolio 549.00000000 0.99951352  green
+#>  4:              normal portfolio  -3.21341063 0.99934416  green
+#>  5:     hosmer_lemeshow portfolio  12.51211309 0.02840601  green
+#>  6:        multi_period portfolio -11.19460843 1.00000000  green
+#>  7:      auc_vs_initial portfolio  -1.43959713 0.92500929  green
+#>  8:          psi_grades portfolio   0.96337125         NA    red
+#>  9: migration_mwb_upper portfolio           NA         NA   <NA>
+#> 10:    concentration_cv portfolio   1.24524312 0.18694109  green
 ```
 
 One red, and it is readable. The one-sided tests are green on every
@@ -655,8 +655,8 @@ an availability row, never a fabricated number.
 
 out <- file.path(tempdir(), "scorecraft-pd-vignette")
 ex <- scr_export(pd, out, stamp = FALSE, validation = v)
-#>   /tmp/RtmpS7fVkQ/scorecraft-pd-vignette/pd_default.xlsx
-#>   /tmp/RtmpS7fVkQ/scorecraft-pd-vignette/sql_pd_default.sql
+#>   /tmp/RtmpzILdE8/scorecraft-pd-vignette/pd_default.xlsx
+#>   /tmp/RtmpzILdE8/scorecraft-pd-vignette/sql_pd_default.sql
 basename(unlist(ex$files))
 #> [1] "pd_default.xlsx"    "sql_pd_default.sql"
 openxlsx::getSheetNames(ex$files$pd)

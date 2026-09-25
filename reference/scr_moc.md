@@ -8,12 +8,13 @@ of the long-run average from the cohort series, \\t\_{q, T-1}\\
 sd(DR_t)/\sqrt{T}\\ per grade; `"ci_binomial"` uses \\z_q
 \sqrt{PD(1-PD)/n}\\ on the obligors (or obligor-years when a series
 exists); `"bootstrap"` resamples the outcomes of the sample within each
-grade and takes the `level` quantile of the default rate above the
-estimate. Categories `"A"` (data and methodological deficiencies) and
-`"B"` (changes in standards or environment) are expert quantities:
-`value` (one number or one per grade, in PD units) and a non-empty
-`reason` are mandatory. The ledger is append-only: `A` and `B` entries
-accumulate, a new `C` supersedes the previous one (kept with
+grade (drawn as the resampled default rate, Binomial(n, DR) / n, its
+exact distribution) and takes the `level` quantile of the default rate
+above the estimate. Categories `"A"` (data and methodological
+deficiencies) and `"B"` (changes in standards or environment) are expert
+quantities: `value` (one number or one per grade, in PD units) and a
+non-empty `reason` are mandatory. The ledger is append-only: `A` and `B`
+entries accumulate, a new `C` supersedes the previous one (kept with
 `active = FALSE`).
 
 ## Usage
@@ -112,12 +113,12 @@ gr$moc
 #> 8:     2        A      manual    NA     4 0.36956522 0.00200000
 #>                                             reason active       date
 #>                                             <char> <lgcl>     <char>
-#> 1:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-05
-#> 2:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-05
-#> 3:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-05
-#> 4:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-05
-#> 5: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-05
-#> 6: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-05
-#> 7: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-05
-#> 8: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-05
+#> 1:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-25
+#> 2:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-25
+#> 3:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-25
+#> 4:  estimation error, ci_binomial at 95% one-sided   TRUE 2026-09-25
+#> 5: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-25
+#> 6: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-25
+#> 7: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-25
+#> 8: missing unlikeliness-to-pay trigger before 2024   TRUE 2026-09-25
 ```

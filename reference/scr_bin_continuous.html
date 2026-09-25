@@ -158,8 +158,11 @@ impute) first, exactly as the scorecard pipeline does. Categorical
 missing values become the level <code>"NA"</code>, as in the engine. When a
 <code>holdout_idx</code> is given, the frozen bins are revalidated: the hold-out
 bin means are recomputed, the PSI of the bin shares is reported with the
-sample-size-adjusted critical value, and a driver whose hold-out means
-break the training order is flagged <code>UNSTABLE_HOLDOUT</code>.</p>
+sample-size-adjusted critical value, a driver whose hold-out means
+break the training order is flagged <code>UNSTABLE_HOLDOUT</code>, one whose bin
+shares shift (fixed PSI flag <code>"shift"</code>, PSI at or above 0.25) is flagged
+<code>PSI_ACTION</code>, and one with more than 1% of hold-out rows outside the
+bins <code>UNBINNED_HOLDOUT</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

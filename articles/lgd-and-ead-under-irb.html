@@ -464,9 +464,9 @@ jump at six months is the cures leaving the set of open events.</p>
 <span><span class="co">#&gt;   consistency at tau = 0: ELBE equals the LRA and the in-default LGD equals the downturn LGD</span></span>
 <span><span class="co">#&gt;   in-default LGD by pool and age</span></span>
 <span><span class="co">#&gt;   pool       m0      m6     m12     m24     m36</span></span>
-<span><span class="co">#&gt;   1       31.5%   50.8%   50.0%   51.4%   54.3%</span></span>
-<span><span class="co">#&gt;   2       50.6%   70.9%   70.3%   67.3%   69.3%</span></span>
-<span><span class="co">#&gt;   3       67.4%   84.5%   84.5%   81.6%   82.6%</span></span>
+<span><span class="co">#&gt;   1       31.5%   50.9%   50.1%   51.5%   54.4%</span></span>
+<span><span class="co">#&gt;   2       50.6%   71.2%   70.8%   67.6%   69.4%</span></span>
+<span><span class="co">#&gt;   3       67.4%   84.8%   84.9%   81.8%   82.7%</span></span>
 <span><span class="va">e</span><span class="op">$</span><span class="va">consistency</span></span>
 <span><span class="co">#&gt;     pool       lra    lgd_dt    elbe_0 lgd_in_default_0     ok</span></span>
 <span><span class="co">#&gt;    &lt;int&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;            &lt;num&gt; &lt;lgcl&gt;</span></span>
@@ -501,7 +501,7 @@ floored result.</p>
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">m</span>, table <span class="op">=</span> <span class="st">"prd.defaults"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span><span class="op">)</span></span>
 <span><span class="va">sql_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">sql</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$"</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294914 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998077 THEN 2 ELSE 3 END AS pool</span></span>
+<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294925 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998088 THEN 2 ELSE 3 END AS pool</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor</span></span>
 <span><span class="co">#&gt;     GREATEST(lgd_dt, lgd_floor) AS lgd_final</span></span></code></pre></div>
@@ -705,12 +705,12 @@ limit-factor measure form their own pool <code>LF</code>.</p>
 <span><span class="co">#&gt;   train    n   126 | RMSE 0.3628 | MAE 0.2884 | gAUC 0.5582 [0.5068, 0.5935] | EAD adequacy 0.8485 | CEAR 0.1181</span></span>
 <span><span class="co">#&gt;   holdout  n    71 | RMSE 0.4035 | MAE 0.2728 | gAUC 0.5708 [0.5392, 0.6340] | EAD adequacy 0.7905 | CEAR 0.4077</span></span>
 <span><span class="va">m_ead</span><span class="op">$</span><span class="va">drivers</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">feature</span>, <span class="va">n_bins</span>, <span class="va">eta2</span>, <span class="va">direction</span>, <span class="va">p_anova</span>, <span class="va">eta2_holdout</span>, <span class="va">psi_flag</span>, <span class="va">admitted</span>, <span class="va">reason</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;            feature n_bins       eta2       direction    p_anova eta2_holdout</span></span>
-<span><span class="co">#&gt;             &lt;char&gt;  &lt;int&gt;      &lt;num&gt;          &lt;char&gt;      &lt;num&gt;        &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1: utilisation_ref      2 0.04934431      decreasing 0.01433303   0.03634314</span></span>
-<span><span class="co">#&gt; 2:         product      3 0.02890852 ordered_by_mean 0.17715296   0.05268658</span></span>
-<span><span class="co">#&gt; 3:  months_on_book      4 0.08125227      decreasing 0.01893577   0.07602372</span></span>
-<span><span class="co">#&gt; 4:             dpd      1 0.00000000            none         NA   0.00000000</span></span>
+<span><span class="co">#&gt;            feature n_bins         eta2       direction    p_anova eta2_holdout</span></span>
+<span><span class="co">#&gt;             &lt;char&gt;  &lt;int&gt;        &lt;num&gt;          &lt;char&gt;      &lt;num&gt;        &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: utilisation_ref      2 4.934431e-02      decreasing 0.01433303 3.634314e-02</span></span>
+<span><span class="co">#&gt; 2:         product      3 2.890852e-02 ordered_by_mean 0.17715296 5.268658e-02</span></span>
+<span><span class="co">#&gt; 3:  months_on_book      4 8.125227e-02      decreasing 0.01893577 7.602372e-02</span></span>
+<span><span class="co">#&gt; 4:             dpd      1 2.225959e-32            none         NA 1.830249e-32</span></span>
 <span><span class="co">#&gt;    psi_flag admitted        reason</span></span>
 <span><span class="co">#&gt;      &lt;char&gt;   &lt;lgcl&gt;        &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1:   stable     TRUE            OK</span></span>
@@ -908,22 +908,22 @@ and the secured share.</p>
 <span><span class="co">#&gt; 12:            downturn</span></span>
 <span><span class="co">#&gt; 13:            downturn</span></span>
 <span><span class="co">#&gt; 14:               floor</span></span>
-<span><span class="co">#&gt;                                                                                                         detail</span></span>
-<span><span class="co">#&gt;                                                                                                         &lt;char&gt;</span></span>
-<span><span class="co">#&gt;  1:                            reference rate at default + add-on 5.00%, monthly compounding over whole months</span></span>
-<span><span class="co">#&gt;  2:        outstanding at the cure date (ead net of cash recovered) as an artificial recovery on the cure date</span></span>
-<span><span class="co">#&gt;  3:                                               15 event(s) merged: gap below 9 months or overlapping spells</span></span>
-<span><span class="co">#&gt;  4:      160 open event(s) extrapolated from the product recovery profile (lambda = 1); 2 closed at t_max = 60</span></span>
-<span><span class="co">#&gt;  5:                                                                          indirect costs 0 allocated by ead</span></span>
-<span><span class="co">#&gt;  6:                                                                    floor at zero: TRUE | cap at one: FALSE</span></span>
-<span><span class="co">#&gt;  7:                                                           cohort split, hold-out 30.0%, cut-off 2024-01-01</span></span>
-<span><span class="co">#&gt;  8:                                                                                                         OK</span></span>
-<span><span class="co">#&gt;  9:                                                                                       fractional_logit: OK</span></span>
-<span><span class="co">#&gt; 10:                                                                                                        ltv</span></span>
-<span><span class="co">#&gt; 11:                                 4 band(s) below 100 defaults merged into the neighbour with the closer LRA</span></span>
-<span><span class="co">#&gt; 12:                         provisional: type 3 add-on 15.0%; run scr_lgd_downturn() with the downturn periods</span></span>
-<span><span class="co">#&gt; 13:                                    type1; add-on 15.0%; periods 2022-01-01 to 2023-12-31; mean impact 4.1%</span></span>
-<span><span class="co">#&gt; 14: bcb retail_other: unsecured 30.0%, real_estate 10.0%, secured share 40.0%; binding in 0.0% of the defaults</span></span>
+<span><span class="co">#&gt;                                                                                                                 detail</span></span>
+<span><span class="co">#&gt;                                                                                                                 &lt;char&gt;</span></span>
+<span><span class="co">#&gt;  1:                                    reference rate at default + add-on 5.00%, monthly compounding over whole months</span></span>
+<span><span class="co">#&gt;  2: outstanding at the cure date (ead plus drawings, net of cash recovered) as an artificial recovery on the cure date</span></span>
+<span><span class="co">#&gt;  3:                                                       15 event(s) merged: gap below 9 months or overlapping spells</span></span>
+<span><span class="co">#&gt;  4:              160 open event(s) extrapolated from the product recovery profile (lambda = 1); 2 closed at t_max = 60</span></span>
+<span><span class="co">#&gt;  5:                                                                                  indirect costs 0 allocated by ead</span></span>
+<span><span class="co">#&gt;  6:                                                                            floor at zero: TRUE | cap at one: FALSE</span></span>
+<span><span class="co">#&gt;  7:                                                                   cohort split, hold-out 30.0%, cut-off 2024-01-01</span></span>
+<span><span class="co">#&gt;  8:                                                                                                                 OK</span></span>
+<span><span class="co">#&gt;  9:                                                                                               fractional_logit: OK</span></span>
+<span><span class="co">#&gt; 10:                                                                                                                ltv</span></span>
+<span><span class="co">#&gt; 11:                                         4 band(s) below 100 defaults merged into the neighbour with the closer LRA</span></span>
+<span><span class="co">#&gt; 12:                                 provisional: type 3 add-on 15.0%; run scr_lgd_downturn() with the downturn periods</span></span>
+<span><span class="co">#&gt; 13:                                            type1; add-on 15.0%; periods 2022-01-01 to 2023-12-31; mean impact 4.1%</span></span>
+<span><span class="co">#&gt; 14:         bcb retail_other: unsecured 30.0%, real_estate 10.0%, secured share 40.0%; binding in 0.0% of the defaults</span></span>
 <span><span class="co">#&gt;                                    reason</span></span>
 <span><span class="co">#&gt;                                    &lt;char&gt;</span></span>
 <span><span class="co">#&gt;  1:                                      </span></span>

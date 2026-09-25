@@ -113,17 +113,18 @@ also has `horizon`, `by`, `pd_column` and `target`.
   `p = F_Beta(PD; D + 1/2, N - D + 1/2)`, the binomial `P(X >= D)` with
   its critical count at `alpha`, the normal `z`, and the traffic light
   on the Jeffreys p-value. Portfolio: the same tests on the totals,
-  Hosmer-Lemeshow over the grades (`K - 2` degrees of freedom), the
-  multi-period normal test over the cohort default rates and the Brier
-  score.
+  Hosmer-Lemeshow over the grades (`K` degrees of freedom: the grade PDs
+  are not fitted on the validation sample), the multi-period normal test
+  over the cohort differences `DR_t - PD_t` (BCBS Working Paper
+  14, 2005) and the Brier score.
 
 - Discrimination:
 
   AUC, Gini and KS with a bootstrap interval
   ([`scr_metrics()`](https://evandeilton.github.io/scorecraft/reference/scr_metrics.md))
   on the score when a `score` column exists, otherwise on the grade; the
-  `S` statistic against `auc_init` (`(AUC_init - AUC_curr) / se`,
-  Hanley-McNeil), `p = 1 - Phi(S)`.
+  `S` statistic against `auc_init` (`(AUC_init - AUC_curr) / se`, with
+  the DeLong standard error of the current AUC), `p = 1 - Phi(S)`.
 
 - Stability:
 
@@ -169,13 +170,13 @@ v <- scr_pd_validate(pd, pnl, id = "id", date = "date", default = "default",
                      grade = "grade", score = "score", by = "quarter")
 v
 #> <scr_pd_validation> target "default" | 8 quarterly cohorts, 12-month window | overall light: RED
-#>   portfolio: N 4,568 | D 562 | DR 12.30% vs pd_final 10.54% | Jeffreys p 0.0001 | binomial p 0.0001 (critical 517) | HL chi2 51.00 (p 0.0000) | multi-period z 4.53
+#>   portfolio: N 4,568 | D 562 | DR 12.30% vs pd_final 10.54% | Jeffreys p 0.0001 | binomial p 0.0001 (critical 517) | HL chi2 51.00 (p 0.0000) | multi-period z 3.84
 #>   grade       n     d       dr       pd    p_jeff   p_binom light 
 #>   1        3373   234    6.94%    4.75%    0.0000    0.0000 red   
 #>   2         498   103   20.68%   15.26%    0.0006    0.0007 red   
 #>   3         475   125   26.32%   30.54%    0.9782    0.9808 green 
 #>   4         222   100   45.05%   45.23%    0.5217    0.5485 green 
-#>   discrimination (score): AUC 0.7682 [0.7517, 0.7832] vs initial 0.7394 | S -2.38, p 0.9914 | KS 0.4177
+#>   discrimination (score): AUC 0.7682 [0.7517, 0.7832] vs initial 0.7394 | S -2.81, p 0.9976 | KS 0.4177
 #>   stability: grade PSI 0.7658 (shift, adjusted shift) at cohort 2024-10-01 | MWB up - / down - | CV 1.158 vs 0.462 (p 0.2213)
 v$summary
 #>                    test     level   statistic      p_value  light
@@ -184,9 +185,9 @@ v$summary
 #>  2: jeffreys_grades_red     grade   2.0000000 9.742426e-09    red
 #>  3:            binomial portfolio 517.0000000 8.340461e-05    red
 #>  4:              normal portfolio   3.8701036 5.439457e-05    red
-#>  5:     hosmer_lemeshow portfolio  51.0038064 8.407448e-12    red
-#>  6:        multi_period portfolio   4.5283667 2.972068e-06    red
-#>  7:      auc_vs_initial portfolio  -2.3811341 9.913703e-01  green
+#>  5:     hosmer_lemeshow portfolio  51.0038064 2.228134e-10    red
+#>  6:        multi_period portfolio   3.8442315 6.046541e-05    red
+#>  7:      auc_vs_initial portfolio  -2.8144151 9.975567e-01  green
 #>  8:          psi_grades portfolio   0.7658293           NA    red
 #>  9: migration_mwb_upper portfolio          NA           NA   <NA>
 #> 10:    concentration_cv portfolio   1.1575073 2.213365e-01  green
