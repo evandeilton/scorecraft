@@ -13,7 +13,7 @@ chains them for the common case:"><meta property="og:image" content="https://eva
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -117,7 +117,9 @@ validation. <code><a href="scr_el.html">scr_el()</a></code>, <code><a href="scr_
 <code><a href="scr_pd_stress.html">scr_pd_stress()</a></code> and <code><a href="scr_ecl.html">scr_ecl()</a></code> compute expected loss, risk weights,
 capital and expected credit loss. Binning
 against a continuous target goes through <code><a href="scr_bin_continuous.html">scr_bin_continuous()</a></code>, whose
-result the engine reproduces in R and in SQL.</p>
+result the engine reproduces in R and in SQL. The regulatory texts behind
+the presets are listed in <code><a href="scr_irb_params.html">scr_irb_params()</a></code>; users are responsible for
+checking the tables against the texts in force before any regulatory use.</p>
     </div>
     <div class="section level2">
     <h2 id="parallelism">Parallelism<a class="anchor" aria-label="anchor" href="#parallelism"></a></h2>

@@ -76,7 +76,6 @@ p <- scr_classing_propose(lab, "ds_region",
                           groups = list(edge = c("NORTH", "SOUTH"),
                                         core = c("EAST", "WEST", "CENTRE")))
 lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
-#>   ds_region: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
 sp <- scr_classing_spec(lab)
 sp
 #> <scr_classing_spec> 33 bins | 8 variables (1 manual)
@@ -110,7 +109,6 @@ sp
 # round trip through a file: a fresh lab receives the manual bins as proposals
 f <- tempfile(fileext = ".csv")
 scr_classing_spec(lab, file = f)
-#> classing spec written to /tmp/RtmpH7bJa4/file18ec4d034f86.csv
 props <- scr_classing_import(scr_coarse_classing(res), scr_classing_read(f))
 names(props)
 #> [1] "ds_region"

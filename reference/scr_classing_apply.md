@@ -61,7 +61,6 @@ p <- scr_classing_propose(lab, "ds_region",
                           groups = list(edge = c("NORTH", "SOUTH"),
                                         core = c("EAST", "WEST", "CENTRE")))
 lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
-#>   ds_region: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
 res2 <- scr_classing_apply(lab)
 scr_selected(res2)
 #> [1] "vl_score_01" "vl_score_02" "ds_band"     "ds_region"   "vl_score_05"
@@ -69,7 +68,7 @@ scr_selected(res2)
 scr_decisions(res2)
 #>      seq                  at author  variable action proposal_id
 #>    <int>              <POSc> <char>    <char> <char>      <char>
-#> 1:     1 2026-09-25 22:24:37 runner ds_region accept        P001
+#> 1:     1 2026-09-25 22:36:06 runner ds_region accept        P001
 #>                                                                      instruction
 #>                                                                           <char>
 #> 1: groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE"))

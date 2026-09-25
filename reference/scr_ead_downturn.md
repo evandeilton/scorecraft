@@ -2,12 +2,12 @@
 
 Quantifies the downturn component of the CCF from user-supplied downturn
 periods. `"type1"` (observed impact) takes, per pool, the
-default-weighted average of the realised values of the events whose
-default date falls in the periods and sets
-`ccf_dt = max(lra, observed)`; `"type3"` (reference value plus add-on)
-sets `ccf_dt = lra + add_on`; `"none"` resets `ccf_dt = lra`. The pool
-table is recomputed (`ccf_final`, `ccf_applied`) and the ledger records
-the periods, the method and the reason.
+default-weighted average of the realised values of the training events
+whose default date falls in the periods (the hold-out stays independent)
+and sets `ccf_dt = max(lra, observed)`; `"type3"` (long-run average plus
+add-on) sets `ccf_dt = lra + add_on`; `"none"` resets `ccf_dt = lra`.
+The pool table is recomputed (`ccf_final`, `ccf_applied`) and the ledger
+records the periods, the method and the reason.
 
 ## Usage
 
@@ -76,12 +76,12 @@ m2 <- scr_ead_downturn(m, periods = data.frame(start = as.Date("2024-01-01"),
 m2$downturn$table
 #>      pool       lra n_downturn dt_observed  dt_type3    ccf_dt ccf_final
 #>    <char>     <num>      <int>       <num>     <num>     <num>     <num>
-#> 1:     P1 0.3400611         29   0.3717872 0.4900611 0.3717872 0.4694382
-#> 2:     P2 0.5348808         45   0.5588773 0.6848808 0.5588773 0.6485326
+#> 1:     P1 0.3400611         26   0.3882968 0.4900611 0.3882968 0.4859478
+#> 2:     P2 0.5348808         41   0.5615728 0.6848808 0.5615728 0.6512281
 #> 3:     LF 0.8726786          7   0.8726786 1.0226786 0.8726786 0.9962084
 #>    ccf_applied
 #>          <num>
-#> 1:   0.4694382
-#> 2:   0.6485326
+#> 1:   0.4859478
+#> 2:   0.6512281
 #> 3:   0.9962084
 ```

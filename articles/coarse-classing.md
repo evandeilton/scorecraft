@@ -62,7 +62,7 @@ defaults to the system user.
 
 lab <- scr_coarse_classing(res, author = "analyst")
 lab
-#> <scr_classing> target "default" | opened 2026-09-25 22:25 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-25 22:37 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)
 ```
 
@@ -185,7 +185,7 @@ Suppose underwriting quotes `vl_score_01` in the bands below 40, 40 to
 
 p_breaks <- scr_classing_propose(lab, "vl_score_01", breaks = c(40, 55, 70))
 p_breaks
-#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-25 22:25
+#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-25 22:37
 #>                         optimal     manual      delta
 #>   n_bins                      7          4         -3
 #>   iv_train               0.3464     0.2993    -0.0471
@@ -225,7 +225,7 @@ p_merge$entry$cutpoints
 p_split <- scr_classing_propose(lab, "vl_score_01",
                                 split = c(1, res$fit$results$vl_score_01$cutpoints[1] - 5))
 p_split
-#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-25 22:25
+#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-25 22:37
 #>                         optimal     manual      delta
 #>   n_bins                      7          8          1
 #>   iv_train               0.3464     0.3561     0.0098
@@ -275,7 +275,7 @@ p_groups <- scr_classing_propose(lab, "ds_region",
                                  groups = list(edge = c("NORTH", "SOUTH"),
                                                core = c("EAST", "WEST", "CENTRE")))
 p_groups
-#> <scr_classing_proposal> P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-25 22:25
+#> <scr_classing_proposal> P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-25 22:37
 #>                         optimal     manual      delta
 #>   n_bins                      5          2         -3
 #>   iv_train               0.0846     0.0739    -0.0107
@@ -324,11 +324,14 @@ p_missing$verdict
 #> [1] "REVIEW"
 p_missing$warnings
 #> [1] "IV_BELOW_MIN"       "IV_LOW_ON_HOLDOUT"  "IV_LOSS_VS_OPTIMAL"
+#> [4] "IV_RATIO_UNSTABLE"
 ```
 
 The optimal bins of `ds_optin` carried a training IV of 0.0065 (see the
 overview); folding `"MISSING"` into `YES` leaves almost none, below the
-admission minimum, and loses more than the lab allows on hold-out.
+admission minimum, and loses more than the lab allows on hold-out. With
+a training IV that close to zero, the hold-out/train IV ratio says
+nothing either, hence `IV_RATIO_UNSTABLE`.
 
 ### Reading the warnings and the verdict
 
@@ -339,11 +342,13 @@ lab-specific rules. Codes fall into two tiers.
 - **Warnings** (advisory) give a `REVIEW` verdict: the engine screening
   codes (`NOT_MONOTONIC`, `SMALL_BIN`, `IV_BELOW_MIN`, `IV_SUSPECT`, …),
   the hold-out codes (`IV_DROPS_ON_HOLDOUT`, `IV_LOW_ON_HOLDOUT`,
-  `PSI_UNSTABLE`, …) and `IV_LOSS_VS_OPTIMAL`, raised when the hold-out
-  IV falls more than `lab_max_iv_loss` (10% by default) below the
-  optimal one. The `ds_region` grouping is a `REVIEW` for exactly that
-  reason: two regions lose about a fifth of the hold-out IV of five
-  states.
+  `PSI_UNSTABLE`, …), `IV_LOSS_VS_OPTIMAL`, raised when the hold-out IV
+  falls more than `lab_max_iv_loss` (10% by default) below the optimal
+  one, and `IV_RATIO_UNSTABLE`, raised when the train IV is below
+  `iv_min` and the hold-out/train IV ratio therefore carries little
+  information. The `ds_region` grouping is a `REVIEW` for
+  `IV_LOSS_VS_OPTIMAL` alone: two regions lose about a fifth of the
+  hold-out IV of five states.
 - **Blocking** codes give a `BLOCKED` verdict: an empty bin, a
   degenerate bin (no events or no non-events, unless the lab was opened
   with `laplace > 0`), a bin below `lab_min_bin_pct_hard` (0.5%) and a
@@ -362,7 +367,6 @@ verbs return the updated lab, so the idiom is to reassign.
 ``` r
 
 lab <- scr_classing_accept(lab, p_breaks, reason = "policy bands 40/55/70 used by underwriting")
-#>   vl_score_01: P001 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2740
 ```
 
 The grouping proposed in the previous section is still valid and is
@@ -371,7 +375,6 @@ accepted in turn.
 ``` r
 
 lab <- scr_classing_accept(lab, p_groups, reason = "edge/core is what pricing uses")
-#>   ds_region: P004 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
 ```
 
 The `ds_optin` proposal erased what little signal the variable had, so
@@ -414,7 +417,6 @@ copy of the lab so that the session carries on without the empty bin.
 
 lab_override <- scr_classing_accept(lab, p_blocked, reason = "deliberate policy floor at -5000",
                                     override = TRUE)
-#>   vl_score_04: P007 accepted (BLOCKED) - 3 bins, hold-out IV 0.0010
 scr_decisions(lab_override)[variable == "vl_score_04", .(seq, action, proposal_id, verdict, warnings, reason)]
 #>      seq   action proposal_id verdict
 #>    <int>   <char>      <char>  <char>
@@ -466,7 +468,7 @@ final choice.
 ``` r
 
 lab
-#> <scr_classing> target "default" | opened 2026-09-25 22:25 by analyst | 37 variables | 7 proposals: 2 accepted, 1 discarded
+#> <scr_classing> target "default" | opened 2026-09-25 22:37 by analyst | 37 variables | 7 proposals: 2 accepted, 1 discarded
 #>   variable                   action      bins          IV train       IV hold-out verdict     reason
 #>   vl_score_01                accepted  7->4     0.3464->0.2993     0.2877->0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti
 #>   ds_region                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      edge/core is what pricing uses
@@ -598,7 +600,7 @@ names(imported)
 imported$vl_score_01$imported_reason
 #> [1] "reviewer: first cut moved to 42 to match the bureau band"
 imported$vl_score_01
-#> <scr_classing_proposal> P008 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-25 22:25
+#> <scr_classing_proposal> P008 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-25 22:37
 #>                         optimal    current     manual      delta
 #>   n_bins                      7          4          4         -3
 #>   iv_train               0.3464     0.2993     0.2990    -0.0474
@@ -625,7 +627,6 @@ supersedes it, and the ledger records both facts.
 ``` r
 
 lab <- scr_classing_accept(lab, imported$vl_score_01, reason = imported$vl_score_01$imported_reason)
-#>   vl_score_01: P008 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2631
 scr_decisions(lab)[variable == "vl_score_01", .(seq, action, proposal_id, instruction, verdict)]
 #>      seq    action proposal_id            instruction    verdict
 #>    <int>    <char>      <char>                 <char>     <char>
@@ -649,7 +650,7 @@ res2 <- scr_classing_apply(lab)
 res2
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 0.6s
+#>   event: 14.25% on train, 14.50% on hold-out | 0.9s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel

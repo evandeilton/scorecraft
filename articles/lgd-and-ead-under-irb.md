@@ -9,6 +9,11 @@ for the scorecard itself); the third, [Expected loss and regulatory
 capital](https://evandeilton.github.io/scorecraft/articles/expected-loss-and-capital.md),
 combines PD, LGD and EAD into expected loss, capital and accounting ECL.
 
+The regulatory texts behind the parameter tables are listed in
+[`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md).
+Regulation changes and each supervisor interprets it: check the tables
+against the texts in force before any regulatory use.
+
 The two IRB parameters after the PD follow the discipline of the
 scorecard pipeline: a reference data set built with a funnel that names
 every rule it applied, drivers binned on training cohorts and
@@ -355,16 +360,17 @@ m$pools[, .(pool, pred_lo, pred_hi, n, lra, lra_ew, se, moc_c, lgd_dt, floor, lg
 
 [`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md)
 quantifies the downturn per pool from user-supplied periods. Under
-`"type1"` the downturn value is the realised LGD of the defaults whose
-default date falls in the periods (a pool with fewer than ten such
-defaults falls back to the add-on); the reference value, the mean of the
-two worst calendar years of the pool, is reported as a challenger, not a
-bound. The downturn LGD used for capital is
-`min(1, max(LRA + MoC, DT + MoC))`. The cap at one is the package’s
-choice; the EBA guidelines cap the type-3 estimate at 105%, so a pool
-that loses more than its exposure in a downturn needs a decision the cap
-does not take. The reference rate of the demo rises above thirteen per
-cent in 2022 and 2023, which is the reason recorded.
+`"type1"` the downturn value is the realised LGD of the training
+defaults whose default date falls in the periods (a pool with fewer than
+ten such defaults falls back to the add-on); the reference value, the
+mean of the two worst calendar years of the pool’s training defaults, is
+reported as a challenger, not a bound. Both use the training rows only,
+so the hold-out stays independent for validation. The downturn LGD used
+for capital is `min(1, max(LRA + MoC, DT + MoC))`. The cap at one is the
+package’s choice; the EBA guidelines cap the type-3 estimate at 105%, so
+a pool that loses more than its exposure in a downturn needs a decision
+the cap does not take. The reference rate of the demo rises above
+thirteen per cent in 2022 and 2023, which is the reason recorded.
 
 ``` r
 
@@ -374,18 +380,19 @@ m$downturn$table[, .(pool, n, lra, moc_c, n_downturn, dt_observed, reference_val
 #>     pool     n       lra      moc_c n_downturn dt_observed reference_value
 #>    <int> <int>     <num>      <num>      <int>       <num>           <num>
 #> 1:     1   274 0.2749072 0.02281440        117   0.2923210       0.3071022
-#> 2:     2   170 0.4002597 0.03786551         73   0.4681236       0.5277502
-#> 3:     3   176 0.5926373 0.04292232         79   0.6312294       0.6842627
+#> 2:     2   170 0.4002597 0.03786551         73   0.4681236       0.4750833
+#> 3:     3   176 0.5926373 0.04292232         79   0.6312294       0.6358949
 #>    method_used    lgd_dt     impact below_reference
 #>         <char>     <num>      <num>          <lgcl>
 #> 1:       type1 0.3151354 0.01741372           FALSE
-#> 2:       type1 0.5059891 0.06786385            TRUE
-#> 3:       type1 0.6741517 0.03859206            TRUE
+#> 2:       type1 0.5059891 0.06786385           FALSE
+#> 3:       type1 0.6741517 0.03859206           FALSE
 ```
 
-Pools 2 and 3 sit below their reference value: the two worst years of
-those pools were worse than the periods declared. The flag does not
-change the estimate; it is there for the reviewer to answer.
+No pool sits below its reference value: in every pool the downturn LGD,
+margin included, is at least the mean of the two worst training years.
+Had one fallen below, the flag would not change the estimate; it would
+be there for the reviewer to answer.
 
 [`scr_lgd_floor()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_floor.md)
 reads the input floor from the parameter table of the framework. The
@@ -492,7 +499,7 @@ pool parameters and the floored result.
 sql <- scr_sql(m, table = "prd.defaults", dialect = "duckdb")
 sql_lines <- unlist(strsplit(sql, "\n", fixed = TRUE))
 cat(grep("AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$", sql_lines, value = TRUE), sep = "\n")
-#>     CASE WHEN lgd_pred <= 0.37690454385294908 THEN 1 WHEN lgd_pred <= 0.45265644452998066 THEN 2 ELSE 3 END AS pool
+#>     CASE WHEN lgd_pred <= 0.37690454385294925 THEN 1 WHEN lgd_pred <= 0.45265644452998088 THEN 2 ELSE 3 END AS pool
 #>     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,
 #>     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor
 #>     GREATEST(lgd_dt, lgd_floor) AS lgd_final
@@ -761,15 +768,16 @@ m_ead$pools[, .(pool, measure, n, lra, lra_ew, se, moc_est, ccf_dt, ccf_final, c
 takes the periods and a mandatory reason. Under `"type1"` the downturn
 value of a pool is `max(lra, observed)`, the default-weighted realised
 CCF of the events whose default date falls in the periods; the applied
-CCF is recomputed and the ledger records periods, method and reason. Two
-facts to keep in view: the observed value is computed on every row of
-the reference data set, training and hold-out alike, so the hold-out
-validation below is not independent of the downturn component; and no
-minimum count is imposed, so a pool with few events in the periods (the
-`LF` pool here) should be read with care.
+CCF is recomputed and the ledger records periods, method and reason. The
+observed value is computed on the training rows only, like the long-run
+average, so the hold-out validation below stays independent of the
+downturn component. No minimum count is imposed, so a pool with few
+training events in the periods (the `LF` pool here, with four) should be
+read with care.
 
 The period chosen covers the first three quarters of 2024, when the
-realised CCFs of the demo panel run above their average in every pool.
+realised CCFs of the training rows run above their long-run average in
+every pool; the table shows the observed value above `lra` in each.
 
 ``` r
 
@@ -778,12 +786,12 @@ m_ead <- scr_ead_downturn(m_ead, periods = data.frame(start = as.Date("2024-01-0
 m_ead$downturn$table
 #>      pool       lra n_downturn dt_observed  dt_type3    ccf_dt ccf_final
 #>    <char>     <num>      <int>       <num>     <num>     <num>     <num>
-#> 1:     P1 0.2856519         61   0.3251603 0.4356519 0.3251603 0.3854151
+#> 1:     P1 0.2856519         59   0.3253274 0.4356519 0.3253274 0.3855822
 #> 2:     P2 0.4962957         19   0.5274588 0.6462957 0.5274588 0.6576017
 #> 3:     LF 0.8884167          4   0.9255208 1.0384167 0.9255208 1.0665993
 #>    ccf_applied
 #>          <num>
-#> 1:   0.3854151
+#> 1:   0.3855822
 #> 2:   0.6576017
 #> 3:   1.0665993
 ```
@@ -815,16 +823,16 @@ ap_ead <- scr_apply(m_ead, new_ead)
 ap_ead
 #>      pool measure utilisation undrawn ccf_applied ead_model ead_floor
 #>    <char>  <char>       <num>   <num>       <num>     <num>     <num>
-#> 1:     P1     ulf   0.5891667    4930   0.3854151  8970.096      8056
+#> 1:     P1     ulf   0.5891667    4930   0.3855822  8970.920      8056
 #> 2:     P2     ulf   0.1066667    2680   0.6576017  2082.373       856
-#> 3:     P1     ulf   0.4745600   32840   0.3854151 42317.032     36228
+#> 3:     P1     ulf   0.4745600   32840   0.3855822 42322.519     36228
 #> 4:     P2     ulf   0.0000000    8000   0.6576017  5260.814      1600
 #> 5:     LF      lf   1.0514286       0   1.0665993  3733.098      3680
 #>    ead_predicted ead_floor_binding
 #>            <num>            <lgcl>
-#> 1:      8970.096             FALSE
+#> 1:      8970.920             FALSE
 #> 2:      2082.373             FALSE
-#> 3:     42317.032             FALSE
+#> 3:     42322.519             FALSE
 #> 4:      5260.814             FALSE
 #> 5:      3733.098             FALSE
 ```
@@ -849,7 +857,7 @@ cat(tail(sql_ead_lines, 10), sep = "\n")
 #> FROM (
 #>   SELECT
 #>     *,
-#>     CASE pool WHEN 'P1' THEN 0.3854151113299159 WHEN 'P2' THEN 0.6576016928597912 WHEN 'LF' THEN 1.066599304475079 ELSE NULL END AS ccf_applied
+#>     CASE pool WHEN 'P1' THEN 0.38558218069556494 WHEN 'P2' THEN 0.6576016928597912 WHEN 'LF' THEN 1.066599304475079 ELSE NULL END AS ccf_applied
 #>   FROM pool_ead
 #> ) ead;
 ```
@@ -862,9 +870,9 @@ got_ead <- DBI::dbGetQuery(con, paste(scr_sql(m_ead, table = "facilities_t", dia
 DBI::dbDisconnect(con, shutdown = TRUE)
 got_ead[, c("pool", "ccf_applied", "ead_predicted")]
 #>   pool ccf_applied ead_predicted
-#> 1   P1   0.3854151      8970.096
+#> 1   P1   0.3855822      8970.920
 #> 2   P2   0.6576017      2082.373
-#> 3   P1   0.3854151     42317.032
+#> 3   P1   0.3855822     42322.519
 #> 4   P2   0.6576017      5260.814
 #> 5   LF   1.0665993      3733.098
 identical(got_ead$pool, ap_ead$pool)
@@ -887,41 +895,39 @@ v_ead <- scr_ead_validate(m_ead)
 v_ead
 #> <scr_ead_validation> 71 rows (holdout)
 #>   pool        n  realised predicted        t        p  light  adequacy  light
-#>   P1         50    0.2763    0.3854   -1.829   0.9633 green     0.7710 green 
+#>   P1         50    0.2763    0.3856   -1.832   0.9635 green     0.7709 green 
 #>   P2         18    0.4536    0.6576   -2.346   0.9843 green     0.7600 green 
 #>   LF          3    0.9022    1.0666   -1.193   0.8224 green     0.7167 green 
-#>   TOTAL      71    0.3232    0.4575   -2.678   0.9953 green     0.7674 green 
+#>   TOTAL      71    0.3232    0.4576   -2.680   0.9954 green     0.7674 green 
 #>   gAUC 0.5708 [0.5027, 0.6398] vs development 0.5582 (p 0.6133) | Spearman 0.2580 | CEAR 0.4077
 #>   stability: pool PSI 0.0308 (stable) | utilisation_ref PSI 0.0319 (stable)
 #>   lights: calibration_t_total green | ead_adequacy_total green | gauc_vs_development green | pool_psi green
 v_ead$summary[, .(test, statistic, p, light)]
 #>                   test   statistic         p  light
 #>                 <char>       <num>     <num> <char>
-#> 1: calibration_t_total -2.67751226 0.9953405  green
-#> 2:  ead_adequacy_total  0.76742361        NA  green
+#> 1: calibration_t_total -2.67996285 0.9953712  green
+#> 2:  ead_adequacy_total  0.76736324        NA  green
 #> 3: gauc_vs_development -0.28794667 0.6133062  green
 #> 4:            pool_psi  0.03078423        NA  green
 v_ead$backtest[, .(cohort, n, realised, predicted, p, adequacy, light_adequacy)]
 #>    cohort     n  realised predicted         p  adequacy light_adequacy
 #>    <char> <int>     <num>     <num>     <num>     <num>         <char>
-#> 1:   2023    27 0.1802738 0.4398524 0.9999977 0.6232298          green
-#> 2:   2024    44 0.4063661 0.4677041 0.7991478 0.8391052          green
+#> 1:   2023    27 0.1802738 0.4399861 0.9999977 0.6231908          green
+#> 2:   2024    44 0.4063661 0.4678206 0.7995910 0.8390325          green
 ```
 
 Every calibration light is green because the estimate sits above the
 realised values on the hold-out: the margin and the downturn push the
 applied CCF up, and an adequacy ratio below one means the predicted EAD
-covers the realised one. Part of that cover is not independent evidence,
-since the downturn component was estimated on rows that include the
-hold-out. The discrimination light is green only because the hold-out
-gAUC does not fall below the development value; the level itself is
-weak, 0.57 with an interval that reaches down to 0.50, so the single
-admitted driver separates the pools little better than chance. On a real
-portfolio that would be the first finding of the review. The workbook
-carries the funnel, the summaries, the driver bins and the admission
-table, the pools and the cells, the downturn and the margin, the
-hold-out metrics, the validation blocks, the model card and the ledger,
-next to the SQL file.
+covers the realised one. The discrimination light is green only because
+the hold-out gAUC does not fall below the development value; the level
+itself is weak, 0.57 with an interval that reaches down to 0.50, so the
+single admitted driver separates the pools little better than chance. On
+a real portfolio that would be the first finding of the review. The
+workbook carries the funnel, the summaries, the driver bins and the
+admission table, the pools and the cells, the downturn and the margin,
+the hold-out metrics, the validation blocks, the model card and the
+ledger, next to the SQL file.
 
 ``` r
 
@@ -1011,7 +1017,7 @@ m_ead$ledger[, .(step, action, detail, reason)]
 #>                                                                                                                          <char>
 #> 1: horizon fixed (12 months); measure auto with u* = 0.95; floor 0; cap NA; post-default drawings in lgd; default level obligor
 #> 2:                                            drivers admitted: utilisation_ref; 2 pools; MoC alpha 0.05; floor 0.5 x 0.4 = 0.2
-#> 3:           periods: 2024-01-01 to 2024-09-30; 84 reference rows in the periods; add-on 0.15; applied CCF now 0.3854 to 1.0666
+#> 3:  periods: 2024-01-01 to 2024-09-30; 82 training reference rows in the periods; add-on 0.15; applied CCF now 0.3856 to 1.0666
 #>                                             reason
 #>                                             <char>
 #> 1:                                   configuration

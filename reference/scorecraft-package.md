@@ -119,7 +119,11 @@ and
 compute expected loss, risk weights, capital and expected credit loss.
 Binning against a continuous target goes through
 [`scr_bin_continuous()`](https://evandeilton.github.io/scorecraft/reference/scr_bin_continuous.md),
-whose result the engine reproduces in R and in SQL.
+whose result the engine reproduces in R and in SQL. The regulatory texts
+behind the presets are listed in
+[`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md);
+users are responsible for checking the tables against the texts in force
+before any regulatory use.
 
 ## Parallelism
 

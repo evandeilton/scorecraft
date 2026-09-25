@@ -2,12 +2,14 @@
 
 Quantifies the downturn per pool from user-supplied downturn periods.
 `method = "type1"` (observed impact): the default-weighted realised LGD
-of the defaults whose default date falls inside the periods; a pool with
-fewer than ten such defaults falls back to type 3. `method = "type3"`:
-the long-run average plus `add_on`. `method = "none"`: the long-run
-average. The reference value (a challenger, not a bound) is the mean of
-the two worst calendar years of the pool. The downturn LGD used for
-capital is \$\$\mathrm{LGD}^{DT} = \min\\\big(1,\\ \max(\mathrm{LRA} +
+of the training defaults whose default date falls inside the periods; a
+pool with fewer than ten such defaults falls back to type 3.
+`method = "type3"`: the long-run average plus `add_on`.
+`method = "none"`: the long-run average. The reference value (a
+challenger, not a bound) is the mean of the two worst calendar years of
+the pool. Both use the training rows only, so the hold-out stays
+independent evidence. The downturn LGD used for capital is
+\$\$\mathrm{LGD}^{DT} = \min\\\big(1,\\ \max(\mathrm{LRA} +
 \mathrm{MoC},\\ \mathrm{DT} + \mathrm{MoC})\big)\$\$ and the impact
 `LGD^DT - min(1, LRA + MoC)` is reported per pool.
 
@@ -79,14 +81,14 @@ m <- scr_lgd_downturn(m, periods = data.frame(start = as.Date("2022-01-01"),
 m$downturn$table
 #>     pool     n       lra      moc_c reference_value  dt_type3 dt_observed
 #>    <int> <int>     <num>      <num>           <num>     <num>       <num>
-#> 1:     1   188 0.2498970 0.02528145       0.2812681 0.3998970   0.2480498
-#> 2:     2   165 0.3508759 0.03580269       0.4668095 0.5008759   0.4306490
-#> 3:     3   107 0.4747053 0.05200935       0.5556376 0.6247053   0.4912879
-#> 4:     4   160 0.5750268 0.04491468       0.6789895 0.7250268   0.6253841
+#> 1:     1   188 0.2498970 0.02528145       0.2769583 0.3998970   0.2480498
+#> 2:     2   165 0.3508759 0.03580269       0.4306490 0.5008759   0.4306490
+#> 3:     3   107 0.4747053 0.05200935       0.5114381 0.6247053   0.4912879
+#> 4:     4   160 0.5750268 0.04491468       0.6727390 0.7250268   0.6253841
 #>    n_downturn method_used        dt    lgd_dt     impact below_reference
 #>         <int>      <char>     <num>     <num>      <num>          <lgcl>
 #> 1:         80       type1 0.2480498 0.2751785 0.00000000            TRUE
-#> 2:         70       type1 0.4306490 0.4664517 0.07977312            TRUE
-#> 3:         46       type1 0.4912879 0.5432972 0.01658261            TRUE
+#> 2:         70       type1 0.4306490 0.4664517 0.07977312           FALSE
+#> 3:         46       type1 0.4912879 0.5432972 0.01658261           FALSE
 #> 4:         73       type1 0.6253841 0.6702988 0.05035731            TRUE
 ```

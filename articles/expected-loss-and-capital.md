@@ -15,6 +15,11 @@ the kind those models produce (grade PDs, pool LGDs, exposures), rather
 than on the objects built there, so that the portfolio can cover six
 asset classes at once.
 
+The regulatory texts behind the parameter tables are listed in
+[`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md).
+Regulation changes and each supervisor interprets it: check the tables
+against the texts in force before any regulatory use.
+
 ``` r
 
 library(scorecraft)

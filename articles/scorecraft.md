@@ -103,7 +103,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = c("id", "churn"),
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 0.6s
+#>   event: 14.25% on train, 14.50% on hold-out | 0.9s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -428,16 +428,16 @@ length(sql)
 #> [1] 441
 cat(grep("^-- (Scale|score =)", sql, value = TRUE), sep = "\n")
 #> -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer
-#> -- score = 491.19665800103655 + -26.318891476654567 * logit | base_points = 538
+#> -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538
 i <- max(which(sql == "SELECT"))
 cat(sql[i:(i + 6)], sep = "\n")
 #> SELECT
 #>     id,
 #>     ref_date,
 #>     538.30012744760336
-#>       + -29.70104376344629 * vl_score_01_woe
-#>       + -27.130718819754303 * vl_score_02_woe
-#>       + -26.64928685994122 * vl_score_04_woe
+#>       + -29.701043763446282 * vl_score_01_woe
+#>       + -27.130718819754311 * vl_score_02_woe
+#>       + -26.649286859941228 * vl_score_04_woe
 ```
 
 The claim that R and SQL agree is tested in the package; here it is also
@@ -660,11 +660,11 @@ d$ref_date <- as.character(d$ref_date)
 DBI::dbWriteTable(con, "dtm", d)
 nrow(scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42))
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.5
-#> [1] 2132
+#> [1] 2107
 nrow(scr_fetch(con, "dtm", max_rows = 1000))
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.23809523809523808
-#> [1] 1014
+#> [1] 1013
 ```
 
 [`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)

@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,6 +89,9 @@ rating grades</a>, builds the probability of default from a scorecard
 started</a> for the scorecard itself); the third, <a href="expected-loss-and-capital.html">Expected loss and regulatory
 capital</a>, combines PD, LGD and EAD into expected loss, capital and
 accounting ECL.</p>
+<p>The regulatory texts behind the parameter tables are listed in <a href="../reference/scr_irb_params.html"><code>scr_irb_params()</code></a>.
+Regulation changes and each supervisor interprets it: check the tables
+against the texts in force before any regulatory use.</p>
 <p>The two IRB parameters after the PD follow the discipline of the
 scorecard pipeline: a reference data set built with a funnel that names
 every rule it applied, drivers binned on training cohorts and
@@ -397,16 +400,17 @@ floor is zero until <code><a href="../reference/scr_lgd_floor.html">scr_lgd_floo
 </h3>
 <p><code><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn()</a></code> quantifies the downturn per pool from
 user-supplied periods. Under <code>"type1"</code> the downturn value is
-the realised LGD of the defaults whose default date falls in the periods
-(a pool with fewer than ten such defaults falls back to the add-on); the
-reference value, the mean of the two worst calendar years of the pool,
-is reported as a challenger, not a bound. The downturn LGD used for
-capital is <code>min(1, max(LRA + MoC, DT + MoC))</code>. The cap at one
-is the package’s choice; the EBA guidelines cap the type-3 estimate at
-105%, so a pool that loses more than its exposure in a downturn needs a
-decision the cap does not take. The reference rate of the demo rises
-above thirteen per cent in 2022 and 2023, which is the reason
-recorded.</p>
+the realised LGD of the training defaults whose default date falls in
+the periods (a pool with fewer than ten such defaults falls back to the
+add-on); the reference value, the mean of the two worst calendar years
+of the pool’s training defaults, is reported as a challenger, not a
+bound. Both use the training rows only, so the hold-out stays
+independent for validation. The downturn LGD used for capital is
+<code>min(1, max(LRA + MoC, DT + MoC))</code>. The cap at one is the
+package’s choice; the EBA guidelines cap the type-3 estimate at 105%, so
+a pool that loses more than its exposure in a downturn needs a decision
+the cap does not take. The reference rate of the demo rises above
+thirteen per cent in 2022 and 2023, which is the reason recorded.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn</a></span><span class="op">(</span><span class="va">m</span>, periods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2022-01-01"</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-12-31"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                      reason <span class="op">=</span> <span class="st">"reference rate above 13% in 2022-2023"</span><span class="op">)</span></span>
@@ -414,16 +418,17 @@ recorded.</p>
 <span><span class="co">#&gt;     pool     n       lra      moc_c n_downturn dt_observed reference_value</span></span>
 <span><span class="co">#&gt;    &lt;int&gt; &lt;int&gt;     &lt;num&gt;      &lt;num&gt;      &lt;int&gt;       &lt;num&gt;           &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1:     1   274 0.2749072 0.02281440        117   0.2923210       0.3071022</span></span>
-<span><span class="co">#&gt; 2:     2   170 0.4002597 0.03786551         73   0.4681236       0.5277502</span></span>
-<span><span class="co">#&gt; 3:     3   176 0.5926373 0.04292232         79   0.6312294       0.6842627</span></span>
+<span><span class="co">#&gt; 2:     2   170 0.4002597 0.03786551         73   0.4681236       0.4750833</span></span>
+<span><span class="co">#&gt; 3:     3   176 0.5926373 0.04292232         79   0.6312294       0.6358949</span></span>
 <span><span class="co">#&gt;    method_used    lgd_dt     impact below_reference</span></span>
 <span><span class="co">#&gt;         &lt;char&gt;     &lt;num&gt;      &lt;num&gt;          &lt;lgcl&gt;</span></span>
 <span><span class="co">#&gt; 1:       type1 0.3151354 0.01741372           FALSE</span></span>
-<span><span class="co">#&gt; 2:       type1 0.5059891 0.06786385            TRUE</span></span>
-<span><span class="co">#&gt; 3:       type1 0.6741517 0.03859206            TRUE</span></span></code></pre></div>
-<p>Pools 2 and 3 sit below their reference value: the two worst years of
-those pools were worse than the periods declared. The flag does not
-change the estimate; it is there for the reviewer to answer.</p>
+<span><span class="co">#&gt; 2:       type1 0.5059891 0.06786385           FALSE</span></span>
+<span><span class="co">#&gt; 3:       type1 0.6741517 0.03859206           FALSE</span></span></code></pre></div>
+<p>No pool sits below its reference value: in every pool the downturn
+LGD, margin included, is at least the mean of the two worst training
+years. Had one fallen below, the flag would not change the estimate; it
+would be there for the reviewer to answer.</p>
 <p><code><a href="../reference/scr_lgd_floor.html">scr_lgd_floor()</a></code> reads the input floor from the parameter
 table of the framework. The tables are numbers, editable and printable;
 an edit is detected and recorded as <code>params_modified</code> in the
@@ -515,7 +520,7 @@ floored result.</p>
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">m</span>, table <span class="op">=</span> <span class="st">"prd.defaults"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span><span class="op">)</span></span>
 <span><span class="va">sql_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">sql</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$"</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294908 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998066 THEN 2 ELSE 3 END AS pool</span></span>
+<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294925 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998088 THEN 2 ELSE 3 END AS pool</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor</span></span>
 <span><span class="co">#&gt;     GREATEST(lgd_dt, lgd_floor) AS lgd_final</span></span></code></pre></div>
@@ -763,27 +768,28 @@ the utilisation of the row.</p>
 reason. Under <code>"type1"</code> the downturn value of a pool is
 <code>max(lra, observed)</code>, the default-weighted realised CCF of
 the events whose default date falls in the periods; the applied CCF is
-recomputed and the ledger records periods, method and reason. Two facts
-to keep in view: the observed value is computed on every row of the
-reference data set, training and hold-out alike, so the hold-out
-validation below is not independent of the downturn component; and no
-minimum count is imposed, so a pool with few events in the periods (the
-<code>LF</code> pool here) should be read with care.</p>
+recomputed and the ledger records periods, method and reason. The
+observed value is computed on the training rows only, like the long-run
+average, so the hold-out validation below stays independent of the
+downturn component. No minimum count is imposed, so a pool with few
+training events in the periods (the <code>LF</code> pool here, with
+four) should be read with care.</p>
 <p>The period chosen covers the first three quarters of 2024, when the
-realised CCFs of the demo panel run above their average in every
-pool.</p>
+realised CCFs of the training rows run above their long-run average in
+every pool; the table shows the observed value above <code>lra</code> in
+each.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m_ead</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_ead_downturn.html">scr_ead_downturn</a></span><span class="op">(</span><span class="va">m_ead</span>, periods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-01"</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-09-30"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                          reason <span class="op">=</span> <span class="st">"realised CCFs above their average in 2024 Q1-Q3"</span><span class="op">)</span></span>
 <span><span class="va">m_ead</span><span class="op">$</span><span class="va">downturn</span><span class="op">$</span><span class="va">table</span></span>
 <span><span class="co">#&gt;      pool       lra n_downturn dt_observed  dt_type3    ccf_dt ccf_final</span></span>
 <span><span class="co">#&gt;    &lt;char&gt;     &lt;num&gt;      &lt;int&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:     P1 0.2856519         61   0.3251603 0.4356519 0.3251603 0.3854151</span></span>
+<span><span class="co">#&gt; 1:     P1 0.2856519         59   0.3253274 0.4356519 0.3253274 0.3855822</span></span>
 <span><span class="co">#&gt; 2:     P2 0.4962957         19   0.5274588 0.6462957 0.5274588 0.6576017</span></span>
 <span><span class="co">#&gt; 3:     LF 0.8884167          4   0.9255208 1.0384167 0.9255208 1.0665993</span></span>
 <span><span class="co">#&gt;    ccf_applied</span></span>
 <span><span class="co">#&gt;          &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:   0.3854151</span></span>
+<span><span class="co">#&gt; 1:   0.3855822</span></span>
 <span><span class="co">#&gt; 2:   0.6576017</span></span>
 <span><span class="co">#&gt; 3:   1.0665993</span></span></code></pre></div>
 </div>
@@ -813,16 +819,16 @@ amount.</p>
 <span><span class="va">ap_ead</span></span>
 <span><span class="co">#&gt;      pool measure utilisation undrawn ccf_applied ead_model ead_floor</span></span>
 <span><span class="co">#&gt;    &lt;char&gt;  &lt;char&gt;       &lt;num&gt;   &lt;num&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:     P1     ulf   0.5891667    4930   0.3854151  8970.096      8056</span></span>
+<span><span class="co">#&gt; 1:     P1     ulf   0.5891667    4930   0.3855822  8970.920      8056</span></span>
 <span><span class="co">#&gt; 2:     P2     ulf   0.1066667    2680   0.6576017  2082.373       856</span></span>
-<span><span class="co">#&gt; 3:     P1     ulf   0.4745600   32840   0.3854151 42317.032     36228</span></span>
+<span><span class="co">#&gt; 3:     P1     ulf   0.4745600   32840   0.3855822 42322.519     36228</span></span>
 <span><span class="co">#&gt; 4:     P2     ulf   0.0000000    8000   0.6576017  5260.814      1600</span></span>
 <span><span class="co">#&gt; 5:     LF      lf   1.0514286       0   1.0665993  3733.098      3680</span></span>
 <span><span class="co">#&gt;    ead_predicted ead_floor_binding</span></span>
 <span><span class="co">#&gt;            &lt;num&gt;            &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:      8970.096             FALSE</span></span>
+<span><span class="co">#&gt; 1:      8970.920             FALSE</span></span>
 <span><span class="co">#&gt; 2:      2082.373             FALSE</span></span>
-<span><span class="co">#&gt; 3:     42317.032             FALSE</span></span>
+<span><span class="co">#&gt; 3:     42322.519             FALSE</span></span>
 <span><span class="co">#&gt; 4:      5260.814             FALSE</span></span>
 <span><span class="co">#&gt; 5:      3733.098             FALSE</span></span></code></pre></div>
 <p>The floor never binds here because every applied CCF is above 0.20;
@@ -844,7 +850,7 @@ branch, and the applied CCF with the predicted EAD as a
 <span><span class="co">#&gt; FROM (</span></span>
 <span><span class="co">#&gt;   SELECT</span></span>
 <span><span class="co">#&gt;     *,</span></span>
-<span><span class="co">#&gt;     CASE pool WHEN 'P1' THEN 0.3854151113299159 WHEN 'P2' THEN 0.6576016928597912 WHEN 'LF' THEN 1.066599304475079 ELSE NULL END AS ccf_applied</span></span>
+<span><span class="co">#&gt;     CASE pool WHEN 'P1' THEN 0.38558218069556494 WHEN 'P2' THEN 0.6576016928597912 WHEN 'LF' THEN 1.066599304475079 ELSE NULL END AS ccf_applied</span></span>
 <span><span class="co">#&gt;   FROM pool_ead</span></span>
 <span><span class="co">#&gt; ) ead;</span></span></code></pre></div>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
@@ -854,9 +860,9 @@ branch, and the applied CCF with the predicted EAD as a
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">got_ead</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pool"</span>, <span class="st">"ccf_applied"</span>, <span class="st">"ead_predicted"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;   pool ccf_applied ead_predicted</span></span>
-<span><span class="co">#&gt; 1   P1   0.3854151      8970.096</span></span>
+<span><span class="co">#&gt; 1   P1   0.3855822      8970.920</span></span>
 <span><span class="co">#&gt; 2   P2   0.6576017      2082.373</span></span>
-<span><span class="co">#&gt; 3   P1   0.3854151     42317.032</span></span>
+<span><span class="co">#&gt; 3   P1   0.3855822     42322.519</span></span>
 <span><span class="co">#&gt; 4   P2   0.6576017      5260.814</span></span>
 <span><span class="co">#&gt; 5   LF   1.0665993      3733.098</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">got_ead</span><span class="op">$</span><span class="va">pool</span>, <span class="va">ap_ead</span><span class="op">$</span><span class="va">pool</span><span class="op">)</span></span>
@@ -875,39 +881,37 @@ last column.</p>
 <span><span class="va">v_ead</span></span>
 <span><span class="co">#&gt; &lt;scr_ead_validation&gt; 71 rows (holdout)</span></span>
 <span><span class="co">#&gt;   pool        n  realised predicted        t        p  light  adequacy  light</span></span>
-<span><span class="co">#&gt;   P1         50    0.2763    0.3854   -1.829   0.9633 green     0.7710 green </span></span>
+<span><span class="co">#&gt;   P1         50    0.2763    0.3856   -1.832   0.9635 green     0.7709 green </span></span>
 <span><span class="co">#&gt;   P2         18    0.4536    0.6576   -2.346   0.9843 green     0.7600 green </span></span>
 <span><span class="co">#&gt;   LF          3    0.9022    1.0666   -1.193   0.8224 green     0.7167 green </span></span>
-<span><span class="co">#&gt;   TOTAL      71    0.3232    0.4575   -2.678   0.9953 green     0.7674 green </span></span>
+<span><span class="co">#&gt;   TOTAL      71    0.3232    0.4576   -2.680   0.9954 green     0.7674 green </span></span>
 <span><span class="co">#&gt;   gAUC 0.5708 [0.5027, 0.6398] vs development 0.5582 (p 0.6133) | Spearman 0.2580 | CEAR 0.4077</span></span>
 <span><span class="co">#&gt;   stability: pool PSI 0.0308 (stable) | utilisation_ref PSI 0.0319 (stable)</span></span>
 <span><span class="co">#&gt;   lights: calibration_t_total green | ead_adequacy_total green | gauc_vs_development green | pool_psi green</span></span>
 <span><span class="va">v_ead</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">test</span>, <span class="va">statistic</span>, <span class="va">p</span>, <span class="va">light</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;                   test   statistic         p  light</span></span>
 <span><span class="co">#&gt;                 &lt;char&gt;       &lt;num&gt;     &lt;num&gt; &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1: calibration_t_total -2.67751226 0.9953405  green</span></span>
-<span><span class="co">#&gt; 2:  ead_adequacy_total  0.76742361        NA  green</span></span>
+<span><span class="co">#&gt; 1: calibration_t_total -2.67996285 0.9953712  green</span></span>
+<span><span class="co">#&gt; 2:  ead_adequacy_total  0.76736324        NA  green</span></span>
 <span><span class="co">#&gt; 3: gauc_vs_development -0.28794667 0.6133062  green</span></span>
 <span><span class="co">#&gt; 4:            pool_psi  0.03078423        NA  green</span></span>
 <span><span class="va">v_ead</span><span class="op">$</span><span class="va">backtest</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">cohort</span>, <span class="va">n</span>, <span class="va">realised</span>, <span class="va">predicted</span>, <span class="va">p</span>, <span class="va">adequacy</span>, <span class="va">light_adequacy</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;    cohort     n  realised predicted         p  adequacy light_adequacy</span></span>
 <span><span class="co">#&gt;    &lt;char&gt; &lt;int&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1:   2023    27 0.1802738 0.4398524 0.9999977 0.6232298          green</span></span>
-<span><span class="co">#&gt; 2:   2024    44 0.4063661 0.4677041 0.7991478 0.8391052          green</span></span></code></pre></div>
+<span><span class="co">#&gt; 1:   2023    27 0.1802738 0.4399861 0.9999977 0.6231908          green</span></span>
+<span><span class="co">#&gt; 2:   2024    44 0.4063661 0.4678206 0.7995910 0.8390325          green</span></span></code></pre></div>
 <p>Every calibration light is green because the estimate sits above the
 realised values on the hold-out: the margin and the downturn push the
 applied CCF up, and an adequacy ratio below one means the predicted EAD
-covers the realised one. Part of that cover is not independent evidence,
-since the downturn component was estimated on rows that include the
-hold-out. The discrimination light is green only because the hold-out
-gAUC does not fall below the development value; the level itself is
-weak, 0.57 with an interval that reaches down to 0.50, so the single
-admitted driver separates the pools little better than chance. On a real
-portfolio that would be the first finding of the review. The workbook
-carries the funnel, the summaries, the driver bins and the admission
-table, the pools and the cells, the downturn and the margin, the
-hold-out metrics, the validation blocks, the model card and the ledger,
-next to the SQL file.</p>
+covers the realised one. The discrimination light is green only because
+the hold-out gAUC does not fall below the development value; the level
+itself is weak, 0.57 with an interval that reaches down to 0.50, so the
+single admitted driver separates the pools little better than chance. On
+a real portfolio that would be the first finding of the review. The
+workbook carries the funnel, the summaries, the driver bins and the
+admission table, the pools and the cells, the downturn and the margin,
+the hold-out metrics, the validation blocks, the model card and the
+ledger, next to the SQL file.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">m_ead</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span>, validation <span class="op">=</span> <span class="va">v_ead</span><span class="op">)</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "ead_ccf.xlsx"    "sql_ead_ccf.sql"</span></span></code></pre></div>
@@ -990,7 +994,7 @@ periods and reason.</p>
 <span><span class="co">#&gt;                                                                                                                          &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1: horizon fixed (12 months); measure auto with u* = 0.95; floor 0; cap NA; post-default drawings in lgd; default level obligor</span></span>
 <span><span class="co">#&gt; 2:                                            drivers admitted: utilisation_ref; 2 pools; MoC alpha 0.05; floor 0.5 x 0.4 = 0.2</span></span>
-<span><span class="co">#&gt; 3:           periods: 2024-01-01 to 2024-09-30; 84 reference rows in the periods; add-on 0.15; applied CCF now 0.3854 to 1.0666</span></span>
+<span><span class="co">#&gt; 3:  periods: 2024-01-01 to 2024-09-30; 82 training reference rows in the periods; add-on 0.15; applied CCF now 0.3856 to 1.0666</span></span>
 <span><span class="co">#&gt;                                             reason</span></span>
 <span><span class="co">#&gt;                                             &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1:                                   configuration</span></span>

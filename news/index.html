@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,6 +45,18 @@
       <small>Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="scorecraft-030">scorecraft 0.3.0<a class="anchor" aria-label="anchor" href="#scorecraft-030"></a></h2>
+<ul><li>
+<code><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn()</a></code> and <code><a href="../reference/scr_ead_downturn.html">scr_ead_downturn()</a></code> estimate the observed downturn impact, and the LGD reference value, on the training rows only, like the long-run averages; the hold-out stays independent evidence.</li>
+<li>
+<code><a href="../reference/scr_export.html">scr_export()</a></code>, <code>scr_sql(file = )</code> and the classing lab functions follow the <code>verbose</code> key of the object’s configuration, as the function that fitted it does.</li>
+<li>The classing lab raises <code>IV_RATIO_UNSTABLE</code>, an advisory warning, when the train IV of a proposal is below <code>iv_min</code> and the hold-out/train IV ratio carries little information.</li>
+<li>
+<code><a href="../reference/scr_irb_params.html">scr_irb_params()</a></code> lists the regulatory texts behind the presets; users check the tables against the texts in force before any regulatory use.</li>
+<li>Three vignettes: Get started, coarse classing, and scaling, alignment and challengers. The PD, LGD/EAD and capital guides are articles on the package website.</li>
+<li>A two-page cheat sheet ships in <code>inst/cheatsheet</code> (PDF and its HTML source).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="scorecraft-020">scorecraft 0.2.0<a class="anchor" aria-label="anchor" href="#scorecraft-020"></a></h2>
 <p>The IRB layer: from the scorecard to regulatory risk parameters, with the same contracts as the scorecard pipeline (one configuration, ledgers with mandatory reasons, hold-out revalidation with frozen bins, hardened workbooks, production SQL verified against DuckDB and SQLite). Regimes are parameter tables selected by a preset, never prose.</p>

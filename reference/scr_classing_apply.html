@@ -23,7 +23,7 @@ scr_scorecard() and scr_export(). The input result is not modified.'><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,7 +118,6 @@ scorecard.</p>
 <span class="r-in"><span>                          groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NORTH"</span>, <span class="st">"SOUTH"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                                        core <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAST"</span>, <span class="st">"WEST"</span>, <span class="st">"CENTRE"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p</span>, reason <span class="op">=</span> <span class="st">"edge/core is what pricing uses"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ds_region: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786</span>
 <span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">scr_classing_apply</span><span class="op">(</span><span class="va">lab</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "vl_score_01" "vl_score_02" "ds_band"     "ds_region"   "vl_score_05"</span>
@@ -126,7 +125,7 @@ scorecard.</p>
 <span class="r-in"><span><span class="fu"><a href="scr_decisions.html">scr_decisions</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      seq                  at author  variable action proposal_id</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;int&gt;              &lt;POSc&gt; &lt;char&gt;    &lt;char&gt; &lt;char&gt;      &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:     1 2026-09-25 22:24:37 runner ds_region accept        P001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:     1 2026-09-25 22:36:06 runner ds_region accept        P001</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      instruction</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                           &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE"))</span>

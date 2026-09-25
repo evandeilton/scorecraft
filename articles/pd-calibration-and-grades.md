@@ -9,6 +9,11 @@ builds the other two parameters, and [Expected loss and regulatory
 capital](https://evandeilton.github.io/scorecraft/articles/expected-loss-and-capital.md)
 turns the three into expected loss, capital and accounting ECL.
 
+The regulatory texts behind the parameter tables are listed in
+[`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md).
+Regulation changes and each supervisor interprets it: check the tables
+against the texts in force before any regulatory use.
+
 The introductory guide ends with a scorecard whose alignment turns a
 score into a probability. That probability is a good ranking device and
 a fair estimate of the event rate **of the development sample**; it is
@@ -473,8 +478,8 @@ cat(tail(sql, 6), sep = "\n")
 #> -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)
 #> SELECT
 #>     s.*,
-#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947994 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
-#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947994 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
+#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947983 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
+#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947983 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
 #> FROM score_scr s;
 ```
 

@@ -1,5 +1,29 @@
 # Changelog
 
+## scorecraft 0.3.0
+
+- [`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md)
+  and
+  [`scr_ead_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_downturn.md)
+  estimate the observed downturn impact, and the LGD reference value, on
+  the training rows only, like the long-run averages; the hold-out stays
+  independent evidence.
+- [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
+  `scr_sql(file = )` and the classing lab functions follow the `verbose`
+  key of the object’s configuration, as the function that fitted it
+  does.
+- The classing lab raises `IV_RATIO_UNSTABLE`, an advisory warning, when
+  the train IV of a proposal is below `iv_min` and the hold-out/train IV
+  ratio carries little information.
+- [`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md)
+  lists the regulatory texts behind the presets; users check the tables
+  against the texts in force before any regulatory use.
+- Three vignettes: Get started, coarse classing, and scaling, alignment
+  and challengers. The PD, LGD/EAD and capital guides are articles on
+  the package website.
+- A two-page cheat sheet ships in `inst/cheatsheet` (PDF and its HTML
+  source).
+
 ## scorecraft 0.2.0
 
 The IRB layer: from the scorecard to regulatory risk parameters, with
