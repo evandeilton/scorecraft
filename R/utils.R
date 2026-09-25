@@ -247,6 +247,60 @@ time_it <- function(label, expr) {
 
 # -- Sampling --------------------------------------------------------------- #
 
+#' Seed the random number generator for the calling function only
+#'
+#' `set.seed()` inside a package function would replace the user's random
+#' stream for the rest of the session (CRAN policy: a package must not
+#' change the global RNG state behind the user's back). This sets `seed`
+#' and registers, in the caller's frame, an exit hook that puts
+#' `.Random.seed` (and with it the RNG kind) back as it was, or removes it
+#' if it did not exist. `NULL` does nothing: the caller then draws from the
+#' user's stream, as documented.
+#' @keywords internal
+#' @noRd
+.scr_local_seed <- function(seed, frame = parent.frame()) {
+  if (is.null(seed)) return(invisible(NULL))
+  genv <- globalenv()
+  old  <- if (exists(".Random.seed", envir = genv, inherits = FALSE))
+    get(".Random.seed", envir = genv, inherits = FALSE) else NULL
+  restore <- function() {
+    if (is.null(old)) {
+      if (exists(".Random.seed", envir = genv, inherits = FALSE)) rm(".Random.seed", envir = genv)
+    } else {
+      assign(".Random.seed", old, envir = genv)
+    }
+  }
+  # the closure itself goes in the call, and hooks run last-in first-out, so
+  # several calls in one frame unwind to the state before the first
+  do.call(base::on.exit, list(as.call(list(restore)), add = TRUE, after = FALSE), envir = frame)
+  set.seed(seed)
+  invisible(NULL)
+}
+
+#' Keep the user's random stream as it is at this point
+#'
+#' Snapshots `.Random.seed` and registers, in the caller's frame, an exit
+#' hook that restores it. Used around bootstrap loops that re-seed once per
+#' replicate (so that results do not depend on the backend or the number of
+#' workers): the replicate seeds are drawn from the user's stream before the
+#' guard, which is therefore advanced by exactly those draws and no more.
+#' @keywords internal
+#' @noRd
+.scr_rng_guard <- function(frame = parent.frame()) {
+  genv <- globalenv()
+  old  <- if (exists(".Random.seed", envir = genv, inherits = FALSE))
+    get(".Random.seed", envir = genv, inherits = FALSE) else NULL
+  restore <- function() {
+    if (is.null(old)) {
+      if (exists(".Random.seed", envir = genv, inherits = FALSE)) rm(".Random.seed", envir = genv)
+    } else {
+      assign(".Random.seed", old, envir = genv)
+    }
+  }
+  do.call(base::on.exit, list(as.call(list(restore)), add = TRUE, after = FALSE), envir = frame)
+  invisible(NULL)
+}
+
 #' Indices of a subsample stratified by the target
 #'
 #' Used only for the classifiers: permutation importance and cross-validation
@@ -257,7 +311,7 @@ time_it <- function(label, expr) {
 subsample_stratified <- function(y, max_n, seed = NULL) {
   n <- length(y)
   if (!is.finite(max_n) || n <= max_n) return(seq_len(n))
-  if (!is.null(seed)) set.seed(seed)
+  .scr_local_seed(seed)
   frac <- max_n / n
   idx  <- integer(0)
   for (lv in unique(y)) {
@@ -331,6 +385,23 @@ lst <- function(x, n = 8) {
   }, character(1), USE.NAMES = FALSE)
 }
 
+#' Quote a string literal for SQL
+#'
+#' A single quote is always doubled (SQL-92). The backslash is an escape
+#' character only in MySQL/MariaDB, Spark/Hive/Databricks and BigQuery; in
+#' ANSI SQL, PostgreSQL (standard_conforming_strings), SQL Server, Oracle,
+#' SQLite and DuckDB it is an ordinary character, and doubling it there
+#' would change the literal. `dialect = NULL` keeps the historical
+#' behaviour (backslash doubled); callers that know the dialect should pass
+#' it. `NA` becomes `NULL`.
 #' @keywords internal
 #' @noRd
-.sql_str <- function(x) paste0("'", gsub("'", "''", gsub("\\\\", "\\\\\\\\", x)), "'")
+.sql_str <- function(x, dialect = NULL) {
+  x <- as.character(x)
+  bs_escape <- is.null(dialect) ||
+    dialect %in% c("mysql", "mariadb", "spark", "hive", "databricks", "bigquery")
+  s <- if (bs_escape) gsub("\\\\", "\\\\\\\\", x) else x
+  out <- paste0("'", gsub("'", "''", s, fixed = TRUE), "'")
+  out[is.na(x)] <- "NULL"
+  out
+}

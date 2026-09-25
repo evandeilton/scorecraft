@@ -22,7 +22,9 @@
 #'     same labels, train/hold-out PSI (the fixed threshold decides; the
 #'     n-adjusted one is reported) and the fraction of hold-out without a bin.
 #'   \item **Redundancy pruning** by rank correlation on the WOE space,
-#'     ranked by hold-out IV.
+#'     ranked by hold-out IV. Under `allow_derived_final = FALSE` the derived
+#'     flags leave before this step (`derived_excluded`), so that a flag
+#'     that cannot be delivered never prunes a real column.
 #' }
 #'
 #' @section Parallelism:
@@ -92,19 +94,23 @@ scr_bin <- function(triage, config = scr_config()) {
     app_ho[, (intersect(bins_tr, names(app_ho))) := NULL]
   }
 
-  ranking <- holdout[feature %in% pos_holdout][order(-iv_holdout), feature]
-  prune   <- prune_redundancy(app_tr, pos_holdout, ranking, cfg)
-  if (nrow(prune$dropped)) msg("  redundancy removed %d: %s", nrow(prune$dropped), lst(prune$dropped$feature))
-  pool <- prune$keep
-
+  # A derived flag that cannot reach the deliverable leaves BEFORE the
+  # pruning: otherwise it could remove, as redundant, a real column that
+  # correlates with it, and then be excluded itself - losing both.
   derived_out <- character()
+  to_prune <- pos_holdout
   if (!isTRUE(cfg$allow_derived_final)) {
-    derived_out <- intersect(pool, triage$derived)
+    derived_out <- intersect(pos_holdout, triage$derived)
     if (length(derived_out)) {
       msg("  %d derived flag(s) excluded from the final selection (allow_derived_final = FALSE)", length(derived_out))
-      pool <- setdiff(pool, derived_out)
+      to_prune <- setdiff(pos_holdout, derived_out)
     }
   }
+
+  ranking <- holdout[feature %in% to_prune][order(-iv_holdout), feature]
+  prune   <- prune_redundancy(app_tr, to_prune, ranking, cfg)
+  if (nrow(prune$dropped)) msg("  redundancy removed %d: %s", nrow(prune$dropped), lst(prune$dropped$feature))
+  pool <- prune$keep
   msg("  pool eligible for the models: %d", length(pool))
 
   structure(list(fit = fit, screen = screen, holdout = holdout, prune = prune, pool = pool,
@@ -252,7 +258,7 @@ holdout_check <- function(app_train, app_holdout, y_train, y_holdout, features, 
     }
     b_tr <- as.character(app_train[[cb]]); b_ho <- as.character(app_holdout[[cb]])
     ok_tr <- !is.na(b_tr); ok_ho <- !is.na(b_ho)
-    pct_unbinned <- 1 - mean(ok_ho)
+    pct_unbinned <- if (length(ok_ho)) 1 - mean(ok_ho) else 1
     iv_tr <- scr_iv(b_tr[ok_tr], y_train[ok_tr])
     iv_ho <- scr_iv(b_ho[ok_ho], y_holdout[ok_ho])
     ratio <- if (iv_tr > 0) iv_ho / iv_tr else NA_real_
@@ -275,26 +281,41 @@ holdout_check <- function(app_train, app_holdout, y_train, y_holdout, features, 
       psi_flag_adjusted = ps$flag_adjusted, pct_unbinned = pct_unbinned,
       holdout_ok = length(reasons) == 0L,
       holdout_reason = if (length(reasons)) paste(reasons, collapse = ";") else "OK")
-  }, nthread = cfg$nthread)
+  }, nthread = cfg$nthread, fork_only = TRUE)   # per column the work is cheap: shipping both WOE tables to PSOCK workers is not
   data.table::rbindlist(rows)
 }
 
-#' Remove redundancy on the WOE space through obwoe_prune
+#' Remove redundancy on the WOE space
+#'
+#' Greedy pruning with the rule of `OptimalBinningWoE::obwoe_prune()`: the
+#' worse-ranked member of the strongest pair at or above `corr_cutoff` leaves,
+#' one at a time. For `"pearson"` and `"spearman"` the correlation matrix is
+#' computed by the compiled kernel (`.scr_cor_matrix()`: each column ranked
+#' once, one BLAS cross-product) and the greedy sweep runs on it
+#' (`.scr_prune_matrix()`), with the same result as `obwoe_prune()` at a
+#' fraction of the cost on wide tables; the other methods go through
+#' `obwoe_prune()`. The WOE columns are read in place, not copied.
 #' @keywords internal
 #' @noRd
 prune_redundancy <- function(app_train, features, ranking, cfg) {
   empty <- data.table::data.table(feature = character(), correlated_with = character(), correlation = numeric())
   if (length(features) < 2L) return(list(keep = features, dropped = empty))
-  x <- as.data.frame(app_train[, paste0(features, "_woe"), with = FALSE])
+  x <- lapply(paste0(features, "_woe"), function(f) app_train[[f]])
   names(x) <- features
   const <- names(x)[vapply(x, function(v) !is.finite(stats::sd(v)) || stats::sd(v) == 0, logical(1))]
-  if (length(const)) x <- x[, setdiff(names(x), const), drop = FALSE]
-  if (ncol(x) < 2L) {
+  if (length(const)) x <- x[setdiff(names(x), const)]
+  if (length(x) < 2L) {
     return(list(keep = names(x), dropped = if (length(const)) data.table::data.table(
       feature = const, correlated_with = NA_character_, correlation = NA_real_) else empty))
   }
-  pr <- OptimalBinningWoE::obwoe_prune(x, ranking = intersect(ranking, names(x)),
-                                       cutoff = cfg$corr_cutoff, method = cfg$corr_method)
+  rk <- intersect(ranking, names(x))
+  fast <- cfg$corr_method %in% c("pearson", "spearman") &&
+    all(vapply(x, function(v) is.numeric(v) && all(is.finite(v)), logical(1)))
+  pr <- if (fast) {
+    .scr_prune_matrix(.scr_cor_matrix(x, cfg$corr_method, cfg$nthread), rk, cfg$corr_cutoff)
+  } else {
+    OptimalBinningWoE::obwoe_prune(as.data.frame(x), ranking = rk, cutoff = cfg$corr_cutoff, method = cfg$corr_method)
+  }
   dropped <- data.table::as.data.table(pr$dropped)
   if (nrow(dropped)) data.table::setnames(dropped, names(dropped)[1], "feature")
   if (length(const)) {

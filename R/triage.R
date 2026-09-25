@@ -172,7 +172,9 @@ triage_plan <- function(dt, target, cols, train_idx, cfg) {
   }
 
   iv_q  <- .quick_iv(x, y, num, sp, cfg)
-  w_sp  <- if (share > 0) woe_subpop((is.na(x) | x %in% sp), y) else NA_real_
+  # sentinels are numeric-only: for text, `x %in% sp` would coerce -999 to
+  # "-999" and count a legitimate level as special
+  w_sp  <- if (share > 0) woe_subpop(if (num) is.na(x) | x %in% sp else is.na(x), y) else NA_real_
 
   decomp <- "-"
   if (num && share >= cfg$special_min_share && share <= 1 - cfg$special_min_share &&
@@ -237,23 +239,32 @@ apply_triage <- function(dt, target, plan, cfg) {
   imput <- plan$ledger[kind == "num_impute"]
   flags <- plan$ledger[kind == "num_flag"]
   coal  <- plan$ledger[kind == "cat_coalesce"]
+  # set() cannot add a column beyond the over-allocated slots (1024 by
+  # default): reserve room for every output column up front
+  data.table::setalloccol(out, length(plan$keep) + nrow(flags) + 2L + getOption("datatable.alloccol", 1024L))
 
-  for (f in plan$keep) {
-    if (f %in% plan$derived) next
+  # ledger rows matched once: a lookup (a data.table subset) per column is
+  # O(p^2) on a wide table
+  feats  <- setdiff(plan$keep, plan$derived)
+  imp_v  <- imput$impute_value[match(feats, imput$source)]
+  coal_f <- feats %in% coal$source
+  flag_o <- flags$output[match(feats, flags$source)]
+
+  for (i in seq_along(feats)) {
+    f <- feats[i]
     x <- dt[[f]]
     if (is.numeric(x)) {
-      v <- imput[source == f, impute_value]
-      if (length(v) == 1L && is.finite(v)) {
+      v <- imp_v[i]
+      if (is.finite(v)) {
         bad <- is.na(x) | x %in% sp
         if (any(bad)) x[bad] <- v
       }
       data.table::set(out, j = f, value = x)
     } else {
-      if (nrow(coal[source == f]) && anyNA(x)) x[is.na(x)] <- "MISSING"
+      if (coal_f[i] && anyNA(x)) x[is.na(x)] <- "MISSING"
       data.table::set(out, j = f, value = as.character(x))
     }
-    fl <- flags[source == f, output]
-    if (length(fl)) data.table::set(out, j = fl[1], value = .flag_levels(dt[[f]], sp))
+    if (!is.na(flag_o[i])) data.table::set(out, j = flag_o[i], value = .flag_levels(dt[[f]], sp))
   }
   orphans <- flags[!source %in% plan$keep]
   for (j in seq_len(nrow(orphans))) {

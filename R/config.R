@@ -345,7 +345,116 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
   if (!cfg$sql_output %in% c("woe", "bin", "both")) {
     stop("`sql_output` must be \"woe\", \"bin\" or \"both\".", call. = FALSE)
   }
+  if (!is.numeric(cfg$nthread) || length(cfg$nthread) != 1L || is.na(cfg$nthread)) {
+    stop("`nthread` must be a single number.", call. = FALSE)
+  }
   cfg$nthread <- max(1L, as.integer(cfg$nthread))
+
+  # ---- scorecard pipeline keys (stages 0-7) --------------------------------- #
+  # Checked here because, wrong, they fail minutes later inside a stage with
+  # an engine's message - or, worse, do not fail at all.
+  .flag <- function(key) {
+    if (!is.logical(cfg[[key]]) || length(cfg[[key]]) != 1L || is.na(cfg[[key]])) {
+      stop("`", key, "` must be TRUE or FALSE.", call. = FALSE)
+    }
+  }
+  .int <- function(key, lower, upper = Inf) {
+    v <- cfg[[key]]
+    if (!is.numeric(v) || length(v) != 1L || is.na(v) || (is.finite(v) && v != round(v)) ||
+        v < lower || v > upper) {
+      stop("`", key, "` must be a single whole number in [", lower, ", ", upper, "].", call. = FALSE)
+    }
+  }
+  .str1 <- function(key) {
+    if (!is.character(cfg[[key]]) || length(cfg[[key]]) != 1L || is.na(cfg[[key]]) || !nzchar(cfg[[key]])) {
+      stop("`", key, "` must be a single non-empty string.", call. = FALSE)
+    }
+  }
+  .int("seed", -.Machine$integer.max, .Machine$integer.max)
+  for (k in c("verbose", "check_duplicates", "allow_derived_final", "allow_degenerate",
+              "use_glmnet", "use_xgboost", "use_ranger", "use_lightgbm", "weight_by_gini",
+              "points_round")) .flag(k)
+  if (!is.null(cfg$oot_date_col)) .str1("oot_date_col")
+  if (anyNA(cfg$special_values) || !(is.numeric(cfg$special_values) || !length(cfg$special_values))) {
+    stop("`special_values` must be a numeric vector without NA (numeric() for none).", call. = FALSE)
+  }
+  .str1("flag_suffix")
+  .str1("bin_separator")
+  .scr_num1(cfg$max_missing, "max_missing", lower = 0, upper = 1)
+  .scr_num1(cfg$near_constant, "near_constant", lower = 0, upper = 1, open_lower = TRUE)
+  .int("max_cat_levels", 2)
+  .scr_num1(cfg$min_iv_quick, "min_iv_quick", lower = 0)
+  .int("quick_iv_groups", 2)
+  .scr_num1(cfg$special_min_share, "special_min_share", lower = 0, upper = 0.5)
+  .scr_num1(cfg$special_min_woe, "special_min_woe", lower = 0)
+  .int("min_bins", 2)
+  .int("max_bins", cfg$min_bins)
+  .int("screen_min_bins", 1)
+  .int("max_n_prebins", 2)
+  .int("max_iterations", 1)
+  .scr_num1(cfg$bin_cutoff, "bin_cutoff", lower = 0, upper = 1, open_lower = TRUE)
+  .scr_num1(cfg$iv_min, "iv_min", lower = 0)
+  if (!is.numeric(cfg$iv_max) || length(cfg$iv_max) != 1L || is.na(cfg$iv_max) || cfg$iv_max <= cfg$iv_min) {
+    stop("`iv_max` must be a single number (Inf allowed) above `iv_min`.", call. = FALSE)
+  }
+  .scr_num1(cfg$iv_suspect, "iv_suspect", lower = 0)
+  if (!is.character(cfg$require_monotonic) || !cfg$require_monotonic %in% c("numeric", "all", "none")) {
+    stop("`require_monotonic` must be \"numeric\", \"all\" or \"none\".", call. = FALSE)
+  }
+  if (!is.character(cfg$monotonicity) || !cfg$monotonicity %in% c("weak", "strict")) {
+    stop("`monotonicity` must be \"weak\" or \"strict\".", call. = FALSE)
+  }
+  .scr_num1(cfg$min_bin_pct, "min_bin_pct", lower = 0, upper = 1)
+  if (cfg$min_bin_pct >= 1) stop("`min_bin_pct` must be below 1.", call. = FALSE)
+  if (!is.null(cfg$screen_top_n)) .int("screen_top_n", 1)
+  .scr_num1(cfg$iv_ratio_min, "iv_ratio_min", lower = 0)
+  .scr_num1(cfg$psi_max, "psi_max", lower = 0, open_lower = TRUE)
+  .scr_num1(cfg$psi_alpha, "psi_alpha", lower = 0, upper = 1, open_lower = TRUE)
+  .scr_num1(cfg$max_unbinned, "max_unbinned", lower = 0, upper = 1)
+  .scr_num1(cfg$corr_cutoff, "corr_cutoff", lower = 0, upper = 1, open_lower = TRUE)
+  if (!is.character(cfg$corr_method) ||
+      !cfg$corr_method %in% c("pearson", "spearman", "kendall", "hoeffding", "distance", "biweight", "pbend")) {
+    stop("`corr_method` must be one of \"pearson\", \"spearman\", \"kendall\", \"hoeffding\", ",
+         "\"distance\", \"biweight\", \"pbend\".", call. = FALSE)
+  }
+  .int("cv_folds", 3)   # cv.glmnet refuses fewer than three folds
+  .scr_num1(cfg$en_alpha, "en_alpha", lower = 0, upper = 1)
+  .int("xgb_rounds", 1)
+  .scr_num1(cfg$xgb_eta, "xgb_eta", lower = 0, upper = 1, open_lower = TRUE)
+  .int("xgb_max_depth", 1)
+  .scr_num1(cfg$xgb_subsample, "xgb_subsample", lower = 0, upper = 1, open_lower = TRUE)
+  .scr_num1(cfg$xgb_colsample, "xgb_colsample", lower = 0, upper = 1, open_lower = TRUE)
+  .scr_num1(cfg$xgb_min_child_weight, "xgb_min_child_weight", lower = 0)
+  .int("xgb_early_stopping", 1)
+  .int("rf_trees", 1)
+  if (!is.character(cfg$rf_importance) ||
+      !cfg$rf_importance %in% c("permutation", "impurity", "impurity_corrected")) {
+    stop("`rf_importance` must be \"permutation\", \"impurity\" or \"impurity_corrected\".", call. = FALSE)
+  }
+  .int("model_top_k", 1)
+  if (!is.numeric(cfg$model_max_rows) || length(cfg$model_max_rows) != 1L || is.na(cfg$model_max_rows) ||
+      cfg$model_max_rows < 10) {
+    stop("`model_max_rows` must be a single number >= 10 (Inf for no cap).", call. = FALSE)
+  }
+  .int("min_votes", 1)
+  .scr_num1(cfg$max_abs_coef, "max_abs_coef", lower = 0, open_lower = TRUE)
+  .int("align_bands", 2)
+  .int("n_boot", 1)
+  .scr_num1(cfg$ci_level, "ci_level", lower = 0, upper = 1, open_lower = TRUE)
+  if (cfg$ci_level >= 1) stop("`ci_level` must be below 1.", call. = FALSE)
+  .int("score_groups", 2)
+  .int("cutoff_n", 2)
+  if (!is.numeric(cfg$reject_multipliers) || !length(cfg$reject_multipliers) ||
+      any(!is.finite(cfg$reject_multipliers)) || any(cfg$reject_multipliers <= 0)) {
+    stop("`reject_multipliers` must be a vector of positive numbers.", call. = FALSE)
+  }
+  .scr_num1(cfg$lab_max_iv_loss, "lab_max_iv_loss", lower = 0, upper = 1)
+  .scr_num1(cfg$lab_min_bin_pct_hard, "lab_min_bin_pct_hard", lower = 0, upper = 1)
+  .str1("sql_table")
+  .str1("sql_dialect")
+  if (!is.character(cfg$sql_keep_columns) || anyNA(cfg$sql_keep_columns)) {
+    stop("`sql_keep_columns` must be a character vector.", call. = FALSE)
+  }
 
   # ---- IRB keys ------------------------------------------------------------ #
   .enum <- function(key, allowed) {
