@@ -42,8 +42,7 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scaling, alignment and challengers</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -111,12 +110,13 @@ optimal ones, so there is no second implementation to keep in step.</p>
 <h2 id="a-fast-selection-run">A fast selection run<a class="anchor" aria-label="anchor" href="#a-fast-selection-run"></a>
 </h2>
 <p>The lab opens on an <code><a href="../reference/scr_select.html">scr_select()</a></code> result. The
-configuration below is the quick one used in the package tests: single
-thread, two consensus voters and a light bootstrap, enough for a few
-seconds of run time on <code>scr_demo</code>.</p>
+configuration below is a light one: a single thread, two consensus
+voters (elastic net and xgboost) and a short bootstrap. The selection
+itself is described in
+<code><a href="../articles/scorecraft.html">vignette("scorecraft", package = "scorecraft")</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/evandeilton/scorecraft" class="external-link">scorecraft</a></span><span class="op">)</span></span>
-<span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_glmnet <span class="op">=</span> <span class="cn">TRUE</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                  use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">60</span>, n_boot <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>,</span>
 <span>                  drop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"churn"</span><span class="op">)</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span>
@@ -136,7 +136,7 @@ the system user.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span>, author <span class="op">=</span> <span class="st">"analyst"</span><span class="op">)</span></span>
 <span><span class="va">lab</span></span>
-<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-25 21:33 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded</span></span>
+<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-25 21:57 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded</span></span>
 <span><span class="co">#&gt;   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)</span></span></code></pre></div>
 <p>Without a variable, <code><a href="../reference/scr_classing_view.html">scr_classing_view()</a></code> prints one line
 per variable: its current source (optimal or manual), the number of
@@ -246,7 +246,7 @@ below 40, 40 to 55, 55 to 70 and above 70.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"vl_score_01"</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">55</span>, <span class="fl">70</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_breaks</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-25 21:33</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-25 21:57</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          4         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.2993    -0.0471</span></span>
@@ -282,7 +282,7 @@ points, which is what the header shows.</p>
 <span><span class="va">p_split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"vl_score_01"</span>,</span>
 <span>                                split <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">res</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">vl_score_01</span><span class="op">$</span><span class="va">cutpoints</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_split</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P003 vl_score_01 | split = c(1, 28.36) | 2026-09-25 21:33</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P003 vl_score_01 | split = c(1, 28.36) | 2026-09-25 21:57</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          8          1</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.3561     0.0098</span></span>
@@ -307,9 +307,10 @@ points, which is what the header shows.</p>
 <span><span class="co">#&gt;     - NOT_MONOTONIC</span></span>
 <span><span class="co">#&gt;     - TOO_MANY_BINS</span></span>
 <span><span class="co">#&gt;   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.</span></span></code></pre></div>
-<p>The split proposal is a <code>REVIEW</code>: the new first bin holds
-2% of the training rows and breaks the monotone pattern of the event
-rate, so the engine’s <code>NOT_MONOTONIC</code> rule fires. A
+<p>The split proposal is a <code>REVIEW</code> on two counts: the new
+first bin holds 2% of the training rows and breaks the monotone pattern
+of the event rate (<code>NOT_MONOTONIC</code>), and eight bins exceed
+the configured maximum of seven (<code>TOO_MANY_BINS</code>). A
 <code>REVIEW</code> verdict is advisory: the proposal can be accepted
 with a reason or discarded. Every proposal takes the next id from the
 lab’s counter (<code>P001</code>, <code>P002</code>, …), whether or not
@@ -330,7 +331,7 @@ it.</p>
 <span>                                 groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NORTH"</span>, <span class="st">"SOUTH"</span><span class="op">)</span>,</span>
 <span>                                               core <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAST"</span>, <span class="st">"WEST"</span>, <span class="st">"CENTRE"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p_groups</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-25 21:33</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-25 21:57</span></span>
 <span><span class="co">#&gt;                         optimal     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      5          2         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.0846     0.0739    -0.0107</span></span>
@@ -366,27 +367,16 @@ which the optimal binning kept on its own. <code>missing_to</code> folds
 it into another bin.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_missing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_optin"</span>, missing_to <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">p_missing</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P006 ds_optin | missing_to = 1 | 2026-09-25 21:33</span></span>
-<span><span class="co">#&gt;                         optimal     manual      delta</span></span>
-<span><span class="co">#&gt;   n_bins                      3          2         -1</span></span>
-<span><span class="co">#&gt;   iv_train               0.0065     0.0000    -0.0065</span></span>
-<span><span class="co">#&gt;   iv_holdout             0.0032     0.0023    -0.0008</span></span>
-<span><span class="co">#&gt;   iv_ratio               0.4676  8743.8015  8743.3339</span></span>
-<span><span class="co">#&gt;   ks                     0.0237     0.0004    -0.0233</span></span>
-<span><span class="co">#&gt;   psi                    0.0019     0.0017    -0.0001</span></span>
-<span><span class="co">#&gt;   min_bin_pct            0.0975     0.4414     0.3439</span></span>
-<span><span class="co">#&gt;   largest_bin_pct        0.4611     0.5586     0.0975</span></span>
-<span><span class="co">#&gt;   n_degenerate                0          0          0</span></span>
-<span><span class="co">#&gt;   monotonic                   1          1          0</span></span>
-<span><span class="co">#&gt;   manual bins (train | hold-out)</span></span>
-<span><span class="co">#&gt;     1  YES | MISSING                    1,564  55.9%  14.3%   0.001 |     753  53.8%  13.9%  -0.046</span></span>
-<span><span class="co">#&gt;     2  NO                               1,236  44.1%  14.2%  -0.001 |     647  46.2%  15.1%   0.051</span></span>
-<span><span class="co">#&gt;   Warnings</span></span>
-<span><span class="co">#&gt;     - IV_BELOW_MIN</span></span>
-<span><span class="co">#&gt;     - IV_LOW_ON_HOLDOUT</span></span>
-<span><span class="co">#&gt;     - IV_LOSS_VS_OPTIMAL</span></span>
-<span><span class="co">#&gt;   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.</span></span></code></pre></div>
+<span><span class="va">p_missing</span><span class="op">$</span><span class="va">entry</span><span class="op">$</span><span class="va">bin</span></span>
+<span><span class="co">#&gt; [1] "YES%;%MISSING" "NO"</span></span>
+<span><span class="va">p_missing</span><span class="op">$</span><span class="va">verdict</span></span>
+<span><span class="co">#&gt; [1] "REVIEW"</span></span>
+<span><span class="va">p_missing</span><span class="op">$</span><span class="va">warnings</span></span>
+<span><span class="co">#&gt; [1] "IV_BELOW_MIN"       "IV_LOW_ON_HOLDOUT"  "IV_LOSS_VS_OPTIMAL"</span></span></code></pre></div>
+<p>The optimal bins of <code>ds_optin</code> carried a training IV of
+0.0065 (see the overview); folding <code>"MISSING"</code> into
+<code>YES</code> leaves almost none, below the admission minimum, and
+loses more than the lab allows on hold-out.</p>
 </div>
 <div class="section level3">
 <h3 id="reading-the-warnings-and-the-verdict">Reading the warnings and the verdict<a class="anchor" aria-label="anchor" href="#reading-the-warnings-and-the-verdict"></a>
@@ -433,12 +423,10 @@ accepted in turn.</p>
 <code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_groups</span>, reason <span class="op">=</span> <span class="st">"edge/core is what pricing uses"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   ds_region: P004 accepted (REVIEW) - 2 bins, hold-out IV 0.0786</span></span></code></pre></div>
 <p>The <code>ds_optin</code> proposal erased what little signal the
-variable had (<code>IV_BELOW_MIN</code>), so it is discarded, with a
-reason, and the variable keeps its optimal bins. A discarded proposal is
-a ledger row too.</p>
+variable had, so it is discarded, with a reason, and the variable keeps
+its optimal bins. A discarded proposal is a ledger row too.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p_missing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_optin"</span>, missing_to <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_discard</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_missing</span>, reason <span class="op">=</span> <span class="st">"folding MISSING into YES erases the signal"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_discard</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_missing</span>, reason <span class="op">=</span> <span class="st">"folding MISSING into YES erases the signal"</span><span class="op">)</span></span></code></pre></div>
 <p>A blocking rule cannot be accepted through the normal path. A break
 at -5000 on <code>vl_score_04</code>, whose minimum is above 16, leaves
 the first bin empty:</p>
@@ -451,7 +439,7 @@ the first bin empty:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_blocked</span>, reason <span class="op">=</span> <span class="st">"we need this band for the policy"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> scr_classing_accept(): proposal P008 is BLOCKED (EMPTY_BIN). Pass override = TRUE to accept it anyway; the override is recorded.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> scr_classing_accept(): proposal P007 is BLOCKED (EMPTY_BIN). Pass override = TRUE to accept it anyway; the override is recorded.</span></span></code></pre></div>
 <p>The override path is <code>override = TRUE</code>. It exists because
 there are legitimate reasons to carry a band the training data does not
 populate (a policy floor that will bind on a future population, for
@@ -462,12 +450,12 @@ that the session carries on without the empty bin.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lab_override</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p_blocked</span>, reason <span class="op">=</span> <span class="st">"deliberate policy floor at -5000"</span>,</span>
 <span>                                    override <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   vl_score_04: P008 accepted (BLOCKED) - 3 bins, hold-out IV 0.0010</span></span>
+<span><span class="co">#&gt;   vl_score_04: P007 accepted (BLOCKED) - 3 bins, hold-out IV 0.0010</span></span>
 <span><span class="fu"><a href="../reference/scr_decisions.html">scr_decisions</a></span><span class="op">(</span><span class="va">lab_override</span><span class="op">)</span><span class="op">[</span><span class="va">variable</span> <span class="op">==</span> <span class="st">"vl_score_04"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">seq</span>, <span class="va">action</span>, <span class="va">proposal_id</span>, <span class="va">verdict</span>, <span class="va">warnings</span>, <span class="va">reason</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;      seq   action proposal_id verdict</span></span>
 <span><span class="co">#&gt;    &lt;int&gt;   &lt;char&gt;      &lt;char&gt;  &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1:     4 override        P008 BLOCKED</span></span>
-<span><span class="co">#&gt; 2:     5   accept        P008 BLOCKED</span></span>
+<span><span class="co">#&gt; 1:     4 override        P007 BLOCKED</span></span>
+<span><span class="co">#&gt; 2:     5   accept        P007 BLOCKED</span></span>
 <span><span class="co">#&gt;                                                                            warnings</span></span>
 <span><span class="co">#&gt;                                                                              &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1:                                                                        EMPTY_BIN</span></span>
@@ -512,11 +500,11 @@ bins and IV before and after, the verdicts, the reasons, the discards
 and the final choice.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lab</span></span>
-<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-25 21:33 by analyst | 37 variables | 8 proposals: 2 accepted, 1 discarded</span></span>
+<span><span class="co">#&gt; &lt;scr_classing&gt; target "default" | opened 2026-09-25 21:57 by analyst | 37 variables | 7 proposals: 2 accepted, 1 discarded</span></span>
 <span><span class="co">#&gt;   variable                   action      bins          IV train       IV hold-out verdict     reason</span></span>
 <span><span class="co">#&gt;   vl_score_01                accepted  7-&gt;4     0.3464-&gt;0.2993     0.2877-&gt;0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti</span></span>
 <span><span class="co">#&gt;   ds_region                  accepted  5-&gt;2     0.0846-&gt;0.0739     0.0971-&gt;0.0786   REVIEW      edge/core is what pricing uses</span></span>
-<span><span class="co">#&gt;   ds_optin                   discard  P007: folding MISSING into YES erases the sign</span></span>
+<span><span class="co">#&gt;   ds_optin                   discard  P006: folding MISSING into YES erases the sign</span></span>
 <span><span class="co">#&gt;   final choice: 12 variables | consensus 12 | force: vl_score_03 | drop: vl_score_10</span></span></code></pre></div>
 <p><code><a href="../reference/scr_decisions.html">scr_decisions()</a></code> returns the ledger: one row per
 decision, append-only, with the author, the timestamp, the instruction,
@@ -529,7 +517,7 @@ scorecard fitted on it.</p>
 <span><span class="co">#&gt;    &lt;int&gt;      &lt;char&gt;  &lt;char&gt;      &lt;char&gt;     &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1:     1 vl_score_01  accept        P001 ACCEPTABLE</span></span>
 <span><span class="co">#&gt; 2:     2   ds_region  accept        P004     REVIEW</span></span>
-<span><span class="co">#&gt; 3:     3    ds_optin discard        P007     REVIEW</span></span>
+<span><span class="co">#&gt; 3:     3    ds_optin discard        P006     REVIEW</span></span>
 <span><span class="co">#&gt; 4:     4 vl_score_03   force        &lt;NA&gt;       &lt;NA&gt;</span></span>
 <span><span class="co">#&gt; 5:     5 vl_score_10    drop        &lt;NA&gt;       &lt;NA&gt;</span></span>
 <span><span class="co">#&gt;                                        reason</span></span>
@@ -584,8 +572,7 @@ is regenerated on read. Open ends are written as empty cells. A
 <span><span class="co">#&gt;     FALSE optimal                                       &lt;NA&gt;</span></span>
 <span><span class="co">#&gt;   ... (+137 rows)</span></span>
 <span><span class="va">spec_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"classing_default.csv"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/scr_classing_spec.html">scr_classing_spec</a></span><span class="op">(</span><span class="va">lab</span>, file <span class="op">=</span> <span class="va">spec_file</span><span class="op">)</span></span>
-<span><span class="co">#&gt; classing spec written to /tmp/RtmpRnnnLf/classing_default.csv</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/scr_classing_spec.html">scr_classing_spec</a></span><span class="op">(</span><span class="va">lab</span>, file <span class="op">=</span> <span class="va">spec_file</span><span class="op">)</span></span></code></pre></div>
 <p>A reviewer opens the file, moves the first cut of
 <code>vl_score_01</code> from 40 to 42 and writes why in
 <code>reason</code>. Done in R, as it would be done in a spreadsheet
@@ -625,7 +612,7 @@ accepted on the analyst’s behalf.</p>
 <span><span class="va">imported</span><span class="op">$</span><span class="va">vl_score_01</span><span class="op">$</span><span class="va">imported_reason</span></span>
 <span><span class="co">#&gt; [1] "reviewer: first cut moved to 42 to match the bureau band"</span></span>
 <span><span class="va">imported</span><span class="op">$</span><span class="va">vl_score_01</span></span>
-<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P009 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-25 21:33</span></span>
+<span><span class="co">#&gt; &lt;scr_classing_proposal&gt; P008 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-25 21:57</span></span>
 <span><span class="co">#&gt;                         optimal    current     manual      delta</span></span>
 <span><span class="co">#&gt;   n_bins                      7          4          4         -3</span></span>
 <span><span class="co">#&gt;   iv_train               0.3464     0.2993     0.2990    -0.0474</span></span>
@@ -648,13 +635,13 @@ the variable already carries an accepted manual proposal. Accepting the
 imported one supersedes it, and the ledger records both facts.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">imported</span><span class="op">$</span><span class="va">vl_score_01</span>, reason <span class="op">=</span> <span class="va">imported</span><span class="op">$</span><span class="va">vl_score_01</span><span class="op">$</span><span class="va">imported_reason</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   vl_score_01: P009 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2631</span></span>
+<span><span class="co">#&gt;   vl_score_01: P008 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2631</span></span>
 <span><span class="fu"><a href="../reference/scr_decisions.html">scr_decisions</a></span><span class="op">(</span><span class="va">lab</span><span class="op">)</span><span class="op">[</span><span class="va">variable</span> <span class="op">==</span> <span class="st">"vl_score_01"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">seq</span>, <span class="va">action</span>, <span class="va">proposal_id</span>, <span class="va">instruction</span>, <span class="va">verdict</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;      seq    action proposal_id            instruction    verdict</span></span>
 <span><span class="co">#&gt;    &lt;int&gt;    &lt;char&gt;      &lt;char&gt;                 &lt;char&gt;     &lt;char&gt;</span></span>
 <span><span class="co">#&gt; 1:     1    accept        P001 breaks = c(40, 55, 70) ACCEPTABLE</span></span>
 <span><span class="co">#&gt; 2:     6 supersede        P001                   &lt;NA&gt;       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 3:     7    accept        P009 breaks = c(42, 55, 70) ACCEPTABLE</span></span></code></pre></div>
+<span><span class="co">#&gt; 3:     7    accept        P008 breaks = c(42, 55, 70) ACCEPTABLE</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="committing-the-lab-what-changed">Committing the lab: what changed<a class="anchor" aria-label="anchor" href="#committing-the-lab-what-changed"></a>
@@ -671,7 +658,7 @@ rebuilt.</p>
 <span><span class="va">res2</span></span>
 <span><span class="co">#&gt; &lt;scr_result&gt; target "default"</span></span>
 <span><span class="co">#&gt;   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span></span>
-<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 0.7s</span></span>
+<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 0.9s</span></span>
 <span><span class="co">#&gt;   convention: risk (target=1 is the bad case)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Funnel</span></span>
@@ -793,12 +780,30 @@ manually binned variable are distributed over its four policy bands.</p>
 <span><span class="co">#&gt;       &lt;char&gt;               &lt;char&gt;      &lt;num&gt;  &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1: ds_region        NORTH%;%SOUTH  0.4985359    -15</span></span>
 <span><span class="co">#&gt; 2: ds_region EAST%;%WEST%;%CENTRE -0.1492097      5</span></span></code></pre></div>
+<p>The manual decisions have a price, and the committee should see it.
+The scorecard fitted on the optimal bins and the consensus shortlist is
+the benchmark:</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sc_auto</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_score_metrics.html">scr_score_metrics</a></span><span class="op">(</span><span class="va">sc_auto</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>card <span class="op">=</span> <span class="st">"optimal"</span>, <span class="va">sample</span>, <span class="va">auc</span>, <span class="va">auc_lo</span>, <span class="va">auc_hi</span>, <span class="va">ks</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>      <span class="fu"><a href="../reference/scr_score_metrics.html">scr_score_metrics</a></span><span class="op">(</span><span class="va">sc</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>card <span class="op">=</span> <span class="st">"manual"</span>, <span class="va">sample</span>, <span class="va">auc</span>, <span class="va">auc_lo</span>, <span class="va">auc_hi</span>, <span class="va">ks</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;       card  sample       auc    auc_lo    auc_hi        ks</span></span>
+<span><span class="co">#&gt;     &lt;char&gt;  &lt;char&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: optimal   train 0.7856428 0.7662170 0.8069608 0.4411466</span></span>
+<span><span class="co">#&gt; 2: optimal holdout 0.7394060 0.7066284 0.7770357 0.3889033</span></span>
+<span><span class="co">#&gt; 3:  manual   train 0.7844919 0.7681230 0.8025513 0.4390349</span></span>
+<span><span class="co">#&gt; 4:  manual holdout 0.7348276 0.7007297 0.7736362 0.3598076</span></span></code></pre></div>
+<p>On hold-out the manual card gives up about 0.005 of AUC and 0.03 of
+KS, well inside the bootstrap interval of either card. Whether policy
+bands, a two-region grouping, a forced bureau variable and a dropped
+unavailable one are worth that is a business decision; the lab makes
+sure it is taken with the numbers on the table.</p>
 <p>The model card states the provenance in words: which binning
 algorithms the card mixes, whether the shortlist came from the consensus
 or from the lab, how many manual bins it carries and which variables
 were forced in or dropped. The ledger travels into the scorecard as
 well.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">sc</span><span class="op">$</span><span class="va">model_card</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"binning_algorithm"</span>, <span class="st">"shortlist_source"</span>, <span class="st">"n_manual_bins"</span>,</span>
 <span>                    <span class="st">"manual_bins"</span>, <span class="st">"forced_in"</span>, <span class="st">"manual_dropped"</span>, <span class="st">"n_decisions"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; List of 7</span></span>
@@ -820,7 +825,7 @@ well.</p>
 pre-processing and the frozen bins; the points for
 <code>vl_score_01</code> fall in one of the four policy bands and the
 points for <code>ds_region</code> in one of the two regions.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">new</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vl_score_01"</span>, <span class="st">"ds_region"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;   vl_score_01 ds_region</span></span>
@@ -843,7 +848,7 @@ lines below show the frozen pre-processing, the WOE <code>CASE</code> on
 the manual cut points and groupings with full precision, and the
 bin-index <code>CASE</code> on the same cuts. The tail composes the
 whole points from that index.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">sc</span>, table <span class="op">=</span> <span class="st">"prd.customers"</span>, dialect <span class="op">=</span> <span class="st">"databricks"</span><span class="op">)</span></span>
 <span><span class="va">sql_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">sql</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"^-- Provenance"</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
@@ -884,41 +889,20 @@ database to run.</p>
 <div class="section level2">
 <h2 id="governance">Governance<a class="anchor" aria-label="anchor" href="#governance"></a>
 </h2>
-<p>The lab is designed so that a reviewer can reconstruct every manual
-decision from the deliverables alone.</p>
-<ul>
-<li>
-<strong>What the ledger records.</strong> One row per decision, in
-order: <code>accept</code>, <code>discard</code>,
-<code>supersede</code>, <code>restore</code> (a
-<code>reset = TRUE</code> proposal taking a variable back to its optimal
-bins), <code>override</code>, <code>force</code>, <code>drop</code> and
-<code>keep</code>. Each row carries the author, the timestamp, the
-instruction as typed, the number of bins and the train and hold-out IV
-before and after, the PSI, the verdict, the codes and the reason. The
-ledger is append-only and travels unchanged from the lab into the
-result, into the scorecard and into the <code>.xlsx</code> workbooks
-written by <code><a href="../reference/scr_export.html">scr_export()</a></code>, next to the classing spec.</li>
-<li>
-<strong>What is blocked.</strong> An empty bin, a degenerate bin
-without smoothing, a bin below the hard minimum share, a manual IV above
-the leakage ceiling, a category left unassigned, a proposal without a
-reason, a <code>force</code> of a variable that never reached binning.
-The first four block a proposal (<code>BLOCKED</code>); the last three
-are errors that never produce a proposal at all.</li>
-<li>
-<strong>What needs an override.</strong> Accepting a
-<code>BLOCKED</code> proposal, forcing a variable failed for
-<code>IV_SUSPICIOUS</code>, and forcing a derived <code>__sp</code> flag
-under <code>allow_derived_final = FALSE</code>. An override is not a way
-round the rule; it is a documented exception, with its own ledger row,
-that the model card and the SQL header will point to.</li>
-</ul>
-<p>Everything a manual decision touches remains reproducible: the
-optimal artefacts are frozen alongside, the manual bins are recomputed
-on the training rows with the engine’s own WOE formula, and the
-scorecard, the R scoring and the SQL read them through the same contract
-as any optimal bin.</p>
+<p>A reviewer can reconstruct every manual decision from the
+deliverables. The ledger is append-only, with one row per
+<code>accept</code>, <code>discard</code>, <code>supersede</code>,
+<code>restore</code> (a <code>reset = TRUE</code> proposal that takes a
+variable back to its optimal bins), <code>override</code>,
+<code>force</code>, <code>drop</code> and <code>keep</code>, and it
+travels from the lab into the result, the scorecard and the workbooks
+written by <code><a href="../reference/scr_export.html">scr_export()</a></code>. Four conditions block a proposal:
+an empty bin, a degenerate bin without smoothing, a bin below the hard
+minimum share and a manual IV above the leakage ceiling. Accepting a
+blocked proposal, forcing a variable failed for
+<code>IV_SUSPICIOUS</code> and forcing a derived <code>__sp</code> flag
+under <code>allow_derived_final = FALSE</code> each need
+<code>override = TRUE</code>, which adds its own ledger row.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

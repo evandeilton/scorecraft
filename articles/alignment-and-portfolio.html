@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Scale alignment across targets, engines and conventions • scorecraft</title>
+<title>Scaling, alignment and challengers • scorecraft</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Scale alignment across targets, engines and conventions">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Scaling, alignment and challengers">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -42,8 +42,7 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scaling, alignment and challengers</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -70,7 +69,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Scale alignment across targets, engines and conventions</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Scaling, alignment and challengers</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/alignment-and-portfolio.Rmd" class="external-link"><code>vignettes/alignment-and-portfolio.Rmd</code></a></small>
@@ -106,8 +105,7 @@ follow two constants,</p>
 <p>and the map from log-odds to points,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi></mrow><mo>=</mo><mrow><mi mathvariant="normal">o</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi></mrow><mo>+</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>⋅</mo><mrow><mi mathvariant="normal">ln</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mrow><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">s</mi></mrow><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{score} = \mathrm{offset} + \mathrm{factor} \cdot \ln(\mathrm{odds})</annotation></semantics></math>.
 The textbook example is 600 points at odds 50:1 with a PDO of 20
-(Siddiqi, 2006); it is an example, not a standard published by
-anyone.</p>
+(Siddiqi, 2017); it is an example, not a standard.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">factor</span> <span class="op">&lt;-</span> <span class="fl">20</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">offset</span> <span class="op">&lt;-</span> <span class="fl">600</span> <span class="op">-</span> <span class="va">factor</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span></span>
@@ -314,6 +312,11 @@ predicted probability matches the observed event rate; the direct map
 reports whatever the raw score claims, here a third too low. This is why
 <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code> always aligns and defaults to
 <code>"regression"</code>.</p>
+<p>The regression aligns the score to the event rate of the sample it is
+fitted on, a point-in-time rate. It is not a calibration to a long-run
+default rate with rating grades and margins of conservatism; that step
+is covered in <a href="https://evandeilton.github.io/scorecraft/articles/pd-calibration-and-grades.html">PD
+calibration and rating grades</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="two-targets-two-conventions-one-scale">3. Two targets, two conventions, one scale<a class="anchor" aria-label="anchor" href="#two-targets-two-conventions-one-scale"></a>
@@ -324,10 +327,10 @@ shall treat as a propensity target (the campaign wants to reach
 customers who <em>will</em> churn). Each is selected with the other
 target dropped, so that neither becomes a candidate for the other.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cfg_risk</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>objective <span class="op">=</span> <span class="st">"risk"</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                       use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">60</span>, n_boot <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">cfg_prop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>objective <span class="op">=</span> <span class="st">"propensity"</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                       use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">60</span>, n_boot <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">cfg_risk</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>objective <span class="op">=</span> <span class="st">"risk"</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_glmnet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                       use_ranger <span class="op">=</span> <span class="cn">FALSE</span>, use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">60</span>, n_boot <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">cfg_prop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>objective <span class="op">=</span> <span class="st">"propensity"</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_glmnet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                       use_ranger <span class="op">=</span> <span class="cn">FALSE</span>, use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">60</span>, n_boot <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">res_risk</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg_risk</span>, drop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"churn"</span><span class="op">)</span>,</span>
 <span>                       date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span>
@@ -394,16 +397,109 @@ error in reverse: <code><a href="../reference/scr_metrics.html">scr_metrics()</a
 <span><span class="co">#&gt;        0.739406        0.260594</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="a-tree-challenger-on-the-same-scale">4. A tree challenger on the same scale<a class="anchor" aria-label="anchor" href="#a-tree-challenger-on-the-same-scale"></a>
+<h2 id="from-logit-to-points">4. From logit to points<a class="anchor" aria-label="anchor" href="#from-logit-to-points"></a>
+</h2>
+<p>With <code>score = a + b * logit</code> and
+<code>logit = alpha + sum(beta_j * woe_ij)</code>, the score splits into
+a constant and one term per variable:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">b</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi></mrow><mo>=</mo><mi>a</mi><mo>+</mo><mi>b</mi><mspace width="0.167em"></mspace><mi>α</mi><mo>,</mo><mspace width="2.0em"></mspace><msub><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">s</mi></mrow><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>b</mi><mspace width="0.167em"></mspace><msub><mi>β</mi><mi>j</mi></msub><mspace width="0.167em"></mspace><msub><mrow><mi mathvariant="normal">W</mi><mi mathvariant="normal">O</mi><mi mathvariant="normal">E</mi></mrow><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\mathrm{base} = a + b\,\alpha, \qquad
+\mathrm{points}_{ij} = b\,\beta_j\,\mathrm{WOE}_{ij}.
+</annotation></semantics></math></p>
+<p>Under the default <code>points_style = "base_plus_deviation"</code>
+the constant is kept apart as <code>base_points</code> and each bin
+carries its deviation, so a bin with a WOE of 0 (the average risk)
+scores 0 points. <code>"distributed"</code> spreads the constant over
+the variables instead (Siddiqi, 2017), and no bin has a zero reference.
+The exact points are kept in <code>points_raw</code>; the published
+points are rounded.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">al</span> <span class="op">&lt;-</span> <span class="va">sc_risk</span><span class="op">$</span><span class="va">alignment</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a <span class="op">=</span> <span class="va">al</span><span class="op">$</span><span class="va">a</span>, b <span class="op">=</span> <span class="va">al</span><span class="op">$</span><span class="va">b</span>, alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">sc_risk</span><span class="op">$</span><span class="va">coef</span><span class="op">[</span><span class="st">"(Intercept)"</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  base_exact <span class="op">=</span> <span class="va">sc_risk</span><span class="op">$</span><span class="va">base_points_raw</span>, base_points <span class="op">=</span> <span class="va">sc_risk</span><span class="op">$</span><span class="va">base_points</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           a           b       alpha  base_exact base_points </span></span>
+<span><span class="co">#&gt;  491.196658  -26.318891   -1.789721  538.300127  538.000000</span></span>
+<span><span class="va">sc_risk</span><span class="op">$</span><span class="va">points</span><span class="op">[</span><span class="va">variable</span> <span class="op">==</span> <span class="st">"vl_score_01"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">bin</span>, <span class="va">woe</span>, <span class="va">coef</span>, points_raw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">points_raw</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">points</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;                      bin         woe     coef points_raw points</span></span>
+<span><span class="co">#&gt;                   &lt;char&gt;       &lt;num&gt;    &lt;num&gt;      &lt;num&gt;  &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:      (-Inf;33.360000] -2.06253559 1.128507      61.26     61</span></span>
+<span><span class="co">#&gt; 2: (33.360000;38.150000] -0.73104946 1.128507      21.71     22</span></span>
+<span><span class="co">#&gt; 3: (38.150000;44.240000] -0.65810792 1.128507      19.55     20</span></span>
+<span><span class="co">#&gt; 4: (44.240000;48.060000] -0.52261206 1.128507      15.52     16</span></span>
+<span><span class="co">#&gt; 5: (48.060000;63.940000]  0.03978629 1.128507      -1.18     -1</span></span>
+<span><span class="co">#&gt; 6: (63.940000;72.610000]  0.70394095 1.128507     -20.91    -21</span></span>
+<span><span class="co">#&gt; 7:      (72.610000;+Inf]  0.99617148 1.128507     -29.59    -30</span></span></code></pre></div>
+<p>A risky bin has a positive WOE, the coefficient is positive and
+<code>b</code> is negative under <code>higher_is_safer</code>, so the
+riskiest bin of <code>vl_score_01</code> loses 30 points and the safest
+gains 61. <code><a href="../reference/scr_apply.html">scr_apply()</a></code> returns both scores:
+<code>score</code> is exact, and <code>score_points</code> is
+<code>base_points</code> plus the rounded points of each bin, which is
+what a points table on paper gives. The two differ by the rounding of
+one constant and twelve bin points.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sc_new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">sc_risk</span>, <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="fl">5</span><span class="op">)</span>, what <span class="op">=</span> <span class="st">"points"</span><span class="op">)</span></span>
+<span><span class="va">var_pts</span> <span class="op">&lt;-</span> <span class="va">sc_new</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">sc_risk</span><span class="op">$</span><span class="va">features</span>, <span class="st">"_points"</span><span class="op">)</span>, with <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span><span class="va">sc_new</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">score</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">score_points</span>,</span>
+<span>           check <span class="op">=</span> <span class="va">sc_risk</span><span class="op">$</span><span class="va">base_points</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">var_pts</span><span class="op">)</span>, diff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">score</span> <span class="op">-</span> <span class="va">score_points</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;     score score_points check  diff</span></span>
+<span><span class="co">#&gt;     &lt;num&gt;        &lt;num&gt; &lt;num&gt; &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: 546.53          546   546  0.53</span></span>
+<span><span class="co">#&gt; 2: 562.33          562   562  0.33</span></span>
+<span><span class="co">#&gt; 3: 560.52          559   559  1.52</span></span>
+<span><span class="co">#&gt; 4: 507.06          507   507  0.06</span></span>
+<span><span class="co">#&gt; 5: 536.76          536   536  0.76</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="do-the-odds-double-every-pdo">5. Do the odds double every PDO?<a class="anchor" aria-label="anchor" href="#do-the-odds-double-every-pdo"></a>
+</h2>
+<p>The scale is a claim about odds: at 600 points 50:1, and twice the
+odds every 20 points. <code><a href="../reference/scr_score_gains.html">scr_score_gains()</a></code> gives the observed
+odds (non-events per event) in each band of the score, the training
+deciles applied frozen to the hold-out, and the claim can be checked
+against them.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_score_gains.html">scr_score_gains</a></span><span class="op">(</span><span class="va">sc_risk</span><span class="op">)</span></span>
+<span><span class="va">g</span><span class="op">[</span>, <span class="va">scale_odds</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">(</span><span class="va">mean_score</span> <span class="op">-</span> <span class="va">al</span><span class="op">$</span><span class="va">offset</span><span class="op">)</span> <span class="op">/</span> <span class="va">al</span><span class="op">$</span><span class="va">factor</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">g</span><span class="op">[</span><span class="va">sample</span> <span class="op">==</span> <span class="st">"holdout"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">band</span>, <span class="va">n</span>, <span class="va">events</span>, mean_score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mean_score</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                         odds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">odds</span>, <span class="fl">2</span><span class="op">)</span>, scale_odds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">scale_odds</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;           band     n events mean_score  odds scale_odds</span></span>
+<span><span class="co">#&gt;         &lt;char&gt; &lt;int&gt;  &lt;int&gt;      &lt;num&gt; &lt;num&gt;      &lt;num&gt;</span></span>
+<span><span class="co">#&gt;  1: [-Inf,510]   127     45      495.2  1.81       1.32</span></span>
+<span><span class="co">#&gt;  2:  (510,524]   128     35      517.0  2.63       2.81</span></span>
+<span><span class="co">#&gt;  3:  (524,533]   139     37      528.7  2.73       4.22</span></span>
+<span><span class="co">#&gt;  4:  (533,542]   149     26      537.7  4.66       5.77</span></span>
+<span><span class="co">#&gt;  5:  (542,550]   151     17      545.9  7.69       7.68</span></span>
+<span><span class="co">#&gt;  6:  (550,558]   148     18      554.0  7.05      10.15</span></span>
+<span><span class="co">#&gt;  7:  (558,567]   149     11      562.4 12.04      13.59</span></span>
+<span><span class="co">#&gt;  8:  (567,577]   128      5      571.0 22.45      18.32</span></span>
+<span><span class="co">#&gt;  9:  (577,590]   124      4      583.0 26.78      27.74</span></span>
+<span><span class="co">#&gt; 10: (590, Inf]   157      5      608.0 27.73      66.05</span></span>
+<span><span class="va">g</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>pdo_implied <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">log_odds</span> <span class="op">~</span> <span class="va">mean_score</span>, weights <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">sample</span><span class="op">]</span></span>
+<span><span class="co">#&gt;     sample pdo_implied</span></span>
+<span><span class="co">#&gt;     &lt;char&gt;       &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:   train    20.00000</span></span>
+<span><span class="co">#&gt; 2: holdout    24.03442</span></span></code></pre></div>
+<p>On train the implied PDO is 20 by construction: the same deciles fed
+the alignment regression. On hold-out the odds double every 24 points or
+so, and the safest band is well short of the scale (odds near 28 against
+about 66 on the scale). The ranking holds, but the out-of-time
+population is less separated than the development one, and the top of
+the scale promises more than it delivers. This is the table to show
+before a cut-off is quoted in odds, and the one to recompute when
+monitoring.</p>
+</div>
+<div class="section level2">
+<h2 id="a-tree-challenger-on-the-same-scale">6. A tree challenger on the same scale<a class="anchor" aria-label="anchor" href="#a-tree-challenger-on-the-same-scale"></a>
 </h2>
 <p>A gradient-boosted model can be fitted on the same WOE columns as the
 scorecard and aligned to the same scale by the same regression. That
 makes its output comparable point for point with the champion; it does
 <strong>not</strong> make it a scorecard. The object says so explicitly:
 no points, no reason codes, <code>supports_scorecard = FALSE</code>.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res_risk</span>, challenger <span class="op">=</span> <span class="st">"xgboost"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc_x</span><span class="op">$</span><span class="va">challenger</span><span class="op">$</span><span class="va">supports_scorecard</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="va">sc_x</span><span class="op">$</span><span class="va">challenger</span><span class="op">$</span><span class="va">points</span></span>
@@ -413,14 +509,12 @@ no points, no reason codes, <code>supports_scorecard = FALSE</code>.</p>
 <span><span class="co">#&gt;   factor = 28.853901 | offset = 487.122876</span></span>
 <span><span class="co">#&gt;   calibration: ln(odds) = -1.398883 + -1.883869 * raw  (adj. R2 = 0.9710, 10 bands)</span></span>
 <span><span class="co">#&gt;   score = 446.759642 + -54.356970 * raw</span></span>
-<span><span class="va">sc_x</span><span class="op">$</span><span class="va">challenger</span><span class="op">$</span><span class="va">metrics</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">sample</span>, <span class="va">direction</span>, <span class="va">auc</span>, <span class="va">auc_lo</span>, <span class="va">auc_hi</span>, <span class="va">ks</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;     sample       direction       auc    auc_lo    auc_hi        ks</span></span>
-<span><span class="co">#&gt;     &lt;char&gt;          &lt;char&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1: holdout higher_is_safer 0.7340725 0.7021223 0.7720179 0.3574453</span></span>
-<span><span class="fu"><a href="../reference/scr_score_metrics.html">scr_score_metrics</a></span><span class="op">(</span><span class="va">sc_x</span><span class="op">)</span><span class="op">[</span><span class="va">sample</span> <span class="op">==</span> <span class="st">"holdout"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">sample</span>, <span class="va">direction</span>, <span class="va">auc</span>, <span class="va">auc_lo</span>, <span class="va">auc_hi</span>, <span class="va">ks</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;     sample       direction      auc    auc_lo    auc_hi        ks</span></span>
-<span><span class="co">#&gt;     &lt;char&gt;          &lt;char&gt;    &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1: holdout higher_is_safer 0.739406 0.7066284 0.7770357 0.3889033</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">sc_x</span><span class="op">$</span><span class="va">challenger</span><span class="op">$</span><span class="va">metrics</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>model <span class="op">=</span> <span class="st">"xgboost challenger"</span>, <span class="va">sample</span>, <span class="va">auc</span>, <span class="va">auc_lo</span>, <span class="va">auc_hi</span>, <span class="va">ks</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>      <span class="fu"><a href="../reference/scr_score_metrics.html">scr_score_metrics</a></span><span class="op">(</span><span class="va">sc_x</span><span class="op">)</span><span class="op">[</span><span class="va">sample</span> <span class="op">==</span> <span class="st">"holdout"</span>, <span class="fu">.</span><span class="op">(</span>model <span class="op">=</span> <span class="st">"scorecard"</span>, <span class="va">sample</span>, <span class="va">auc</span>, <span class="va">auc_lo</span>, <span class="va">auc_hi</span>, <span class="va">ks</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                 model  sample       auc    auc_lo    auc_hi        ks</span></span>
+<span><span class="co">#&gt;                &lt;char&gt;  &lt;char&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: xgboost challenger holdout 0.7340725 0.7021223 0.7720179 0.3574453</span></span>
+<span><span class="co">#&gt; 2:          scorecard holdout 0.7394060 0.7066284 0.7770357 0.3889033</span></span></code></pre></div>
 <p>The challenger’s alignment has its own intercept and slope: two
 engines, two raw scores, one declared scale. Here the slope is well
 above 1 in magnitude, which says the boosted logit is compressed (a few
@@ -434,7 +528,7 @@ scorecard’s, which is the usual finding on a WOE feature set.</p>
 <p>Aggregate AUCs hide where two models disagree. The swap-set table
 holds the <strong>approval rate</strong> fixed and asks which customers
 one model would approve and the other would not:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc_x</span><span class="op">$</span><span class="va">challenger</span><span class="op">$</span><span class="va">swapset</span></span>
 <span><span class="co">#&gt;    approval_rate n_swap_in n_swap_out event_rate_swap_in event_rate_swap_out</span></span>
 <span><span class="co">#&gt;            &lt;num&gt;     &lt;int&gt;      &lt;int&gt;              &lt;num&gt;               &lt;num&gt;</span></span>
@@ -472,23 +566,23 @@ directly comparable numbers.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="the-portfolio-view">5. The portfolio view<a class="anchor" aria-label="anchor" href="#the-portfolio-view"></a>
+<h2 id="the-portfolio-view">7. The portfolio view<a class="anchor" aria-label="anchor" href="#the-portfolio-view"></a>
 </h2>
 <p>With several targets in flight, <code><a href="../reference/scr_compare.html">scr_compare()</a></code> gives one
-row per target (funnel, best hold-out model with its interval, warning
-signs) and <code><a href="../reference/scr_core.html">scr_core()</a></code> lists the variables that survived on
+row per target (funnel, best hold-out model of the selection stage,
+warning signs) and <code><a href="../reference/scr_core.html">scr_core()</a></code> the variables approved on
 more than one target.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>default <span class="op">=</span> <span class="va">res_risk</span>, churn <span class="op">=</span> <span class="va">res_prop</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/scr_compare.html">scr_compare</a></span><span class="op">(</span><span class="va">runs</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">target</span>, <span class="va">rows</span>, <span class="va">event_rate</span>, <span class="va">candidates</span>, <span class="va">approved</span>, <span class="va">best_model</span>, <span class="va">auc</span>, <span class="va">auc_lo</span>, <span class="va">auc_hi</span>, <span class="va">ks</span>, <span class="va">relaxation</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;     target  rows event_rate candidates approved best_model    auc auc_lo auc_hi</span></span>
-<span><span class="co">#&gt;     &lt;char&gt; &lt;int&gt;      &lt;num&gt;      &lt;int&gt;    &lt;int&gt;     &lt;char&gt;  &lt;num&gt;  &lt;num&gt;  &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1: default  4200     0.1425         37       12    xgboost 0.7375 0.7065 0.7762</span></span>
-<span><span class="co">#&gt; 2:   churn  4200     0.2846         37        9     glmnet 0.7262 0.7086 0.7544</span></span>
-<span><span class="co">#&gt;        ks             relaxation</span></span>
-<span><span class="co">#&gt;     &lt;num&gt;                 &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1: 0.3695                   none</span></span>
-<span><span class="co">#&gt; 2: 0.3288 min_votes reduced to 1</span></span>
+<span><span class="fu"><a href="../reference/scr_compare.html">scr_compare</a></span><span class="op">(</span><span class="va">runs</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">target</span>, <span class="va">rows</span>, <span class="va">event_rate</span>, <span class="va">approved</span>, <span class="va">best_model</span>, <span class="va">auc</span>, <span class="va">ks</span>, <span class="va">relaxation</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;     target  rows event_rate approved best_model    auc     ks</span></span>
+<span><span class="co">#&gt;     &lt;char&gt; &lt;int&gt;      &lt;num&gt;    &lt;int&gt;     &lt;char&gt;  &lt;num&gt;  &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: default  4200     0.1425       12    xgboost 0.7375 0.3695</span></span>
+<span><span class="co">#&gt; 2:   churn  4200     0.2846        9     glmnet 0.7262 0.3288</span></span>
+<span><span class="co">#&gt;                relaxation</span></span>
+<span><span class="co">#&gt;                    &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:                   none</span></span>
+<span><span class="co">#&gt; 2: min_votes reduced to 1</span></span>
 <span><span class="fu"><a href="../reference/scr_core.html">scr_core</a></span><span class="op">(</span><span class="va">runs</span>, min_targets <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        feature n_targets mean_rank        targets</span></span>
 <span><span class="co">#&gt;         &lt;char&gt;     &lt;int&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
@@ -499,36 +593,24 @@ more than one target.</p>
 <span><span class="co">#&gt; 5: vl_score_05         2       6.0 churn, default</span></span>
 <span><span class="co">#&gt; 6: vl_score_07         2       7.5 churn, default</span></span>
 <span><span class="co">#&gt; 7:  vl_hist_04         2      10.0 churn, default</span></span></code></pre></div>
-<p>A variable that is approved on both targets, with a good mean
-consensus rank, is the strongest argument a model committee can hear in
-its favour: it is not an artefact of one target definition. The
-<code>relaxation</code> column records whether the consensus had to
-loosen its vote threshold to reach the configured minimum number of
-variables, which is worth knowing before the two shortlists are
-compared. Note that <code><a href="../reference/scr_compare.html">scr_compare()</a></code> reports the AUC of the
-<strong>selection-stage</strong> consensus models, not of the final
-scorecards; the scorecards’ own metrics live in
-<code><a href="../reference/scr_score_metrics.html">scr_score_metrics()</a></code>, and since both cards are on the same
-scale, their score distributions can be laid side by side as well.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>scorecard <span class="op">=</span> <span class="st">"default"</span>, <span class="va">sc_risk</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">holdout</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span>, median <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span>, max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>scorecard <span class="op">=</span> <span class="st">"churn"</span>,   <span class="va">sc_prop</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">holdout</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span>, median <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span>, max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt;    scorecard      min   median      max</span></span>
-<span><span class="co">#&gt;       &lt;char&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:   default 452.9460 550.6549 652.3243</span></span>
-<span><span class="co">#&gt; 2:     churn 360.4282 455.5152 549.2294</span></span></code></pre></div>
+<p>A variable approved on both targets is not an artefact of one target
+definition. <code>relaxation</code> records whether the consensus
+loosened its vote threshold to reach the minimum number of variables, as
+it did for <code>churn</code>. The AUC here is that of the
+selection-stage models; the scorecards’ own metrics are in
+<code><a href="../reference/scr_score_metrics.html">scr_score_metrics()</a></code>.</p>
 </div>
 <div class="section level2">
-<h2 id="rescaling-an-existing-scorecard">6. Rescaling an existing scorecard<a class="anchor" aria-label="anchor" href="#rescaling-an-existing-scorecard"></a>
+<h2 id="rescaling-an-existing-scorecard">8. Rescaling an existing scorecard<a class="anchor" aria-label="anchor" href="#rescaling-an-existing-scorecard"></a>
 </h2>
 <p>A committee may ask for a different convention, say 700 points at
-30:1 with a PDO of 25. Refitting is unnecessary: the logit and the
-calibration regression are unchanged, only the PDO map moves.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+30:1 with a PDO of 25. The model does not change: calling
+<code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code> with the new scale refits the same
+regression on the same data, so the logit and the calibration regression
+come out identical and only the PDO map moves.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc_700</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res_risk</span>, base_score <span class="op">=</span> <span class="fl">700</span>, base_odds <span class="op">=</span> <span class="fl">30</span>, pdo <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc_700</span><span class="op">$</span><span class="va">alignment</span></span>
 <span><span class="co">#&gt; &lt;scr_align&gt; 700 points at odds 30:1 (safe:event), PDO 25 | higher_is_safer</span></span>
 <span><span class="co">#&gt;   factor = 36.067376 | offset = 577.327735</span></span>
@@ -542,7 +624,7 @@ calibration regression are unchanged, only the PDO map moves.</p>
 <p>Ranking metrics are invariant to a monotone transformation, so AUC,
 KS and Gini are identical to the last digit, while every point value
 moves.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_score_metrics.html">scr_score_metrics</a></span><span class="op">(</span><span class="va">sc_risk</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>scale <span class="op">=</span> <span class="st">"600/50/20"</span>, <span class="va">sample</span>, <span class="va">auc</span>, <span class="va">ks</span>, <span class="va">gini</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>      <span class="fu"><a href="../reference/scr_score_metrics.html">scr_score_metrics</a></span><span class="op">(</span><span class="va">sc_700</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>scale <span class="op">=</span> <span class="st">"700/30/25"</span>, <span class="va">sample</span>, <span class="va">auc</span>, <span class="va">ks</span>, <span class="va">gini</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        scale  sample       auc        ks      gini</span></span>
@@ -565,7 +647,7 @@ moves.</p>
 <span><span class="co">#&gt; 6: ds_channel  STORE          9         11</span></span></code></pre></div>
 <p>The two scores are the same log-odds seen through two maps, so one
 can be recovered from the other exactly:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a600</span> <span class="op">&lt;-</span> <span class="va">sc_risk</span><span class="op">$</span><span class="va">alignment</span>; <span class="va">a700</span> <span class="op">&lt;-</span> <span class="va">sc_700</span><span class="op">$</span><span class="va">alignment</span></span>
 <span><span class="va">ln_odds</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">sc_risk</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">holdout</span><span class="op">$</span><span class="va">score</span> <span class="op">-</span> <span class="va">a600</span><span class="op">$</span><span class="va">offset</span><span class="op">)</span> <span class="op">/</span> <span class="va">a600</span><span class="op">$</span><span class="va">factor</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">a700</span><span class="op">$</span><span class="va">offset</span> <span class="op">+</span> <span class="va">a700</span><span class="op">$</span><span class="va">factor</span> <span class="op">*</span> <span class="va">ln_odds</span>, <span class="va">sc_700</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">holdout</span><span class="op">$</span><span class="va">score</span><span class="op">)</span></span>
@@ -576,11 +658,11 @@ is rescaled, not remodelled, when only <code>factor</code> and
 <code>offset</code> change.</p>
 </div>
 <div class="section level2">
-<h2 id="a-checklist-for-the-model-committee">7. A checklist for the model committee<a class="anchor" aria-label="anchor" href="#a-checklist-for-the-model-committee"></a>
+<h2 id="a-checklist-for-the-model-committee">9. A checklist for the model committee<a class="anchor" aria-label="anchor" href="#a-checklist-for-the-model-committee"></a>
 </h2>
 <p>Everything the committee needs to reproduce, compare and later
 monitor the scale is on the model card. Record it verbatim.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="va">sc_risk</span><span class="op">$</span><span class="va">model_card</span></span>
 <span><span class="va">keys</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"target"</span>, <span class="st">"objective"</span>, <span class="st">"direction"</span>, <span class="st">"odds_orientation"</span>,</span>
 <span>          <span class="st">"base_score"</span>, <span class="st">"base_odds"</span>, <span class="st">"pdo"</span>, <span class="st">"factor"</span>, <span class="st">"offset"</span>,</span>
@@ -636,7 +718,10 @@ not.</li>
 <strong>The population the alignment was fitted on</strong>:
 <code>n_train</code>, <code>event_rate_train</code>, the split method
 and cut-off. An alignment absorbs the base rate of that population; if
-the deployment population differs, the intercept will drift first.</li>
+the deployment population differs, the intercept will drift first.
+Calibration to a long-run default rate is a separate step, described in
+<a href="https://evandeilton.github.io/scorecraft/articles/pd-calibration-and-grades.html">PD
+calibration and rating grades</a>.</li>
 <li>
 <strong>The challenger’s status</strong>: engine,
 <code>supports_scorecard = FALSE</code>, and the swap-set table at the
@@ -652,8 +737,8 @@ only item 1 are not, however similar their numbers look.</p>
 <div class="section level2">
 <h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>
 </h2>
-<p>Siddiqi, N. (2006). <em>Credit Risk Scorecards: Developing and
-Implementing Intelligent Credit Scoring</em>. Wiley.</p>
+<p>Siddiqi, N. (2017). <em>Intelligent Credit Scoring: Building and
+Implementing Better Credit Risk Scorecards</em>, 2nd edition. Wiley.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

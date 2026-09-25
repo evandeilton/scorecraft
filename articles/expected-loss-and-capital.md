@@ -1,14 +1,25 @@
 # Expected loss and regulatory capital
 
-This vignette takes PD, LGD and EAD from the previous two and turns them
-into expected loss, IRB risk weights, capital with the output floor and
-accounting ECL, on the bundled `scr_demo_portfolio`.
+This is the third of three articles on the IRB risk parameters. [PD
+calibration and rating
+grades](https://evandeilton.github.io/scorecraft/articles/pd-calibration-and-grades.md)
+builds the probability of default and [LGD and EAD under
+IRB](https://evandeilton.github.io/scorecraft/articles/lgd-and-ead-under-irb.md)
+the loss given default and the exposure at default, both starting from
+the scorecard pipeline of [Get
+started](https://evandeilton.github.io/scorecraft/articles/scorecraft.html).
+This article turns the three parameters into expected loss, IRB risk
+weights, capital with the output floor and accounting ECL. It works on
+the bundled `scr_demo_portfolio`, whose PD, LGD and EAD columns are of
+the kind those models produce (grade PDs, pool LGDs, exposures), rather
+than on the objects built there, so that the portfolio can cover six
+asset classes at once.
 
 ``` r
 
 library(scorecraft)
 library(data.table)
-cfg <- scr_config(verbose = FALSE, nthread = 1)
+cfg <- scr_config(verbose = FALSE, nthread = 2)
 ```
 
 ## 1. Expected and unexpected loss
@@ -19,7 +30,7 @@ covered by provisions and pricing. The loss in a bad year exceeds that
 average, and the gap between a high quantile of the loss distribution
 and its mean is the **unexpected loss** that capital must absorb. The
 IRB risk-weight function turns a through-the-cycle PD into the PD of a
-year at the 99.9 % quantile of a one-factor model, and charges capital
+year at the 99.9% quantile of a one-factor model, and charges capital
 for the difference between the loss at that quantile and the expected
 loss. Every number that a regime fixes in that calculation (PD and LGD
 floors, asset correlations, the maturity rule, the confidence level, the
@@ -60,11 +71,17 @@ p$pd_floor
 #> 7:    retail_other 5e-04
 ```
 
-The presets differ in a handful of cells (`"bcb"` takes its values from
-BCB Resolution 303/2023, `"basel3_final"` from the consolidated Basel
-Framework, whose CRE31 chapter is the risk-weight function). The visible
-differences are the supervisory LGD table of the foundation approach and
-the firm-size bounds of the SME correlation adjustment.
+There are three presets. `"bcb"` takes its values from BCB Resolution
+303/2023, `"basel3_final"` from the consolidated Basel Framework, whose
+CRE31 chapter is the risk-weight function, and `"crr3"` from the EU
+Capital Requirements Regulation as amended in 2024; `"crr3"` currently
+carries the same tables as `"basel3_final"`. Between `"bcb"` and
+`"basel3_final"` the visible differences are the supervisory LGD table
+of the foundation approach (the `"bcb"` preset carries 75% for a senior
+unsecured claim and 45% for a claim with priority; the Basel table
+separates corporates, 40%, from financial institutions, 45%) and the
+firm-size bounds of the SME correlation adjustment. Each table is a
+default to be checked against the text in force, not a citation.
 
 ``` r
 
@@ -113,8 +130,8 @@ scr_el(0.02, 0.45, 1000, defaulted = TRUE, elbe = 0.6)
 returns the intermediate quantities of the risk-weight function, not
 only the answer: the PD and LGD after floors, the maturity after
 clipping, the correlation `r`, the maturity adjustment `ma` and the
-capital requirement `k`. A corporate exposure at PD 1 %, LGD 45 % and
-maturity 2.5 years carries a risk weight of 92.32 %.
+capital requirement `k`. A corporate exposure at PD 1%, LGD 45% and
+maturity 2.5 years carries a risk weight of 92.32%.
 
 ``` r
 
@@ -156,7 +173,7 @@ scr_pd_stress(0.02, rho = 0.15, q = c(0.5, 0.95, 0.99, 0.999))
 
 The shape of the function differs by asset class because the correlation
 does: fixed for mortgages (0.15) and revolving retail (0.04), decreasing
-in PD for corporates and other retail. Plotted at a common LGD of 45 %:
+in PD for corporates and other retail. Plotted at a common LGD of 45%:
 
 ``` r
 
@@ -164,7 +181,7 @@ grid <- exp(seq(log(1e-4), log(0.3), length.out = 80))
 classes <- c("corporate", "retail_mortgage", "qrre_revolver", "retail_other")
 curves <- lapply(classes, function(a) scr_irb_rw(grid, 0.45, asset_class = a, params = p)$rw)
 plot(grid, curves[[1]], type = "n", log = "x", ylim = c(0, max(unlist(curves))),
-     xlab = "PD (log scale)", ylab = "risk weight", main = "IRB risk weight by PD, LGD 45 %")
+     xlab = "PD (log scale)", ylab = "risk weight", main = "IRB risk weight by PD, LGD 45%")
 for (i in seq_along(classes)) lines(grid, curves[[i]], lwd = 2, col = i)
 legend("topleft", classes, col = seq_along(classes), lwd = 2, bty = "n")
 ```
@@ -194,9 +211,13 @@ data.table(pd = grid, rw_floored = r_floored$rw, rw_no_floor = r_raw$rw)[pd < 6e
 #> 2: 0.0001499881 0.06629119  0.02554640
 #> 3: 0.0002489589 0.06629119  0.03839309
 #> 4: 0.0004132365 0.06629119  0.05720678
-# LGD floors by collateral class: an own estimate of 10 % is lifted to the unsecured floor
+# LGD floors: an unsecured own estimate of 10% is lifted to the floor of its class,
+# except for the mortgage, whose 5% floor does not bind
 scr_irb_rw(0.01, 0.10, asset_class = c("retail_other", "qrre_revolver", "corporate", "retail_mortgage"), params = p)$lgd_used
 #> [1] 0.30 0.50 0.25 0.10
+# secured by real estate, the retail floor is 10% instead of the unsecured 30%
+scr_irb_rw(0.01, 0.05, asset_class = "retail_other", collateral = "real_estate", params = p)$lgd_used
+#> [1] 0.1
 ```
 
 ## 4. The standardised comparison
@@ -232,8 +253,12 @@ p$sa_rw[asset_class == "retail_mortgage" & sub_class == "standard"]
 `scr_demo_portfolio` holds 5,000 exposures in six segments that map one
 to one onto the asset classes; PD is a grade PD and LGD a pool value, so
 segment by grade is homogeneous in PD and LGD, while maturity varies
-inside the corporate pools (section 6 comes back to this). About 3 % of
-the rows are in default with an `elbe` and a provision.
+inside the corporate pools (section 6 comes back to this). About 3% of
+the rows are in default with an `elbe` and a provision. The whole book
+is run under the advanced approach (`capital_approach = "airb"`, the
+default) to show every input at work; under the final Basel framework
+and CRR3 a book of large corporates would be restricted to the
+foundation approach, shown at the end of this section.
 
 ``` r
 
@@ -309,9 +334,13 @@ cap$segments[, .(segment, n, ead, pd_mean, lgd_mean, rw, rwa_irb, irb_sa_ratio, 
 ```
 
 The `irb_sa_ratio` column says where the IRB approach saves the most
-against the standardised one; mortgages sit far below the 72.5 % line on
+against the standardised one; mortgages sit far below the 72.5% line on
 their own, the large corporate book just above it and the SME book well
-above, and the output floor is applied to the total, not by segment.
+above, and the output floor is applied to the total, not by segment. The
+total here is credit risk only: the regulatory floor compares the whole
+of the risk-weighted assets, market and operational risk included, with
+72.5% of their standardised counterparts, so the figure below is a
+credit-portfolio view of the floor, not the bank’s.
 
 ### Floors and the output-floor bridge
 
@@ -352,9 +381,14 @@ negative when it binds.
 ### Expected loss against provisions
 
 Regulatory EL is compared with the provision stock. A shortfall is
-deducted from capital; an excess counts as tier 2 up to 0.6 % of the IRB
-risk-weighted assets, which is why `tier2_addback` can be smaller than
-`excess`.
+deducted from common equity tier 1; an excess counts as tier 2 up to
+0.6% of the IRB risk-weighted assets, which is why `tier2_addback` can
+be smaller than `excess`. The comparison is made on the totals,
+defaulted and performing exposures together. The Basel text (CRE35) and
+the CRR compare the two separately, so that an excess of specific
+provisions on defaulted exposures cannot cover a shortfall on performing
+ones; where that distinction matters, run the function on each part and
+combine the results.
 
 ``` r
 
@@ -390,6 +424,48 @@ cap$sensitivity
 #> 10: vasicek_q0.99 2377857720 1163542463  0.958188128
 ```
 
+### The foundation approach
+
+Under `capital_approach = "firb"` the LGD is the supervisory value of
+the claim type, read from `params$lgd_firb` through the `claim` column,
+no LGD floor applies and the maturity is fixed at `params$m_default`.
+The claim names belong to the preset. Here the large corporates are run
+as senior unsecured claims under the two presets and set beside the
+advanced run of the same rows.
+
+``` r
+
+big <- d[d$segment == "corporate_large", ]
+cap_firb <- function(framework, claim) {
+  big$claim <- claim
+  scr_capital(big, segment = "segment", asset_class = "asset_class", m = "m",
+              defaulted = "defaulted", elbe = "elbe", sales = "sales", rating = "rating",
+              grade = "grade", claim = "claim", params = scr_irb_params(framework),
+              config = scr_config(verbose = FALSE, nthread = 2, framework = framework,
+                                  capital_approach = "firb"))$totals
+}
+airb  <- cap$segments[segment == "corporate_large"]
+f_bcb <- cap_firb("bcb", "senior_unsecured")
+f_b3  <- cap_firb("basel3_final", "senior_unsecured_corporate")
+data.table(run = c("airb, own LGD", "firb, bcb preset", "firb, basel3_final preset"),
+           rwa_irb = c(airb$rwa_irb, f_bcb$rwa_irb, f_b3$rwa_irb),
+           el = c(airb$el, f_bcb$el, f_b3$el))
+#>                          run    rwa_irb       el
+#>                       <char>      <num>    <num>
+#> 1:             airb, own LGD  944938904 20926478
+#> 2:          firb, bcb preset 1625968473 25912479
+#> 3: firb, basel3_final preset  867183186 20926478
+```
+
+The preset drives the result. With the 40% of the Basel table, equal to
+the own LGD of this book, the foundation run is lower than the advanced
+one because the maturity is fixed at 2.5 years where the book averages
+three, and because the defaulted rows carry no `LGD - ELBE` charge under
+the foundation approach. With the 75% the `"bcb"` preset carries for a
+senior unsecured claim, the risk-weighted assets rise by about 70% and
+the expected loss by about a quarter (less than in proportion, because
+the defaulted rows keep their `ELBE`).
+
 ## 6. The same numbers in SQL
 
 The production query does not need a normal quantile: the constants of
@@ -401,17 +477,13 @@ and `K = max(0, LGD - ELBE)` from their own columns.
 ``` r
 
 sql <- scr_sql(cap, table = "portfolio", dialect = "duckdb")
-cat(sql[c(4:9, 12:15)], sep = "\n")
+cat(grep("^-- (CTE|  |NOTE)", sql, value = TRUE), sep = "\n")
 #> -- CTE pool_params: PD, LGD, correlation, K and RW per pool, computed in R
 #> --   (floors applied; no normal quantile needed at run time).
 #> -- CTE exposure_capital: el = pd * lgd * ead, rwa = 12.5 * k * ead per exposure;
 #> --   rows with defaulted = 1 use ELBE * ead and K = max(0, LGD - ELBE).
 #> -- NOTE: at least one pool is not homogeneous: its constants are EAD-weighted, so
 #> --   EL and RWA are exact per pool and approximate per exposure. Pass `grade` for finer pools.
-#> WITH pool_params AS (
-#>   SELECT 'cards_revolver' AS segment, 'G01' AS grade, 0.001 AS pd, 0.75 AS lgd, 0.04 AS r, 0.0036114040962495642 AS k, 0.045142551203119552 AS rw
-#>   UNION ALL
-#>   SELECT 'cards_revolver' AS segment, 'G02' AS grade, 0.001 AS pd, 0.75 AS lgd, 0.04 AS r, 0.0036114040962495642 AS k, 0.045142551203119552 AS rw
 cat(tail(sql, 21), sep = "\n")
 #>   SELECT
 #>     e.id,
@@ -443,7 +515,7 @@ their constants are EAD-weighted and the match is exact at pool level
 
 ``` r
 
-con <- DBI::dbConnect(duckdb::duckdb(), config = list(threads = "1"))
+con <- DBI::dbConnect(duckdb::duckdb())
 DBI::dbWriteTable(con, "portfolio", d)
 got <- DBI::dbGetQuery(con, paste(sql, collapse = "\n"))
 got <- got[match(d$id, got$id), ]
@@ -478,7 +550,7 @@ prepayment the sum collapses to the closed form
 
 ``` r
 
-cfg_none <- scr_config(verbose = FALSE, nthread = 1, ecl_discount = "none")
+cfg_none <- scr_config(verbose = FALSE, nthread = 2, ecl_discount = "none")
 h <- 0.01; lgd <- 0.4; ead <- 1000
 e1 <- scr_ecl(h, lgd, ead, t_max = 36L, config = cfg_none)
 c(ecl_12m = e1$totals$ecl_12m, closed_form = lgd * ead * (1 - (1 - h)^12),
@@ -487,38 +559,61 @@ c(ecl_12m = e1$totals$ecl_12m, closed_form = lgd * ead * (1 - (1 - h)^12),
 #>    45.44605    45.44605   121.43471   121.43471
 ```
 
-On the portfolio, the annual grade PD becomes a flat monthly hazard, the
-stage is allocated by the rule (days past due, or a doubling of the PD
-since origination), and three scenarios are weighted. The `z` shock
-moves every hazard through the one-factor model; `lgd_add` and
-`ead_mult` do what their names say.
+On the portfolio, the annual grade PD becomes a flat monthly hazard, run
+over a term that depends on the product: twenty years for mortgages, the
+contractual maturity for corporates and three years for the other retail
+lines. The hazard matrix is zero after the term of each row, so the
+lifetime figure stops there. The stage is allocated by the rule: 90 days
+past due for stage 3; 30 days past due, or a 12-month PD at least twice
+the one at origination, for stage 2. The 30-day backstop is the
+rebuttable presumption of IFRS 9; the ratio of two is a common
+convention, set by `ecl_sicr_ratio`, not a threshold the standard
+prescribes. Three scenarios are weighted. The `z` shock moves every
+monthly hazard through the one-factor model with the correlation `rho`,
+given explicitly here because the default (0.15) is only a placeholder;
+applied month by month, the shock raises the 12-month PD more than the
+same `z` applied to the annual PD would. `lgd_add` and `ead_mult` do
+what their names say.
+
+Two inputs are shortcuts that a real ECL model would not take. The PD
+here is a regulatory grade PD, through-the-cycle and possibly carrying a
+margin and a floor, and the LGD is a pool value that may include a
+downturn component; IFRS 9 asks for unbiased, point-in-time,
+forward-looking estimates, such as `pd_be` mapped to the current state
+of the cycle (see the point-in-time section of the PD article) and an
+LGD without the downturn and the margin. The mechanics below are
+unchanged by that choice; the numbers are not.
 
 ``` r
 
 hz <- 1 - (1 - d$pd)^(1 / 12)
-ecl <- scr_ecl(hz, d$lgd, d$ead, eir = d$eir, dpd = d$dpd, pd_orig = d$pd_orig, t_max = 36L,
-               segment = d$segment, id = d$id,
+term <- ifelse(d$segment == "mortgages", 240L,
+               ifelse(is.na(d$m), 36L, as.integer(round(12 * d$m))))
+hz_term <- outer(hz, rep(1, max(term)))
+hz_term[col(hz_term) > term] <- 0
+ecl <- scr_ecl(hz_term, d$lgd, d$ead, eir = d$eir, dpd = d$dpd, pd_orig = d$pd_orig,
+               rho = 0.10, segment = d$segment, id = d$id,
                scenarios = list(base = list(), downturn = list(z = -1, lgd_add = 0.05), upturn = list(z = 1)),
                weights = c(0.5, 0.3, 0.2), config = cfg)
 ecl
-#> <scr_ecl> 5,000 exposures | ECL 31,844,876 | coverage 1.64% | 12-month horizon 12 of 36 months | discount: eir
+#> <scr_ecl> 5,000 exposures | ECL 31,966,351 | coverage 1.65% | 12-month horizon 12 of 240 months | discount: eir
 #>   stage rule: dpd >= 90 -> stage 3; dpd >= 30 or PD ratio >= 2 -> stage 2
-#>   stage 1  n 4,304   EAD 1,687,138,403  ECL 7,929,306    coverage 0.47%
-#>   stage 2  n 542     EAD 201,418,836    ECL 2,448,913    coverage 1.22%
+#>   stage 1  n 4,304   EAD 1,687,138,403  ECL 8,069,792    coverage 0.48%
+#>   stage 2  n 542     EAD 201,418,836    ECL 2,429,902    coverage 1.21%
 #>   stage 3  n 154     EAD 51,845,553     ECL 21,466,657   coverage 41.41%
-#>   12-month 30,364,216 | lifetime 43,365,170 | scenarios: base 0.50, downturn 0.30, upturn 0.20
+#>   12-month 30,524,224 | lifetime 44,113,928 | scenarios: base 0.50, downturn 0.30, upturn 0.20
 ecl$scenarios
 #>    scenario weight  ecl_12m ecl_life      ecl
 #>      <char>  <num>    <num>    <num>    <num>
-#> 1:     base    0.5 28846459 41112620 30230826
-#> 2: downturn    0.3 38666873 60477202 41191373
-#> 3:   upturn    0.2 21704624 23328500 21860257
+#> 1:     base    0.5 28846459 41358454 30157406
+#> 2: downturn    0.3 38686456 61177845 41134697
+#> 3:   upturn    0.2 22475291 25406736 22736196
 ecl$stages
 #> Key: <stage>
 #>    stage     n        ead    ecl_12m ecl_life      ecl    coverage
 #>    <int> <int>      <num>      <num>    <num>    <num>       <num>
-#> 1:     1  4304 1687138403  7929306.1 19449600  7929306 0.004699855
-#> 2:     2   542  201418836   968252.8  2448913  2448913 0.012158310
+#> 1:     1  4304 1687138403  8069792.3 20217368  8069792 0.004783124
+#> 2:     2   542  201418836   987774.7  2429902  2429902 0.012063925
 #> 3:     3   154   51845553 21466657.4 21466657 21466657 0.414050119
 ```
 
@@ -534,12 +629,12 @@ merge(cap$segments[, .(segment, ead, el_regulatory = el, provisions)],
       ecl$segments[, .(segment, ecl_accounting = ecl, share_stage2, share_stage3)], by = "segment")[order(-ead)]
 #>             segment        ead el_regulatory provisions ecl_accounting
 #>              <char>      <num>         <num>      <num>          <num>
-#> 1:  corporate_large 1451911238    20926478.3   30840652    21161783.28
-#> 2:    corporate_sme  302516540     9087003.5   10039600     9516734.43
-#> 3:        mortgages  165305905      421450.8    1963358      531916.08
-#> 4:     retail_loans   15592011      374260.3     396848      406081.75
-#> 5:   cards_revolver    3282347      181708.6     142177      190006.99
-#> 6: cards_transactor    1794751       37575.5      42936       38353.51
+#> 1:  corporate_large 1451911238    20926478.3   30840652    21178194.33
+#> 2:    corporate_sme  302516540     9087003.5   10039600     9497790.04
+#> 3:        mortgages  165305905      421450.8    1963358      652546.02
+#> 4:     retail_loans   15592011      374260.3     396848      408339.48
+#> 5:   cards_revolver    3282347      181708.6     142177      190857.73
+#> 6: cards_transactor    1794751       37575.5      42936       38623.76
 #>    share_stage2 share_stage3
 #>           <num>        <num>
 #> 1:    0.0960000   0.02600000
@@ -550,7 +645,7 @@ merge(cap$segments[, .(segment, ead, el_regulatory = el, provisions)],
 #> 6:    0.0980000   0.01800000
 c(el_regulatory = cap$totals$el, ecl_accounting = ecl$totals$ecl, provisions = cap$totals$provisions)
 #>  el_regulatory ecl_accounting     provisions 
-#>       31028477       31844876       43425571
+#>       31028477       31966351       43425571
 ```
 
 ## 8. Deliverables
@@ -562,10 +657,10 @@ of the object, plus the SQL file.
 ``` r
 
 out <- file.path(tempdir(), "scorecraft-capital")
-cap <- scr_export(cap, out, stamp = FALSE)
-basename(unlist(cap$files))
+ex <- scr_export(cap, out, stamp = FALSE)
+basename(unlist(ex$files))
 #> [1] "capital_bcb.xlsx"    "sql_capital_bcb.sql"
-openxlsx::getSheetNames(cap$files$xlsx)
+openxlsx::getSheetNames(ex$files$xlsx)
 #>  [1] "Capital_Summary"         "Capital_Config"         
 #>  [3] "Segments_Reconciliation" "Pools"                  
 #>  [5] "Floors_Impact"           "Output_Floor_Bridge"    

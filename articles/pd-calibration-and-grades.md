@@ -1,6 +1,15 @@
 # PD calibration and rating grades
 
-The introductory vignette ends with a scorecard whose alignment turns a
+This is the first of three articles on the IRB risk parameters. It
+starts where [Get
+started](https://evandeilton.github.io/scorecraft/articles/scorecraft.html)
+ends and builds the probability of default; [LGD and EAD under
+IRB](https://evandeilton.github.io/scorecraft/articles/lgd-and-ead-under-irb.md)
+builds the other two parameters, and [Expected loss and regulatory
+capital](https://evandeilton.github.io/scorecraft/articles/expected-loss-and-capital.md)
+turns the three into expected loss, capital and accounting ECL.
+
+The introductory guide ends with a scorecard whose alignment turns a
 score into a probability. That probability is a good ranking device and
 a fair estimate of the event rate **of the development sample**; it is
 not yet a probability of default (PD) in the sense a capital or
@@ -32,8 +41,8 @@ interprets.
 
 library(scorecraft)
 library(data.table)
-cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
-                  use_lightgbm = FALSE, n_boot = 20)
+cfg <- scr_config(verbose = FALSE, nthread = 2, use_ranger = FALSE,
+                  use_lightgbm = FALSE, n_boot = 200)
 ```
 
 ## 1. The default flag and the default-rate series
@@ -73,11 +82,13 @@ d$ledger$detail
 turns the flagged panel into one-year default rates by cohort: at every
 cohort start the non-defaulted obligors form the population and the
 outcome is a default within the next twelve months. The long-run average
-is the arithmetic mean of the cohort rates; the benchmark is the larger
-of the last five years’ mean and the whole period’s mean, and a flag is
-raised when the average sits below it. The panel covers less than two
-years of complete windows, so the print says plainly that the average is
-not a long-run one yet.
+is the arithmetic mean of the cohort rates. When the analyst proposes an
+adjusted average (`lra_adjusted`, for instance because the period lacks
+bad years), it is compared with a benchmark, the larger of the last five
+years’ mean and the whole period’s mean, and flagged when it sits below;
+the adjusted value is recorded, never applied. The panel covers less
+than two years of complete windows, so the print says plainly that the
+average is not a long-run one yet.
 
 ``` r
 
@@ -103,7 +114,7 @@ dr$table
 ## 2. Calibrating the scorecard to the central tendency
 
 The scorecard comes from `scr_demo` with the fast configuration. Its
-hold-out event rate is 14.5 %, well above the 9.6 % long-run average of
+hold-out event rate is 14.5%, well above the 9.6% long-run average of
 the panel: a sample of the development window, not the cycle.
 
 ``` r
@@ -115,8 +126,8 @@ sc
 #> <scr_scorecard> target "default" | 12 variables | higher_is_safer
 #>   scale: 600 points at odds 50:1 (safe:event), PDO 20 | alignment regression
 #>   score = 491.1967 + -26.3189 * logit | base_points = 538
-#>   train    n 2,800   AUC 0.7856 [0.7662, 0.8070]  KS 0.4411  Gini 0.5713
-#>   holdout  n 1,400   AUC 0.7394 [0.7066, 0.7770]  KS 0.3889  Gini 0.4788
+#>   train    n 2,800   AUC 0.7856 [0.7643, 0.8087]  KS 0.4411  Gini 0.5713
+#>   holdout  n 1,400   AUC 0.7394 [0.7070, 0.7750]  KS 0.3889  Gini 0.4788
 #>   score PSI (hold-out): 0.0069 - fixed: stable | adjusted (0.0181): stable
 #> 
 #> Points (first rows)
@@ -152,11 +163,16 @@ Four methods are available. `"intercept"` is the prior-correction shift
 of King and Zeng, refined by a one-dimensional root so that the mean PD
 equals the CT exactly; the slope is untouched, so every rank statistic
 is untouched. `"logodds_ab"` and `"qmm"` fit both intercept and slope of
-`ln(odds*) = a + b ln(odds)`, the first to a target accuracy ratio, the
-second to the accuracy ratio implied by the PDs themselves. `"scaling"`
-is the proportional rescaling `PD * CT / ybar`, projected back onto a
-logit map. All four hit the CT; only the slope differs, and a monotone
-map of the ln(odds) never changes the AUC of the hold-out.
+`ln(odds*) = a + b ln(odds)` so that the mean PD equals the CT and the
+accuracy ratio implied by the calibrated PDs equals a target.
+`"logodds_ab"` takes the target from `ar_target` or, by default, from
+the accuracy ratio observed on the sample, which is Tasche’s
+quasi-moment matching proper; the package’s `"qmm"` is the outcome-free
+variant, whose target is the implied accuracy ratio of the uncalibrated
+PDs. `"scaling"` is the proportional rescaling `PD * CT / ybar`,
+projected back onto a logit map. All four hit the CT; only the slope
+differs, and a monotone map of the ln(odds) never changes the AUC of the
+hold-out.
 
 ``` r
 
@@ -182,9 +198,9 @@ compare
 
 [`scr_grades()`](https://evandeilton.github.io/scorecraft/reference/scr_grades.md)
 cuts the production score into grades whose PD is monotone. The default
-construction is `"geometric"`: a master scale is built between
-percentiles 1 and 99 of the calibrated PD, every grade doubling (or
-multiplying by the ratio) the PD of the one before, and its PD
+construction is `"geometric"`: a master scale whose midpoints form a
+geometric sequence from percentile 1 to percentile 99 of the calibrated
+PD, with ratio `(p99 / p1)^(1 / (K - 1))` for `K` grades, and whose PD
 boundaries are converted into score cut points through the calibrated
 alignment. Grade 1 is the safest, the highest scores under
 `higher_is_safer`. Grades with fewer than `min_obligors` obligors or
@@ -332,6 +348,15 @@ reason are both mandatory. The ledger is append-only: `A` and `B`
 entries accumulate, a new `C` supersedes the previous one, which stays
 in the ledger with `active = FALSE`.
 
+One caveat applies to the series here. Quarterly cohorts with a
+twelve-month window overlap: consecutive cohorts share nine of their
+twelve months and most of their obligors, so the eight cohort rates are
+far from eight independent observations and the `t` interval understates
+the estimation error. On a series of that kind use annual cohorts
+(`by = "year"`) for the margin, or widen it and say so in the reason;
+this panel is too short for annual cohorts, which is why the quarterly
+series is kept.
+
 ``` r
 
 gm <- scr_moc(gr2, "C", method = "ci_timeseries", dr = drg)
@@ -386,7 +411,7 @@ pd
 ```
 
 The floor does not bind on this portfolio, whose safest grade sits above
-5 %. The table carries every intermediate column, so a validator can
+5%. The table carries every intermediate column, so a validator can
 follow the number from the sample default rate to the final PD:
 
 ``` r
@@ -407,6 +432,14 @@ pd$table[, .(grade, label, n, dr, pd_be, moc_a, moc_c, pd_moc, floor, pd_final, 
 #> 4: 0.24662989         FALSE
 #> 5: 0.44534566         FALSE
 ```
+
+Two readings of this table would stop a validator. Grades 2 and 3 end
+within half a point of each other (18.4% and 18.7%), which is not a
+meaningful differentiation of risk: the long-run series of grade 2 is
+much worse than its hold-out default rate (14.4% against 8.4%) and its
+margin is the widest, so the two grades collapse after the margin. On a
+real portfolio the answer is to merge them, or to revisit the cut points
+once more cohorts exist.
 
 ## 5. Production: R and SQL agree
 
@@ -440,33 +473,32 @@ cat(tail(sql, 6), sep = "\n")
 #> -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)
 #> SELECT
 #>     s.*,
-#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947994 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
-#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947994 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
+#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947983 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
+#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947983 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
 #> FROM score_scr s;
 ```
 
-When DuckDB is installed the SQL is run on a few hundred rows and
-compared with
+The SQL is run on a few hundred rows in DuckDB and compared with
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md):
 the score, the grade and the final PD are the same numbers.
 
 ``` r
 
-con <- DBI::dbConnect(duckdb::duckdb(), config = list(threads = "1"))
+con <- DBI::dbConnect(duckdb::duckdb())
 DBI::dbWriteTable(con, "customers", head(scr_demo, 300))
 got <- DBI::dbGetQuery(con, paste(sql, collapse = "\n"))
 DBI::dbDisconnect(con, shutdown = TRUE)
-exp <- scr_apply(pd, head(scr_demo, 300))
+ref <- scr_apply(pd, head(scr_demo, 300))
 head(got[, c("score", "grade", "pd_final")], 3)
 #>      score grade  pd_final
 #> 1 546.5330     3 0.1873880
 #> 2 562.3290     2 0.1837548
 #> 3 560.5217     2 0.1837548
-all.equal(got$score, exp$score)
+all.equal(got$score, ref$score)
 #> [1] TRUE
-identical(as.integer(got$grade), exp$grade)
+identical(as.integer(got$grade), ref$grade)
 #> [1] TRUE
-all.equal(got$pd_final, exp$pd_final)
+all.equal(got$pd_final, ref$pd_final)
 #> [1] TRUE
 ```
 
@@ -486,10 +518,18 @@ production SQL follows.
   same tests on the totals, Hosmer-Lemeshow over the grades, the
   multi-period test over the cohort default rates and the Brier score.
 - **Discrimination**: AUC, Gini and KS with a bootstrap interval on the
-  score, and the `S` statistic against the development AUC.
+  score, and the `S` statistic against the development AUC, with the
+  DeLong standard error of the current AUC.
 - **Stability**: the PSI of the grade distribution per cohort against
   the development sample, the migration matrix pooled over the cohorts,
   and the concentration test on the coefficient of variation.
+
+The overlap noted in section 4 matters here as well: the tests pooled
+over quarterly cohorts count the same obligor once per cohort, over
+windows that overlap, and the multi-period test treats overlapping
+cohort rates as independent, so their p-values are more confident than
+the data allow. Read them as indicators, and confirm on annual cohorts
+when the series is long enough.
 
 ``` r
 
@@ -505,7 +545,7 @@ v
 #>   3         324    55   16.98%   18.74%    0.7906    0.8110 green 
 #>   4         391    86   21.99%   24.66%    0.8905    0.9014 green 
 #>   5         185    76   41.08%   44.53%    0.8276    0.8459 green 
-#>   discrimination (score): AUC 0.7564 [0.7308, 0.7723] vs initial 0.7394 | S -1.44, p 0.9250 | KS 0.4027
+#>   discrimination (score): AUC 0.7564 [0.7333, 0.7794] vs initial 0.7394 | S -1.44, p 0.9250 | KS 0.4027
 #>   stability: grade PSI 0.9634 (shift, adjusted shift) at cohort 2024-10-01 | MWB up - / down - | CV 1.245 vs 0.452 (p 0.1869)
 ```
 
@@ -614,34 +654,51 @@ scr_migration(g0, g1, K = 5)
 The grade PDs above are through-the-cycle: the long-run average with a
 margin.
 [`scr_pd_pit_ttc()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_pit_ttc.md)
-is Vasicek’s one-factor bridge between that PD and the conditional PD of
-a given state of the systematic factor `z` (negative for a stressed
-year, positive for a benign one), with the asset correlation `rho`; the
-map is invertible. `scr_pd(philosophy = "pit")` applies it before the
-floor.
+is Vasicek’s one-factor bridge between a through-the-cycle PD and the
+conditional PD of a given state of the systematic factor `z` (negative
+for a stressed year, positive for a benign one), with the correlation
+`rho`; the map is invertible, and averaging the conditional PD over `z`
+returns the through-the-cycle value.
+
+A point-in-time PD for provisioning or stress testing starts from the
+best estimate `pd_be`, not from `pd_final`: the margin of conservatism
+and the floor are regulatory devices that an unbiased estimate must not
+carry. The value of `rho` is the other choice to make explicitly. The
+asset correlation of the capital formula is a supervisory parameter, not
+an estimate of how strongly this portfolio’s default rates move with the
+cycle; the value below is illustrative and should be replaced by one
+fitted to a default-rate series long enough to contain a cycle.
 
 ``` r
 
-rho <- scr_irb_params("bcb")$correlation$retail_other[["lo"]]
-pit <- scr_pd_pit_ttc(pd$table$pd_final, z = -1, rho = rho)
-data.table(grade = pd$table$grade, pd_ttc = pd$table$pd_final, pd_pit_stressed = pit,
+rho <- 0.05   # illustrative; fit it to a long default-rate series
+pit <- scr_pd_pit_ttc(pd$table$pd_be, z = -1, rho = rho)
+data.table(grade = pd$table$grade, pd_be = pd$table$pd_be, pd_pit_stressed = pit,
            back_to_ttc = scr_pd_pit_ttc(pit, z = -1, rho = rho, to = "ttc"))
-#>    grade     pd_ttc pd_pit_stressed back_to_ttc
+#>    grade      pd_be pd_pit_stressed back_to_ttc
 #>    <int>      <num>           <num>       <num>
-#> 1:     1 0.05417353       0.0729115  0.05417353
-#> 2:     2 0.18375476       0.2299188  0.18375476
-#> 3:     3 0.18738803       0.2341278  0.18738803
-#> 4:     4 0.24662989       0.3016069  0.24662989
-#> 5:     5 0.44534566       0.5144882  0.44534566
+#> 1:     1 0.04661908      0.06775148  0.04661908
+#> 2:     2 0.14443910      0.19524687  0.14443910
+#> 3:     3 0.16957030      0.22624186  0.16957030
+#> 4:     4 0.21934765      0.28600282  0.21934765
+#> 5:     5 0.40823352      0.49652726  0.40823352
+```
+
+`scr_pd(philosophy = "pit")` applies the same map inside the PD model,
+to `pd_moc` and before the floor, for a regulatory-style point-in-time
+grade PD:
+
+``` r
+
 pd_pit <- scr_pd(gm, params = prm, philosophy = "pit", rho = rho, z = -1)
 pd_pit$table[, .(grade, pd_ttc, pd_pit, pd_final)]
-#>    grade     pd_ttc    pd_pit  pd_final
-#>    <int>      <num>     <num>     <num>
-#> 1:     1 0.05417353 0.0729115 0.0729115
-#> 2:     2 0.18375476 0.2299188 0.2299188
-#> 3:     3 0.18738803 0.2341278 0.2341278
-#> 4:     4 0.24662989 0.3016069 0.3016069
-#> 5:     5 0.44534566 0.5144882 0.5144882
+#>    grade     pd_ttc     pd_pit   pd_final
+#>    <int>      <num>      <num>      <num>
+#> 1:     1 0.05417353 0.07810063 0.07810063
+#> 2:     2 0.18375476 0.24348290 0.24348290
+#> 3:     3 0.18738803 0.24787110 0.24787110
+#> 4:     4 0.24662989 0.31792245 0.31792245
+#> 5:     5 0.44534566 0.53522700 0.53522700
 ```
 
 ## 7. Deliverables
@@ -653,10 +710,8 @@ an availability row, never a fabricated number.
 
 ``` r
 
-out <- file.path(tempdir(), "scorecraft-pd-vignette")
+out <- file.path(tempdir(), "scorecraft-pd")
 ex <- scr_export(pd, out, stamp = FALSE, validation = v)
-#>   /tmp/RtmpM6Pvji/scorecraft-pd-vignette/pd_default.xlsx
-#>   /tmp/RtmpM6Pvji/scorecraft-pd-vignette/sql_pd_default.sql
 basename(unlist(ex$files))
 #> [1] "pd_default.xlsx"    "sql_pd_default.sql"
 openxlsx::getSheetNames(ex$files$pd)

@@ -32,14 +32,15 @@ optimal ones, so there is no second implementation to keep in step.
 
 The lab opens on an
 [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
-result. The configuration below is the quick one used in the package
-tests: single thread, two consensus voters and a light bootstrap, enough
-for a few seconds of run time on `scr_demo`.
+result. The configuration below is a light one: a single thread, two
+consensus voters (elastic net and xgboost) and a short bootstrap. The
+selection itself is described in
+[`vignette("scorecraft", package = "scorecraft")`](https://evandeilton.github.io/scorecraft/articles/scorecraft.md).
 
 ``` r
 
 library(scorecraft)
-cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_glmnet = TRUE, use_ranger = FALSE,
                   use_lightgbm = FALSE, xgb_rounds = 60, n_boot = 20)
 res <- scr_select(scr_demo, "default", config = cfg,
                   drop = c("id", "churn"), date_col = "ref_date")
@@ -61,7 +62,7 @@ defaults to the system user.
 
 lab <- scr_coarse_classing(res, author = "analyst")
 lab
-#> <scr_classing> target "default" | opened 2026-09-25 21:33 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-25 21:57 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)
 ```
 
@@ -184,7 +185,7 @@ Suppose underwriting quotes `vl_score_01` in the bands below 40, 40 to
 
 p_breaks <- scr_classing_propose(lab, "vl_score_01", breaks = c(40, 55, 70))
 p_breaks
-#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-25 21:33
+#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-25 21:57
 #>                         optimal     manual      delta
 #>   n_bins                      7          4         -3
 #>   iv_train               0.3464     0.2993    -0.0471
@@ -224,7 +225,7 @@ p_merge$entry$cutpoints
 p_split <- scr_classing_propose(lab, "vl_score_01",
                                 split = c(1, res$fit$results$vl_score_01$cutpoints[1] - 5))
 p_split
-#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-25 21:33
+#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-25 21:57
 #>                         optimal     manual      delta
 #>   n_bins                      7          8          1
 #>   iv_train               0.3464     0.3561     0.0098
@@ -251,15 +252,16 @@ p_split
 #>   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.
 ```
 
-The split proposal is a `REVIEW`: the new first bin holds 2% of the
-training rows and breaks the monotone pattern of the event rate, so the
-engine’s `NOT_MONOTONIC` rule fires. A `REVIEW` verdict is advisory: the
-proposal can be accepted with a reason or discarded. Every proposal
-takes the next id from the lab’s counter (`P001`, `P002`, …), whether or
-not it is later acted on, so the ids in a session count the proposals
-made, not the decisions taken. A proposal is a value and can be kept for
-as long as the lab is open; the lab only refuses a proposal that has
-already been accepted or discarded.
+The split proposal is a `REVIEW` on two counts: the new first bin holds
+2% of the training rows and breaks the monotone pattern of the event
+rate (`NOT_MONOTONIC`), and eight bins exceed the configured maximum of
+seven (`TOO_MANY_BINS`). A `REVIEW` verdict is advisory: the proposal
+can be accepted with a reason or discarded. Every proposal takes the
+next id from the lab’s counter (`P001`, `P002`, …), whether or not it is
+later acted on, so the ids in a session count the proposals made, not
+the decisions taken. A proposal is a value and can be kept for as long
+as the lab is open; the lab only refuses a proposal that has already
+been accepted or discarded.
 
 ### Categorical: groups, other_to, missing_to
 
@@ -273,7 +275,7 @@ p_groups <- scr_classing_propose(lab, "ds_region",
                                  groups = list(edge = c("NORTH", "SOUTH"),
                                                core = c("EAST", "WEST", "CENTRE")))
 p_groups
-#> <scr_classing_proposal> P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-25 21:33
+#> <scr_classing_proposal> P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-25 21:57
 #>                         optimal     manual      delta
 #>   n_bins                      5          2         -3
 #>   iv_train               0.0846     0.0739    -0.0107
@@ -316,28 +318,17 @@ kept on its own. `missing_to` folds it into another bin.
 ``` r
 
 p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
-p_missing
-#> <scr_classing_proposal> P006 ds_optin | missing_to = 1 | 2026-09-25 21:33
-#>                         optimal     manual      delta
-#>   n_bins                      3          2         -1
-#>   iv_train               0.0065     0.0000    -0.0065
-#>   iv_holdout             0.0032     0.0023    -0.0008
-#>   iv_ratio               0.4676  8743.8015  8743.3339
-#>   ks                     0.0237     0.0004    -0.0233
-#>   psi                    0.0019     0.0017    -0.0001
-#>   min_bin_pct            0.0975     0.4414     0.3439
-#>   largest_bin_pct        0.4611     0.5586     0.0975
-#>   n_degenerate                0          0          0
-#>   monotonic                   1          1          0
-#>   manual bins (train | hold-out)
-#>     1  YES | MISSING                    1,564  55.9%  14.3%   0.001 |     753  53.8%  13.9%  -0.046
-#>     2  NO                               1,236  44.1%  14.2%  -0.001 |     647  46.2%  15.1%   0.051
-#>   Warnings
-#>     - IV_BELOW_MIN
-#>     - IV_LOW_ON_HOLDOUT
-#>     - IV_LOSS_VS_OPTIMAL
-#>   Verdict: REVIEW - advisory warnings only; accept with a reason or discard.
+p_missing$entry$bin
+#> [1] "YES%;%MISSING" "NO"
+p_missing$verdict
+#> [1] "REVIEW"
+p_missing$warnings
+#> [1] "IV_BELOW_MIN"       "IV_LOW_ON_HOLDOUT"  "IV_LOSS_VS_OPTIMAL"
 ```
+
+The optimal bins of `ds_optin` carried a training IV of 0.0065 (see the
+overview); folding `"MISSING"` into `YES` leaves almost none, below the
+admission minimum, and loses more than the lab allows on hold-out.
 
 ### Reading the warnings and the verdict
 
@@ -383,13 +374,12 @@ lab <- scr_classing_accept(lab, p_groups, reason = "edge/core is what pricing us
 #>   ds_region: P004 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
 ```
 
-The `ds_optin` proposal erased what little signal the variable had
-(`IV_BELOW_MIN`), so it is discarded, with a reason, and the variable
-keeps its optimal bins. A discarded proposal is a ledger row too.
+The `ds_optin` proposal erased what little signal the variable had, so
+it is discarded, with a reason, and the variable keeps its optimal bins.
+A discarded proposal is a ledger row too.
 
 ``` r
 
-p_missing <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
 lab <- scr_classing_discard(lab, p_missing, reason = "folding MISSING into YES erases the signal")
 ```
 
@@ -410,7 +400,7 @@ p_blocked$blocking
 
 scr_classing_accept(lab, p_blocked, reason = "we need this band for the policy")
 #> Error:
-#> ! scr_classing_accept(): proposal P008 is BLOCKED (EMPTY_BIN). Pass override = TRUE to accept it anyway; the override is recorded.
+#> ! scr_classing_accept(): proposal P007 is BLOCKED (EMPTY_BIN). Pass override = TRUE to accept it anyway; the override is recorded.
 ```
 
 The override path is `override = TRUE`. It exists because there are
@@ -424,12 +414,12 @@ copy of the lab so that the session carries on without the empty bin.
 
 lab_override <- scr_classing_accept(lab, p_blocked, reason = "deliberate policy floor at -5000",
                                     override = TRUE)
-#>   vl_score_04: P008 accepted (BLOCKED) - 3 bins, hold-out IV 0.0010
+#>   vl_score_04: P007 accepted (BLOCKED) - 3 bins, hold-out IV 0.0010
 scr_decisions(lab_override)[variable == "vl_score_04", .(seq, action, proposal_id, verdict, warnings, reason)]
 #>      seq   action proposal_id verdict
 #>    <int>   <char>      <char>  <char>
-#> 1:     4 override        P008 BLOCKED
-#> 2:     5   accept        P008 BLOCKED
+#> 1:     4 override        P007 BLOCKED
+#> 2:     5   accept        P007 BLOCKED
 #>                                                                            warnings
 #>                                                                              <char>
 #> 1:                                                                        EMPTY_BIN
@@ -476,11 +466,11 @@ final choice.
 ``` r
 
 lab
-#> <scr_classing> target "default" | opened 2026-09-25 21:33 by analyst | 37 variables | 8 proposals: 2 accepted, 1 discarded
+#> <scr_classing> target "default" | opened 2026-09-25 21:57 by analyst | 37 variables | 7 proposals: 2 accepted, 1 discarded
 #>   variable                   action      bins          IV train       IV hold-out verdict     reason
 #>   vl_score_01                accepted  7->4     0.3464->0.2993     0.2877->0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti
 #>   ds_region                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      edge/core is what pricing uses
-#>   ds_optin                   discard  P007: folding MISSING into YES erases the sign
+#>   ds_optin                   discard  P006: folding MISSING into YES erases the sign
 #>   final choice: 12 variables | consensus 12 | force: vl_score_03 | drop: vl_score_10
 ```
 
@@ -497,7 +487,7 @@ scr_decisions(lab)[, .(seq, variable, action, proposal_id, verdict, reason)]
 #>    <int>      <char>  <char>      <char>     <char>
 #> 1:     1 vl_score_01  accept        P001 ACCEPTABLE
 #> 2:     2   ds_region  accept        P004     REVIEW
-#> 3:     3    ds_optin discard        P007     REVIEW
+#> 3:     3    ds_optin discard        P006     REVIEW
 #> 4:     4 vl_score_03   force        <NA>       <NA>
 #> 5:     5 vl_score_10    drop        <NA>       <NA>
 #>                                        reason
@@ -555,7 +545,6 @@ spec
 #>   ... (+137 rows)
 spec_file <- file.path(tempdir(), "classing_default.csv")
 scr_classing_spec(lab, file = spec_file)
-#> classing spec written to /tmp/RtmpRnnnLf/classing_default.csv
 ```
 
 A reviewer opens the file, moves the first cut of `vl_score_01` from 40
@@ -609,7 +598,7 @@ names(imported)
 imported$vl_score_01$imported_reason
 #> [1] "reviewer: first cut moved to 42 to match the bureau band"
 imported$vl_score_01
-#> <scr_classing_proposal> P009 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-25 21:33
+#> <scr_classing_proposal> P008 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-25 21:57
 #>                         optimal    current     manual      delta
 #>   n_bins                      7          4          4         -3
 #>   iv_train               0.3464     0.2993     0.2990    -0.0474
@@ -636,13 +625,13 @@ supersedes it, and the ledger records both facts.
 ``` r
 
 lab <- scr_classing_accept(lab, imported$vl_score_01, reason = imported$vl_score_01$imported_reason)
-#>   vl_score_01: P009 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2631
+#>   vl_score_01: P008 accepted (ACCEPTABLE) - 4 bins, hold-out IV 0.2631
 scr_decisions(lab)[variable == "vl_score_01", .(seq, action, proposal_id, instruction, verdict)]
 #>      seq    action proposal_id            instruction    verdict
 #>    <int>    <char>      <char>                 <char>     <char>
 #> 1:     1    accept        P001 breaks = c(40, 55, 70) ACCEPTABLE
 #> 2:     6 supersede        P001                   <NA>       <NA>
-#> 3:     7    accept        P009 breaks = c(42, 55, 70) ACCEPTABLE
+#> 3:     7    accept        P008 breaks = c(42, 55, 70) ACCEPTABLE
 ```
 
 ## Committing the lab: what changed
@@ -660,7 +649,7 @@ res2 <- scr_classing_apply(lab)
 res2
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 0.7s
+#>   event: 14.25% on train, 14.50% on hold-out | 0.9s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -797,6 +786,29 @@ sc$points[variable == "ds_region", .(variable, bin, woe, points)]
 #> 2: ds_region EAST%;%WEST%;%CENTRE -0.1492097      5
 ```
 
+The manual decisions have a price, and the committee should see it. The
+scorecard fitted on the optimal bins and the consensus shortlist is the
+benchmark:
+
+``` r
+
+sc_auto <- scr_scorecard(res)
+rbind(scr_score_metrics(sc_auto)[, .(card = "optimal", sample, auc, auc_lo, auc_hi, ks)],
+      scr_score_metrics(sc)[, .(card = "manual", sample, auc, auc_lo, auc_hi, ks)])
+#>       card  sample       auc    auc_lo    auc_hi        ks
+#>     <char>  <char>     <num>     <num>     <num>     <num>
+#> 1: optimal   train 0.7856428 0.7662170 0.8069608 0.4411466
+#> 2: optimal holdout 0.7394060 0.7066284 0.7770357 0.3889033
+#> 3:  manual   train 0.7844919 0.7681230 0.8025513 0.4390349
+#> 4:  manual holdout 0.7348276 0.7007297 0.7736362 0.3598076
+```
+
+On hold-out the manual card gives up about 0.005 of AUC and 0.03 of KS,
+well inside the bootstrap interval of either card. Whether policy bands,
+a two-region grouping, a forced bureau variable and a dropped
+unavailable one are worth that is a business decision; the lab makes
+sure it is taken with the numbers on the table.
+
 The model card states the provenance in words: which binning algorithms
 the card mixes, whether the shortlist came from the consensus or from
 the lab, how many manual bins it carries and which variables were forced
@@ -896,33 +908,16 @@ on the same rows. This vignette does not need a database to run.
 
 ## Governance
 
-The lab is designed so that a reviewer can reconstruct every manual
-decision from the deliverables alone.
-
-- **What the ledger records.** One row per decision, in order: `accept`,
-  `discard`, `supersede`, `restore` (a `reset = TRUE` proposal taking a
-  variable back to its optimal bins), `override`, `force`, `drop` and
-  `keep`. Each row carries the author, the timestamp, the instruction as
-  typed, the number of bins and the train and hold-out IV before and
-  after, the PSI, the verdict, the codes and the reason. The ledger is
-  append-only and travels unchanged from the lab into the result, into
-  the scorecard and into the `.xlsx` workbooks written by
-  [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md),
-  next to the classing spec.
-- **What is blocked.** An empty bin, a degenerate bin without smoothing,
-  a bin below the hard minimum share, a manual IV above the leakage
-  ceiling, a category left unassigned, a proposal without a reason, a
-  `force` of a variable that never reached binning. The first four block
-  a proposal (`BLOCKED`); the last three are errors that never produce a
-  proposal at all.
-- **What needs an override.** Accepting a `BLOCKED` proposal, forcing a
-  variable failed for `IV_SUSPICIOUS`, and forcing a derived `__sp` flag
-  under `allow_derived_final = FALSE`. An override is not a way round
-  the rule; it is a documented exception, with its own ledger row, that
-  the model card and the SQL header will point to.
-
-Everything a manual decision touches remains reproducible: the optimal
-artefacts are frozen alongside, the manual bins are recomputed on the
-training rows with the engine’s own WOE formula, and the scorecard, the
-R scoring and the SQL read them through the same contract as any optimal
-bin.
+A reviewer can reconstruct every manual decision from the deliverables.
+The ledger is append-only, with one row per `accept`, `discard`,
+`supersede`, `restore` (a `reset = TRUE` proposal that takes a variable
+back to its optimal bins), `override`, `force`, `drop` and `keep`, and
+it travels from the lab into the result, the scorecard and the workbooks
+written by
+[`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md).
+Four conditions block a proposal: an empty bin, a degenerate bin without
+smoothing, a bin below the hard minimum share and a manual IV above the
+leakage ceiling. Accepting a blocked proposal, forcing a variable failed
+for `IV_SUSPICIOUS` and forcing a derived `__sp` flag under
+`allow_derived_final = FALSE` each need `override = TRUE`, which adds
+its own ledger row.

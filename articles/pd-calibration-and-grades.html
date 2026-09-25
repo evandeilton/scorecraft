@@ -16,6 +16,9 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="PD calibration and rating grades">
+<meta name="description" content="From a scorecard probability to an IRB probability of default: the default definition, calibration to the long-run average, rating grades, margin of conservatism, floors, validation and production SQL.">
+<meta property="og:description" content="From a scorecard probability to an IRB probability of default: the default definition, calibration to the long-run average, rating grades, margin of conservatism, floors, validation and production SQL.">
+<meta property="og:image" content="https://evandeilton.github.io/scorecraft/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -42,8 +45,7 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scaling, alignment and challengers</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -73,15 +75,21 @@
       <img src="../logo.png" class="logo" alt=""><h1>PD calibration and rating grades</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/pd-calibration-and-grades.Rmd" class="external-link"><code>vignettes/pd-calibration-and-grades.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/articles/pd-calibration-and-grades.Rmd" class="external-link"><code>vignettes/articles/pd-calibration-and-grades.Rmd</code></a></small>
       <div class="d-none name"><code>pd-calibration-and-grades.Rmd</code></div>
     </div>
 
     
     
-<p>The introductory vignette ends with a scorecard whose alignment turns
-a score into a probability. That probability is a good ranking device
-and a fair estimate of the event rate <strong>of the development
+<p>This is the first of three articles on the IRB risk parameters. It
+starts where <a href="https://evandeilton.github.io/scorecraft/articles/scorecraft.html">Get
+started</a> ends and builds the probability of default; <a href="lgd-and-ead-under-irb.html">LGD and EAD under IRB</a> builds the
+other two parameters, and <a href="expected-loss-and-capital.html">Expected loss and regulatory
+capital</a> turns the three into expected loss, capital and accounting
+ECL.</p>
+<p>The introductory guide ends with a scorecard whose alignment turns a
+score into a probability. That probability is a good ranking device and
+a fair estimate of the event rate <strong>of the development
 sample</strong>; it is not yet a probability of default (PD) in the
 sense a capital or provisioning model needs. Four things separate the
 two:</p>
@@ -113,8 +121,8 @@ interprets.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/evandeilton/scorecraft" class="external-link">scorecraft</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
-<span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                  use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, n_boot <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">2</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                  use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, n_boot <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-default-flag-and-the-default-rate-series">1. The default flag and the default-rate series<a class="anchor" aria-label="anchor" href="#the-default-flag-and-the-default-rate-series"></a>
 </h2>
@@ -148,10 +156,13 @@ events table and the ledger document what the rule did.</p>
 default rates by cohort: at every cohort start the non-defaulted
 obligors form the population and the outcome is a default within the
 next twelve months. The long-run average is the arithmetic mean of the
-cohort rates; the benchmark is the larger of the last five years’ mean
-and the whole period’s mean, and a flag is raised when the average sits
-below it. The panel covers less than two years of complete windows, so
-the print says plainly that the average is not a long-run one yet.</p>
+cohort rates. When the analyst proposes an adjusted average
+(<code>lra_adjusted</code>, for instance because the period lacks bad
+years), it is compared with a benchmark, the larger of the last five
+years’ mean and the whole period’s mean, and flagged when it sits below;
+the adjusted value is recorded, never applied. The panel covers less
+than two years of complete windows, so the print says plainly that the
+average is not a long-run one yet.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_default_rate.html">scr_default_rate</a></span><span class="op">(</span><span class="va">d</span>, by <span class="op">=</span> <span class="st">"quarter"</span>, config <span class="op">=</span> <span class="va">cfg</span><span class="op">)</span></span>
 <span><span class="va">dr</span></span>
@@ -175,7 +186,7 @@ the print says plainly that the average is not a long-run one yet.</p>
 <h2 id="calibrating-the-scorecard-to-the-central-tendency">2. Calibrating the scorecard to the central tendency<a class="anchor" aria-label="anchor" href="#calibrating-the-scorecard-to-the-central-tendency"></a>
 </h2>
 <p>The scorecard comes from <code>scr_demo</code> with the fast
-configuration. Its hold-out event rate is 14.5 %, well above the 9.6 %
+configuration. Its hold-out event rate is 14.5%, well above the 9.6%
 long-run average of the panel: a sample of the development window, not
 the cycle.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -186,8 +197,8 @@ the cycle.</p>
 <span><span class="co">#&gt; &lt;scr_scorecard&gt; target "default" | 12 variables | higher_is_safer</span></span>
 <span><span class="co">#&gt;   scale: 600 points at odds 50:1 (safe:event), PDO 20 | alignment regression</span></span>
 <span><span class="co">#&gt;   score = 491.1967 + -26.3189 * logit | base_points = 538</span></span>
-<span><span class="co">#&gt;   train    n 2,800   AUC 0.7856 [0.7662, 0.8070]  KS 0.4411  Gini 0.5713</span></span>
-<span><span class="co">#&gt;   holdout  n 1,400   AUC 0.7394 [0.7066, 0.7770]  KS 0.3889  Gini 0.4788</span></span>
+<span><span class="co">#&gt;   train    n 2,800   AUC 0.7856 [0.7643, 0.8087]  KS 0.4411  Gini 0.5713</span></span>
+<span><span class="co">#&gt;   holdout  n 1,400   AUC 0.7394 [0.7070, 0.7750]  KS 0.3889  Gini 0.4788</span></span>
 <span><span class="co">#&gt;   score PSI (hold-out): 0.0069 - fixed: stable | adjusted (0.0181): stable</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Points (first rows)</span></span>
@@ -219,12 +230,16 @@ prior-correction shift of King and Zeng, refined by a one-dimensional
 root so that the mean PD equals the CT exactly; the slope is untouched,
 so every rank statistic is untouched. <code>"logodds_ab"</code> and
 <code>"qmm"</code> fit both intercept and slope of
-<code>ln(odds*) = a + b ln(odds)</code>, the first to a target accuracy
-ratio, the second to the accuracy ratio implied by the PDs themselves.
-<code>"scaling"</code> is the proportional rescaling
-<code>PD * CT / ybar</code>, projected back onto a logit map. All four
-hit the CT; only the slope differs, and a monotone map of the ln(odds)
-never changes the AUC of the hold-out.</p>
+<code>ln(odds*) = a + b ln(odds)</code> so that the mean PD equals the
+CT and the accuracy ratio implied by the calibrated PDs equals a target.
+<code>"logodds_ab"</code> takes the target from <code>ar_target</code>
+or, by default, from the accuracy ratio observed on the sample, which is
+Tasche’s quasi-moment matching proper; the package’s <code>"qmm"</code>
+is the outcome-free variant, whose target is the implied accuracy ratio
+of the uncalibrated PDs. <code>"scaling"</code> is the proportional
+rescaling <code>PD * CT / ybar</code>, projected back onto a logit map.
+All four hit the CT; only the slope differs, and a monotone map of the
+ln(odds) never changes the AUC of the hold-out.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ho</span> <span class="op">&lt;-</span> <span class="va">sc</span><span class="op">$</span><span class="va">samples</span><span class="op">$</span><span class="va">holdout</span></span>
 <span><span class="va">auc_score</span> <span class="op">&lt;-</span> <span class="va">sc</span><span class="op">$</span><span class="va">metrics</span><span class="op">[</span><span class="va">sample</span> <span class="op">==</span> <span class="st">"holdout"</span>, <span class="va">auc</span><span class="op">]</span></span>
@@ -248,11 +263,12 @@ never changes the AUC of the hold-out.</p>
 </h2>
 <p><code><a href="../reference/scr_grades.html">scr_grades()</a></code> cuts the production score into grades whose
 PD is monotone. The default construction is <code>"geometric"</code>: a
-master scale is built between percentiles 1 and 99 of the calibrated PD,
-every grade doubling (or multiplying by the ratio) the PD of the one
-before, and its PD boundaries are converted into score cut points
-through the calibrated alignment. Grade 1 is the safest, the highest
-scores under <code>higher_is_safer</code>. Grades with fewer than
+master scale whose midpoints form a geometric sequence from percentile 1
+to percentile 99 of the calibrated PD, with ratio
+<code>(p99 / p1)^(1 / (K - 1))</code> for <code>K</code> grades, and
+whose PD boundaries are converted into score cut points through the
+calibrated alignment. Grade 1 is the safest, the highest scores under
+<code>higher_is_safer</code>. Grades with fewer than
 <code>min_obligors</code> obligors or <code>min_defaults</code> defaults
 are merged with the neighbour of closer default rate; the sequence of
 grade PDs is then repaired by pool-adjacent-violators when it is not
@@ -383,6 +399,14 @@ quantities: a value in PD units and a non-empty reason are both
 mandatory. The ledger is append-only: <code>A</code> and <code>B</code>
 entries accumulate, a new <code>C</code> supersedes the previous one,
 which stays in the ledger with <code>active = FALSE</code>.</p>
+<p>One caveat applies to the series here. Quarterly cohorts with a
+twelve-month window overlap: consecutive cohorts share nine of their
+twelve months and most of their obligors, so the eight cohort rates are
+far from eight independent observations and the <code>t</code> interval
+understates the estimation error. On a series of that kind use annual
+cohorts (<code>by = "year"</code>) for the margin, or widen it and say
+so in the reason; this panel is too short for annual cohorts, which is
+why the quarterly series is kept.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_moc.html">scr_moc</a></span><span class="op">(</span><span class="va">gr2</span>, <span class="st">"C"</span>, method <span class="op">=</span> <span class="st">"ci_timeseries"</span>, dr <span class="op">=</span> <span class="va">drg</span><span class="op">)</span></span>
 <span><span class="va">gm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_moc.html">scr_moc</a></span><span class="op">(</span><span class="va">gm</span>, <span class="st">"A"</span>, value <span class="op">=</span> <span class="fl">0.001</span>,</span>
@@ -430,7 +454,7 @@ is flagged in the ledger.</p>
 <span><span class="co">#&gt;   5          -Inf    497.66     66   40.82%    10.0     0.0   361.1   44.53%   44.53%      </span></span>
 <span><span class="co">#&gt;   portfolio: PD_BE 15.141% | MoC 235.0 bp (A/B/C in bp) | PD_final 17.491% | 0.0% of obligors at the floor</span></span></code></pre></div>
 <p>The floor does not bind on this portfolio, whose safest grade sits
-above 5 %. The table carries every intermediate column, so a validator
+above 5%. The table carries every intermediate column, so a validator
 can follow the number from the sample default rate to the final PD:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pd</span><span class="op">$</span><span class="va">table</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">grade</span>, <span class="va">label</span>, <span class="va">n</span>, <span class="va">dr</span>, <span class="va">pd_be</span>, <span class="va">moc_a</span>, <span class="va">moc_c</span>, <span class="va">pd_moc</span>, <span class="va">floor</span>, <span class="va">pd_final</span>, <span class="va">floor_applied</span><span class="op">)</span><span class="op">]</span></span>
@@ -448,6 +472,13 @@ can follow the number from the sample default rate to the final PD:</p>
 <span><span class="co">#&gt; 3: 0.18738803         FALSE</span></span>
 <span><span class="co">#&gt; 4: 0.24662989         FALSE</span></span>
 <span><span class="co">#&gt; 5: 0.44534566         FALSE</span></span></code></pre></div>
+<p>Two readings of this table would stop a validator. Grades 2 and 3 end
+within half a point of each other (18.4% and 18.7%), which is not a
+meaningful differentiation of risk: the long-run series of grade 2 is
+much worse than its hold-out default rate (14.4% against 8.4%) and its
+margin is the widest, so the two grades collapse after the margin. On a
+real portfolio the answer is to merge them, or to revisit the cut points
+once more cohorts exist.</p>
 </div>
 <div class="section level2">
 <h2 id="production-r-and-sql-agree">5. Production: R and SQL agree<a class="anchor" aria-label="anchor" href="#production-r-and-sql-agree"></a>
@@ -476,28 +507,28 @@ another for the final PD.</p>
 <span><span class="co">#&gt; -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)</span></span>
 <span><span class="co">#&gt; SELECT</span></span>
 <span><span class="co">#&gt;     s.*,</span></span>
-<span><span class="co">#&gt;     CASE WHEN score &lt;= 497.65810792199238 THEN 5 WHEN score &lt;= 525.006786354523 THEN 4 WHEN score &lt;= 548.82434894947994 THEN 3 WHEN score &lt;= 571.2740854703145 THEN 2 ELSE 1 END AS grade,</span></span>
-<span><span class="co">#&gt;     CASE WHEN score &lt;= 497.65810792199238 THEN 0.44534566116911861 WHEN score &lt;= 525.006786354523 THEN 0.24662988720215417 WHEN score &lt;= 548.82434894947994 THEN 0.1873880268001506 WHEN score &lt;= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final</span></span>
+<span><span class="co">#&gt;     CASE WHEN score &lt;= 497.65810792199238 THEN 5 WHEN score &lt;= 525.006786354523 THEN 4 WHEN score &lt;= 548.82434894947983 THEN 3 WHEN score &lt;= 571.2740854703145 THEN 2 ELSE 1 END AS grade,</span></span>
+<span><span class="co">#&gt;     CASE WHEN score &lt;= 497.65810792199238 THEN 0.44534566116911861 WHEN score &lt;= 525.006786354523 THEN 0.24662988720215417 WHEN score &lt;= 548.82434894947983 THEN 0.1873880268001506 WHEN score &lt;= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final</span></span>
 <span><span class="co">#&gt; FROM score_scr s;</span></span></code></pre></div>
-<p>When DuckDB is installed the SQL is run on a few hundred rows and
-compared with <code><a href="../reference/scr_apply.html">scr_apply()</a></code>: the score, the grade and the
-final PD are the same numbers.</p>
+<p>The SQL is run on a few hundred rows in DuckDB and compared with
+<code><a href="../reference/scr_apply.html">scr_apply()</a></code>: the score, the grade and the final PD are the
+same numbers.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span>, config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>threads <span class="op">=</span> <span class="st">"1"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbWriteTable.html" class="external-link">dbWriteTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"customers"</span>, <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="fl">300</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">got</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">sql</span>, collapse <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">exp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">pd</span>, <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="fl">300</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">pd</span>, <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="fl">300</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">got</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"score"</span>, <span class="st">"grade"</span>, <span class="st">"pd_final"</span><span class="op">)</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      score grade  pd_final</span></span>
 <span><span class="co">#&gt; 1 546.5330     3 0.1873880</span></span>
 <span><span class="co">#&gt; 2 562.3290     2 0.1837548</span></span>
 <span><span class="co">#&gt; 3 560.5217     2 0.1837548</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">got</span><span class="op">$</span><span class="va">score</span>, <span class="va">exp</span><span class="op">$</span><span class="va">score</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">got</span><span class="op">$</span><span class="va">score</span>, <span class="va">ref</span><span class="op">$</span><span class="va">score</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">got</span><span class="op">$</span><span class="va">grade</span><span class="op">)</span>, <span class="va">exp</span><span class="op">$</span><span class="va">grade</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">got</span><span class="op">$</span><span class="va">grade</span><span class="op">)</span>, <span class="va">ref</span><span class="op">$</span><span class="va">grade</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">got</span><span class="op">$</span><span class="va">pd_final</span>, <span class="va">exp</span><span class="op">$</span><span class="va">pd_final</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">got</span><span class="op">$</span><span class="va">pd_final</span>, <span class="va">ref</span><span class="op">$</span><span class="va">pd_final</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -519,13 +550,19 @@ Brier score.</li>
 <li>
 <strong>Discrimination</strong>: AUC, Gini and KS with a bootstrap
 interval on the score, and the <code>S</code> statistic against the
-development AUC.</li>
+development AUC, with the DeLong standard error of the current AUC.</li>
 <li>
 <strong>Stability</strong>: the PSI of the grade distribution per
 cohort against the development sample, the migration matrix pooled over
 the cohorts, and the concentration test on the coefficient of
 variation.</li>
 </ul>
+<p>The overlap noted in section 4 matters here as well: the tests pooled
+over quarterly cohorts count the same obligor once per cohort, over
+windows that overlap, and the multi-period test treats overlapping
+cohort rates as independent, so their p-values are more confident than
+the data allow. Read them as indicators, and confirm on annual cohorts
+when the series is long enough.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pnl</span><span class="op">[</span>, <span class="va">grade</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pd</span>, score <span class="op">=</span> <span class="va">score</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_pd_validate.html">scr_pd_validate</a></span><span class="op">(</span><span class="va">pd</span>, <span class="va">pnl</span>, id <span class="op">=</span> <span class="st">"id"</span>, date <span class="op">=</span> <span class="st">"date"</span>, default <span class="op">=</span> <span class="st">"default"</span>,</span>
@@ -539,7 +576,7 @@ variation.</li>
 <span><span class="co">#&gt;   3         324    55   16.98%   18.74%    0.7906    0.8110 green </span></span>
 <span><span class="co">#&gt;   4         391    86   21.99%   24.66%    0.8905    0.9014 green </span></span>
 <span><span class="co">#&gt;   5         185    76   41.08%   44.53%    0.8276    0.8459 green </span></span>
-<span><span class="co">#&gt;   discrimination (score): AUC 0.7564 [0.7308, 0.7723] vs initial 0.7394 | S -1.44, p 0.9250 | KS 0.4027</span></span>
+<span><span class="co">#&gt;   discrimination (score): AUC 0.7564 [0.7333, 0.7794] vs initial 0.7394 | S -1.44, p 0.9250 | KS 0.4027</span></span>
 <span><span class="co">#&gt;   stability: grade PSI 0.9634 (shift, adjusted shift) at cohort 2024-10-01 | MWB up - / down - | CV 1.245 vs 0.452 (p 0.1869)</span></span></code></pre></div>
 <p>The summary is one row per test with its statistic, p-value and
 light; the overall light is the worst of them.</p>
@@ -633,32 +670,45 @@ gives the full reading:</p>
 </h3>
 <p>The grade PDs above are through-the-cycle: the long-run average with
 a margin. <code><a href="../reference/scr_pd_pit_ttc.html">scr_pd_pit_ttc()</a></code> is Vasicek’s one-factor bridge
-between that PD and the conditional PD of a given state of the
-systematic factor <code>z</code> (negative for a stressed year, positive
-for a benign one), with the asset correlation <code>rho</code>; the map
-is invertible. <code>scr_pd(philosophy = "pit")</code> applies it before
-the floor.</p>
+between a through-the-cycle PD and the conditional PD of a given state
+of the systematic factor <code>z</code> (negative for a stressed year,
+positive for a benign one), with the correlation <code>rho</code>; the
+map is invertible, and averaging the conditional PD over <code>z</code>
+returns the through-the-cycle value.</p>
+<p>A point-in-time PD for provisioning or stress testing starts from the
+best estimate <code>pd_be</code>, not from <code>pd_final</code>: the
+margin of conservatism and the floor are regulatory devices that an
+unbiased estimate must not carry. The value of <code>rho</code> is the
+other choice to make explicitly. The asset correlation of the capital
+formula is a supervisory parameter, not an estimate of how strongly this
+portfolio’s default rates move with the cycle; the value below is
+illustrative and should be replaced by one fitted to a default-rate
+series long enough to contain a cycle.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rho</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_irb_params.html">scr_irb_params</a></span><span class="op">(</span><span class="st">"bcb"</span><span class="op">)</span><span class="op">$</span><span class="va">correlation</span><span class="op">$</span><span class="va">retail_other</span><span class="op">[[</span><span class="st">"lo"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">pit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_pd_pit_ttc.html">scr_pd_pit_ttc</a></span><span class="op">(</span><span class="va">pd</span><span class="op">$</span><span class="va">table</span><span class="op">$</span><span class="va">pd_final</span>, z <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, rho <span class="op">=</span> <span class="va">rho</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>grade <span class="op">=</span> <span class="va">pd</span><span class="op">$</span><span class="va">table</span><span class="op">$</span><span class="va">grade</span>, pd_ttc <span class="op">=</span> <span class="va">pd</span><span class="op">$</span><span class="va">table</span><span class="op">$</span><span class="va">pd_final</span>, pd_pit_stressed <span class="op">=</span> <span class="va">pit</span>,</span>
+<code class="sourceCode R"><span><span class="va">rho</span> <span class="op">&lt;-</span> <span class="fl">0.05</span>   <span class="co"># illustrative; fit it to a long default-rate series</span></span>
+<span><span class="va">pit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_pd_pit_ttc.html">scr_pd_pit_ttc</a></span><span class="op">(</span><span class="va">pd</span><span class="op">$</span><span class="va">table</span><span class="op">$</span><span class="va">pd_be</span>, z <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, rho <span class="op">=</span> <span class="va">rho</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>grade <span class="op">=</span> <span class="va">pd</span><span class="op">$</span><span class="va">table</span><span class="op">$</span><span class="va">grade</span>, pd_be <span class="op">=</span> <span class="va">pd</span><span class="op">$</span><span class="va">table</span><span class="op">$</span><span class="va">pd_be</span>, pd_pit_stressed <span class="op">=</span> <span class="va">pit</span>,</span>
 <span>           back_to_ttc <span class="op">=</span> <span class="fu"><a href="../reference/scr_pd_pit_ttc.html">scr_pd_pit_ttc</a></span><span class="op">(</span><span class="va">pit</span>, z <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, rho <span class="op">=</span> <span class="va">rho</span>, to <span class="op">=</span> <span class="st">"ttc"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    grade     pd_ttc pd_pit_stressed back_to_ttc</span></span>
+<span><span class="co">#&gt;    grade      pd_be pd_pit_stressed back_to_ttc</span></span>
 <span><span class="co">#&gt;    &lt;int&gt;      &lt;num&gt;           &lt;num&gt;       &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:     1 0.05417353       0.0729115  0.05417353</span></span>
-<span><span class="co">#&gt; 2:     2 0.18375476       0.2299188  0.18375476</span></span>
-<span><span class="co">#&gt; 3:     3 0.18738803       0.2341278  0.18738803</span></span>
-<span><span class="co">#&gt; 4:     4 0.24662989       0.3016069  0.24662989</span></span>
-<span><span class="co">#&gt; 5:     5 0.44534566       0.5144882  0.44534566</span></span>
-<span><span class="va">pd_pit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_pd.html">scr_pd</a></span><span class="op">(</span><span class="va">gm</span>, params <span class="op">=</span> <span class="va">prm</span>, philosophy <span class="op">=</span> <span class="st">"pit"</span>, rho <span class="op">=</span> <span class="va">rho</span>, z <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 1:     1 0.04661908      0.06775148  0.04661908</span></span>
+<span><span class="co">#&gt; 2:     2 0.14443910      0.19524687  0.14443910</span></span>
+<span><span class="co">#&gt; 3:     3 0.16957030      0.22624186  0.16957030</span></span>
+<span><span class="co">#&gt; 4:     4 0.21934765      0.28600282  0.21934765</span></span>
+<span><span class="co">#&gt; 5:     5 0.40823352      0.49652726  0.40823352</span></span></code></pre></div>
+<p><code>scr_pd(philosophy = "pit")</code> applies the same map inside
+the PD model, to <code>pd_moc</code> and before the floor, for a
+regulatory-style point-in-time grade PD:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pd_pit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_pd.html">scr_pd</a></span><span class="op">(</span><span class="va">gm</span>, params <span class="op">=</span> <span class="va">prm</span>, philosophy <span class="op">=</span> <span class="st">"pit"</span>, rho <span class="op">=</span> <span class="va">rho</span>, z <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">pd_pit</span><span class="op">$</span><span class="va">table</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">grade</span>, <span class="va">pd_ttc</span>, <span class="va">pd_pit</span>, <span class="va">pd_final</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;    grade     pd_ttc    pd_pit  pd_final</span></span>
-<span><span class="co">#&gt;    &lt;int&gt;      &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:     1 0.05417353 0.0729115 0.0729115</span></span>
-<span><span class="co">#&gt; 2:     2 0.18375476 0.2299188 0.2299188</span></span>
-<span><span class="co">#&gt; 3:     3 0.18738803 0.2341278 0.2341278</span></span>
-<span><span class="co">#&gt; 4:     4 0.24662989 0.3016069 0.3016069</span></span>
-<span><span class="co">#&gt; 5:     5 0.44534566 0.5144882 0.5144882</span></span></code></pre></div>
+<span><span class="co">#&gt;    grade     pd_ttc     pd_pit   pd_final</span></span>
+<span><span class="co">#&gt;    &lt;int&gt;      &lt;num&gt;      &lt;num&gt;      &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:     1 0.05417353 0.07810063 0.07810063</span></span>
+<span><span class="co">#&gt; 2:     2 0.18375476 0.24348290 0.24348290</span></span>
+<span><span class="co">#&gt; 3:     3 0.18738803 0.24787110 0.24787110</span></span>
+<span><span class="co">#&gt; 4:     4 0.24662989 0.31792245 0.31792245</span></span>
+<span><span class="co">#&gt; 5:     5 0.44534566 0.53522700 0.53522700</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -668,11 +718,9 @@ the floor.</p>
 With the validation supplied the workbook carries the test sheets;
 without it the sheets exist with an availability row, never a fabricated
 number.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-pd-vignette"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-pd"</span><span class="op">)</span></span>
 <span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">pd</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span>, validation <span class="op">=</span> <span class="va">v</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpM6Pvji/scorecraft-pd-vignette/pd_default.xlsx</span></span>
-<span><span class="co">#&gt;   /tmp/RtmpM6Pvji/scorecraft-pd-vignette/sql_pd_default.sql</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">ex</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "pd_default.xlsx"    "sql_pd_default.sql"</span></span>
 <span><span class="fu">openxlsx</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/openxlsx/man/getSheetNames.html" class="external-link">getSheetNames</a></span><span class="op">(</span><span class="va">ex</span><span class="op">$</span><span class="va">files</span><span class="op">$</span><span class="va">pd</span><span class="op">)</span></span>
@@ -692,7 +740,7 @@ script and forgotten. The margin ledger keeps every entry with its
 category, method, value and reason, active or superseded; the grade
 repairs keep every merge with the count that forced it; the decision
 ledger of the model strings the stages together.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pd</span><span class="op">$</span><span class="va">moc_ledger</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">id</span>, <span class="va">category</span>, <span class="va">method</span>, <span class="va">level</span>, <span class="va">grade</span>, <span class="va">value</span>, <span class="va">reason</span>, <span class="va">active</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        id category        method level grade       value</span></span>
 <span><span class="co">#&gt;     &lt;int&gt;   &lt;char&gt;        &lt;char&gt; &lt;num&gt; &lt;int&gt;       &lt;num&gt;</span></span>

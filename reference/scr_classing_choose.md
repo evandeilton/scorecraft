@@ -78,6 +78,6 @@ lab <- scr_coarse_classing(res)
 lab <- scr_classing_choose(lab, drop = "vl_score_10",
                            reason = "not available at decision time")
 lab
-#> <scr_classing> target "default" | opened 2026-09-25 21:32 by runner | 8 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-25 21:56 by runner | 8 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 5 variables | consensus 6 | force: (none) | drop: vl_score_10
 ```

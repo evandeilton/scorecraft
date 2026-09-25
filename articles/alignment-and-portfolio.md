@@ -1,4 +1,4 @@
-# Scale alignment across targets, engines and conventions
+# Scaling, alignment and challengers
 
 ``` r
 
@@ -30,7 +30,7 @@ follow two constants,
 and the map from log-odds to points,
 $`\mathrm{score} = \mathrm{offset} + \mathrm{factor} \cdot \ln(\mathrm{odds})`$.
 The textbook example is 600 points at odds 50:1 with a PDO of 20
-(Siddiqi, 2006); it is an example, not a standard published by anyone.
+(Siddiqi, 2017); it is an example, not a standard.
 
 ``` r
 
@@ -248,6 +248,12 @@ claims, here a third too low. This is why
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
 always aligns and defaults to `"regression"`.
 
+The regression aligns the score to the event rate of the sample it is
+fitted on, a point-in-time rate. It is not a calibration to a long-run
+default rate with rating grades and margins of conservatism; that step
+is covered in [PD calibration and rating
+grades](https://evandeilton.github.io/scorecraft/articles/pd-calibration-and-grades.html).
+
 ## 3. Two targets, two conventions, one scale
 
 The bundled `scr_demo` table carries two binary targets: `default`, a
@@ -258,10 +264,10 @@ candidate for the other.
 
 ``` r
 
-cfg_risk <- scr_config(objective = "risk", verbose = FALSE, nthread = 1, use_ranger = FALSE,
-                       use_lightgbm = FALSE, xgb_rounds = 60, n_boot = 20)
-cfg_prop <- scr_config(objective = "propensity", verbose = FALSE, nthread = 1, use_ranger = FALSE,
-                       use_lightgbm = FALSE, xgb_rounds = 60, n_boot = 20)
+cfg_risk <- scr_config(objective = "risk", verbose = FALSE, nthread = 1, use_glmnet = TRUE,
+                       use_ranger = FALSE, use_lightgbm = FALSE, xgb_rounds = 60, n_boot = 20)
+cfg_prop <- scr_config(objective = "propensity", verbose = FALSE, nthread = 1, use_glmnet = TRUE,
+                       use_ranger = FALSE, use_lightgbm = FALSE, xgb_rounds = 60, n_boot = 20)
 
 res_risk <- scr_select(scr_demo, "default", config = cfg_risk, drop = c("id", "churn"),
                        date_col = "ref_date")
@@ -345,7 +351,110 @@ c(read_as_safer  = scr_metrics(s$score, s$y, higher_is_event = FALSE, ci = FALSE
 #>        0.739406        0.260594
 ```
 
-## 4. A tree challenger on the same scale
+## 4. From logit to points
+
+With `score = a + b * logit` and `logit = alpha + sum(beta_j * woe_ij)`,
+the score splits into a constant and one term per variable:
+
+``` math
+\mathrm{base} = a + b\,\alpha, \qquad
+\mathrm{points}_{ij} = b\,\beta_j\,\mathrm{WOE}_{ij}.
+```
+
+Under the default `points_style = "base_plus_deviation"` the constant is
+kept apart as `base_points` and each bin carries its deviation, so a bin
+with a WOE of 0 (the average risk) scores 0 points. `"distributed"`
+spreads the constant over the variables instead (Siddiqi, 2017), and no
+bin has a zero reference. The exact points are kept in `points_raw`; the
+published points are rounded.
+
+``` r
+
+al <- sc_risk$alignment
+c(a = al$a, b = al$b, alpha = unname(sc_risk$coef["(Intercept)"]),
+  base_exact = sc_risk$base_points_raw, base_points = sc_risk$base_points)
+#>           a           b       alpha  base_exact base_points 
+#>  491.196658  -26.318891   -1.789721  538.300127  538.000000
+sc_risk$points[variable == "vl_score_01", .(bin, woe, coef, points_raw = round(points_raw, 2), points)]
+#>                      bin         woe     coef points_raw points
+#>                   <char>       <num>    <num>      <num>  <num>
+#> 1:      (-Inf;33.360000] -2.06253559 1.128507      61.26     61
+#> 2: (33.360000;38.150000] -0.73104946 1.128507      21.71     22
+#> 3: (38.150000;44.240000] -0.65810792 1.128507      19.55     20
+#> 4: (44.240000;48.060000] -0.52261206 1.128507      15.52     16
+#> 5: (48.060000;63.940000]  0.03978629 1.128507      -1.18     -1
+#> 6: (63.940000;72.610000]  0.70394095 1.128507     -20.91    -21
+#> 7:      (72.610000;+Inf]  0.99617148 1.128507     -29.59    -30
+```
+
+A risky bin has a positive WOE, the coefficient is positive and `b` is
+negative under `higher_is_safer`, so the riskiest bin of `vl_score_01`
+loses 30 points and the safest gains 61.
+[`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
+returns both scores: `score` is exact, and `score_points` is
+`base_points` plus the rounded points of each bin, which is what a
+points table on paper gives. The two differ by the rounding of one
+constant and twelve bin points.
+
+``` r
+
+sc_new <- scr_apply(sc_risk, head(scr_demo, 5), what = "points")
+var_pts <- sc_new[, paste0(sc_risk$features, "_points"), with = FALSE]
+sc_new[, .(score = round(score, 2), score_points,
+           check = sc_risk$base_points + rowSums(var_pts), diff = round(score - score_points, 2))]
+#>     score score_points check  diff
+#>     <num>        <num> <num> <num>
+#> 1: 546.53          546   546  0.53
+#> 2: 562.33          562   562  0.33
+#> 3: 560.52          559   559  1.52
+#> 4: 507.06          507   507  0.06
+#> 5: 536.76          536   536  0.76
+```
+
+## 5. Do the odds double every PDO?
+
+The scale is a claim about odds: at 600 points 50:1, and twice the odds
+every 20 points.
+[`scr_score_gains()`](https://evandeilton.github.io/scorecraft/reference/scr_score_gains.md)
+gives the observed odds (non-events per event) in each band of the
+score, the training deciles applied frozen to the hold-out, and the
+claim can be checked against them.
+
+``` r
+
+g <- scr_score_gains(sc_risk)
+g[, scale_odds := exp((mean_score - al$offset) / al$factor)]
+g[sample == "holdout", .(band, n, events, mean_score = round(mean_score, 1),
+                         odds = round(odds, 2), scale_odds = round(scale_odds, 2))]
+#>           band     n events mean_score  odds scale_odds
+#>         <char> <int>  <int>      <num> <num>      <num>
+#>  1: [-Inf,510]   127     45      495.2  1.81       1.32
+#>  2:  (510,524]   128     35      517.0  2.63       2.81
+#>  3:  (524,533]   139     37      528.7  2.73       4.22
+#>  4:  (533,542]   149     26      537.7  4.66       5.77
+#>  5:  (542,550]   151     17      545.9  7.69       7.68
+#>  6:  (550,558]   148     18      554.0  7.05      10.15
+#>  7:  (558,567]   149     11      562.4 12.04      13.59
+#>  8:  (567,577]   128      5      571.0 22.45      18.32
+#>  9:  (577,590]   124      4      583.0 26.78      27.74
+#> 10: (590, Inf]   157      5      608.0 27.73      66.05
+g[, .(pdo_implied = log(2) / coef(stats::lm(log_odds ~ mean_score, weights = n))[[2]]), by = sample]
+#>     sample pdo_implied
+#>     <char>       <num>
+#> 1:   train    20.00000
+#> 2: holdout    24.03442
+```
+
+On train the implied PDO is 20 by construction: the same deciles fed the
+alignment regression. On hold-out the odds double every 24 points or so,
+and the safest band is well short of the scale (odds near 28 against
+about 66 on the scale). The ranking holds, but the out-of-time
+population is less separated than the development one, and the top of
+the scale promises more than it delivers. This is the table to show
+before a cut-off is quoted in odds, and the one to recompute when
+monitoring.
+
+## 6. A tree challenger on the same scale
 
 A gradient-boosted model can be fitted on the same WOE columns as the
 scorecard and aligned to the same scale by the same regression. That
@@ -369,14 +478,12 @@ sc_x$challenger$alignment
 #>   factor = 28.853901 | offset = 487.122876
 #>   calibration: ln(odds) = -1.398883 + -1.883869 * raw  (adj. R2 = 0.9710, 10 bands)
 #>   score = 446.759642 + -54.356970 * raw
-sc_x$challenger$metrics[, .(sample, direction, auc, auc_lo, auc_hi, ks)]
-#>     sample       direction       auc    auc_lo    auc_hi        ks
-#>     <char>          <char>     <num>     <num>     <num>     <num>
-#> 1: holdout higher_is_safer 0.7340725 0.7021223 0.7720179 0.3574453
-scr_score_metrics(sc_x)[sample == "holdout", .(sample, direction, auc, auc_lo, auc_hi, ks)]
-#>     sample       direction      auc    auc_lo    auc_hi        ks
-#>     <char>          <char>    <num>     <num>     <num>     <num>
-#> 1: holdout higher_is_safer 0.739406 0.7066284 0.7770357 0.3889033
+rbind(sc_x$challenger$metrics[, .(model = "xgboost challenger", sample, auc, auc_lo, auc_hi, ks)],
+      scr_score_metrics(sc_x)[sample == "holdout", .(model = "scorecard", sample, auc, auc_lo, auc_hi, ks)])
+#>                 model  sample       auc    auc_lo    auc_hi        ks
+#>                <char>  <char>     <num>     <num>     <num>     <num>
+#> 1: xgboost challenger holdout 0.7340725 0.7021223 0.7720179 0.3574453
+#> 2:          scorecard holdout 0.7394060 0.7066284 0.7770357 0.3889033
 ```
 
 The challenger’s alignment has its own intercept and slope: two engines,
@@ -426,27 +533,27 @@ in points: a customer swapped in at the 70% rate crossed the
 challenger’s cut-off and not the champion’s, and the two cut-offs are
 directly comparable numbers.
 
-## 5. The portfolio view
+## 7. The portfolio view
 
 With several targets in flight,
 [`scr_compare()`](https://evandeilton.github.io/scorecraft/reference/scr_compare.md)
-gives one row per target (funnel, best hold-out model with its interval,
-warning signs) and
+gives one row per target (funnel, best hold-out model of the selection
+stage, warning signs) and
 [`scr_core()`](https://evandeilton.github.io/scorecraft/reference/scr_core.md)
-lists the variables that survived on more than one target.
+the variables approved on more than one target.
 
 ``` r
 
 runs <- list(default = res_risk, churn = res_prop)
-scr_compare(runs)[, .(target, rows, event_rate, candidates, approved, best_model, auc, auc_lo, auc_hi, ks, relaxation)]
-#>     target  rows event_rate candidates approved best_model    auc auc_lo auc_hi
-#>     <char> <int>      <num>      <int>    <int>     <char>  <num>  <num>  <num>
-#> 1: default  4200     0.1425         37       12    xgboost 0.7375 0.7065 0.7762
-#> 2:   churn  4200     0.2846         37        9     glmnet 0.7262 0.7086 0.7544
-#>        ks             relaxation
-#>     <num>                 <char>
-#> 1: 0.3695                   none
-#> 2: 0.3288 min_votes reduced to 1
+scr_compare(runs)[, .(target, rows, event_rate, approved, best_model, auc, ks, relaxation)]
+#>     target  rows event_rate approved best_model    auc     ks
+#>     <char> <int>      <num>    <int>     <char>  <num>  <num>
+#> 1: default  4200     0.1425       12    xgboost 0.7375 0.3695
+#> 2:   churn  4200     0.2846        9     glmnet 0.7262 0.3288
+#>                relaxation
+#>                    <char>
+#> 1:                   none
+#> 2: min_votes reduced to 1
 scr_core(runs, min_targets = 2)
 #>        feature n_targets mean_rank        targets
 #>         <char>     <int>     <num>         <char>
@@ -459,36 +566,21 @@ scr_core(runs, min_targets = 2)
 #> 7:  vl_hist_04         2      10.0 churn, default
 ```
 
-A variable that is approved on both targets, with a good mean consensus
-rank, is the strongest argument a model committee can hear in its
-favour: it is not an artefact of one target definition. The `relaxation`
-column records whether the consensus had to loosen its vote threshold to
-reach the configured minimum number of variables, which is worth knowing
-before the two shortlists are compared. Note that
-[`scr_compare()`](https://evandeilton.github.io/scorecraft/reference/scr_compare.md)
-reports the AUC of the **selection-stage** consensus models, not of the
-final scorecards; the scorecards’ own metrics live in
-[`scr_score_metrics()`](https://evandeilton.github.io/scorecraft/reference/scr_score_metrics.md),
-and since both cards are on the same scale, their score distributions
-can be laid side by side as well.
+A variable approved on both targets is not an artefact of one target
+definition. `relaxation` records whether the consensus loosened its vote
+threshold to reach the minimum number of variables, as it did for
+`churn`. The AUC here is that of the selection-stage models; the
+scorecards’ own metrics are in
+[`scr_score_metrics()`](https://evandeilton.github.io/scorecraft/reference/scr_score_metrics.md).
 
-``` r
-
-rbind(
-  data.table(scorecard = "default", sc_risk$samples$holdout[, .(min = min(score), median = stats::median(score), max = max(score))]),
-  data.table(scorecard = "churn",   sc_prop$samples$holdout[, .(min = min(score), median = stats::median(score), max = max(score))])
-)
-#>    scorecard      min   median      max
-#>       <char>    <num>    <num>    <num>
-#> 1:   default 452.9460 550.6549 652.3243
-#> 2:     churn 360.4282 455.5152 549.2294
-```
-
-## 6. Rescaling an existing scorecard
+## 8. Rescaling an existing scorecard
 
 A committee may ask for a different convention, say 700 points at 30:1
-with a PDO of 25. Refitting is unnecessary: the logit and the
-calibration regression are unchanged, only the PDO map moves.
+with a PDO of 25. The model does not change: calling
+[`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
+with the new scale refits the same regression on the same data, so the
+logit and the calibration regression come out identical and only the PDO
+map moves.
 
 ``` r
 
@@ -551,7 +643,7 @@ That identity is what “comparable” means: two scorecards are on the same
 scale when the same log-odds gives the same points, and a scorecard is
 rescaled, not remodelled, when only `factor` and `offset` change.
 
-## 7. A checklist for the model committee
+## 9. A checklist for the model committee
 
 Everything the committee needs to reproduce, compare and later monitor
 the scale is on the model card. Record it verbatim.
@@ -608,7 +700,10 @@ What to write down, and why:
 4.  **The population the alignment was fitted on**: `n_train`,
     `event_rate_train`, the split method and cut-off. An alignment
     absorbs the base rate of that population; if the deployment
-    population differs, the intercept will drift first.
+    population differs, the intercept will drift first. Calibration to a
+    long-run default rate is a separate step, described in [PD
+    calibration and rating
+    grades](https://evandeilton.github.io/scorecraft/articles/pd-calibration-and-grades.html).
 5.  **The challenger’s status**: engine, `supports_scorecard = FALSE`,
     and the swap-set table at the approval rates the business uses.
 6.  **The invariants to check on every rescale**: AUC/KS/Gini unchanged,
@@ -620,5 +715,5 @@ only item 1 are not, however similar their numbers look.
 
 ## Reference
 
-Siddiqi, N. (2006). *Credit Risk Scorecards: Developing and Implementing
-Intelligent Credit Scoring*. Wiley.
+Siddiqi, N. (2017). *Intelligent Credit Scoring: Building and
+Implementing Better Credit Risk Scorecards*, 2nd edition. Wiley.

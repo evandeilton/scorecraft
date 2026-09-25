@@ -16,6 +16,9 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="LGD and EAD under IRB">
+<meta name="description" content="Workout LGD, the two-stage cure and severity model, pools, downturn, floors and in-default estimates; realised CCFs, CCF pools, downturn and the EAD floor; validation, production SQL and the ledgers.">
+<meta property="og:description" content="Workout LGD, the two-stage cure and severity model, pools, downturn, floors and in-default estimates; realised CCFs, CCF pools, downturn and the EAD floor; validation, production SQL and the ledgers.">
+<meta property="og:image" content="https://evandeilton.github.io/scorecraft/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -42,8 +45,7 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
-    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scale alignment across targets, engines and conventions</a></li>
-    <li><a class="dropdown-item" href="../articles/production-and-monitoring.html">From database to production</a></li>
+    <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scaling, alignment and challengers</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -73,12 +75,19 @@
       <img src="../logo.png" class="logo" alt=""><h1>LGD and EAD under IRB</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/lgd-and-ead-under-irb.Rmd" class="external-link"><code>vignettes/lgd-and-ead-under-irb.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/articles/lgd-and-ead-under-irb.Rmd" class="external-link"><code>vignettes/articles/lgd-and-ead-under-irb.Rmd</code></a></small>
       <div class="d-none name"><code>lgd-and-ead-under-irb.Rmd</code></div>
     </div>
 
     
     
+<p>This is the second of three articles on the IRB risk parameters. The
+first, <a href="pd-calibration-and-grades.html">PD calibration and
+rating grades</a>, builds the probability of default from a scorecard
+(see <a href="https://evandeilton.github.io/scorecraft/articles/scorecraft.html">Get
+started</a> for the scorecard itself); the third, <a href="expected-loss-and-capital.html">Expected loss and regulatory
+capital</a>, combines PD, LGD and EAD into expected loss, capital and
+accounting ECL.</p>
 <p>The two IRB parameters after the PD follow the discipline of the
 scorecard pipeline: a reference data set built with a funnel that names
 every rule it applied, drivers binned on training cohorts and
@@ -87,13 +96,13 @@ floor that land in a ledger with a reason, an R scoring function and a
 SQL query that agree number for number, a validation battery with
 traffic lights and a workbook. Part A walks the loss given default (LGD)
 on the bundled default events and cash flows; part B walks the exposure
-at default (EAD) on the bundled facility snapshots. Both use the light
-configuration below: single thread, twenty bootstrap replicates, and a
-lower minimum of defaults per CCF bin because the EAD panel is
-small.</p>
+at default (EAD) on the bundled facility snapshots. Both use the
+configuration below: two threads, 200 bootstrap replicates for the
+intervals, and a lower minimum of defaults per CCF bin because the EAD
+panel is small.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/evandeilton/scorecraft" class="external-link">scorecraft</a></span><span class="op">)</span></span>
-<span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, n_boot <span class="op">=</span> <span class="fl">20</span>, ccf_min_defaults <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">2</span>, n_boot <span class="op">=</span> <span class="fl">200</span>, ccf_min_defaults <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/scr_verbose.html">scr_verbose</a></span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="part-a-loss-given-default">Part A: loss given default<a class="anchor" aria-label="anchor" href="#part-a-loss-given-default"></a>
@@ -118,8 +127,9 @@ default-weighted mean over the events; the downturn LGD is the value
 appropriate for an economic downturn, never below the LRA; and an own
 estimate is subject to an input floor by asset class and collateral. The
 <code>"type1"</code> and <code>"type3"</code> labels of the downturn
-methods below follow the public supervisory guidance on downturn LGD
-estimation (observed impact, and reference value plus add-on); the
+methods below follow the EBA guidelines on downturn LGD estimation
+(EBA/GL/2019/03): type 1 is the impact observed in the downturn periods,
+type 3 the long-run average plus an add-on of 15 percentage points; the
 <code>"bcb"</code> parameter preset is the Brazilian text (BCB
 Resolution 303/2023).</p>
 </div>
@@ -288,8 +298,8 @@ the last 30% of the default dates are the hold-out.</p>
 <span><span class="va">m</span></span>
 <span><span class="co">#&gt; &lt;scr_lgd&gt; 885 defaults | train 620 / hold-out 265 (cohort split after 2024-01-01) | cure rate 37.5%</span></span>
 <span><span class="co">#&gt;   cure stage: prior_dpd_max, months_on_book, region | severity stage (fractional_logit): product, prior_dpd_max, months_on_book | LGD of a cure 4.5%</span></span>
-<span><span class="co">#&gt;   train    n 620   RMSE 0.2731  R2 0.241  Spearman 0.473  gAUC 0.672 [0.657, 0.686]  LCR 0.403</span></span>
-<span><span class="co">#&gt;   holdout  n 265   RMSE 0.2655  R2 0.275  Spearman 0.536  gAUC 0.693 [0.644, 0.725]  LCR 0.460</span></span>
+<span><span class="co">#&gt;   train    n 620   RMSE 0.2731  R2 0.241  Spearman 0.473  gAUC 0.672 [0.645, 0.694]  LCR 0.403</span></span>
+<span><span class="co">#&gt;   holdout  n 265   RMSE 0.2655  R2 0.275  Spearman 0.536  gAUC 0.693 [0.655, 0.728]  LCR 0.460</span></span>
 <span><span class="co">#&gt;   pools 3 | downturn type1 (provisional) | floor not applied</span></span>
 <span><span class="co">#&gt;   pool   n     pred        LRA     LRA ew   MoC C    LGD DT   floor    final</span></span>
 <span><span class="co">#&gt;   1    274    0.276     27.5%     23.1%   0.023     44.8%   0.000     44.8%</span></span>
@@ -350,8 +360,8 @@ capture ratio.</p>
 <code class="sourceCode R"><span><span class="va">m</span><span class="op">$</span><span class="va">metrics</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">sample</span>, <span class="va">n</span>, <span class="va">rmse</span>, <span class="va">r2</span>, <span class="va">spearman</span>, <span class="va">gauc</span>, <span class="va">gauc_lo</span>, <span class="va">gauc_hi</span>, <span class="va">lcr</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;     sample     n      rmse        r2  spearman      gauc   gauc_lo   gauc_hi</span></span>
 <span><span class="co">#&gt;     &lt;char&gt; &lt;int&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:   train   620 0.2730699 0.2411368 0.4725775 0.6721247 0.6566138 0.6856745</span></span>
-<span><span class="co">#&gt; 2: holdout   265 0.2655118 0.2751904 0.5359311 0.6925386 0.6437596 0.7253226</span></span>
+<span><span class="co">#&gt; 1:   train   620 0.2730699 0.2411368 0.4725775 0.6721247 0.6449645 0.6938869</span></span>
+<span><span class="co">#&gt; 2: holdout   265 0.2655118 0.2751904 0.5359311 0.6925386 0.6553274 0.7278851</span></span>
 <span><span class="co">#&gt;          lcr</span></span>
 <span><span class="co">#&gt;        &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1: 0.4030191</span></span>
@@ -365,9 +375,9 @@ to three. Per pool: the default-weighted LRA, the exposure-weighted one,
 and the category-C margin of conservatism, a one-sided 95% t interval on
 the mean. The downturn column is provisional at this point: the
 configured method is <code>"type1"</code>, which needs periods, so until
-<code><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn()</a></code> runs each pool carries the type-3 add-on
-of 15% as a placeholder, and the floor is zero until
-<code><a href="../reference/scr_lgd_floor.html">scr_lgd_floor()</a></code> runs.</p>
+<code><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn()</a></code> runs each pool carries the type-3 value
+(long-run average plus 15 percentage points) as a placeholder, and the
+floor is zero until <code><a href="../reference/scr_lgd_floor.html">scr_lgd_floor()</a></code> runs.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span><span class="op">$</span><span class="va">pools</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">pool</span>, <span class="va">pred_lo</span>, <span class="va">pred_hi</span>, <span class="va">n</span>, <span class="va">lra</span>, <span class="va">lra_ew</span>, <span class="va">se</span>, <span class="va">moc_c</span>, <span class="va">lgd_dt</span>, <span class="va">floor</span>, <span class="va">lgd_final</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;     pool   pred_lo   pred_hi     n       lra    lra_ew         se      moc_c</span></span>
@@ -390,9 +400,12 @@ the realised LGD of the defaults whose default date falls in the periods
 (a pool with fewer than ten such defaults falls back to the add-on); the
 reference value, the mean of the two worst calendar years of the pool,
 is reported as a challenger, not a bound. The downturn LGD used for
-capital is <code>min(1, max(LRA + MoC, DT + MoC))</code>. The reference
-rate of the demo rises above thirteen per cent in 2022 and 2023, which
-is the reason recorded.</p>
+capital is <code>min(1, max(LRA + MoC, DT + MoC))</code>. The cap at one
+is the package’s choice; the EBA guidelines cap the type-3 estimate at
+105%, so a pool that loses more than its exposure in a downturn needs a
+decision the cap does not take. The reference rate of the demo rises
+above thirteen per cent in 2022 and 2023, which is the reason
+recorded.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_lgd_downturn.html">scr_lgd_downturn</a></span><span class="op">(</span><span class="va">m</span>, periods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2022-01-01"</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-12-31"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                      reason <span class="op">=</span> <span class="st">"reference rate above 13% in 2022-2023"</span><span class="op">)</span></span>
@@ -440,8 +453,8 @@ collateral floors with the secured share:
 <span><span class="va">m</span></span>
 <span><span class="co">#&gt; &lt;scr_lgd&gt; 885 defaults | train 620 / hold-out 265 (cohort split after 2024-01-01) | cure rate 37.5%</span></span>
 <span><span class="co">#&gt;   cure stage: prior_dpd_max, months_on_book, region | severity stage (fractional_logit): product, prior_dpd_max, months_on_book | LGD of a cure 4.5%</span></span>
-<span><span class="co">#&gt;   train    n 620   RMSE 0.2731  R2 0.241  Spearman 0.473  gAUC 0.672 [0.657, 0.686]  LCR 0.403</span></span>
-<span><span class="co">#&gt;   holdout  n 265   RMSE 0.2655  R2 0.275  Spearman 0.536  gAUC 0.693 [0.644, 0.725]  LCR 0.460</span></span>
+<span><span class="co">#&gt;   train    n 620   RMSE 0.2731  R2 0.241  Spearman 0.473  gAUC 0.672 [0.645, 0.694]  LCR 0.403</span></span>
+<span><span class="co">#&gt;   holdout  n 265   RMSE 0.2655  R2 0.275  Spearman 0.536  gAUC 0.693 [0.655, 0.728]  LCR 0.460</span></span>
 <span><span class="co">#&gt;   pools 3 | downturn type1 (final) | floor retail_other, binding in 0.0% of the defaults</span></span>
 <span><span class="co">#&gt;   pool   n     pred        LRA     LRA ew   MoC C    LGD DT   floor    final</span></span>
 <span><span class="co">#&gt;   1    274    0.276     27.5%     23.1%   0.023     31.5%   0.220     31.5%</span></span>
@@ -501,14 +514,14 @@ floored result.</p>
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">m</span>, table <span class="op">=</span> <span class="st">"prd.defaults"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span><span class="op">)</span></span>
 <span><span class="va">sql_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">sql</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$"</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294908 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998066 THEN 2 ELSE 3 END AS pool</span></span>
+<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294925 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998088 THEN 2 ELSE 3 END AS pool</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor</span></span>
 <span><span class="co">#&gt;     GREATEST(lgd_dt, lgd_floor) AS lgd_final</span></span></code></pre></div>
-<p>When <code>duckdb</code> is installed the query runs on the same five
-rows and reproduces <code><a href="../reference/scr_apply.html">scr_apply()</a></code>.</p>
+<p>The query runs in DuckDB on the same five rows and reproduces
+<code><a href="../reference/scr_apply.html">scr_apply()</a></code>.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span>, config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>threads <span class="op">=</span> <span class="st">"1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbWriteTable.html" class="external-link">dbWriteTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"defaults_t"</span>, <span class="va">new</span><span class="op">)</span></span>
 <span><span class="va">got</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">m</span>, table <span class="op">=</span> <span class="st">"defaults_t"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -540,7 +553,7 @@ between pools. The lights use the p-value thresholds of
 <span><span class="va">v</span></span>
 <span><span class="co">#&gt; &lt;scr_lgd_validation&gt; sample holdout | n 265</span></span>
 <span><span class="co">#&gt;   calibration: realised 41.7% vs estimate 39.1% | t 1.33 p 0.092 [green] | loss shortfall -1.1% | downturn covers: TRUE</span></span>
-<span><span class="co">#&gt;   discrimination: gAUC 0.693 [0.644, 0.725] vs initial 0.672 (S -0.98, p 0.837) [green] | Spearman 0.536 | LCR 0.460</span></span>
+<span><span class="co">#&gt;   discrimination: gAUC 0.693 [0.655, 0.728] vs initial 0.672 (S -1.10, p 0.865) [green] | Spearman 0.536 | LCR 0.460</span></span>
 <span><span class="co">#&gt;   stability: pool PSI 0.0056 (stable; adjusted stable) | drivers: prior_dpd_max_cure 0.009, months_on_book_cure 0.001, region_cure 0.029, product_sev 0.001, prior_dpd_max_sev 0.001, months_on_book_sev 0.002</span></span>
 <span><span class="co">#&gt;   calibration_portfolio_t        green  </span></span>
 <span><span class="co">#&gt;   calibration_pools_t            amber  </span></span>
@@ -573,7 +586,7 @@ stages, the sign checks, the pools, the downturn and its periods, the
 floors, the in-default grid, the validation blocks, the model card and
 the ledger, plus the SQL file.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"irb-vignette"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-lgd-ead"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span>, validation <span class="op">=</span> <span class="va">v</span>, elbe <span class="op">=</span> <span class="va">e</span><span class="op">)</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "lgd_model.xlsx"    "sql_lgd_model.sql"</span></span></code></pre></div>
 </div>
@@ -603,7 +616,11 @@ realised CCF is floored at zero for the averages (a facility that repaid
 before default; the raw value is kept), and the applied CCF of an own
 estimate is floored at a fraction of the standardised CCF, one half of
 <code>ccf_sa_ccf</code> here, while the predicted EAD is never below the
-drawn amount.</p>
+drawn amount. The default <code>ccf_sa_ccf = 0.40</code> is the
+standardised CCF of a commitment; unconditionally cancellable retail
+lines, which include most credit cards, carry 10% under the standardised
+approach, which would put the floor at 0.05. Set <code>ccf_sa_ccf</code>
+to the standardised CCF of the product being modelled.</p>
 </div>
 <div class="section level3">
 <h3 id="the-reference-data-set-scr_ead_data">The reference data set: <code>scr_ead_data()</code><a class="anchor" aria-label="anchor" href="#the-reference-data-set-scr_ead_data"></a>
@@ -702,8 +719,8 @@ limit-factor measure form their own pool <code>LF</code>.</p>
 <span><span class="co">#&gt;   P1    ulf       98   0.2857   0.2459   0.0603   0.2857   0.3459   0.2000   0.3459</span></span>
 <span><span class="co">#&gt;   P2    ulf       23   0.4963   0.3785   0.1301   0.4963   0.6264   0.2000   0.6264</span></span>
 <span><span class="co">#&gt;   LF    lf         5   0.8884   0.8726   0.1411   0.8884   1.0295      row   1.0295</span></span>
-<span><span class="co">#&gt;   train    n   126 | RMSE 0.3628 | MAE 0.2884 | gAUC 0.5582 [0.5068, 0.5935] | EAD adequacy 0.8485 | CEAR 0.1181</span></span>
-<span><span class="co">#&gt;   holdout  n    71 | RMSE 0.4035 | MAE 0.2728 | gAUC 0.5708 [0.5392, 0.6340] | EAD adequacy 0.7905 | CEAR 0.4077</span></span>
+<span><span class="co">#&gt;   train    n   126 | RMSE 0.3628 | MAE 0.2884 | gAUC 0.5582 [0.5112, 0.6016] | EAD adequacy 0.8485 | CEAR 0.1181</span></span>
+<span><span class="co">#&gt;   holdout  n    71 | RMSE 0.4035 | MAE 0.2728 | gAUC 0.5708 [0.5027, 0.6398] | EAD adequacy 0.7905 | CEAR 0.4077</span></span>
 <span><span class="va">m_ead</span><span class="op">$</span><span class="va">drivers</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">feature</span>, <span class="va">n_bins</span>, <span class="va">eta2</span>, <span class="va">direction</span>, <span class="va">p_anova</span>, <span class="va">eta2_holdout</span>, <span class="va">psi_flag</span>, <span class="va">admitted</span>, <span class="va">reason</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;            feature n_bins         eta2       direction    p_anova eta2_holdout</span></span>
 <span><span class="co">#&gt;             &lt;char&gt;  &lt;int&gt;        &lt;num&gt;          &lt;char&gt;      &lt;num&gt;        &lt;num&gt;</span></span>
@@ -745,21 +762,29 @@ the utilisation of the row.</p>
 reason. Under <code>"type1"</code> the downturn value of a pool is
 <code>max(lra, observed)</code>, the default-weighted realised CCF of
 the events whose default date falls in the periods; the applied CCF is
-recomputed and the ledger records periods, method and reason.</p>
+recomputed and the ledger records periods, method and reason. Two facts
+to keep in view: the observed value is computed on every row of the
+reference data set, training and hold-out alike, so the hold-out
+validation below is not independent of the downturn component; and no
+minimum count is imposed, so a pool with few events in the periods (the
+<code>LF</code> pool here) should be read with care.</p>
+<p>The period chosen covers the first three quarters of 2024, when the
+realised CCFs of the demo panel run above their average in every
+pool.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_ead</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_ead_downturn.html">scr_ead_downturn</a></span><span class="op">(</span><span class="va">m_ead</span>, periods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-01"</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-12-01"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                          reason <span class="op">=</span> <span class="st">"2024 is the stress year of the demo panel"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">m_ead</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_ead_downturn.html">scr_ead_downturn</a></span><span class="op">(</span><span class="va">m_ead</span>, periods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-01"</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-09-30"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                          reason <span class="op">=</span> <span class="st">"realised CCFs above their average in 2024 Q1-Q3"</span><span class="op">)</span></span>
 <span><span class="va">m_ead</span><span class="op">$</span><span class="va">downturn</span><span class="op">$</span><span class="va">table</span></span>
 <span><span class="co">#&gt;      pool       lra n_downturn dt_observed  dt_type3    ccf_dt ccf_final</span></span>
 <span><span class="co">#&gt;    &lt;char&gt;     &lt;num&gt;      &lt;int&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:     P1 0.2856519         91   0.2912069 0.4356519 0.2912069 0.3514617</span></span>
-<span><span class="co">#&gt; 2:     P2 0.4962957         25   0.4628707 0.6462957 0.4962957 0.6264386</span></span>
-<span><span class="co">#&gt; 3:     LF 0.8884167          7   0.8726786 1.0384167 0.8884167 1.0294951</span></span>
+<span><span class="co">#&gt; 1:     P1 0.2856519         61   0.3251603 0.4356519 0.3251603 0.3854151</span></span>
+<span><span class="co">#&gt; 2:     P2 0.4962957         19   0.5274588 0.6462957 0.5274588 0.6576017</span></span>
+<span><span class="co">#&gt; 3:     LF 0.8884167          4   0.9255208 1.0384167 0.9255208 1.0665993</span></span>
 <span><span class="co">#&gt;    ccf_applied</span></span>
 <span><span class="co">#&gt;          &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:   0.3514617</span></span>
-<span><span class="co">#&gt; 2:   0.6264386</span></span>
-<span><span class="co">#&gt; 3:   1.0294951</span></span></code></pre></div>
+<span><span class="co">#&gt; 1:   0.3854151</span></span>
+<span><span class="co">#&gt; 2:   0.6576017</span></span>
+<span><span class="co">#&gt; 3:   1.0665993</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="production-validation-and-export">Production, validation and export<a class="anchor" aria-label="anchor" href="#production-validation-and-export"></a>
@@ -769,9 +794,10 @@ raw drivers of the admitted set; the utilisation is derived. It returns
 the pool, the measure, the applied CCF, the model EAD, the floor EAD
 (<code>drawn + 0.20 * undrawn</code>), the predicted EAD as the greatest
 of the drawn amount, the model and the floor, and whether the floor is
-the binding term. The five rows below include an over-limit facility,
-which goes to <code>LF</code> and where the drawn amount binds, and an
-undrawn one.</p>
+the binding term. The five rows below include an undrawn facility and an
+over-limit one, which goes to <code>LF</code>: its model EAD, the
+applied limit factor times the limit, only just exceeds the drawn
+amount.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new_ead</span> <span class="op">&lt;-</span> <span class="va">scr_demo_ead</span><span class="op">[</span><span class="va">scr_demo_ead</span><span class="op">$</span><span class="va">ref_date</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2025-06-01"</span><span class="op">)</span> <span class="op">&amp;</span></span>
 <span>                        <span class="va">scr_demo_ead</span><span class="op">$</span><span class="va">facility_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F0001"</span>, <span class="st">"F0002"</span>, <span class="st">"F0004"</span>, <span class="st">"F0186"</span>, <span class="st">"F0615"</span><span class="op">)</span>, <span class="op">]</span></span>
@@ -786,18 +812,18 @@ undrawn one.</p>
 <span><span class="va">ap_ead</span></span>
 <span><span class="co">#&gt;      pool measure utilisation undrawn ccf_applied ead_model ead_floor</span></span>
 <span><span class="co">#&gt;    &lt;char&gt;  &lt;char&gt;       &lt;num&gt;   &lt;num&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:     P1     ulf   0.5891667    4930   0.3514617  8802.706      8056</span></span>
-<span><span class="co">#&gt; 2:     P2     ulf   0.1066667    2680   0.6264386  1998.855       856</span></span>
-<span><span class="co">#&gt; 3:     P1     ulf   0.4745600   32840   0.3514617 41202.001     36228</span></span>
-<span><span class="co">#&gt; 4:     P2     ulf   0.0000000    8000   0.6264386  5011.509      1600</span></span>
-<span><span class="co">#&gt; 5:     LF      lf   1.0514286       0   1.0294951  3603.233      3680</span></span>
+<span><span class="co">#&gt; 1:     P1     ulf   0.5891667    4930   0.3854151  8970.096      8056</span></span>
+<span><span class="co">#&gt; 2:     P2     ulf   0.1066667    2680   0.6576017  2082.373       856</span></span>
+<span><span class="co">#&gt; 3:     P1     ulf   0.4745600   32840   0.3854151 42317.032     36228</span></span>
+<span><span class="co">#&gt; 4:     P2     ulf   0.0000000    8000   0.6576017  5260.814      1600</span></span>
+<span><span class="co">#&gt; 5:     LF      lf   1.0514286       0   1.0665993  3733.098      3680</span></span>
 <span><span class="co">#&gt;    ead_predicted ead_floor_binding</span></span>
 <span><span class="co">#&gt;            &lt;num&gt;            &lt;lgcl&gt;</span></span>
-<span><span class="co">#&gt; 1:      8802.706             FALSE</span></span>
-<span><span class="co">#&gt; 2:      1998.855             FALSE</span></span>
-<span><span class="co">#&gt; 3:     41202.001             FALSE</span></span>
-<span><span class="co">#&gt; 4:      5011.509             FALSE</span></span>
-<span><span class="co">#&gt; 5:      3680.000             FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt; 1:      8970.096             FALSE</span></span>
+<span><span class="co">#&gt; 2:      2082.373             FALSE</span></span>
+<span><span class="co">#&gt; 3:     42317.032             FALSE</span></span>
+<span><span class="co">#&gt; 4:      5260.814             FALSE</span></span>
+<span><span class="co">#&gt; 5:      3733.098             FALSE</span></span></code></pre></div>
 <p>The floor never binds here because every applied CCF is above 0.20;
 the column is there for the pool where it would. The SQL has four
 blocks: utilisation and undrawn amount, the driver bin index from the
@@ -817,21 +843,21 @@ branch, and the applied CCF with the predicted EAD as a
 <span><span class="co">#&gt; FROM (</span></span>
 <span><span class="co">#&gt;   SELECT</span></span>
 <span><span class="co">#&gt;     *,</span></span>
-<span><span class="co">#&gt;     CASE pool WHEN 'P1' THEN 0.3514616719732182 WHEN 'P2' THEN 0.62643859458525963 WHEN 'LF' THEN 1.0294951378084123 ELSE NULL END AS ccf_applied</span></span>
+<span><span class="co">#&gt;     CASE pool WHEN 'P1' THEN 0.3854151113299159 WHEN 'P2' THEN 0.6576016928597912 WHEN 'LF' THEN 1.066599304475079 ELSE NULL END AS ccf_applied</span></span>
 <span><span class="co">#&gt;   FROM pool_ead</span></span>
 <span><span class="co">#&gt; ) ead;</span></span></code></pre></div>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span>, config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>threads <span class="op">=</span> <span class="st">"1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbWriteTable.html" class="external-link">dbWriteTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"facilities_t"</span>, <span class="va">new_ead</span><span class="op">)</span></span>
 <span><span class="va">got_ead</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">m_ead</span>, table <span class="op">=</span> <span class="st">"facilities_t"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">got_ead</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pool"</span>, <span class="st">"ccf_applied"</span>, <span class="st">"ead_predicted"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;   pool ccf_applied ead_predicted</span></span>
-<span><span class="co">#&gt; 1   P1   0.3514617      8802.706</span></span>
-<span><span class="co">#&gt; 2   P2   0.6264386      1998.855</span></span>
-<span><span class="co">#&gt; 3   P1   0.3514617     41202.001</span></span>
-<span><span class="co">#&gt; 4   P2   0.6264386      5011.509</span></span>
-<span><span class="co">#&gt; 5   LF   1.0294951      3680.000</span></span>
+<span><span class="co">#&gt; 1   P1   0.3854151      8970.096</span></span>
+<span><span class="co">#&gt; 2   P2   0.6576017      2082.373</span></span>
+<span><span class="co">#&gt; 3   P1   0.3854151     42317.032</span></span>
+<span><span class="co">#&gt; 4   P2   0.6576017      5260.814</span></span>
+<span><span class="co">#&gt; 5   LF   1.0665993      3733.098</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">got_ead</span><span class="op">$</span><span class="va">pool</span>, <span class="va">ap_ead</span><span class="op">$</span><span class="va">pool</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">got_ead</span><span class="op">$</span><span class="va">ead_predicted</span>, <span class="va">ap_ead</span><span class="op">$</span><span class="va">ead_predicted</span><span class="op">)</span></span>
@@ -848,32 +874,39 @@ last column.</p>
 <span><span class="va">v_ead</span></span>
 <span><span class="co">#&gt; &lt;scr_ead_validation&gt; 71 rows (holdout)</span></span>
 <span><span class="co">#&gt;   pool        n  realised predicted        t        p  light  adequacy  light</span></span>
-<span><span class="co">#&gt;   P1         50    0.2763    0.3515   -1.260   0.8931 green     0.7884 green </span></span>
-<span><span class="co">#&gt;   P2         18    0.4536    0.6264   -1.987   0.9684 green     0.7915 green </span></span>
-<span><span class="co">#&gt;   LF          3    0.9022    1.0295   -0.924   0.7734 green     0.7288 green </span></span>
-<span><span class="co">#&gt;   TOTAL      71    0.3232    0.4242   -2.015   0.9760 green     0.7884 green </span></span>
-<span><span class="co">#&gt;   gAUC 0.5708 [0.5392, 0.6340] vs development 0.5582 (p 0.6239) | Spearman 0.2580 | CEAR 0.4077</span></span>
+<span><span class="co">#&gt;   P1         50    0.2763    0.3854   -1.829   0.9633 green     0.7710 green </span></span>
+<span><span class="co">#&gt;   P2         18    0.4536    0.6576   -2.346   0.9843 green     0.7600 green </span></span>
+<span><span class="co">#&gt;   LF          3    0.9022    1.0666   -1.193   0.8224 green     0.7167 green </span></span>
+<span><span class="co">#&gt;   TOTAL      71    0.3232    0.4575   -2.678   0.9953 green     0.7674 green </span></span>
+<span><span class="co">#&gt;   gAUC 0.5708 [0.5027, 0.6398] vs development 0.5582 (p 0.6133) | Spearman 0.2580 | CEAR 0.4077</span></span>
 <span><span class="co">#&gt;   stability: pool PSI 0.0308 (stable) | utilisation_ref PSI 0.0319 (stable)</span></span>
 <span><span class="co">#&gt;   lights: calibration_t_total green | ead_adequacy_total green | gauc_vs_development green | pool_psi green</span></span>
 <span><span class="va">v_ead</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">test</span>, <span class="va">statistic</span>, <span class="va">p</span>, <span class="va">light</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;                   test   statistic         p  light</span></span>
 <span><span class="co">#&gt;                 &lt;char&gt;       &lt;num&gt;     &lt;num&gt; &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1: calibration_t_total -2.01492331 0.9760359  green</span></span>
-<span><span class="co">#&gt; 2:  ead_adequacy_total  0.78841686        NA  green</span></span>
-<span><span class="co">#&gt; 3: gauc_vs_development -0.31578204 0.6239160  green</span></span>
+<span><span class="co">#&gt; 1: calibration_t_total -2.67751226 0.9953405  green</span></span>
+<span><span class="co">#&gt; 2:  ead_adequacy_total  0.76742361        NA  green</span></span>
+<span><span class="co">#&gt; 3: gauc_vs_development -0.28794667 0.6133062  green</span></span>
 <span><span class="co">#&gt; 4:            pool_psi  0.03078423        NA  green</span></span>
 <span><span class="va">v_ead</span><span class="op">$</span><span class="va">backtest</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">cohort</span>, <span class="va">n</span>, <span class="va">realised</span>, <span class="va">predicted</span>, <span class="va">p</span>, <span class="va">adequacy</span>, <span class="va">light_adequacy</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;    cohort     n  realised predicted         p adequacy light_adequacy</span></span>
-<span><span class="co">#&gt;    &lt;char&gt; &lt;int&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;    &lt;num&gt;         &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1:   2023    27 0.1802738 0.4064571 0.9999845 0.633809          green</span></span>
-<span><span class="co">#&gt; 2:   2024    44 0.4063661 0.4345942 0.6506991 0.866456          green</span></span></code></pre></div>
-<p>Every light is green because the estimate sits above the realised
-values on the hold-out: the margin and the downturn push the applied CCF
-up, and an adequacy ratio below one means the predicted EAD covers the
-realised one. The workbook carries the funnel, the summaries, the driver
-bins and the admission table, the pools and the cells, the downturn and
-the margin, the hold-out metrics, the validation blocks, the model card
-and the ledger, next to the SQL file.</p>
+<span><span class="co">#&gt;    cohort     n  realised predicted         p  adequacy light_adequacy</span></span>
+<span><span class="co">#&gt;    &lt;char&gt; &lt;int&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;     &lt;num&gt;         &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:   2023    27 0.1802738 0.4398524 0.9999977 0.6232298          green</span></span>
+<span><span class="co">#&gt; 2:   2024    44 0.4063661 0.4677041 0.7991478 0.8391052          green</span></span></code></pre></div>
+<p>Every calibration light is green because the estimate sits above the
+realised values on the hold-out: the margin and the downturn push the
+applied CCF up, and an adequacy ratio below one means the predicted EAD
+covers the realised one. Part of that cover is not independent evidence,
+since the downturn component was estimated on rows that include the
+hold-out. The discrimination light is green only because the hold-out
+gAUC does not fall below the development value; the level itself is
+weak, 0.57 with an interval that reaches down to 0.50, so the single
+admitted driver separates the pools little better than chance. On a real
+portfolio that would be the first finding of the review. The workbook
+carries the funnel, the summaries, the driver bins and the admission
+table, the pools and the cells, the downturn and the margin, the
+hold-out metrics, the validation blocks, the model card and the ledger,
+next to the SQL file.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">m_ead</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span>, validation <span class="op">=</span> <span class="va">v_ead</span><span class="op">)</span><span class="op">$</span><span class="va">files</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "ead_ccf.xlsx"    "sql_ead_ccf.sql"</span></span></code></pre></div>
@@ -946,12 +979,22 @@ booked, the default level), how the pools were fitted (the admitted
 drivers, the margin, the floor arithmetic) and the downturn with its
 periods and reason.</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_ead</span><span class="op">$</span><span class="va">ledger</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">step</span>, <span class="va">action</span>, <span class="va">reason</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;              step action                                    reason</span></span>
-<span><span class="co">#&gt;            &lt;char&gt; &lt;char&gt;                                    &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1: reference_data  build                             configuration</span></span>
-<span><span class="co">#&gt; 2:          pools    fit                             configuration</span></span>
-<span><span class="co">#&gt; 3:       downturn  type1 2024 is the stress year of the demo panel</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">m_ead</span><span class="op">$</span><span class="va">ledger</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">step</span>, <span class="va">action</span>, <span class="va">detail</span>, <span class="va">reason</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;              step action</span></span>
+<span><span class="co">#&gt;            &lt;char&gt; &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1: reference_data  build</span></span>
+<span><span class="co">#&gt; 2:          pools    fit</span></span>
+<span><span class="co">#&gt; 3:       downturn  type1</span></span>
+<span><span class="co">#&gt;                                                                                                                          detail</span></span>
+<span><span class="co">#&gt;                                                                                                                          &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1: horizon fixed (12 months); measure auto with u* = 0.95; floor 0; cap NA; post-default drawings in lgd; default level obligor</span></span>
+<span><span class="co">#&gt; 2:                                            drivers admitted: utilisation_ref; 2 pools; MoC alpha 0.05; floor 0.5 x 0.4 = 0.2</span></span>
+<span><span class="co">#&gt; 3:           periods: 2024-01-01 to 2024-09-30; 84 reference rows in the periods; add-on 0.15; applied CCF now 0.3854 to 1.0666</span></span>
+<span><span class="co">#&gt;                                             reason</span></span>
+<span><span class="co">#&gt;                                             &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1:                                   configuration</span></span>
+<span><span class="co">#&gt; 2:                                   configuration</span></span>
+<span><span class="co">#&gt; 3: realised CCFs above their average in 2024 Q1-Q3</span></span></code></pre></div>
 <p>Both ledgers travel unchanged into the <code>Decision_Ledger</code>
 sheet of the workbook, and the SQL header of each model states the
 stages, the downturn status and the floor it was generated with.</p>
