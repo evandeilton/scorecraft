@@ -62,3 +62,57 @@ Other classing:
 [`scr_classing_view()`](https://evandeilton.github.io/scorecraft/reference/scr_classing_view.md),
 [`scr_coarse_classing()`](https://evandeilton.github.io/scorecraft/reference/scr_coarse_classing.md),
 [`scr_decisions()`](https://evandeilton.github.io/scorecraft/reference/scr_decisions.md)
+
+## Examples
+
+``` r
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+                  use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+                  "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+lab <- scr_coarse_classing(res)
+p <- scr_classing_propose(lab, "ds_region",
+                          groups = list(edge = c("NORTH", "SOUTH"),
+                                        core = c("EAST", "WEST", "CENTRE")))
+lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+#>   ds_region: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786
+sp <- scr_classing_spec(lab)
+sp
+#> <scr_classing_spec> 33 bins | 8 variables (1 manual)
+#>     variable        type bin_id             bin_label lower upper
+#>    ds_region categorical      1         NORTH%;%SOUTH    NA    NA
+#>    ds_region categorical      2  EAST%;%WEST%;%CENTRE    NA    NA
+#>      ds_band categorical      1                     D    NA    NA
+#>      ds_band categorical      2                     C    NA    NA
+#>      ds_band categorical      3                     B    NA    NA
+#>      ds_band categorical      4                     A    NA    NA
+#>  vl_score_01     numeric      1      (-Inf;33.360000]    NA 33.36
+#>  vl_score_01     numeric      2 (33.360000;38.150000] 33.36 38.15
+#>  vl_score_01     numeric      3 (38.150000;44.240000] 38.15 44.24
+#>  vl_score_01     numeric      4 (44.240000;48.060000] 44.24 48.06
+#>  vl_score_01     numeric      5 (48.060000;63.940000] 48.06 63.94
+#>  vl_score_01     numeric      6 (63.940000;72.610000] 63.94 72.61
+#>            categories is_other  source                         reason
+#>         NORTH%;%SOUTH    FALSE  manual edge/core is what pricing uses
+#>  EAST%;%WEST%;%CENTRE    FALSE  manual edge/core is what pricing uses
+#>                     D    FALSE optimal                           <NA>
+#>                     C    FALSE optimal                           <NA>
+#>                     B    FALSE optimal                           <NA>
+#>                     A    FALSE optimal                           <NA>
+#>                  <NA>    FALSE optimal                           <NA>
+#>                  <NA>    FALSE optimal                           <NA>
+#>                  <NA>    FALSE optimal                           <NA>
+#>                  <NA>    FALSE optimal                           <NA>
+#>                  <NA>    FALSE optimal                           <NA>
+#>                  <NA>    FALSE optimal                           <NA>
+#>   ... (+21 rows)
+# round trip through a file: a fresh lab receives the manual bins as proposals
+f <- tempfile(fileext = ".csv")
+scr_classing_spec(lab, file = f)
+#> classing spec written to /tmp/Rtmp9oX73c/file1aa1e41edd0.csv
+props <- scr_classing_import(scr_coarse_classing(res), scr_classing_read(f))
+names(props)
+#> [1] "ds_region"
+unlink(f)
+```

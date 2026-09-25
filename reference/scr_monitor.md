@@ -34,8 +34,7 @@ scr_monitor(
 
 - date_col:
 
-  Period column. `NULL` treats `newdata` as a single period. Rows with a
-  missing date form a period of their own (`NA`, last).
+  Period column. `NULL` treats `newdata` as a single period.
 
 - target:
 

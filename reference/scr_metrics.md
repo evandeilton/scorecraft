@@ -29,8 +29,7 @@ scr_metrics(
 
 - y:
 
-  0/1 outcome vector (numeric or logical), same length as `score`. `NA`
-  rows are dropped; any other value is an error.
+  0/1 outcome vector, same length as `score`.
 
 - higher_is_event:
 
@@ -53,8 +52,7 @@ scr_metrics(
 
 - seed:
 
-  Bootstrap seed, local to the call (the user's random stream is
-  restored on exit); `NULL` draws from the user's stream.
+  Bootstrap seed; `NULL` leaves it unset.
 
 - nthread:
 
@@ -67,18 +65,16 @@ A list of class `scr_metrics` with `auc`, `ks`, `gini`, the bounds
 `ci = FALSE`), `n`, `events`, `n_boot` and `level`. Everything is
 `NA_real_` when only one class is present or no valid case exists.
 
+DeLong's analytic variance is not used: the interval is a stratified
+percentile bootstrap, which also covers KS.
+
 ## Details
 
 The confidence interval is **always** computed by default: a bootstrap
 stratified by outcome, percentile method, with `n_boot` resamples. Gini
 is derived from AUC (`2 * AUC - 1`) inside each resample, never
 bootstrapped separately. The cost is absorbed by `nthread` (parallelism
-by resample). DeLong's analytic variance is not used: the interval is a
-stratified percentile bootstrap, which also covers KS.
-
-The AUC is computed from the counts per unique score after one sort, so
-its cost is \\O(n \log n)\\, never the \\O(n_1 n_0)\\ of the pairwise
-definition.
+by resample).
 
 ## References
 

@@ -46,7 +46,7 @@ or, without variable, one line per variable of the lab."><meta property="og:imag
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Inspect the current bins of a variable in the lab</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
       <div class="d-none name"><code>scr_classing_view.Rd</code></div>
     </div>
 
@@ -91,6 +91,42 @@ scorecard.</p>
 <code><a href="scr_decisions.html">scr_decisions()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>                  use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">40</span>, n_boot <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">scr_demo</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"ref_date"</span>, <span class="st">"ds_region"</span>, <span class="st">"ds_band"</span>, <span class="st">"vl_score_01"</span>,</span></span>
+<span class="r-in"><span>                  <span class="st">"vl_score_02"</span>, <span class="st">"vl_score_05"</span>, <span class="st">"vl_score_10"</span>, <span class="st">"vl_hist_01"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">scr_classing_view</span><span class="op">(</span><span class="va">lab</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; target "default" | 8 variables</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   variable                     source    bins  IV train   IV hold     PSI verdict     shortlist</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ds_region                    optimal      5    0.0846    0.0971  0.0064 ACCEPTABLE  yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ds_band                      optimal      4    0.0805    0.0780  0.0013 ACCEPTABLE  yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   vl_score_01                  optimal      7    0.3464    0.2877  0.0066 ACCEPTABLE  yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   vl_score_02                  optimal      7    0.1721    0.1234  0.0053 ACCEPTABLE  yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   vl_score_05                  optimal      5    0.0363    0.0289  0.0024 ACCEPTABLE  yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   vl_score_10                  optimal      3    0.0282    0.0432  0.0024 ACCEPTABLE  yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   vl_hist_01                   optimal      3    0.0029    0.0158  0.0012 REVIEW      -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   vl_hist_01__sp               optimal      2    0.0315    0.0069  0.0017 REVIEW      -</span>
+<span class="r-in"><span><span class="fu">scr_classing_view</span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_region"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; ds_region (categorical) | current: optimal (jedi) | 5 bins | train IV 0.0846, hold-out IV 0.0971 (ratio 1.14)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   monotone: yes | min bin 7.9% | PSI 0.0064 (stable) | KS 0.114 | degenerate bins: 0 | verdict: ACCEPTABLE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    id  bin                                  n      %  events   rate      WOE      IV |  n.hold      %    rate WOE.hold</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1  CENTRE                             539  19.2%      57  10.6%   -0.341   0.020 |     301  21.5%   13.0%   -0.130</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2  EAST                             1,139  40.7%     144  12.6%   -0.139   0.008 |     551  39.4%   13.8%   -0.058</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     3  WEST                               582  20.8%      82  14.1%   -0.014   0.000 |     269  19.2%   10.0%   -0.419</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     4  NORTH                              318  11.4%      66  20.8%    0.453   0.027 |     178  12.7%   23.6%    0.599</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     5  SOUTH                              222   7.9%      50  22.5%    0.557   0.030 |     101   7.2%   18.8%    0.312</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   event rate by bin (train | hold-out)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1  ########            10.6% | ##########          13.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     2  ##########          12.6% | ###########         13.8%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     3  ###########         14.1% | ########            10.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     4  ################    20.8% | ##################  23.6%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     5  #################   22.5% | ##############      18.8%</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

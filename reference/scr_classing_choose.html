@@ -54,7 +54,7 @@ named by variable."><meta property="og:image" content="https://evandeilton.githu
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Choose the final variable list manually</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
       <div class="d-none name"><code>scr_classing_choose.Rd</code></div>
     </div>
 
@@ -126,6 +126,21 @@ scorecard.</p>
 <code><a href="scr_decisions.html">scr_decisions()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>                  use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">40</span>, n_boot <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">scr_demo</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"ref_date"</span>, <span class="st">"ds_region"</span>, <span class="st">"ds_band"</span>, <span class="st">"vl_score_01"</span>,</span></span>
+<span class="r-in"><span>                  <span class="st">"vl_score_02"</span>, <span class="st">"vl_score_05"</span>, <span class="st">"vl_score_10"</span>, <span class="st">"vl_hist_01"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu">scr_classing_choose</span><span class="op">(</span><span class="va">lab</span>, drop <span class="op">=</span> <span class="st">"vl_score_10"</span>,</span></span>
+<span class="r-in"><span>                           reason <span class="op">=</span> <span class="st">"not available at decision time"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lab</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing&gt; target "default" | opened 2026-09-25 20:44 by runner | 8 variables | 0 proposals: 0 accepted, 0 discarded</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   final choice: 5 variables | consensus 6 | force: (none) | drop: vl_score_10</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

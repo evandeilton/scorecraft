@@ -7,14 +7,14 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/evandeilton/scorecraft/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/evandeilton/scorecraft/blob/v0.2.0/DESCRIPTION)
 
-Lopes J (2026). *scorecraft: Scorecard Engine with Scale Alignment,
-Cut-Off Strategy, IRB Risk Parameters and Production SQL*. R package
-version 0.2.0, <https://github.com/evandeilton/scorecraft>.
+Lopes J (2026). *scorecraft: Scorecard Development and Internal
+Ratings-Based Risk Parameters*. R package version 0.2.0,
+<https://github.com/evandeilton/scorecraft>.
 
     @Manual{,
-      title = {scorecraft: Scorecard Engine with Scale Alignment, Cut-Off Strategy, IRB Risk Parameters and Production SQL},
+      title = {scorecraft: Scorecard Development and Internal Ratings-Based Risk Parameters},
       author = {Jose Evandeilton Lopes},
       year = {2026},
       note = {R package version 0.2.0},

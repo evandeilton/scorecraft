@@ -41,9 +41,7 @@ and `full`), `holdout`, `prune`, `pool` (eligible for the models),
     bin.
 
 3.  **Redundancy pruning** by rank correlation on the WOE space, ranked
-    by hold-out IV. Under `allow_derived_final = FALSE` the derived
-    flags leave before this step (`derived_excluded`), so that a flag
-    that cannot be delivered never prunes a real column.
+    by hold-out IV.
 
 ## Parallelism
 
@@ -72,7 +70,7 @@ sp <- scr_split(scr_demo, "default", date_col = "ref_date", drop = "id")
 #>   OOT: 4 period(s) in train, 2 in hold-out (hold-out starts at 2026-05-01, 33.3% of rows)
 bn <- scr_bin(scr_triage(sp, cfg), cfg)
 bn
-#> <scr_bins> 37 binned | screening 20 | hold-out 16 | pruning 12 | pool 12
+#> <scr_bins> 37 binned | screening 20 | hold-out 16 | pruning 15 | pool 12
 #>   screening: IV_BELOW_MIN               12
 #>   screening: IV_BELOW_MIN;NOT_MONOTONIC 4
 #>   screening: NOT_MONOTONIC              1

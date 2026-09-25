@@ -2,7 +2,7 @@
 
 A production-grade scorecard engine for binary targets (credit risk,
 fraud, propensity), built on
-[OptimalBinningWoE](https://github.com/evandeilton/OptimalBinningWoE).
+[OptimalBinningWoE](https://CRAN.R-project.org/package=OptimalBinningWoE).
 It selects variables through optimal binning and a multi-strategy
 consensus, fits the points scorecard with an explicit and auditable
 **scale alignment**, sweeps cut-offs with frozen cuts, performs honest
@@ -26,6 +26,10 @@ Documentation site: <https://evandeilton.github.io/scorecraft/>.
 
 ``` r
 
+# from CRAN
+install.packages("scorecraft")
+
+# development version from GitHub
 # install.packages("pak")
 pak::pak("evandeilton/scorecraft")
 ```

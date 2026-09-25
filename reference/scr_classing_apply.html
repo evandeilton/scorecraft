@@ -58,7 +58,7 @@ scr_scorecard() and scr_export(). The input result is not modified.'><meta prope
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Commit the lab into a new selection result</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
       <div class="d-none name"><code>scr_classing_apply.Rd</code></div>
     </div>
 
@@ -106,6 +106,41 @@ scorecard.</p>
 <code><a href="scr_decisions.html">scr_decisions()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>                  use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">40</span>, n_boot <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">scr_demo</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"ref_date"</span>, <span class="st">"ds_region"</span>, <span class="st">"ds_band"</span>, <span class="st">"vl_score_01"</span>,</span></span>
+<span class="r-in"><span>                  <span class="st">"vl_score_02"</span>, <span class="st">"vl_score_05"</span>, <span class="st">"vl_score_10"</span>, <span class="st">"vl_hist_01"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_region"</span>,</span></span>
+<span class="r-in"><span>                          groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NORTH"</span>, <span class="st">"SOUTH"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                                        core <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAST"</span>, <span class="st">"WEST"</span>, <span class="st">"CENTRE"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p</span>, reason <span class="op">=</span> <span class="st">"edge/core is what pricing uses"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ds_region: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786</span>
+<span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu">scr_classing_apply</span><span class="op">(</span><span class="va">lab</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "vl_score_01" "vl_score_02" "ds_band"     "ds_region"   "vl_score_05"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6] "vl_score_10"</span>
+<span class="r-in"><span><span class="fu"><a href="scr_decisions.html">scr_decisions</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      seq                  at author  variable action proposal_id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;int&gt;              &lt;POSc&gt; &lt;char&gt;    &lt;char&gt; &lt;char&gt;      &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:     1 2026-09-25 20:44:45 runner ds_region accept        P001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                      instruction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                           &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    n_bins_before n_bins_after iv_train_before iv_train_after iv_holdout_before</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;int&gt;        &lt;int&gt;           &lt;num&gt;          &lt;num&gt;             &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:             5            2      0.08464808     0.07392963        0.09714339</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    iv_holdout_after    psi_after verdict           warnings</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;num&gt;        &lt;num&gt;  &lt;char&gt;             &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:       0.07858917 0.0002621977  REVIEW IV_LOSS_VS_OPTIMAL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            reason</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: edge/core is what pricing uses</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

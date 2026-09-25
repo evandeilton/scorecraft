@@ -42,7 +42,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Grade a score vector with the cut points of an scr_grades object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/pd.R" class="external-link"><code>R/pd.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/pd.R" class="external-link"><code>R/pd.R</code></a></small>
       <div class="d-none name"><code>predict.scr_grades.Rd</code></div>
     </div>
 
@@ -94,6 +94,21 @@
 <code><a href="scr_pd_validate.html">scr_pd_validate()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>                  use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">40</span>, n_boot <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">scr_demo</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"ref_date"</span>, <span class="st">"ds_region"</span>, <span class="st">"ds_band"</span>, <span class="st">"vl_score_01"</span>,</span></span>
+<span class="r-in"><span>                  <span class="st">"vl_score_02"</span>, <span class="st">"vl_score_05"</span>, <span class="st">"vl_score_10"</span>, <span class="st">"vl_hist_01"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_grades.html">scr_grades</a></span><span class="op">(</span><span class="va">sc</span>, <span class="fu"><a href="scr_calibrate.html">scr_calibrate</a></span><span class="op">(</span><span class="va">sc</span>, target <span class="op">=</span> <span class="fl">0.06</span><span class="op">)</span>, n_grades <span class="op">=</span> <span class="fl">7</span>, min_defaults <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">gr</span>, score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">480</span>, <span class="fl">560</span>, <span class="fl">640</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5 2 1</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">gr</span>, score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">480</span>, <span class="fl">560</span>, <span class="fl">640</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"pd"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.30171014 0.02629432 0.00168493</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

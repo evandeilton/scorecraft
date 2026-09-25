@@ -42,14 +42,9 @@ scr_split(
 
 - seed:
 
-  Seed of the random split. `NULL` draws from the session's random
-  stream (reproducible only through a
-  [`set.seed()`](https://rdrr.io/r/base/Random.html) of your own;
-  [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
-  passes the `seed` of
-  [`scr_config()`](https://evandeilton.github.io/scorecraft/reference/scr_config.md)).
-  A seed is applied locally: the session's random stream is restored on
-  exit.
+  Seed of the random split. `NULL` leaves the random number generator
+  untouched, so the split is reproducible only through the `seed` of
+  [`scr_config()`](https://evandeilton.github.io/scorecraft/reference/scr_config.md).
 
 - event_level:
 
@@ -63,9 +58,8 @@ scr_split(
 
 - copy:
 
-  If `TRUE` (default), works on a copy of `data`. `FALSE` modifies a
-  `data.table` by reference (target and typing), saving memory; a
-  `data.frame` is always converted, hence copied.
+  If `TRUE` (default), works on a copy of `data`. `FALSE` modifies
+  `data` by reference (typing), saving memory.
 
 ## Value
 
@@ -81,10 +75,7 @@ tests generalisation to a future period. The cut is made on the
 of most recent periods that already reaches `ratio` of the population.
 Without a date column, or with a single period, it falls back to random
 stratified by the target. The date column is never a candidate: it is
-the key of the split and leaves the contest. A text date column is read
-as an ISO date (`YYYY-MM-DD`, `YYYY/MM/DD`, `YYYY-MM`) or as all-digit
-periods (`YYYYMM`); rows with a missing date belong to no period and are
-left out of both train and hold-out, with a warning in the log.
+the key of the split and leaves the contest.
 
 ## Event orientation
 

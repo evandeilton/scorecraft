@@ -50,7 +50,7 @@ its own for whoever wants more control (hybrid interface)."><meta property="og:i
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Select variables for the scorecard</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/select.R" class="external-link"><code>R/select.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/select.R" class="external-link"><code>R/select.R</code></a></small>
       <div class="d-none name"><code>scr_select.Rd</code></div>
     </div>
 
@@ -181,14 +181,14 @@ and the bootstrap, and the binning is deterministic per column.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Models (hold-out)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   glmnet    AUC 0.7345 [0.7028, 0.7723]  KS 0.3842</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   xgboost   AUC 0.7375 [0.7065, 0.7762]  KS 0.3695</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   lightgbm  AUC 0.7342 [0.7028, 0.7750]  KS 0.3699</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   lightgbm  AUC 0.7236 [0.6922, 0.7608]  KS 0.3641</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Warnings</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   - 3 derived flag(s) outside the deliverable by policy (allow_derived_final)</span>
 <span class="r-in"><span><span class="fu"><a href="scr_selected.html">scr_selected</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "vl_hist_04"  "vl_score_10"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "vl_score_10" "vl_hist_04" </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="scr_funnel.html">scr_funnel</a></span><span class="op">(</span><span class="va">res</span>, only_selected <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        feature derived_from        type approved  exit_stage consensus_rank</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;char&gt;       &lt;char&gt;      &lt;char&gt;   &lt;lgcl&gt;      &lt;char&gt;          &lt;int&gt;</span>
@@ -203,9 +203,9 @@ and the bootstrap, and the binning is deterministic per column.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:       1.0000000     3      7 0.34639015 0.28772640 0.1981484 0.006635574</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2:       0.9090909     3      7 0.17206972 0.12336796 0.1564626 0.005346830</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3:       0.8181818     3      7 0.12430307 0.11773607 0.1199427 0.003216554</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:       0.6967027     3      4 0.08054551 0.07804157 0.1100565 0.001317467</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:       0.6065946     3      7 0.07109472 0.06384879 0.1201400 0.104196466</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:       0.6057936     3      5 0.08464808 0.09714339 0.1141337 0.006365199</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:       0.6377928     3      4 0.08054551 0.07804157 0.1100565 0.001317467</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5:       0.6367525     3      7 0.07109472 0.06384879 0.1201400 0.104196466</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6:       0.6345456     3      5 0.08464808 0.09714339 0.1141337 0.006365199</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    psi_flag_adjusted iv_suspect triage_reason screen_reason holdout_reason</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;char&gt;     &lt;lgcl&gt;        &lt;char&gt;        &lt;char&gt;         &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:            stable      FALSE            OK            OK             OK</span>

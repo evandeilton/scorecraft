@@ -5,9 +5,8 @@ the upper bound of a one-sided level interval of the long-run average
 from the cohort series, \(t_{q, T-1}\, sd(DR_t)/\sqrt{T}\) per grade;
 "ci_binomial" uses \(z_q \sqrt{PD(1-PD)/n}\) on the obligors (or
 obligor-years when a series exists); "bootstrap" resamples the
-outcomes of the sample within each grade (drawn as the resampled default
-rate, Binomial(n, DR) / n, its exact distribution) and takes the level
-quantile of the default rate above the estimate. Categories "A" (data and
+outcomes of the sample within each grade and takes the level quantile
+of the default rate above the estimate. Categories "A" (data and
 methodological deficiencies) and "B" (changes in standards or
 environment) are expert quantities: value (one number or one per
 grade, in PD units) and a non-empty reason are mandatory. The ledger
@@ -18,9 +17,8 @@ the upper bound of a one-sided level interval of the long-run average
 from the cohort series, \(t_{q, T-1}\, sd(DR_t)/\sqrt{T}\) per grade;
 "ci_binomial" uses \(z_q \sqrt{PD(1-PD)/n}\) on the obligors (or
 obligor-years when a series exists); "bootstrap" resamples the
-outcomes of the sample within each grade (drawn as the resampled default
-rate, Binomial(n, DR) / n, its exact distribution) and takes the level
-quantile of the default rate above the estimate. Categories "A" (data and
+outcomes of the sample within each grade and takes the level quantile
+of the default rate above the estimate. Categories "A" (data and
 methodological deficiencies) and "B" (changes in standards or
 environment) are expert quantities: value (one number or one per
 grade, in PD units) and a non-empty reason are mandatory. The ledger
@@ -68,7 +66,7 @@ previous one (kept with active = FALSE).'><meta property="og:image" content="htt
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Margin of conservatism, by category</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/pd.R" class="external-link"><code>R/pd.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/pd.R" class="external-link"><code>R/pd.R</code></a></small>
       <div class="d-none name"><code>scr_moc.Rd</code></div>
     </div>
 
@@ -79,9 +77,8 @@ the upper bound of a one-sided <code>level</code> interval of the long-run avera
 from the cohort series, \(t_{q, T-1}\, sd(DR_t)/\sqrt{T}\) per grade;
 <code>"ci_binomial"</code> uses \(z_q \sqrt{PD(1-PD)/n}\) on the obligors (or
 obligor-years when a series exists); <code>"bootstrap"</code> resamples the
-outcomes of the sample within each grade (drawn as the resampled default
-rate, Binomial(n, DR) / n, its exact distribution) and takes the <code>level</code>
-quantile of the default rate above the estimate. Categories <code>"A"</code> (data and
+outcomes of the sample within each grade and takes the <code>level</code> quantile
+of the default rate above the estimate. Categories <code>"A"</code> (data and
 methodological deficiencies) and <code>"B"</code> (changes in standards or
 environment) are expert quantities: <code>value</code> (one number or one per
 grade, in PD units) and a non-empty <code>reason</code> are mandatory. The ledger

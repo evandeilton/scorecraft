@@ -63,7 +63,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 res                      # print: the funnel in one screen
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 1.3s
+#>   event: 14.25% on train, 14.50% on hold-out | 1.0s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -86,7 +86,7 @@ res                      # print: the funnel in one screen
 #> Models (hold-out)
 #>   glmnet    AUC 0.7345 [0.7028, 0.7723]  KS 0.3842
 #>   xgboost   AUC 0.7375 [0.7065, 0.7762]  KS 0.3695
-#>   lightgbm  AUC 0.7342 [0.7028, 0.7750]  KS 0.3699
+#>   lightgbm  AUC 0.7236 [0.6922, 0.7608]  KS 0.3641
 #> 
 #> Warnings
 #>   - 3 derived flag(s) outside the deliverable by policy (allow_derived_final)
@@ -119,8 +119,8 @@ summary(res)             # full text report
 #> | Model | AUC | 95% CI | KS | Gini | Votes | Weight | Note |
 #> |---|---:|---|---:|---:|---:|---:|---|
 #> | glmnet | 0.7345 | [0.7028, 0.7723] | 0.3842 | 0.4690 | 12 | 0.469 |  |
-#> | xgboost | 0.7375 | [0.7065, 0.7762] | 0.3695 | 0.4750 | 12 | 0.475 | 60 trees |
-#> | lightgbm | 0.7342 | [0.7028, 0.7750] | 0.3699 | 0.4685 | 12 | 0.468 | 60 trees |
+#> | xgboost | 0.7375 | [0.7065, 0.7762] | 0.3695 | 0.4750 | 12 | 0.475 | 59 trees |
+#> | lightgbm | 0.7236 | [0.6922, 0.7608] | 0.3641 | 0.4471 | 12 | 0.447 | 53 trees |
 #> 
 #> ## Approved variables (12)
 #> 
@@ -129,15 +129,15 @@ summary(res)             # full text report
 #> | 1 | vl_score_01 | numeric | 7 | 0.3464 | 0.2877 | 0.1981 | 0.007 | 3 | 1.000 |
 #> | 2 | vl_score_02 | numeric | 7 | 0.1721 | 0.1234 | 0.1565 | 0.005 | 3 | 0.909 |
 #> | 3 | vl_score_04 | numeric | 7 | 0.1243 | 0.1177 | 0.1199 | 0.003 | 3 | 0.818 |
-#> | 4 | ds_band | categorical | 4 | 0.0805 | 0.0780 | 0.1101 | 0.001 | 3 | 0.697 |
-#> | 5 | vl_late | numeric | 7 | 0.0711 | 0.0638 | 0.1201 | 0.104 | 3 | 0.607 |
-#> | 6 | ds_region | categorical | 5 | 0.0846 | 0.0971 | 0.1141 | 0.006 | 3 | 0.606 |
+#> | 4 | ds_band | categorical | 4 | 0.0805 | 0.0780 | 0.1101 | 0.001 | 3 | 0.638 |
+#> | 5 | vl_late | numeric | 7 | 0.0711 | 0.0638 | 0.1201 | 0.104 | 3 | 0.637 |
+#> | 6 | ds_region | categorical | 5 | 0.0846 | 0.0971 | 0.1141 | 0.006 | 3 | 0.635 |
 #> | 7 | vl_score_06 | numeric | 7 | 0.0483 | 0.0794 | 0.0940 | 0.005 | 3 | 0.455 |
-#> | 8 | vl_score_07 | numeric | 6 | 0.0505 | 0.0705 | 0.0955 | 0.007 | 3 | 0.303 |
-#> | 9 | vl_score_05 | numeric | 5 | 0.0363 | 0.0289 | 0.0842 | 0.002 | 3 | 0.242 |
-#> | 10 | ds_channel | categorical | 3 | 0.0279 | 0.0438 | 0.0804 | 0.000 | 3 | 0.212 |
-#> | 11 | vl_hist_04 | numeric | 3 | 0.0332 | 0.0809 | 0.0732 | 0.005 | 3 | 0.091 |
-#> | 12 | vl_score_10 | numeric | 3 | 0.0282 | 0.0432 | 0.0500 | 0.002 | 3 | 0.060 |
+#> | 8 | vl_score_07 | numeric | 6 | 0.0505 | 0.0705 | 0.0955 | 0.007 | 3 | 0.304 |
+#> | 9 | vl_score_05 | numeric | 5 | 0.0363 | 0.0289 | 0.0842 | 0.002 | 3 | 0.302 |
+#> | 10 | ds_channel | categorical | 3 | 0.0279 | 0.0438 | 0.0804 | 0.000 | 3 | 0.152 |
+#> | 11 | vl_score_10 | numeric | 3 | 0.0282 | 0.0432 | 0.0500 | 0.002 | 3 | 0.091 |
+#> | 12 | vl_hist_04 | numeric | 3 | 0.0332 | 0.0809 | 0.0732 | 0.005 | 3 | 0.062 |
 #> 
 #> ## Derived flags outside the deliverable (3)
 #> 
@@ -176,9 +176,9 @@ head(as.data.frame(res)) # the funnel as a data.frame
 #> 1       1.0000000     3      7 0.34639015 0.28772640 0.1981484 0.006635574
 #> 2       0.9090909     3      7 0.17206972 0.12336796 0.1564626 0.005346830
 #> 3       0.8181818     3      7 0.12430307 0.11773607 0.1199427 0.003216554
-#> 4       0.6967027     3      4 0.08054551 0.07804157 0.1100565 0.001317467
-#> 5       0.6065946     3      7 0.07109472 0.06384879 0.1201400 0.104196466
-#> 6       0.6057936     3      5 0.08464808 0.09714339 0.1141337 0.006365199
+#> 4       0.6377928     3      4 0.08054551 0.07804157 0.1100565 0.001317467
+#> 5       0.6367525     3      7 0.07109472 0.06384879 0.1201400 0.104196466
+#> 6       0.6345456     3      5 0.08464808 0.09714339 0.1141337 0.006365199
 #>   psi_flag_adjusted iv_suspect triage_reason screen_reason holdout_reason
 #> 1            stable      FALSE            OK            OK             OK
 #> 2            stable      FALSE            OK            OK             OK

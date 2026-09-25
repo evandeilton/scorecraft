@@ -66,9 +66,9 @@ md
 #> <scr_models> 3 model(s) | pool 12 | approved 12 | relaxation: none
 #>   glmnet    AUC 0.7345 [0.7028, 0.7723]  KS 0.3842  votes 12
 #>   xgboost   AUC 0.7375 [0.7065, 0.7762]  KS 0.3695  votes 12
-#>   lightgbm  AUC 0.7342 [0.7028, 0.7750]  KS 0.3699  votes 12
+#>   lightgbm  AUC 0.7236 [0.6922, 0.7608]  KS 0.3641  votes 12
 md$consensus$selected
 #>  [1] "vl_score_01" "vl_score_02" "vl_score_04" "ds_band"     "vl_late"    
 #>  [6] "ds_region"   "vl_score_06" "vl_score_07" "vl_score_05" "ds_channel" 
-#> [11] "vl_hist_04"  "vl_score_10"
+#> [11] "vl_score_10" "vl_hist_04" 
 ```

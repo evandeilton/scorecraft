@@ -4,14 +4,11 @@ For every pool and every reference age `tau` of the grid, the expected
 loss best estimate is the mean realised LGD of the training defaults of
 the pool that were still in workout at `tau` (so that at `tau = 0` it
 equals the pool's long-run average), and the in-default LGD adds the
-unexpected-loss increment \$\$\Delta^{UL}(\tau) = \max(0,\\
-\mathrm{LGD}^{DT} - \mathrm{LRA})\\\frac{\rho(T\_{\max}) - \rho(\tau -
-1)}{\rho(T\_{\max})}\$\$ read from the recovery profile of the pool's
-product mix, where \\\rho(\tau - 1)\\ is the cumulative discounted
-recovery rate of the months before age `tau` (zero at `tau = 0`): the
-downturn uplift shrinks as the recoveries come in. The consistency table
-checks that `lgd_in_default` at `tau = 0` reproduces the pool's
-`lgd_dt`.
+unexpected-loss increment \$\$\Delta^{UL}(\tau) = (\mathrm{LGD}^{DT} -
+\mathrm{LRA})\\\frac{\rho(T\_{\max}) - \rho(\tau)}{\rho(T\_{\max})}\$\$
+read from the recovery profile of the pool's product mix: the downturn
+uplift shrinks as the recoveries come in. The consistency table checks
+that `lgd_in_default` at `tau = 0` reproduces the pool's `lgd_dt`.
 
 ## Usage
 
@@ -60,8 +57,8 @@ e
 #>   consistency at tau = 0: ELBE equals the LRA and the in-default LGD equals the downturn LGD
 #>   in-default LGD by pool and age
 #>   pool       m0      m6     m12     m24     m36
-#>   1       42.5%   59.3%   56.0%   48.3%   45.0%
-#>   2       53.7%   73.5%   71.2%   64.9%   65.0%
-#>   3       67.7%   78.2%   73.3%   70.4%   69.7%
-#>   4       77.0%   93.2%   92.9%   84.1%   84.6%
+#>   1       42.5%   59.1%   55.3%   47.8%   44.7%
+#>   2       53.7%   72.9%   70.5%   64.4%   64.8%
+#>   3       67.7%   75.5%   71.6%   69.8%   69.7%
+#>   4       77.0%   92.7%   92.2%   83.5%   84.3%
 ```

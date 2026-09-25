@@ -48,7 +48,7 @@ hold-out before any supervised fit."><meta property="og:image" content="https://
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Stage 0: type the data and split train and hold-out</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/split.R" class="external-link"><code>R/split.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/split.R" class="external-link"><code>R/split.R</code></a></small>
       <div class="d-none name"><code>scr_split.Rd</code></div>
     </div>
 
@@ -96,10 +96,9 @@ stratified split.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Seed of the random split. <code>NULL</code> draws from the session's
-random stream (reproducible only through a <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> of your own;
-<code><a href="scr_select.html">scr_select()</a></code> passes the <code>seed</code> of <code><a href="scr_config.html">scr_config()</a></code>). A seed is applied
-locally: the session's random stream is restored on exit.</p></dd>
+<dd><p>Seed of the random split. <code>NULL</code> leaves the random number
+generator untouched, so the split is reproducible only through the
+<code>seed</code> of <code><a href="scr_config.html">scr_config()</a></code>.</p></dd>
 
 
 <dt id="arg-event-level">event_level<a class="anchor" aria-label="anchor" href="#arg-event-level"></a></dt>
@@ -114,8 +113,7 @@ targets, free text). They stay in the funnel as <code>00.config</code>.</p></dd>
 
 <dt id="arg-copy">copy<a class="anchor" aria-label="anchor" href="#arg-copy"></a></dt>
 <dd><p>If <code>TRUE</code> (default), works on a copy of <code>data</code>. <code>FALSE</code>
-modifies a <code>data.table</code> by reference (target and typing), saving
-memory; a <code>data.frame</code> is always converted, hence copied.</p></dd>
+modifies <code>data</code> by reference (typing), saving memory.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -132,10 +130,7 @@ tests generalisation to a future period. The cut is made on the
 of most recent periods that already reaches <code>ratio</code> of the population.
 Without a date column, or with a single period, it falls back to random
 stratified by the target. The date column is never a candidate: it is the
-key of the split and leaves the contest. A text date column is read as an
-ISO date (<code>YYYY-MM-DD</code>, <code>YYYY/MM/DD</code>, <code>YYYY-MM</code>) or as all-digit periods
-(<code>YYYYMM</code>); rows with a missing date belong to no period and are left out
-of both train and hold-out, with a warning in the log.</p>
+key of the split and leaves the contest.</p>
     </div>
     <div class="section level2">
     <h2 id="event-orientation">Event orientation<a class="anchor" aria-label="anchor" href="#event-orientation"></a></h2>

@@ -86,10 +86,10 @@ identifiers, `default_date`, `ead`, `product`, drivers, `status`,
 ## Rules
 
 - **Cures.** An event with `status == "cured"` returns to performing:
-  the balance outstanding at the cure date (`ead` plus the drawings
-  after default, net of the cash recovered) enters as an artificial
-  recovery on the cure date, so the cure carries its costs and the
-  discount effect, never a zero loss by decree.
+  the balance outstanding at the cure date (`ead` net of the cash
+  recovered) enters as an artificial recovery on the cure date, so the
+  cure carries its costs and the discount effect, never a zero loss by
+  decree.
 
 - **Multiple defaults.** Two defaults of one facility separated by fewer
   than `lgd_cure_window` months (from the close of the first to the

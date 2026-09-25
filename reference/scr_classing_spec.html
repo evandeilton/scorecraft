@@ -56,7 +56,7 @@ silently."><meta property="og:image" content="https://evandeilton.github.io/scor
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Classing specification as a long table, with its file round trip</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.2.0/R/classing.R" class="external-link"><code>R/classing.R</code></a></small>
       <div class="d-none name"><code>scr_classing_spec.Rd</code></div>
     </div>
 
@@ -123,6 +123,59 @@ scorecard.</p>
 <code><a href="scr_decisions.html">scr_decisions()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_config.html">scr_config</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, nthread <span class="op">=</span> <span class="fl">1</span>, use_ranger <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>                  use_lightgbm <span class="op">=</span> <span class="cn">FALSE</span>, xgb_rounds <span class="op">=</span> <span class="fl">40</span>, n_boot <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">scr_demo</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"ref_date"</span>, <span class="st">"ds_region"</span>, <span class="st">"ds_band"</span>, <span class="st">"vl_score_01"</span>,</span></span>
+<span class="r-in"><span>                  <span class="st">"vl_score_02"</span>, <span class="st">"vl_score_05"</span>, <span class="st">"vl_score_10"</span>, <span class="st">"vl_hist_01"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_select.html">scr_select</a></span><span class="op">(</span><span class="va">d</span>, <span class="st">"default"</span>, config <span class="op">=</span> <span class="va">cfg</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_propose.html">scr_classing_propose</a></span><span class="op">(</span><span class="va">lab</span>, <span class="st">"ds_region"</span>,</span></span>
+<span class="r-in"><span>                          groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>edge <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NORTH"</span>, <span class="st">"SOUTH"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                                        core <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EAST"</span>, <span class="st">"WEST"</span>, <span class="st">"CENTRE"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_classing_accept.html">scr_classing_accept</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">p</span>, reason <span class="op">=</span> <span class="st">"edge/core is what pricing uses"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ds_region: P001 accepted (REVIEW) - 2 bins, hold-out IV 0.0786</span>
+<span class="r-in"><span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu">scr_classing_spec</span><span class="op">(</span><span class="va">lab</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sp</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;scr_classing_spec&gt; 33 bins | 8 variables (1 manual)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     variable        type bin_id             bin_label lower upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ds_region categorical      1         NORTH%;%SOUTH    NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    ds_region categorical      2  EAST%;%WEST%;%CENTRE    NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ds_band categorical      1                     D    NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ds_band categorical      2                     C    NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ds_band categorical      3                     B    NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ds_band categorical      4                     A    NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  vl_score_01     numeric      1      (-Inf;33.360000]    NA 33.36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  vl_score_01     numeric      2 (33.360000;38.150000] 33.36 38.15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  vl_score_01     numeric      3 (38.150000;44.240000] 38.15 44.24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  vl_score_01     numeric      4 (44.240000;48.060000] 44.24 48.06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  vl_score_01     numeric      5 (48.060000;63.940000] 48.06 63.94</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  vl_score_01     numeric      6 (63.940000;72.610000] 63.94 72.61</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            categories is_other  source                         reason</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         NORTH%;%SOUTH    FALSE  manual edge/core is what pricing uses</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  EAST%;%WEST%;%CENTRE    FALSE  manual edge/core is what pricing uses</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     D    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     C    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     B    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     A    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  &lt;NA&gt;    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  &lt;NA&gt;    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  &lt;NA&gt;    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  &lt;NA&gt;    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  &lt;NA&gt;    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  &lt;NA&gt;    FALSE optimal                           &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ... (+21 rows)</span>
+<span class="r-in"><span><span class="co"># round trip through a file: a fresh lab receives the manual bins as proposals</span></span></span>
+<span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".csv"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">scr_classing_spec</span><span class="op">(</span><span class="va">lab</span>, file <span class="op">=</span> <span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> classing spec written to /tmp/Rtmp9oX73c/file1aa1e41edd0.csv</span>
+<span class="r-in"><span><span class="va">props</span> <span class="op">&lt;-</span> <span class="fu">scr_classing_import</span><span class="op">(</span><span class="fu"><a href="scr_coarse_classing.html">scr_coarse_classing</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span>, <span class="fu">scr_classing_read</span><span class="op">(</span><span class="va">f</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">props</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ds_region"</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

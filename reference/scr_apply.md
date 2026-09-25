@@ -115,7 +115,7 @@ str(scr_apply(res, new)[, 1:3])
 #>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...
 #>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...
 #>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...
-#>  - attr(*, ".internal.selfref")=<pointer: 0x562d277b0a30> 
+#>  - attr(*, ".internal.selfref")=<pointer: 0x55f708df7a30> 
 sc <- scr_scorecard(res)
 head(scr_apply(sc, new))
 #>         link       prob    score score_points
@@ -151,12 +151,12 @@ head(scr_apply(sc, new, what = "points"))
 #> 4:                 -3                  6                 -3                 9
 #> 5:                  9                  6                 -9                 4
 #> 6:                -15                 14                  6                 9
-#>    vl_hist_04_points vl_score_10_points
-#>                <num>              <num>
-#> 1:                -3                  2
-#> 2:                -3                  2
-#> 3:                 9                  2
-#> 4:                -3                  2
-#> 5:                -3                  2
-#> 6:                -3                  2
+#>    vl_score_10_points vl_hist_04_points
+#>                 <num>             <num>
+#> 1:                  2                -3
+#> 2:                  2                -3
+#> 3:                  2                 9
+#> 4:                  2                -3
+#> 5:                  2                -3
+#> 6:                  2                -3
 ```

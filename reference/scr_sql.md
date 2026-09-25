@@ -57,9 +57,7 @@ scr_sql(
 
 - table:
 
-  Source table name, written verbatim (it may be qualified,
-  `schema.table`, and is never quoted: pass only a trusted name). `NULL`
-  uses `config$sql_table`.
+  Source table name. `NULL` uses `config$sql_table`.
 
 - dialect:
 
@@ -120,15 +118,8 @@ A character vector with the SQL (invisibly, when `file` is given).
     per variable and `score_points` (whole points).
 
 The order matters: without the first block, the WOE would be applied to
-data different from what was binned. Column names are quoted with the
-dialect's delimiters only when they are not plain identifiers or are
-reserved words, the same rule
-[`OptimalBinningWoE::obwoe_sql()`](https://evandeilton.github.io/OptimalBinningWoE/reference/obwoe_sql.html)
-applies, so every block names a column the same way. A row whose value
-falls in no fitted bin (a category never seen on train) takes a WOE of 0
-and the points of a WOE of 0, in the SQL as in
-[`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md).
-The score computed by the SQL matches
+data different from what was binned. The score computed by the SQL
+matches
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
 numerically, by an automated test that runs both paths.
 
@@ -165,7 +156,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-09-25 03:07:44
+#> -- Generated on 2026-09-25 20:45:45
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().
@@ -193,8 +184,8 @@ cat(tail(scr_sql(sc), 12), sep = "\n")
 #>       CASE vl_score_07_idx WHEN 1 THEN 14 WHEN 2 THEN 6 WHEN 3 THEN 6 WHEN 4 THEN 1 WHEN 5 THEN -2 WHEN 6 THEN -7 ELSE 0 END AS vl_score_07_points,
 #>       CASE vl_score_05_idx WHEN 1 THEN 6 WHEN 2 THEN -3 WHEN 3 THEN -9 WHEN 4 THEN -9 WHEN 5 THEN -14 ELSE 0 END AS vl_score_05_points,
 #>       CASE ds_channel_idx WHEN 1 THEN 9 WHEN 2 THEN 4 WHEN 3 THEN -5 ELSE 0 END AS ds_channel_points,
-#>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points,
-#>       CASE vl_score_10_idx WHEN 1 THEN 2 WHEN 2 THEN -6 WHEN 3 THEN -21 ELSE 0 END AS vl_score_10_points
+#>       CASE vl_score_10_idx WHEN 1 THEN 2 WHEN 2 THEN -6 WHEN 3 THEN -21 ELSE 0 END AS vl_score_10_points,
+#>       CASE vl_hist_04_idx WHEN 1 THEN 19 WHEN 2 THEN 9 WHEN 3 THEN -3 ELSE 0 END AS vl_hist_04_points
 #>   FROM woe_scr
 #> ) pts;
 ```
