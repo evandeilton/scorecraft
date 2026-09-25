@@ -13,3 +13,4 @@ Rplots.pdf
 src/*.o
 src/*.so
 src/*.dll
+tests/testthat/testthat-problems.rds
