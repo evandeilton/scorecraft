@@ -81,8 +81,8 @@ lab <- scr_classing_discard(lab, p2, reason = "no business rationale for this gr
 scr_decisions(lab)
 #>      seq                  at author  variable  action proposal_id
 #>    <int>              <POSc> <char>    <char>  <char>      <char>
-#> 1:     1 2026-09-25 21:03:02 runner ds_region  accept        P001
-#> 2:     2 2026-09-25 21:03:02 runner ds_region discard        P002
+#> 1:     1 2026-09-25 21:32:51 runner ds_region  accept        P001
+#> 2:     2 2026-09-25 21:32:51 runner ds_region discard        P002
 #>                                                                      instruction
 #>                                                                           <char>
 #> 1: groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE"))
