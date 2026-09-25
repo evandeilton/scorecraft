@@ -218,9 +218,28 @@ screen_features <- function(fit, cfg) {
               allow_degenerate = cfg$allow_degenerate, sort_by = "iv",
               bin_separator = cfg$bin_separator)
   if (!is.null(cfg$screen_top_n)) arg$top_n <- as.integer(cfg$screen_top_n)
-  sel  <- data.table::as.data.table(do.call(OptimalBinningWoE::obwoe_select, arg))
-  full <- data.table::as.data.table(do.call(OptimalBinningWoE::obwoe_select, c(arg, list(detail = "full"))))
+  sel  <- data.table::as.data.table(.obwoe_quiet(do.call(OptimalBinningWoE::obwoe_select, arg)))
+  full <- data.table::as.data.table(.obwoe_quiet(do.call(OptimalBinningWoE::obwoe_select, c(arg, list(detail = "full")))))
   list(summary = sel, full = full)
+}
+
+#' Evaluate an OptimalBinningWoE call without the Rcpp subset-proxy warnings
+#'
+#' With Rcpp >= 1.1, `OptimalBinningWoE::obwoe_gains_score()` (reached by
+#' `obwoe_select(detail = "full")`) reorders its input with the aliasing
+#' pattern `x = x[idx]`, and Rcpp's bounds check then warns
+#' "subscript out of bounds (index i >= vector size s)" once per element,
+#' thousands of times per run. The values returned are correct (checked
+#' against a hand computation); the fix belongs upstream. Only that exact
+#' message is muffled; every other condition passes through.
+#' @keywords internal
+#' @noRd
+.obwoe_quiet <- function(expr) {
+  withCallingHandlers(expr, warning = function(w) {
+    if (grepl("^subscript out of bounds \\(index -?[0-9]+ >= vector size -?[0-9]+\\)$", conditionMessage(w))) {
+      invokeRestart("muffleWarning")
+    }
+  })
 }
 
 #' Materialise the WOE space with a frozen fit (subset of features)
