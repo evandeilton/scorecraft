@@ -50,6 +50,7 @@
     <li><a class="dropdown-item" href="../articles/expected-loss-and-capital.html">Expected loss and regulatory capital</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../cheatsheet.html">Cheat sheet</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -166,7 +167,7 @@ dropped so that it cannot become a candidate.</p>
 <span><span class="va">res</span></span>
 <span><span class="co">#&gt; &lt;scr_result&gt; target "default"</span></span>
 <span><span class="co">#&gt;   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01</span></span>
-<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 0.9s</span></span>
+<span><span class="co">#&gt;   event: 14.25% on train, 14.50% on hold-out | 0.6s</span></span>
 <span><span class="co">#&gt;   convention: risk (target=1 is the bad case)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Funnel</span></span>
@@ -472,16 +473,16 @@ script.</p>
 <span><span class="co">#&gt; [1] 441</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"^-- (Scale|score =)"</span>, <span class="va">sql</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- Scale: 600 points at odds 50:1 (safe:event), PDO 20 | higher_is_safer</span></span>
-<span><span class="co">#&gt; -- score = 491.19665800103655 + -26.318891476654574 * logit | base_points = 538</span></span>
+<span><span class="co">#&gt; -- score = 491.19665800103655 + -26.318891476654567 * logit | base_points = 538</span></span>
 <span><span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">sql</span> <span class="op">==</span> <span class="st">"SELECT"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">sql</span><span class="op">[</span><span class="va">i</span><span class="op">:</span><span class="op">(</span><span class="va">i</span> <span class="op">+</span> <span class="fl">6</span><span class="op">)</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SELECT</span></span>
 <span><span class="co">#&gt;     id,</span></span>
 <span><span class="co">#&gt;     ref_date,</span></span>
 <span><span class="co">#&gt;     538.30012744760336</span></span>
-<span><span class="co">#&gt;       + -29.701043763446282 * vl_score_01_woe</span></span>
-<span><span class="co">#&gt;       + -27.130718819754311 * vl_score_02_woe</span></span>
-<span><span class="co">#&gt;       + -26.649286859941228 * vl_score_04_woe</span></span></code></pre></div>
+<span><span class="co">#&gt;       + -29.70104376344629 * vl_score_01_woe</span></span>
+<span><span class="co">#&gt;       + -27.130718819754303 * vl_score_02_woe</span></span>
+<span><span class="co">#&gt;       + -26.64928685994122 * vl_score_04_woe</span></span></code></pre></div>
 <p>The claim that R and SQL agree is tested in the package; here it is
 also demonstrated. DuckDB runs in-process and executes the
 <code>duckdb</code> dialect on <code>scr_demo</code>.</p>
@@ -692,11 +693,11 @@ as text, which the split reads as a date.</p>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbWriteTable.html" class="external-link">dbWriteTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, <span class="va">d</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_fetch.html">scr_fetch</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, sample_frac <span class="op">=</span> <span class="fl">0.5</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.5</span></span>
-<span><span class="co">#&gt; [1] 2035</span></span>
+<span><span class="co">#&gt; [1] 2132</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_fetch.html">scr_fetch</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, max_rows <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.23809523809523808</span></span>
-<span><span class="co">#&gt; [1] 995</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 1014</span></span></code></pre></div>
 <p><code><a href="../reference/scr_fetch.html">scr_fetch()</a></code> samples <strong>on the server</strong>: the
 fraction becomes a <code>WHERE</code> clause on a random expression
 chosen by the connection class, and <code>max_rows</code> lowers the

@@ -69,7 +69,7 @@ scr_selected(res2)
 scr_decisions(res2)
 #>      seq                  at author  variable action proposal_id
 #>    <int>              <POSc> <char>    <char> <char>      <char>
-#> 1:     1 2026-09-25 21:56:01 runner ds_region accept        P001
+#> 1:     1 2026-09-25 22:24:37 runner ds_region accept        P001
 #>                                                                      instruction
 #>                                                                           <char>
 #> 1: groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE"))

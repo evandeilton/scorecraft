@@ -110,7 +110,7 @@ sp
 # round trip through a file: a fresh lab receives the manual bins as proposals
 f <- tempfile(fileext = ".csv")
 scr_classing_spec(lab, file = f)
-#> classing spec written to /tmp/RtmpydbAKM/file1999586bdb6e.csv
+#> classing spec written to /tmp/RtmpH7bJa4/file18ec4d034f86.csv
 props <- scr_classing_import(scr_coarse_classing(res), scr_classing_read(f))
 names(props)
 #> [1] "ds_region"
