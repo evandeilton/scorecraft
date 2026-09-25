@@ -46,8 +46,9 @@ the upper bound of a one-sided \code{level} interval of the long-run average
 from the cohort series, \eqn{t_{q, T-1}\, sd(DR_t)/\sqrt{T}} per grade;
 \code{"ci_binomial"} uses \eqn{z_q \sqrt{PD(1-PD)/n}} on the obligors (or
 obligor-years when a series exists); \code{"bootstrap"} resamples the
-outcomes of the sample within each grade and takes the \code{level} quantile
-of the default rate above the estimate. Categories \code{"A"} (data and
+outcomes of the sample within each grade (drawn as the resampled default
+rate, Binomial(n, DR) / n, its exact distribution) and takes the \code{level}
+quantile of the default rate above the estimate. Categories \code{"A"} (data and
 methodological deficiencies) and \code{"B"} (changes in standards or
 environment) are expert quantities: \code{value} (one number or one per
 grade, in PD units) and a non-empty \code{reason} are mandatory. The ledger

@@ -14,10 +14,17 @@
 #' stratified by outcome, percentile method, with
 #' `n_boot` resamples. Gini is derived from AUC (`2 * AUC - 1`) inside each
 #' resample, never bootstrapped separately. The cost is absorbed by
-#' `nthread` (parallelism by resample).
+#' `nthread` (parallelism by resample). DeLong's analytic variance is not
+#' used: the interval is a stratified percentile bootstrap, which also
+#' covers KS.
+#'
+#' The AUC is computed from the counts per unique score after one sort, so
+#' its cost is \eqn{O(n \log n)}, never the \eqn{O(n_1 n_0)} of the pairwise
+#' definition.
 #'
 #' @param score Numeric vector with the score.
-#' @param y 0/1 outcome vector, same length as `score`.
+#' @param y 0/1 outcome vector (numeric or logical), same length as
+#'   `score`. `NA` rows are dropped; any other value is an error.
 #' @param higher_is_event If `TRUE` (default), a higher score means a higher
 #'   probability of the event (logit, probability, propensity score). Pass
 #'   `FALSE` for a credit points score (`higher_is_safer`), and the AUC is
@@ -25,16 +32,14 @@
 #' @param ci Compute the confidence interval. `FALSE` returns point estimates only.
 #' @param n_boot Number of bootstrap resamples.
 #' @param level Confidence level.
-#' @param seed Bootstrap seed; `NULL` leaves it unset.
+#' @param seed Bootstrap seed, local to the call (the user's random stream
+#'   is restored on exit); `NULL` draws from the user's stream.
 #' @param nthread Parallel workers for the resamples.
 #'
 #' @return A list of class `scr_metrics` with `auc`, `ks`, `gini`, the
 #'   bounds `auc_lo`/`auc_hi`, `ks_lo`/`ks_hi`, `gini_lo`/`gini_hi` (`NA`
 #'   when `ci = FALSE`), `n`, `events`, `n_boot` and `level`. Everything is
 #'   `NA_real_` when only one class is present or no valid case exists.
-#'
-#' DeLong's analytic variance is not used: the interval is a stratified
-#' percentile bootstrap, which also covers KS.
 #'
 #' @references
 #' DeLong, E. R., DeLong, D. M. and Clarke-Pearson, D. L. (1988). Comparing
@@ -57,9 +62,10 @@ scr_metrics <- function(score, y, higher_is_event = TRUE, ci = TRUE, n_boot = 20
                 gini_lo = NA_real_, gini_hi = NA_real_, n = 0L, events = 0L,
                 n_boot = 0L, level = level)
   if (length(score) != length(y)) stop("`score` and `y` must have the same length.", call. = FALSE)
+  y <- .scr_y01(y, "scr_metrics")
   ok <- is.finite(score) & !is.na(y)
   if (!any(ok)) return(structure(empty, class = c("scr_metrics", "list")))
-  score <- as.double(score[ok]); y <- as.integer(y[ok])
+  score <- as.double(score[ok]); y <- y[ok]
   if (!isTRUE(higher_is_event)) score <- -score
   n1 <- sum(y == 1L); n0 <- sum(y == 0L)
   if (n1 == 0L || n0 == 0L) {
@@ -67,21 +73,30 @@ scr_metrics <- function(score, y, higher_is_event = TRUE, ci = TRUE, n_boot = 20
     return(structure(empty, class = c("scr_metrics", "list")))
   }
 
-  pt <- .auc_ks(score, y)
+  # the unique scores are ranked ONCE; every resample only re-tabulates the
+  # counts per rank, O(n) and without a sort
+  idx <- data.table::frank(score, ties.method = "dense")
+  K <- max(idx)
+  idx1 <- idx[y == 1L]; idx0 <- idx[y == 0L]
+  pt <- .auc_ks_counts(tabulate(idx1, K), tabulate(idx0, K))
   out <- empty
   out$auc <- pt$auc; out$ks <- pt$ks; out$gini <- pt$gini
   out$n <- length(y); out$events <- n1
 
   if (isTRUE(ci) && n_boot >= 2L) {
-    i1 <- which(y == 1L); i0 <- which(y == 0L)
-    if (!is.null(seed)) set.seed(seed)
+    # `seed` is local to this call: the user's random stream is restored on exit
+    .scr_local_seed(seed)
     # The seed of every resample is drawn HERE, in the main process, so the
     # result is identical with 1 or N workers.
     seeds <- sample.int(.Machine$integer.max, n_boot)
+    # the per-resample set.seed() below must not leak into the user's stream
+    .scr_rng_guard()
     reps <- .scr_lapply(seeds, function(sd) {
       set.seed(sd)
-      j <- c(i1[sample.int(n1, n1, replace = TRUE)], i0[sample.int(n0, n0, replace = TRUE)])
-      r <- .auc_ks(score[j], y[j])
+      # stratified by outcome: events first, then non-events
+      c1 <- tabulate(idx1[sample.int(n1, n1, replace = TRUE)], K)
+      c0 <- tabulate(idx0[sample.int(n0, n0, replace = TRUE)], K)
+      r <- .auc_ks_counts(c1, c0)
       c(r$auc, r$ks)
     }, nthread = nthread)
     b <- do.call(rbind, reps)
@@ -96,16 +111,46 @@ scr_metrics <- function(score, y, higher_is_event = TRUE, ci = TRUE, n_boot = 20
   structure(out, class = c("scr_metrics", "list"))
 }
 
-#' AUC/KS core without validation (called inside the bootstrap)
+#' Validate a 0/1 outcome: numeric or logical, values in {0, 1} or NA
+#'
+#' A factor or a character vector is refused: `as.integer()` of a factor
+#' returns its codes (1/2), which would silently count the first level as
+#' the event.
+#' @keywords internal
+#' @noRd
+.scr_y01 <- function(y, fn) {
+  if (is.factor(y) || is.character(y)) {
+    stop(fn, "(): `y` must be a 0/1 numeric or logical vector, not a ", class(y)[1], ".", call. = FALSE)
+  }
+  if (is.logical(y)) return(as.integer(y))
+  if (!is.numeric(y)) stop(fn, "(): `y` must be a 0/1 numeric or logical vector.", call. = FALSE)
+  bad <- !is.na(y) & y != 0 & y != 1
+  if (any(bad)) stop(fn, "(): `y` must be 0/1 (found ", lst(utils::head(sort(unique(y[bad])), 5)), ").", call. = FALSE)
+  as.integer(y)
+}
+
+#' AUC/KS core without validation
 #' @keywords internal
 #' @noRd
 .auc_ks <- function(score, y) {
-  n1 <- as.double(sum(y == 1L)); n0 <- as.double(sum(y == 0L))
-  d <- data.table::data.table(s = score, y = y)[
-    , .(n1 = as.double(sum(y == 1L)), n0 = as.double(sum(y == 0L))), by = s][order(s)]
-  cum0 <- cumsum(d$n0)
-  auc  <- sum(d$n1 * (cum0 - d$n0 + d$n0 / 2)) / (n1 * n0)
-  ks   <- max(abs(cumsum(d$n1) / n1 - cum0 / n0))
+  idx <- data.table::frank(score, ties.method = "dense")
+  K <- max(idx)
+  .auc_ks_counts(tabulate(idx[y == 1L], K), tabulate(idx[y == 0L], K))
+}
+
+#' AUC/KS from the event and non-event counts per unique score, in
+#' increasing order of the score (Mann-Whitney with ties counted as 1/2)
+#'
+#' Counts are taken to double first: `n1 * n0` in integer overflows `2^31`.
+#' A score value with no case on either side adds nothing to either sum.
+#' @keywords internal
+#' @noRd
+.auc_ks_counts <- function(c1, c0) {
+  c1 <- as.double(c1); c0 <- as.double(c0)
+  n1 <- sum(c1); n0 <- sum(c0)
+  cum0 <- cumsum(c0)
+  auc  <- sum(c1 * (cum0 - c0 + c0 / 2)) / (n1 * n0)
+  ks   <- max(abs(cumsum(c1) / n1 - cum0 / n0))
   list(auc = auc, ks = ks, gini = 2 * auc - 1)
 }
 
@@ -163,7 +208,10 @@ scr_iv <- function(g, y, laplace = 0.5) {
   ok <- !is.na(g) & !is.na(y)
   g <- g[ok]; y <- as.integer(y[ok])
   if (!length(g)) return(0)
-  gi <- if (is.integer(g) && min(g) >= 1L) g else match(g, unique(g))
+  # integer codes are tabulated directly only when they are compact: an
+  # integer identifier or a yyyymmdd code would make tabulate() allocate
+  # max(g) bins
+  gi <- if (is.integer(g) && min(g) >= 1L && max(g) <= length(g)) g else match(g, unique(g))
   k  <- max(gi)
   if (!is.finite(k) || k < 2L) return(0)
   np <- tabulate(gi[y == 1L], nbins = k)
@@ -201,6 +249,12 @@ woe_subpop <- function(mask, y, laplace = 0.5) {
 #' significant. The fixed threshold remains what the market knows; the
 #' adjusted one is what the statistics support.
 #'
+#' Rows where `base` or `compare` is `NA`, or that fall outside `breaks` or
+#' `levels`, are not counted. A band empty in both samples is left out of
+#' the index and of the degrees of freedom `B - 1`; when a populated band is
+#' empty on one side only, 0.5 is added to every populated band of both
+#' samples.
+#'
 #' @param base Reference vector (the "development" distribution).
 #' @param compare Vector to compare.
 #' @param levels For categorical vectors: the levels to consider. `NULL`
@@ -214,8 +268,9 @@ woe_subpop <- function(mask, y, laplace = 0.5) {
 #'
 #' @return A list of class `scr_psi` with `psi`, `flag_fixed`, `critical`
 #'   (adjusted critical value), `flag_adjusted` (`"stable"` or `"shift"`),
-#'   `n_base`, `n_compare`, `n_bins` and `table` (per band: `pct_base`,
-#'   `pct_compare`, `psi_band`).
+#'   `n_base`, `n_compare`, `n_bins` (bands declared; the degrees of
+#'   freedom count only the populated ones) and `table` (per band: `n_base`,
+#'   `n_compare`, `pct_base`, `pct_compare`, `psi_band`).
 #'   The `thresholds` and `alpha` used are stored and printed.
 #'
 #' @references
@@ -253,26 +308,37 @@ scr_psi <- function(base, compare, levels = NULL, breaks = NULL, n_groups = 10L,
   }
   nb <- tabulate(match(gb, lv), nbins = length(lv))
   nc <- tabulate(match(gc, lv), nbins = length(lv))
-  n <- sum(nb); m <- sum(nc); B <- length(lv)
+  .psi_counts(nb, nc, lv, alpha, thresholds)
+}
+
+#' PSI from the counts per band (the core of scr_psi(), reused by the
+#' monitor, which tabulates the base once for every period)
+#' @keywords internal
+#' @noRd
+.psi_counts <- function(nb, nc, lv, alpha, thresholds) {
+  # a band empty in BOTH samples carries no information: it neither enters
+  # the smoothing nor the degrees of freedom of the adjusted threshold
+  live <- (nb + nc) > 0L
+  n <- sum(nb); m <- sum(nc); B <- sum(live)
   if (n == 0L || m == 0L || B < 2L) {
     return(structure(list(psi = NA_real_, flag_fixed = NA_character_, critical = NA_real_,
                           flag_adjusted = NA_character_, n_base = n, n_compare = m,
-                          n_bins = B, alpha = alpha, thresholds = thresholds, table = NULL),
+                          n_bins = length(lv), alpha = alpha, thresholds = thresholds, table = NULL),
                      class = c("scr_psi", "list")))
   }
   # empty bins on one side: minimal smoothing only when a zero exists, so the
   # PSI of populated bands is left untouched
-  smooth <- if (any(nb == 0L) || any(nc == 0L)) 0.5 else 0
+  smooth <- if (any(nb[live] == 0L) || any(nc[live] == 0L)) 0.5 else 0
   p <- (nb + smooth) / (n + smooth * B)
   q <- (nc + smooth) / (m + smooth * B)
-  band <- (p - q) * log(p / q)
+  band <- ifelse(live, (p - q) * log(p / q), 0)
   psi <- sum(band)
   crit <- (1 / n + 1 / m) * stats::qchisq(1 - alpha, df = B - 1L)
   flag_fixed <- if (psi < thresholds[1]) "stable" else if (psi < thresholds[2]) "moderate" else "shift"
   structure(list(
     psi = psi, flag_fixed = flag_fixed, critical = crit,
     flag_adjusted = if (psi < crit) "stable" else "shift",
-    n_base = n, n_compare = m, n_bins = B, alpha = alpha, thresholds = thresholds,
+    n_base = n, n_compare = m, n_bins = length(lv), alpha = alpha, thresholds = thresholds,
     table = data.frame(band = lv, n_base = nb, n_compare = nc, pct_base = nb / n,
                        pct_compare = nc / m, psi_band = band, stringsAsFactors = FALSE)
   ), class = c("scr_psi", "list"))

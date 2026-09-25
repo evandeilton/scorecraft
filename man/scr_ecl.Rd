@@ -87,11 +87,17 @@ the 12-month PD now over the one at origination (\code{pd_orig}) is at least
 \code{config$ecl_sicr_ratio}, else stage 1.
 
 Scenarios are a named list of shocks applied to the base inputs, each a
-list with any of \code{pd_mult} (multiplier of the hazards, capped at one),
-\code{z} (systematic factor of the one-factor model applied to the hazards
-with correlation \code{rho}, negative in a bad year), \code{lgd_add} (added to the
-LGD) and \code{ead_mult}; \code{weights} (normalised to one) give the
-probability-weighted result.
+list with any of \code{pd_mult} (non-negative multiplier of the hazards,
+capped at one), \code{z} (systematic factor of the one-factor model applied to
+the hazards with correlation \code{rho}, negative in a bad year), \code{lgd_add}
+(added to the LGD, the result floored at zero) and \code{ead_mult}
+(non-negative); \code{weights} (normalised to one) give the
+probability-weighted result. When a shocked hazard plus the prepayment
+hazard exceeds one, the exit probability of that month is capped at one.
+The \code{z} shock is applied to each monthly hazard, not to the annual PD;
+because the Vasicek map is non-linear, the implied 12-month stressed PD
+is higher than the one obtained by stressing the annual PD with the same
+\code{z} and \code{rho} (convert the annual PD yourself when that is wanted).
 }
 \examples{
 cfg <- scr_config(verbose = FALSE)

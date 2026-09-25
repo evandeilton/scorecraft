@@ -83,14 +83,19 @@ scr_apply.scr_scorecard <- function(x, newdata, what = c("score", "points", "woe
   out <- data.table::data.table(link = link, prob = stats::plogis(link), score = al$a + al$b * link)
   sp <- rep(x$base_points, nrow(w))
   pts_cols <- list()
+  # a row in no fitted bin has WOE 0: its points are those of WOE 0, as in the SQL
+  unb <- .sc_unbinned_points(x)
   for (f in feats) {
     p <- x$points[variable == f]
     pf <- p$points[match(w[[paste0(f, "_bin")]], p$bin)]
-    pf[is.na(pf)] <- 0
+    pf[is.na(pf)] <- unb
     sp <- sp + pf
     pts_cols[[paste0(f, "_points")]] <- pf
   }
   out[, score_points := sp]
+  # room for every <f>_points and <f>_woe column: set() cannot grow a table
+  # past its allocated column slots (1024 by default)
+  data.table::setalloccol(out, ncol(out) + 2L * length(feats) + getOption("datatable.alloccol", 1024L))
   if (what %in% c("points", "all")) for (nm in names(pts_cols)) data.table::set(out, j = nm, value = pts_cols[[nm]])
   if (what %in% c("woe", "all")) for (f in feats) data.table::set(out, j = paste0(f, "_woe"), value = w[[paste0(f, "_woe")]])
   if (identical(what, "points")) out <- out[, c("score", "score_points", names(pts_cols)), with = FALSE]
@@ -110,6 +115,7 @@ scr_apply.scr_scorecard <- function(x, newdata, what = c("score", "points", "woe
   missing <- setdiff(unique(origin), names(dt))
   if (length(missing)) stop("newdata lacks the source column(s): ", lst(missing), call. = FALSE)
   base <- data.table::data.table(.i = seq_len(nrow(dt)))
+  data.table::setalloccol(base, length(features) + 1L + getOption("datatable.alloccol", 1024L))
   for (f in features) {
     src <- origin[[f]]
     if (identical(src, f)) {
@@ -180,14 +186,24 @@ scr_reasons <- function(x, newdata, k = 4L, reference = c("mean", "max")) {
   M <- as.matrix(pts[, paste0(feats, "_points"), with = FALSE])
   short <- sweep(-M, 2L, -ref) * sgn   # (ref - points) * sgn
   k <- min(as.integer(k), length(feats))
-  out <- data.table::data.table(.i = seq_len(nrow(M)))
-  for (j in seq_len(k)) { out[[paste0("reason_", j)]] <- NA_character_; out[[paste0("shortfall_", j)]] <- NA_real_ }
-  for (i in seq_len(nrow(M))) {
-    o <- order(-short[i, ])[seq_len(k)]
-    for (j in seq_len(k)) {
-      data.table::set(out, i, paste0("reason_", j), feats[o[j]])
-      data.table::set(out, i, paste0("shortfall_", j), short[i, o[j]])
+  n <- nrow(M); nf <- length(feats)
+  out <- data.table::data.table(.i = seq_len(n))
+  data.table::setalloccol(out, 2L * k + 1L + getOption("datatable.alloccol", 1024L))
+  if (k >= 1L && n > 0L) {
+    # one global sort of the long (row, variable) table instead of one order()
+    # and 2k set() calls per row: ties keep the order of the features, as
+    # order() did row by row
+    long <- data.table::data.table(i = rep(seq_len(n), times = nf), j = rep(seq_len(nf), each = n),
+                                   s = as.vector(short))
+    data.table::setorderv(long, c("i", "s", "j"), order = c(1L, -1L, 1L), na.last = TRUE)
+    rk <- data.table::rowid(long$i)
+    for (h in seq_len(k)) {
+      at <- which(rk == h)   # sorted by row, so aligned with `out`
+      data.table::set(out, j = paste0("reason_", h), value = feats[long$j[at]])
+      data.table::set(out, j = paste0("shortfall_", h), value = long$s[at])
     }
+  } else {
+    for (j in seq_len(k)) { out[[paste0("reason_", j)]] <- NA_character_; out[[paste0("shortfall_", j)]] <- NA_real_ }
   }
   out[, .i := NULL]
   out[]

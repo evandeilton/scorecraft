@@ -71,8 +71,11 @@ impute) first, exactly as the scorecard pipeline does. Categorical
 missing values become the level \code{"NA"}, as in the engine. When a
 \code{holdout_idx} is given, the frozen bins are revalidated: the hold-out
 bin means are recomputed, the PSI of the bin shares is reported with the
-sample-size-adjusted critical value, and a driver whose hold-out means
-break the training order is flagged \code{UNSTABLE_HOLDOUT}.
+sample-size-adjusted critical value, a driver whose hold-out means
+break the training order is flagged \code{UNSTABLE_HOLDOUT}, one whose bin
+shares shift (fixed PSI flag \code{"shift"}, PSI at or above 0.25) is flagged
+\code{PSI_ACTION}, and one with more than 1\% of hold-out rows outside the
+bins \code{UNBINNED_HOLDOUT}.
 }
 \examples{
 set.seed(1)

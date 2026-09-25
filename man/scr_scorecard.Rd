@@ -86,7 +86,10 @@ characteristic (Siddiqi, 2006, chapter 6), leaving \code{base_points = 0}. The
 exact points stay in \code{points_raw}; \code{points} is the rounded version when
 \code{points_round = TRUE}. The exact score (\code{score}) and the whole-points
 score (\code{score_points}) are both returned by \code{\link[=scr_apply]{scr_apply()}} and both
-emitted by \code{\link[=scr_sql]{scr_sql()}}.
+emitted by \code{\link[=scr_sql]{scr_sql()}}. A row that falls in no fitted bin (a category
+never seen on train, a missing value without a missing bin) gets a WOE of
+0 from the binning engine, hence the points of a WOE of 0: \code{0}, or
+\code{base / k} under \code{"distributed"}.
 }
 
 \examples{

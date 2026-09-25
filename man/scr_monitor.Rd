@@ -19,7 +19,8 @@ scr_monitor(
 
 \item{newdata}{New table with the source columns.}
 
-\item{date_col}{Period column. \code{NULL} treats \code{newdata} as a single period.}
+\item{date_col}{Period column. \code{NULL} treats \code{newdata} as a single period.
+Rows with a missing date form a period of their own (\code{NA}, last).}
 
 \item{target}{Target column in \code{newdata}, for the performance by vintage.
 \code{NULL} skips it.}
