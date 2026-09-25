@@ -1082,6 +1082,7 @@ scr_apply.scr_pd <- function(x, newdata, ...) {
 #' @rdname scr_sql
 #' @export
 scr_sql.scr_pd <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
+  .scr_local_verbose(x)
   base <- scr_sql(x$scorecard, table = table, dialect = dialect)
   i_final <- which(base == "SELECT"); i_final <- i_final[length(i_final)]
   i_close <- max(which(base == ")" & seq_along(base) < i_final))
@@ -1560,6 +1561,7 @@ print.scr_pd_validation <- function(x, ...) {
 #' @rdname scr_export
 #' @export
 scr_export.scr_pd <- function(x, dir, stamp = TRUE, validation = NULL, ...) {
+  .scr_local_verbose(x)
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
   tag <- .file_tag(x$target)

@@ -43,7 +43,11 @@ test_that("scr_classing_read() validates the separator and the spec carries it i
   # a spec read with another separator is refused by the lab
   sp2 <- sp; attr(sp2, "sep") <- "|"
   expect_error(scr_classing_import(lab, sp2), "separator")
-  expect_message(scr_classing_import(lab, sp), "nothing to import")
+  # the lab's own config$verbose governs the message
+  lab_v <- lab; lab_v$result$config$verbose <- TRUE
+  expect_message(scr_classing_import(lab_v, sp), "nothing to import")
+  lab_q <- lab; lab_q$result$config$verbose <- FALSE
+  expect_no_message(scr_classing_import(lab_q, sp))
 })
 
 test_that("TOO_MANY_BINS fires when a fit exceeds max_bins", {

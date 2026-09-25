@@ -42,6 +42,22 @@ scr_verbose <- function(on = NULL) {
   invisible(old)
 }
 
+#' Follow the `verbose` key of an object's configuration until the caller exits
+#'
+#' For the methods that act on a fitted object (export, SQL to a file, the
+#' classing lab): the object's `config$verbose` rules, as it does in the
+#' function that fitted it. Objects without a configuration leave the
+#' session setting of [scr_verbose()] as it is.
+#' @keywords internal
+#' @noRd
+.scr_local_verbose <- function(x, frame = parent.frame()) {
+  cfg <- if (is.list(x)) x$config %||% (if (is.list(x$result)) x$result$config) else NULL
+  if (is.null(cfg) || is.null(cfg$verbose)) return(invisible(NULL))
+  old <- scr_verbose(isTRUE(cfg$verbose))
+  do.call(base::on.exit, list(call("scr_verbose", old), add = TRUE), envir = frame)
+  invisible(NULL)
+}
+
 #' @keywords internal
 #' @noRd
 msg <- function(fmt, ...) {

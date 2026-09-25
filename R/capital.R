@@ -823,6 +823,7 @@ print.scr_capital <- function(x, ...) {
 #'   by segment).
 #' @export
 scr_sql.scr_capital <- function(x, table = NULL, dialect = NULL, file = NULL, level = c("exposure", "portfolio"), ...) {
+  .scr_local_verbose(x)
   level <- match.arg(level)
   cfg <- x$config
   if (!is.null(table)) cfg$sql_table <- table
@@ -895,6 +896,7 @@ scr_sql.scr_capital <- function(x, table = NULL, dialect = NULL, file = NULL, le
 #' @rdname scr_export
 #' @export
 scr_export.scr_capital <- function(x, dir, stamp = TRUE, ...) {
+  .scr_local_verbose(x)
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
   tag <- .file_tag(x$framework)

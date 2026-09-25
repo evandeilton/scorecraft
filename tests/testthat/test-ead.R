@@ -238,8 +238,11 @@ test_that("the downturn stack is type1 or type3 with a mandatory reason and a le
   d1 <- scr_ead_downturn(m, per, reason = "2024 as the stress year of the demo panel")
   expect_equal(d1$downturn$method, "type1")
   t <- d1$downturn$table
-  expect_equal(t$n_downturn, m$rds[default_date >= per$start & default_date <= per$end, .N, by = pool][match(t$pool, pool), N])
-  obs <- m$rds[default_date >= per$start & default_date <= per$end, mean(ccf), by = pool]
+  # training rows only: the hold-out stays independent
+  in_per <- m$rds[default_date >= per$start & default_date <= per$end]
+  expect_true(any(in_per$sample == "holdout"))
+  expect_equal(t$n_downturn, in_per[sample == "train", .N, by = pool][match(t$pool, pool), N])
+  obs <- in_per[sample == "train", mean(ccf), by = pool]
   expect_equal(t$dt_observed, obs$V1[match(t$pool, obs$pool)])
   expect_equal(d1$pools$ccf_dt, pmax(d1$pools$lra, t$dt_observed))
   expect_equal(d1$pools$ccf_final, pmax(d1$pools$lra, d1$pools$ccf_dt) + d1$pools$moc_est)

@@ -640,6 +640,8 @@ print.scr_workout <- function(x, ...) {
 #' @keywords internal
 #' @noRd
 .lgd_downturn_table <- function(pools, scored, method, add_on, periods = NULL, min_n = 10L) {
+  # training rows only, like the long-run averages: the hold-out stays independent
+  if ("sample" %in% names(scored)) scored <- scored[sample == "train"]
   tb <- pools[, list(pool, n, lra, moc_c)]
   tb[, reference_value := .lgd_reference_value(scored, pools)]
   tb[, dt_type3 := lra + add_on]
@@ -954,11 +956,12 @@ scr_lgd_pools <- function(x, n_pools = NULL, min_defaults = NULL) {
 #'
 #' Quantifies the downturn per pool from user-supplied downturn periods.
 #' `method = "type1"` (observed impact): the default-weighted realised LGD
-#' of the defaults whose default date falls inside the periods; a pool with
-#' fewer than ten such defaults falls back to type 3. `method = "type3"`:
+#' of the training defaults whose default date falls inside the periods; a
+#' pool with fewer than ten such defaults falls back to type 3. `method = "type3"`:
 #' the long-run average plus `add_on`. `method = "none"`: the long-run
 #' average. The reference value (a challenger, not a bound) is the mean of
-#' the two worst calendar years of the pool. The downturn LGD used for
+#' the two worst calendar years of the pool. Both use the training rows
+#' only, so the hold-out stays independent evidence. The downturn LGD used for
 #' capital is
 #' \deqn{\mathrm{LGD}^{DT} = \min\!\big(1,\ \max(\mathrm{LRA} + \mathrm{MoC},\ \mathrm{DT} + \mathrm{MoC})\big)}
 #' and the impact `LGD^DT - min(1, LRA + MoC)` is reported per pool.
@@ -1186,6 +1189,7 @@ scr_apply.scr_lgd <- function(x, newdata, what = c("pool", "lgd", "all"), ...) {
 #' @rdname scr_sql
 #' @export
 scr_sql.scr_lgd <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
+  .scr_local_verbose(x)
   cfg <- x$config
   if (!is.null(table)) cfg$sql_table <- table
   if (!is.null(dialect)) cfg$sql_dialect <- dialect
@@ -1445,6 +1449,7 @@ print.scr_lgd_validation <- function(x, ...) {
 #'   (`capital_<framework>.xlsx`).
 #' @export
 scr_export.scr_lgd <- function(x, dir, stamp = TRUE, validation = NULL, elbe = NULL, tag = "model", ...) {
+  .scr_local_verbose(x)
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
   tag <- .file_tag(tag)

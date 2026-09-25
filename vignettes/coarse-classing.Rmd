@@ -182,7 +182,9 @@ p_missing$warnings
 
 The optimal bins of `ds_optin` carried a training IV of 0.0065 (see the
 overview); folding `"MISSING"` into `YES` leaves almost none, below the
-admission minimum, and loses more than the lab allows on hold-out.
+admission minimum, and loses more than the lab allows on hold-out. With a
+training IV that close to zero, the hold-out/train IV ratio says nothing
+either, hence `IV_RATIO_UNSTABLE`.
 
 ### Reading the warnings and the verdict
 
@@ -193,10 +195,12 @@ lab-specific rules. Codes fall into two tiers.
 * **Warnings** (advisory) give a `REVIEW` verdict: the engine screening
   codes (`NOT_MONOTONIC`, `SMALL_BIN`, `IV_BELOW_MIN`, `IV_SUSPECT`, ...),
   the hold-out codes (`IV_DROPS_ON_HOLDOUT`, `IV_LOW_ON_HOLDOUT`,
-  `PSI_UNSTABLE`, ...) and `IV_LOSS_VS_OPTIMAL`, raised when the hold-out
+  `PSI_UNSTABLE`, ...), `IV_LOSS_VS_OPTIMAL`, raised when the hold-out
   IV falls more than `lab_max_iv_loss` (10% by default) below the optimal
-  one. The `ds_region` grouping is a `REVIEW` for exactly that reason: two
-  regions lose about a fifth of the hold-out IV of five states.
+  one, and `IV_RATIO_UNSTABLE`, raised when the train IV is below `iv_min`
+  and the hold-out/train IV ratio therefore carries little information.
+  The `ds_region` grouping is a `REVIEW` for `IV_LOSS_VS_OPTIMAL` alone:
+  two regions lose about a fifth of the hold-out IV of five states.
 * **Blocking** codes give a `BLOCKED` verdict: an empty bin, a degenerate
   bin (no events or no non-events, unless the lab was opened with
   `laplace > 0`), a bin below `lab_min_bin_pct_hard` (0.5%) and a manual IV

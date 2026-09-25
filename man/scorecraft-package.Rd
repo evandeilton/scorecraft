@@ -67,7 +67,9 @@ validation. \code{\link[=scr_el]{scr_el()}}, \code{\link[=scr_irb_rw]{scr_irb_rw
 \code{\link[=scr_pd_stress]{scr_pd_stress()}} and \code{\link[=scr_ecl]{scr_ecl()}} compute expected loss, risk weights,
 capital and expected credit loss. Binning
 against a continuous target goes through \code{\link[=scr_bin_continuous]{scr_bin_continuous()}}, whose
-result the engine reproduces in R and in SQL.
+result the engine reproduces in R and in SQL. The regulatory texts behind
+the presets are listed in \code{\link[=scr_irb_params]{scr_irb_params()}}; users are responsible for
+checking the tables against the texts in force before any regulatory use.
 }
 
 \section{Parallelism}{

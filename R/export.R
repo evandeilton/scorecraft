@@ -67,6 +67,7 @@ scr_export <- function(x, dir, stamp = TRUE, ...) UseMethod("scr_export")
 #' @rdname scr_export
 #' @export
 scr_export.scr_result <- function(x, dir, stamp = TRUE, ...) {
+  .scr_local_verbose(x)
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
   tag <- .file_tag(x$target)
@@ -96,6 +97,7 @@ scr_export.scr_result <- function(x, dir, stamp = TRUE, ...) {
 #' @rdname scr_export
 #' @export
 scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
+  .scr_local_verbose(x)
   .need_openxlsx()
   extra <- list(...)
   out_dir <- .export_dir(dir, stamp)

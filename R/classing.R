@@ -342,6 +342,8 @@ check_lab <- function(lab, fn) {
   if (!is.null(optimal_checks) && is.finite(optimal_checks$iv_holdout) && is.finite(ho$iv_holdout) &&
       ho$iv_holdout < (1 - lab$max_iv_loss) * optimal_checks$iv_holdout) codes <- c(codes, "IV_LOSS_VS_OPTIMAL")
   if (is.finite(sc$total_iv) && sc$total_iv >= cfg$iv_suspect && sc$total_iv < cfg$iv_max) codes <- c(codes, "IV_SUSPECT")
+  # a ratio over a train IV near zero is unstable: reported, never blocking
+  if (is.finite(ho$iv_ratio) && is.finite(sc$total_iv) && sc$total_iv < cfg$iv_min) codes <- c(codes, "IV_RATIO_UNSTABLE")
   codes <- unique(codes)
   verdict <- if (length(blocking)) "BLOCKED" else if (length(codes)) "REVIEW" else "ACCEPTABLE"
   summary <- data.table::data.table(
@@ -638,6 +640,7 @@ print.scr_classing_proposal <- function(x, ...) {
 #' scr_decisions(lab)
 #' @export
 scr_classing_accept <- function(lab, proposal, reason, override = FALSE) {
+  .scr_local_verbose(lab)
   check_lab(lab, "scr_classing_accept")
   .check_proposal(lab, proposal, "scr_classing_accept")
   reason <- .check_reason(reason, "scr_classing_accept")
@@ -818,6 +821,7 @@ scr_classing_choose <- function(lab, keep = NULL, drop = NULL, force = NULL, rea
 #' unlink(f)
 #' @export
 scr_classing_spec <- function(lab, file = NULL) {
+  .scr_local_verbose(lab)
   if (inherits(lab, "scr_result")) {
     if (is.null(lab$lab)) stop("this scr_result carries no classing.", call. = FALSE)
     sp <- lab$lab$spec
@@ -948,6 +952,7 @@ scr_classing_read <- function(file, sep = "%;%") {
 #'   accepted or discarded.
 #' @export
 scr_classing_import <- function(lab, file) {
+  .scr_local_verbose(lab)
   check_lab(lab, "scr_classing_import")
   sep <- lab$result$config$bin_separator
   spec <- if (is.character(file)) scr_classing_read(file, sep = sep) else file
@@ -1154,6 +1159,7 @@ print.scr_classing <- function(x, ...) {
 #' @rdname scr_export
 #' @export
 scr_export.scr_classing <- function(x, dir, stamp = TRUE, ...) {
+  .scr_local_verbose(x)
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
   tag <- .file_tag(x$target)

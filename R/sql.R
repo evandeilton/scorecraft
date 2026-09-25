@@ -90,6 +90,7 @@ scr_sql <- function(x, table = NULL, dialect = NULL, file = NULL, ...) UseMethod
 #' @rdname scr_sql
 #' @export
 scr_sql.scr_result <- function(x, table = NULL, dialect = NULL, file = NULL, output = NULL, ...) {
+  .scr_local_verbose(x)
   cfg <- x$config
   if (!is.null(table)) cfg$sql_table <- table
   if (!is.null(dialect)) cfg$sql_dialect <- dialect
@@ -103,6 +104,7 @@ scr_sql.scr_result <- function(x, table = NULL, dialect = NULL, file = NULL, out
 #' @export
 scr_sql.scr_scorecard <- function(x, table = NULL, dialect = NULL, file = NULL, what = c("score", "woe", "all"),
                                   keep_columns = NULL, ...) {
+  .scr_local_verbose(x)
   what <- match.arg(what)
   cfg <- x$config
   if (!is.null(table)) cfg$sql_table <- table

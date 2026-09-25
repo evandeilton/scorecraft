@@ -35,11 +35,12 @@ and the pool columns \code{lgd_dt} and \code{lgd_final} updated.
 \description{
 Quantifies the downturn per pool from user-supplied downturn periods.
 \code{method = "type1"} (observed impact): the default-weighted realised LGD
-of the defaults whose default date falls inside the periods; a pool with
-fewer than ten such defaults falls back to type 3. \code{method = "type3"}:
+of the training defaults whose default date falls inside the periods; a
+pool with fewer than ten such defaults falls back to type 3. \code{method = "type3"}:
 the long-run average plus \code{add_on}. \code{method = "none"}: the long-run
 average. The reference value (a challenger, not a bound) is the mean of
-the two worst calendar years of the pool. The downturn LGD used for
+the two worst calendar years of the pool. Both use the training rows
+only, so the hold-out stays independent evidence. The downturn LGD used for
 capital is
 \deqn{\mathrm{LGD}^{DT} = \min\!\big(1,\ \max(\mathrm{LRA} + \mathrm{MoC},\ \mathrm{DT} + \mathrm{MoC})\big)}
 and the impact \code{LGD^DT - min(1, LRA + MoC)} is reported per pool.

@@ -17,6 +17,11 @@ IRB](lgd-and-ead-under-irb.html) builds the other two parameters, and
 [Expected loss and regulatory capital](expected-loss-and-capital.html)
 turns the three into expected loss, capital and accounting ECL.
 
+The regulatory texts behind the parameter tables are listed in
+[`scr_irb_params()`](../reference/scr_irb_params.html). Regulation changes
+and each supervisor interprets it: check the tables against the texts in
+force before any regulatory use.
+
 The introductory guide ends with a scorecard whose alignment turns a
 score into a probability. That probability is a good ranking device and a
 fair estimate of the event rate **of the development sample**; it is not

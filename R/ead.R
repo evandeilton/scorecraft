@@ -883,9 +883,10 @@ print.scr_ead <- function(x, ...) {
 #'
 #' Quantifies the downturn component of the CCF from user-supplied downturn
 #' periods. `"type1"` (observed impact) takes, per pool, the default-weighted
-#' average of the realised values of the events whose default date falls in
-#' the periods and sets `ccf_dt = max(lra, observed)`; `"type3"` (reference
-#' value plus add-on) sets `ccf_dt = lra + add_on`; `"none"` resets
+#' average of the realised values of the training events whose default date
+#' falls in the periods (the hold-out stays independent) and sets
+#' `ccf_dt = max(lra, observed)`; `"type3"` (long-run average plus add-on)
+#' sets `ccf_dt = lra + add_on`; `"none"` resets
 #' `ccf_dt = lra`. The pool table is recomputed (`ccf_final`, `ccf_applied`)
 #' and the ledger records the periods, the method and the reason.
 #'
@@ -935,6 +936,8 @@ scr_ead_downturn <- function(x, periods = NULL, method = NULL, add_on = 0.15, re
   } else if (identical(method, "type1")) {
     stop("scr_ead_downturn(): `periods` is needed for the observed-impact method (type1).", call. = FALSE)
   }
+  # training rows only, like the long-run averages: the hold-out stays independent
+  in_dt <- in_dt & rds$sample == "train"
   obs <- rds[in_dt, list(n_downturn = .N, dt_observed = mean(ccf)), by = "pool"]
   p <- data.table::copy(x$pools)
   p <- merge(p, obs, by = "pool", all.x = TRUE, sort = FALSE)
@@ -956,12 +959,12 @@ scr_ead_downturn <- function(x, periods = NULL, method = NULL, add_on = 0.15, re
   x$metrics <- .ead_metrics(x, rds)
   x$ledger <- rbind(x$ledger, data.table::data.table(
     step = "downturn", action = method,
-    detail = sprintf("periods: %s; %d reference rows in the periods; add-on %s; applied CCF now %.4f to %.4f",
+    detail = sprintf("periods: %s; %d training reference rows in the periods; add-on %s; applied CCF now %.4f to %.4f",
                      if (is.null(periods)) "(none)" else paste(sprintf("%s to %s", format(pd$start), format(pd$end)), collapse = ", "),
                      sum(in_dt), format(add_on), min(p$ccf_applied), max(p$ccf_applied)),
     reason = reason, date = format(Sys.Date())))
   x$model_card <- .ead_model_card(x)
-  msg("  downturn %s: %d rows in the periods; applied CCF %.4f to %.4f", method, sum(in_dt), min(p$ccf_applied), max(p$ccf_applied))
+  msg("  downturn %s: %d training rows in the periods; applied CCF %.4f to %.4f", method, sum(in_dt), min(p$ccf_applied), max(p$ccf_applied))
   x
 }
 
@@ -999,6 +1002,7 @@ scr_apply.scr_ead <- function(x, newdata, what = c("all", "ead", "pool"), ...) {
 #' @rdname scr_sql
 #' @export
 scr_sql.scr_ead <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
+  .scr_local_verbose(x)
   cfg <- x$config
   if (!is.null(table)) cfg$sql_table <- table
   if (!is.null(dialect)) cfg$sql_dialect <- dialect
@@ -1275,6 +1279,7 @@ print.scr_ead_validation <- function(x, ...) {
 #' @rdname scr_export
 #' @export
 scr_export.scr_ead <- function(x, dir, stamp = TRUE, validation = NULL, tag = "ccf", ...) {
+  .scr_local_verbose(x)
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
   val <- validation %||% scr_ead_validate(x)

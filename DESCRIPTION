@@ -1,6 +1,6 @@
 Package: scorecraft
 Title: Scorecard Development and Internal Ratings-Based Risk Parameters
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(
     person("Jose Evandeilton", "Lopes", email = "evandeilton@gmail.com",
            role = c("aut", "cre", "cph"))

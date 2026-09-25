@@ -59,7 +59,9 @@
 #' [scr_pd_stress()] and [scr_ecl()] compute expected loss, risk weights,
 #' capital and expected credit loss. Binning
 #' against a continuous target goes through [scr_bin_continuous()], whose
-#' result the engine reproduces in R and in SQL.
+#' result the engine reproduces in R and in SQL. The regulatory texts behind
+#' the presets are listed in [scr_irb_params()]; users are responsible for
+#' checking the tables against the texts in force before any regulatory use.
 #'
 #' @section Parallelism:
 #'

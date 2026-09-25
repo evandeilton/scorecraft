@@ -281,3 +281,11 @@ test_that("export carries the classing sheets and the ledger", {
   sc <- scr_export(scr_scorecard(res2, n_boot = 5), out, stamp = FALSE)
   expect_true(all(c("Coarse_Classing", "Decision_Ledger") %in% openxlsx::getSheetNames(sc$files$scorecard)))
 })
+
+test_that("a proposal over a train IV near zero flags the unstable IV ratio without blocking", {
+  lab <- scr_coarse_classing(res_demo())
+  p <- scr_classing_propose(lab, "ds_optin", missing_to = 1)
+  expect_true("IV_RATIO_UNSTABLE" %in% p$warnings)
+  expect_false("IV_RATIO_UNSTABLE" %in% p$blocking)
+  expect_identical(p$verdict, "REVIEW")
+})

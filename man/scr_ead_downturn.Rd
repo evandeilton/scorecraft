@@ -36,9 +36,10 @@ The table also carries \code{ccf_final} and \code{ccf_applied}; the object
 \description{
 Quantifies the downturn component of the CCF from user-supplied downturn
 periods. \code{"type1"} (observed impact) takes, per pool, the default-weighted
-average of the realised values of the events whose default date falls in
-the periods and sets \code{ccf_dt = max(lra, observed)}; \code{"type3"} (reference
-value plus add-on) sets \code{ccf_dt = lra + add_on}; \code{"none"} resets
+average of the realised values of the training events whose default date
+falls in the periods (the hold-out stays independent) and sets
+\code{ccf_dt = max(lra, observed)}; \code{"type3"} (long-run average plus add-on)
+sets \code{ccf_dt = lra + add_on}; \code{"none"} resets
 \code{ccf_dt = lra}. The pool table is recomputed (\code{ccf_final}, \code{ccf_applied})
 and the ledger records the periods, the method and the reason.
 }

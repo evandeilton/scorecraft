@@ -178,16 +178,16 @@ test_that("downturn: observed impact per pool, the type-3 add-on, the reference 
   tb <- d1$downturn$table
   expect_equal(d1$downturn$status, "final")
   expect_true(all(tb$method_used %in% c("type1", "type3_fallback")))
-  # observed: default-weighted realised LGD of the pool's defaults inside the periods
-  s <- m$scored[default_date >= per$start & default_date <= per$end]
+  # observed: default-weighted realised LGD of the pool's training defaults inside the periods
+  s <- m$scored[sample == "train" & default_date >= per$start & default_date <= per$end]
   obs <- s[, list(v = mean(lgd_real), n = .N), by = pool][order(pool)]
   expect_equal(tb$dt_observed[match(obs$pool, tb$pool)], obs$v)
   expect_equal(tb$n_downturn[match(obs$pool, tb$pool)], obs$n)
   expect_equal(tb$lgd_dt, pmin(1, pmax(tb$lra + tb$moc_c, tb$dt + tb$moc_c)))
   expect_true(all(tb$lgd_dt >= tb$lra + tb$moc_c - 1e-12))
   expect_equal(d1$pools$lgd_dt, tb$lgd_dt); expect_equal(d1$pools$lgd_final, tb$lgd_dt)
-  # reference value: the mean of the two worst calendar years of the pool
-  yr <- m$scored[pool == 1, list(v = mean(lgd_real)), by = list(y = as.integer(format(default_date, "%Y")))]
+  # reference value: the mean of the two worst calendar years of the pool, training rows
+  yr <- m$scored[sample == "train" & pool == 1, list(v = mean(lgd_real)), by = list(y = as.integer(format(default_date, "%Y")))]
   expect_equal(tb$reference_value[1], mean(sort(yr$v, decreasing = TRUE)[1:2]))
   d3 <- scr_lgd_downturn(m, method = "type3", reason = "downturn data too thin")
   expect_equal(d3$downturn$table$lgd_dt, pmin(1, m$pools$lra + 0.15 + m$pools$moc_c))

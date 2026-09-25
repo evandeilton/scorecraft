@@ -31,11 +31,39 @@ text applicable from 2025). The presets differ in a handful of cells, all
 visible with \code{print()}; users who need another jurisdiction edit the
 tables and pass the object to the functions that take \code{params}.
 }
+\section{Regulatory texts}{
+
+The presets encode a reading of the texts below at the time of the
+release. Regulation changes and is interpreted by each supervisor: before
+any regulatory use, check every table against the texts in force for the
+jurisdiction and the portfolio, and edit the tables where they differ.
+The package implements the calculations; it does not give regulatory
+advice.
+}
+
 \examples{
 p <- scr_irb_params("bcb")
 p
 p$pd_floor
 p2 <- p; p2$pd_floor$floor[p2$pd_floor$asset_class == "retail_other"] <- 0.001
+}
+\references{
+Basel Committee on Banking Supervision. \emph{The Basel Framework}, chapters
+CRE31 to CRE36 (IRB approach) and RBC20 (output floor).
+
+Regulation (EU) 2024/1623 (CRR3), amending Regulation (EU) No 575/2013.
+
+European Banking Authority (2017). \emph{Guidelines on PD estimation, LGD
+estimation and the treatment of defaulted exposures}, EBA/GL/2017/16.
+
+European Banking Authority (2019). \emph{Guidelines for the estimation of LGD
+appropriate for an economic downturn}, EBA/GL/2019/03.
+
+Banco Central do Brasil. BCB Resolution 229/2022 and BCB Resolution
+303/2023.
+
+International Accounting Standards Board (2014). \emph{IFRS 9 Financial
+Instruments}.
 }
 \seealso{
 Other irb-parameters:

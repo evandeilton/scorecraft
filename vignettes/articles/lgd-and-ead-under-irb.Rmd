@@ -18,6 +18,11 @@ for the scorecard itself); the third, [Expected loss and regulatory
 capital](expected-loss-and-capital.html), combines PD, LGD and EAD into
 expected loss, capital and accounting ECL.
 
+The regulatory texts behind the parameter tables are listed in
+[`scr_irb_params()`](../reference/scr_irb_params.html). Regulation changes
+and each supervisor interprets it: check the tables against the texts in
+force before any regulatory use.
+
 The two IRB parameters after the PD follow the discipline of the scorecard
 pipeline: a reference data set built with a funnel that names every rule
 it applied, drivers binned on training cohorts and revalidated with frozen
@@ -208,10 +213,11 @@ m$pools[, .(pool, pred_lo, pred_hi, n, lra, lra_ew, se, moc_c, lgd_dt, floor, lg
 
 `scr_lgd_downturn()` quantifies the downturn per pool from user-supplied
 periods. Under `"type1"` the downturn value is the realised LGD of the
-defaults whose default date falls in the periods (a pool with fewer than
-ten such defaults falls back to the add-on); the reference value, the mean
-of the two worst calendar years of the pool, is reported as a challenger,
-not a bound. The downturn LGD used for capital is
+training defaults whose default date falls in the periods (a pool with
+fewer than ten such defaults falls back to the add-on); the reference
+value, the mean of the two worst calendar years of the pool's training
+defaults, is reported as a challenger, not a bound. Both use the training
+rows only, so the hold-out stays independent for validation. The downturn LGD used for capital is
 `min(1, max(LRA + MoC, DT + MoC))`. The cap at one is the package's
 choice; the EBA guidelines cap the type-3 estimate at 105%, so a pool
 that loses more than its exposure in a downturn needs a decision the cap
@@ -224,9 +230,10 @@ m <- scr_lgd_downturn(m, periods = data.frame(start = as.Date("2022-01-01"), end
 m$downturn$table[, .(pool, n, lra, moc_c, n_downturn, dt_observed, reference_value, method_used, lgd_dt, impact, below_reference)]
 ```
 
-Pools 2 and 3 sit below their reference value: the two worst years of
-those pools were worse than the periods declared. The flag does not change
-the estimate; it is there for the reviewer to answer.
+No pool sits below its reference value: in every pool the downturn LGD,
+margin included, is at least the mean of the two worst training years.
+Had one fallen below, the flag would not change the estimate; it would be
+there for the reviewer to answer.
 
 `scr_lgd_floor()` reads the input floor from the parameter table of the
 framework. The tables are numbers, editable and printable; an edit is
@@ -434,14 +441,15 @@ m_ead$pools[, .(pool, measure, n, lra, lra_ew, se, moc_est, ccf_dt, ccf_final, c
 `"type1"` the downturn value of a pool is `max(lra, observed)`, the
 default-weighted realised CCF of the events whose default date falls in
 the periods; the applied CCF is recomputed and the ledger records
-periods, method and reason. Two facts to keep in view: the observed value
-is computed on every row of the reference data set, training and hold-out
-alike, so the hold-out validation below is not independent of the
-downturn component; and no minimum count is imposed, so a pool with few
-events in the periods (the `LF` pool here) should be read with care.
+periods, method and reason. The observed value is computed on the
+training rows only, like the long-run average, so the hold-out validation
+below stays independent of the downturn component. No minimum count is
+imposed, so a pool with few training events in the periods (the `LF`
+pool here, with four) should be read with care.
 
 The period chosen covers the first three quarters of 2024, when the
-realised CCFs of the demo panel run above their average in every pool.
+realised CCFs of the training rows run above their long-run average in
+every pool; the table shows the observed value above `lra` in each.
 
 ```{r ead-downturn}
 m_ead <- scr_ead_downturn(m_ead, periods = data.frame(start = as.Date("2024-01-01"), end = as.Date("2024-09-30")),
@@ -508,9 +516,7 @@ v_ead$backtest[, .(cohort, n, realised, predicted, p, adequacy, light_adequacy)]
 Every calibration light is green because the estimate sits above the
 realised values on the hold-out: the margin and the downturn push the
 applied CCF up, and an adequacy ratio below one means the predicted EAD
-covers the realised one. Part of that cover is not independent evidence,
-since the downturn component was estimated on rows that include the
-hold-out. The discrimination light is green only because the hold-out
+covers the realised one. The discrimination light is green only because the hold-out
 gAUC does not fall below the development value; the level itself is weak,
 0.57 with an interval that reaches down to 0.50, so the single admitted
 driver separates the pools little better than chance. On a real portfolio

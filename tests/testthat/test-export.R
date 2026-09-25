@@ -45,3 +45,13 @@ test_that("stamp = TRUE writes into a timestamped subdirectory", {
   res <- scr_export(res_demo(), out, stamp = TRUE)
   expect_match(dirname(res$files$xlsx), "[0-9]{8}_[0-9]{6}$")
 })
+
+test_that("the object's config$verbose governs the messages of scr_sql() and scr_export()", {
+  old <- scr_verbose(TRUE); on.exit(scr_verbose(old), add = TRUE)
+  res <- res_demo()
+  res$config$verbose <- FALSE
+  expect_no_message(scr_sql(res, file = withr::local_tempfile(fileext = ".sql")))
+  expect_true(scr_verbose())
+  res$config$verbose <- TRUE
+  expect_message(scr_sql(res, file = withr::local_tempfile(fileext = ".sql")), "SQL written")
+})
