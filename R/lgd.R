@@ -34,6 +34,9 @@
   r <- data.table::as.data.table(rates)
   if (!all(c("date", "rate") %in% names(r))) stop("scr_workout(): `rates` needs the columns `date` and `rate`.", call. = FALSE)
   r <- r[, list(date = as.Date(date), rate = as.double(rate))][order(date)]
+  if (!nrow(r) || anyNA(r$date) || any(!is.finite(r$rate))) {
+    stop("scr_workout(): `rates` needs at least one row and no missing date or rate.", call. = FALSE)
+  }
   idx <- findInterval(as.numeric(as.Date(dates)), as.numeric(r$date))
   idx[idx == 0L] <- 1L
   r$rate[idx]
@@ -44,6 +47,12 @@
 #' @noRd
 .lgd_merge_map <- function(d, window) {
   d <- d[order(facility_id, default_date)]
+  # only facilities with more than one default need the sequential scan; the
+  # rest are their own root (keeps the grouped R loop off millions of groups)
+  multi <- d$facility_id %in% d$facility_id[duplicated(d$facility_id)]
+  single <- d[!multi, list(default_id, root_id = default_id)]
+  if (!any(multi)) return(single)
+  d <- d[multi]
   out <- d[, {
     root <- default_id[1]; root_close <- close_date[1]; roots <- character(.N); roots[1] <- root
     if (.N > 1L) for (i in 2:.N) {
@@ -56,7 +65,7 @@
     }
     list(default_id = default_id, root_id = roots)
   }, by = facility_id]
-  out[, list(default_id, root_id)]
+  data.table::rbindlist(list(single, out[, list(default_id, root_id)]))
 }
 
 #' Cumulative discounted recovery rate by product and month, from closed defaults
@@ -127,9 +136,10 @@
 #' @section Rules:
 #'
 #' * **Cures.** An event with `status == "cured"` returns to performing: the
-#'   balance outstanding at the cure date (`ead` net of the cash recovered)
-#'   enters as an artificial recovery on the cure date, so the cure carries
-#'   its costs and the discount effect, never a zero loss by decree.
+#'   balance outstanding at the cure date (`ead` plus the drawings after
+#'   default, net of the cash recovered) enters as an artificial recovery
+#'   on the cure date, so the cure carries its costs and the discount
+#'   effect, never a zero loss by decree.
 #' * **Multiple defaults.** Two defaults of one facility separated by fewer
 #'   than `lgd_cure_window` months (from the close of the first to the start
 #'   of the second), or a new default while the first is still open, are
@@ -247,10 +257,16 @@ scr_workout <- function(defaults, cashflows, rates = NULL, config = scr_config()
   cf <- merge(cf, rds[, list(root_id, default_date, discount_rate)], by = "root_id", sort = FALSE)
   cf[, month := pmax(0L, .months_between(default_date, date))]
   cf[, pv := amount / (1 + discount_rate / 12)^month]
-  agg <- cf[, list(recovery_nominal = sum(amount[type == "recovery"]), pv_recovery_cash = sum(pv[type == "recovery"]),
-                   cost_nominal = sum(amount[type == "direct_cost"]), pv_cost = sum(pv[type == "direct_cost"]),
-                   drawing_nominal = sum(amount[type == "drawing"]), pv_drawing = sum(pv[type == "drawing"]),
-                   n_cashflows = .N, last_month = max(month)), by = root_id]
+  # grouped sums on indicator-weighted columns: plain sum()/max() by group are
+  # GForce-optimised, per-group subsetting (amount[type == ...]) is not
+  sums <- c("recovery_nominal", "pv_recovery_cash", "cost_nominal", "pv_cost", "drawing_nominal", "pv_drawing")
+  w <- cf[, list(root_id, month,
+                 recovery_nominal = amount * (type == "recovery"), pv_recovery_cash = pv * (type == "recovery"),
+                 cost_nominal = amount * (type == "direct_cost"), pv_cost = pv * (type == "direct_cost"),
+                 drawing_nominal = amount * (type == "drawing"), pv_drawing = pv * (type == "drawing"))]
+  agg <- w[, c(lapply(.SD, sum), list(n_cashflows = .N)), by = root_id, .SDcols = sums]
+  agg <- merge(agg, w[, list(last_month = max(month)), by = root_id], by = "root_id", sort = FALSE)
+  rm(w)
   rds <- merge(rds, agg, by = "root_id", all.x = TRUE, sort = FALSE)
   for (nm in c("recovery_nominal", "pv_recovery_cash", "cost_nominal", "pv_cost", "drawing_nominal", "pv_drawing", "last_month")) {
     data.table::set(rds, which(is.na(rds[[nm]])), nm, 0)
@@ -260,7 +276,10 @@ scr_workout <- function(defaults, cashflows, rates = NULL, config = scr_config()
                                                            .months_between(default_date, obs_date),
                                                            .months_between(default_date, close_date)))]
   rds[, is_cure := status == "cured"]
-  rds[, recovery_artificial := data.table::fifelse(is_cure, pmax(0, ead - recovery_nominal), 0)]
+  # outstanding at the cure date: exposure at default plus drawings after
+  # default less the cash recovered (the drawings are in the loss, so they
+  # must also be in the balance returned to performing)
+  rds[, recovery_artificial := data.table::fifelse(is_cure, pmax(0, ead + drawing_nominal - recovery_nominal), 0)]
   rds[, pv_artificial := recovery_artificial / (1 + discount_rate / 12)^months_in_default]
   rds[, pv_recovery := pv_recovery_cash + pv_artificial]
 
@@ -276,17 +295,18 @@ scr_workout <- function(defaults, cashflows, rates = NULL, config = scr_config()
   ext <- NULL
   if (any(rds$is_incomplete)) {
     inc <- rds[is_incomplete == TRUE, list(default_id, product, ead, months_in_default)]
-    rho <- function(p, m) {
-      src <- if (p %in% profile$product) p else "all"
-      v <- profile[product == src & month == pmin(m, cfg$lgd_t_max), cum_recovery]
-      list(v = if (length(v)) v else 0, src = src)
+    # vectorised look-up of the profile at (product, month); a product without
+    # closed defaults reads the "all" profile
+    pkey <- paste(profile$product, profile$month, sep = "\r")
+    rho <- function(src, m) {
+      v <- profile$cum_recovery[match(paste(src, pmin(m, cfg$lgd_t_max), sep = "\r"), pkey)]
+      data.table::fifelse(is.na(v), 0, v)
     }
-    ext <- data.table::rbindlist(lapply(seq_len(nrow(inc)), function(i) {
-      a <- rho(inc$product[i], inc$months_in_default[i]); b <- rho(inc$product[i], cfg$lgd_t_max)
-      data.table::data.table(default_id = inc$default_id[i], product = inc$product[i],
-                             months_in_default = inc$months_in_default[i], rho_tau = a$v, rho_t_max = b$v,
-                             expected_further = inc$ead[i] * max(0, b$v - a$v), profile_source = a$src, lambda = 1)
-    }))
+    src <- data.table::fifelse(inc$product %in% profile$product, inc$product, "all")
+    a <- rho(src, inc$months_in_default); b <- rho(src, rep(cfg$lgd_t_max, nrow(inc)))
+    ext <- data.table::data.table(default_id = inc$default_id, product = inc$product, months_in_default = inc$months_in_default,
+                                  rho_tau = a, rho_t_max = b, expected_further = inc$ead * pmax(0, b - a),
+                                  profile_source = src, lambda = 1)
     rds[match(ext$default_id, default_id), recovery_extrapolated := ext$expected_further]
   }
   funnel$inc <- data.table::data.table(rule = "INCOMPLETE_EXTRAPOLATED", n = sum(rds$is_incomplete),
@@ -330,7 +350,7 @@ scr_workout <- function(defaults, cashflows, rates = NULL, config = scr_config()
     .lgd_ledger_row("discounting", sprintf("%s at default + add-on %s, monthly compounding over whole months",
                                            if (is.null(rates)) sprintf("flat rate %s", fmt_pct(cfg$lgd_discount_rate, 2)) else "reference rate",
                                            fmt_pct(cfg$lgd_discount_add_on, 2))),
-    .lgd_ledger_row("cure_treatment", "outstanding at the cure date (ead net of cash recovered) as an artificial recovery on the cure date"),
+    .lgd_ledger_row("cure_treatment", "outstanding at the cure date (ead plus drawings, net of cash recovered) as an artificial recovery on the cure date"),
     .lgd_ledger_row("multiple_defaults", sprintf("%d event(s) merged: gap below %d months or overlapping spells", n_merged, cfg$lgd_cure_window)),
     .lgd_ledger_row("incomplete_workouts", sprintf("%d open event(s) extrapolated from the product recovery profile (lambda = 1); %d closed at t_max = %d",
                                                    sum(rds$is_incomplete), sum(beyond), cfg$lgd_t_max)),
@@ -438,23 +458,12 @@ print.scr_workout <- function(x, ...) {
 
 #' Somers' D of the prediction with respect to the realised value
 #'
-#' `(C - D) / (pairs untied on the realised value)`, through the tau-b of
-#' [stats::cor()]: `C - D = tau_b * sqrt((n0 - n_x)(n0 - n_y))`.
-#' Generalised AUC is `(D + 1) / 2`. Base and stats only: the bootstrap
-#' ships it to workers that may hold an older namespace.
+#' `(C - D) / (pairs untied on the realised value)`, the pairs counted
+#' exactly in `O(n log n)` by the compiled kernel (`.scr_somers()`); `NA`
+#' when the prediction is constant. Generalised AUC is `(D + 1) / 2`.
 #' @keywords internal
 #' @noRd
-.lgd_somers <- function(p, r) {
-  n <- length(p)
-  if (n < 2L) return(NA_real_)
-  tau <- suppressWarnings(stats::cor(p, r, method = "kendall"))
-  if (!is.finite(tau)) return(NA_real_)
-  n0 <- n * (n - 1) / 2
-  tie <- function(x) { t <- as.numeric(table(x)); sum(t * (t - 1) / 2) }
-  n1 <- tie(p); n2 <- tie(r)
-  if (n0 - n2 <= 0 || n0 - n1 <= 0) return(NA_real_)
-  tau * sqrt((n0 - n1) * (n0 - n2)) / (n0 - n2)
-}
+.lgd_somers <- function(p, r) .scr_somers(p, r, const_p = NA_real_)
 
 #' Loss capture ratio: area above the diagonal of the model curve over the ideal one
 #' @keywords internal
@@ -490,13 +499,13 @@ print.scr_workout <- function(x, ...) {
   out$lcr <- .lgd_lcr(pred, real, ead)
   out <- c(out, na, list(n_boot = 0L, level = level))
   if (n_boot >= 2L) {
-    if (!is.null(seed)) set.seed(seed)
+    .scr_local_seed(seed)
     seeds <- sample.int(.Machine$integer.max, n_boot)
-    # a sealed closure: only base/stats inside, so a PSOCK worker with an
-    # older installed namespace still evaluates it
+    .scr_rng_guard()   # the replicates re-seed; the user's stream moves by the n_boot draws above only
+    # the closure carries the data and nothing else from this frame; its parent
+    # is the namespace, which a PSOCK worker loads to reach the compiled kernel
     env <- list2env(list(pred = pred, real = real, ead = ead, n = n, somers = .lgd_somers, lcr = .lgd_lcr),
-                    parent = baseenv())
-    environment(env$somers) <- env; environment(env$lcr) <- env
+                    parent = environment(.lgd_metrics))
     fun <- function(sd) {
       set.seed(sd)
       j <- sample.int(n, n, replace = TRUE)
@@ -524,7 +533,7 @@ print.scr_workout <- function(x, ...) {
   ho <- dates > cutoff
   method <- "cohort"
   if (!any(ho) || all(ho)) {
-    set.seed(seed); ho <- seq_len(n) %in% sample.int(n, max(1L, round(holdout * n))); method <- "random"; cutoff <- as.Date(NA)
+    .scr_local_seed(seed); ho <- seq_len(n) %in% sample.int(n, max(1L, round(holdout * n))); method <- "random"; cutoff <- as.Date(NA)
   }
   list(holdout = ho, cutoff = cutoff, method = method, n_train = sum(!ho), n_holdout = sum(ho))
 }
@@ -902,6 +911,8 @@ print.scr_lgd <- function(x, ...) {
 scr_lgd_pools <- function(x, n_pools = NULL, min_defaults = NULL) {
   if (!inherits(x, "scr_lgd")) stop("scr_lgd_pools(): `x` must come from scr_lgd().", call. = FALSE)
   k <- as.integer(n_pools %||% x$config$lgd_n_pools); min_n <- as.integer(min_defaults %||% x$config$lgd_min_defaults_bin)
+  if (length(k) != 1L || is.na(k) || k < 1L) stop("scr_lgd_pools(): `n_pools` must be a positive integer.", call. = FALSE)
+  if (length(min_n) != 1L || is.na(min_n) || min_n < 1L) stop("scr_lgd_pools(): `min_defaults` must be a positive integer.", call. = FALSE)
   s <- x$scored[sample == "train"]
   pred <- s$lgd_pred; real <- s$lgd_real; ead <- s$ead
   probs <- seq(0, 1, length.out = k + 1L)[-c(1L, k + 1L)]
@@ -992,6 +1003,8 @@ scr_lgd_downturn <- function(x, periods = NULL, method = NULL, add_on = NULL, re
   base <- x$pools[, list(pool, pred_lo, pred_hi, pred_mean, n, share, ead, lra, lra_ew, sd, se, moc_c, lra_moc, merged_from)]
   tb <- .lgd_downturn_table(base, x$scored, method, add_on, periods = p)
   x$downturn <- list(table = tb, periods = p, method = method, add_on = add_on, status = "final", reason = reason %||% NA_character_)
+  # copy before `:=`: the pool table is shared by reference with the caller's object
+  x$pools <- data.table::copy(x$pools)
   x$pools[, lgd_dt := tb$lgd_dt]
   x$pools[, lgd_final := pmax(lgd_dt, floor)]
   x$ledger <- data.table::rbindlist(list(x$ledger, .lgd_ledger_row("downturn",
@@ -1056,6 +1069,8 @@ scr_lgd_floor <- function(x, params = NULL, asset_class = NULL, secured_share = 
                                secured_share = s, floor = fl)
   tb[, lgd_final := pmax(lgd_dt, floor)]
   tb[, binding := lgd_final > lgd_dt]
+  # copy before `:=`: the pool table is shared by reference with the caller's object
+  x$pools <- data.table::copy(x$pools)
   x$pools[, `:=`(floor = fl, lgd_final = pmax(lgd_dt, fl))]
   x$floors <- list(table = tb[], asset_class = asset_class, collateral = collateral, framework = params$framework,
                    params_modified = isTRUE(params$modified), binding_share = sum(tb$n[tb$binding]) / sum(tb$n))
@@ -1075,9 +1090,11 @@ scr_lgd_floor <- function(x, params = NULL, asset_class = NULL, secured_share = 
 #' the pool that were still in workout at `tau` (so that at `tau = 0` it
 #' equals the pool's long-run average), and the in-default LGD adds the
 #' unexpected-loss increment
-#' \deqn{\Delta^{UL}(\tau) = (\mathrm{LGD}^{DT} - \mathrm{LRA})\;\frac{\rho(T_{\max}) - \rho(\tau)}{\rho(T_{\max})}}
-#' read from the recovery profile of the pool's product mix: the downturn
-#' uplift shrinks as the recoveries come in. The consistency table checks
+#' \deqn{\Delta^{UL}(\tau) = \max(0,\ \mathrm{LGD}^{DT} - \mathrm{LRA})\;\frac{\rho(T_{\max}) - \rho(\tau - 1)}{\rho(T_{\max})}}
+#' read from the recovery profile of the pool's product mix, where
+#' \eqn{\rho(\tau - 1)} is the cumulative discounted recovery rate of the
+#' months before age `tau` (zero at `tau = 0`): the downturn uplift
+#' shrinks as the recoveries come in. The consistency table checks
 #' that `lgd_in_default` at `tau = 0` reproduces the pool's `lgd_dt`.
 #'
 #' @param x An [scr_lgd()] object.
@@ -1104,7 +1121,7 @@ scr_elbe <- function(x, grid = NULL) {
   s <- x$scored[sample == "train"]
   rho_mix <- function(p, tau) {
     w <- s[pool == p, list(ead = sum(ead)), by = product]
-    if (!nrow(w)) return(0)
+    if (!nrow(w) || tau < 0) return(0)
     v <- vapply(w$product, function(pr) {
       src <- if (pr %in% prof$product) pr else "all"
       r <- prof[product == src & month == min(tau, t_max), cum_recovery]; if (length(r)) r else 0
@@ -1117,7 +1134,8 @@ scr_elbe <- function(x, grid = NULL) {
     data.table::rbindlist(lapply(grid, function(tau) {
       open <- s[pool == p & (months_in_default > tau | (is_incomplete & months_in_default >= tau) | tau == 0L)]
       n_p <- sum(s$pool == p)
-      rec <- if (r_max > 0) rho_mix(p, tau) / r_max else 0
+      # recoveries collected before age tau: profile months 0 .. tau - 1 (none at tau = 0)
+      rec <- if (r_max > 0) rho_mix(p, tau - 1L) / r_max else 0
       elbe <- if (nrow(open)) mean(open$lgd_real) else NA_real_
       dul <- max(0, dt - lra) * (1 - rec)
       data.table::data.table(months_since_default = tau, pool = p, n_open = nrow(open), share_open = nrow(open) / max(1L, n_p),
@@ -1289,6 +1307,9 @@ scr_lgd_validate <- function(x, newdata = NULL) {
     need <- c(x$drivers, "lgd_real", "ead")
     miss <- setdiff(need, names(nd))
     if (length(miss)) stop("scr_lgd_validate(): newdata lacks column(s): ", lst(miss), call. = FALSE)
+    if (any(!is.finite(as.double(nd$lgd_real))) || any(!is.finite(as.double(nd$ead)) | as.double(nd$ead) <= 0)) {
+      stop("scr_lgd_validate(): newdata needs a finite `lgd_real` and a positive `ead` on every row.", call. = FALSE)
+    }
     dt <- .lgd_prepare(nd[, x$drivers, with = FALSE], x$drivers, "scr_lgd_validate")
     pr <- .lgd_predict(x, dt)
     cur <- data.table::data.table(default_id = if ("default_id" %in% names(nd)) as.character(nd$default_id) else as.character(seq_len(nrow(nd))),
@@ -1324,7 +1345,7 @@ scr_lgd_validate <- function(x, newdata = NULL) {
   }, by = pool][order(pool)]
   calib[, light := light_p(p)]
   tt <- ttest(cur$lgd_real, mean(cur$lgd_est))
-  reg <- if (stats::sd(cur$lgd_pred) > 0) stats::coef(stats::lm(cur$lgd_real ~ cur$lgd_pred)) else c(NA_real_, NA_real_)
+  reg <- if (isTRUE(stats::sd(cur$lgd_pred) > 0)) stats::coef(stats::lm(cur$lgd_real ~ cur$lgd_pred)) else c(NA_real_, NA_real_)
   portfolio <- data.table::data.table(
     sample = label, n = nrow(cur), real_mean = mean(cur$lgd_real), est_mean = mean(cur$lgd_est), pred_mean = mean(cur$lgd_pred),
     t = tt[1], p = tt[2], light = light_p(tt[2]),
@@ -1379,12 +1400,12 @@ scr_lgd_validate <- function(x, newdata = NULL) {
   worst <- function(l) if (!length(l) || all(is.na(l))) "grey" else if ("red" %in% l) "red" else if ("amber" %in% l) "amber" else "green"
   summary <- data.table::rbindlist(list(
     data.table::data.table(test = "calibration_portfolio_t", statistic = portfolio$t, p = portfolio$p, light = portfolio$light),
-    data.table::data.table(test = "calibration_pools_t", statistic = max(calib$t, na.rm = TRUE), p = suppressWarnings(min(calib$p, na.rm = TRUE)), light = worst(calib$light)),
+    data.table::data.table(test = "calibration_pools_t", statistic = suppressWarnings(max(calib$t, na.rm = TRUE)), p = suppressWarnings(min(calib$p, na.rm = TRUE)), light = worst(calib$light)),
     data.table::data.table(test = "loss_shortfall", statistic = portfolio$loss_shortfall, p = NA_real_, light = if (portfolio$loss_shortfall < -0.10) "red" else if (portfolio$loss_shortfall < 0) "amber" else "green"),
     data.table::data.table(test = "downturn_coverage", statistic = as.numeric(portfolio$dt_coverage), p = NA_real_, light = if (portfolio$dt_coverage) "green" else "red"),
     data.table::data.table(test = "gauc_vs_initial", statistic = disc$S, p = disc$p, light = disc$light),
     data.table::data.table(test = "psi_pools", statistic = st_pools$psi, p = NA_real_, light = st_pools$light),
-    data.table::data.table(test = "psi_drivers", statistic = if (nrow(st_drivers)) max(st_drivers$psi, na.rm = TRUE) else NA_real_, p = NA_real_, light = worst(st_drivers$light)),
+    data.table::data.table(test = "psi_drivers", statistic = if (nrow(st_drivers)) suppressWarnings(max(st_drivers$psi, na.rm = TRUE)) else NA_real_, p = NA_real_, light = worst(st_drivers$light)),
     data.table::data.table(test = "homogeneity_within_pools", statistic = NA_real_, p = suppressWarnings(min(homog$p, na.rm = TRUE)), light = worst(homog$light)),
     data.table::data.table(test = "heterogeneity_between_pools", statistic = NA_real_, p = suppressWarnings(max(heter$p, na.rm = TRUE)), light = worst(heter$light))
   ))
