@@ -1,7 +1,7 @@
 ^LICENSE\.md$
-.Rhistory
-scorecraft.Rproj
-.Rproj.user
+^\.Rhistory$
+^.*\.Rproj$
+^\.Rproj\.user$
 ^cran-comments\.md$
 ^_pkgdown\.yml$
 ^docs$
@@ -9,8 +9,8 @@ scorecraft.Rproj
 ^\.github$
 ^codecov\.yml$
 ^data-raw$
-^.*\.Rproj$
-^\.Rproj\.user$
 ^[DS][A-Z]{3,5}\.md$
-^pkgdown$
 ^Rplots\.pdf$
+^src/.*\.o$
+^src/.*\.so$
+^src/.*\.dll$

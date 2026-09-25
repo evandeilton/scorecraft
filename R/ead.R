@@ -114,6 +114,12 @@ scr_ead_data <- function(snapshots, facility_id, obligor_id = NULL, date_col, li
                 "horizon_months", "fast_default", "limit_default", "limit_change")
   clash <- intersect(drivers, reserved)
   if (length(clash)) stop("scr_ead_data(): driver name(s) clash with reserved columns: ", lst(clash), call. = FALSE)
+  # names of the internal panel columns: a driver may only reuse `limit` or
+  # `drawn` when it is that very column
+  clash <- c(intersect(drivers, c("fid", "oid", "date", "def", ".ddate")),
+             if ("limit" %in% drivers && !identical(limit, "limit")) "limit",
+             if ("drawn" %in% drivers && !identical(drawn, "drawn")) "drawn")
+  if (length(clash)) stop("scr_ead_data(): driver name(s) clash with internal columns: ", lst(clash), call. = FALSE)
   H <- as.integer(cfg$ccf_horizon_months)
   if (is.na(H) || H < 1L) stop("scr_ead_data(): `ccf_horizon_months` must be a positive integer.", call. = FALSE)
 
@@ -123,9 +129,13 @@ scr_ead_data <- function(snapshots, facility_id, obligor_id = NULL, date_col, li
                               date = as.Date(dt[[date_col]]),
                               limit = as.double(dt[[limit]]), drawn = as.double(dt[[drawn]]))
   if (anyNA(p$fid) || anyNA(p$date)) stop("scr_ead_data(): the facility identifier and the date cannot be missing.", call. = FALSE)
-  if (anyDuplicated(p, by = c("fid", "date"))) stop("scr_ead_data(): duplicated (facility, date) rows.", call. = FALSE)
   p[, date := .month_floor(date)]
+  # checked after the month floor: two snapshots of one facility in the same
+  # month would otherwise both survive and match() would pick one silently
+  if (anyDuplicated(p, by = c("fid", "date"))) stop("scr_ead_data(): duplicated (facility, month) rows.", call. = FALSE)
   for (d in drivers) data.table::set(p, j = d, value = dt[[d]])
+  # the default-date column travels with its row through the sort below
+  if (is.character(default_date)) data.table::set(p, j = ".ddate", value = .month_floor(as.Date(dt[[default_date]])))
   p[, def := if (is.null(defaulted)) NA_integer_ else as.integer(isTRUE_vec(dt[[defaulted]]))]
   data.table::setorder(p, fid, date)
 
@@ -138,11 +148,9 @@ scr_ead_data <- function(snapshots, facility_id, obligor_id = NULL, date_col, li
   # -- reference rows ----------------------------------------------------- #
   all_dates <- sort(unique(p$date))
   cohort_starts <- all_dates[seq(1L, length(all_dates), by = H)]
-  snaps <- split(p, by = "fid", keep.by = TRUE)
-  rows <- data.table::rbindlist(lapply(seq_len(nrow(events)), function(i) {
-    .ead_reference_rows(events[i], snaps[[events$fid[i]]], cfg$ccf_horizon, H, cohort_starts, cfg$post_default_drawings_in, drivers)
-  }), use.names = TRUE, fill = TRUE)
-  if (!nrow(rows)) stop("scr_ead_data(): no reference row could be built.", call. = FALSE)
+  # rolling joins over all events at once (no per-event closure or subset)
+  rows <- .ead_reference_table(events, p, cfg$ccf_horizon, H, cohort_starts, cfg$post_default_drawings_in, drivers)
+  if (is.null(rows) || !nrow(rows)) stop("scr_ead_data(): no reference row could be built.", call. = FALSE)
 
   # -- admission rules and measures --------------------------------------- #
   rows[, rule := "OK"]
@@ -233,15 +241,17 @@ scr_ead_data <- function(snapshots, facility_id, obligor_id = NULL, date_col, li
 #' First day of the month of a Date
 #' @keywords internal
 #' @noRd
-.month_floor <- function(d) as.Date(format(d, "%Y-%m-01"))
-
-#' Whole months between two month-floored dates
-#' @keywords internal
-#' @noRd
-.months_between <- function(from, to) {
-  f <- as.POSIXlt(from); t <- as.POSIXlt(to)
-  (t$year - f$year) * 12L + (t$mon - f$mon)
+.month_floor <- function(d) {
+  # format/parse only the distinct dates: a panel has few months and many rows
+  d <- as.Date(d)
+  u <- unique(d)
+  as.Date(format(u, "%Y-%m-01"))[match(as.double(d), as.double(u))]
 }
+
+# .months_between() is defined once, in R/lgd.R (day-aware); on the
+# month-floored dates of this file it is the plain difference in months.
+# A second definition here was silently masked by the one of R/lgd.R
+# (collated later).
 
 #' Default events: one row per (facility, default date)
 #'
@@ -262,7 +272,9 @@ scr_ead_data <- function(snapshots, facility_id, obligor_id = NULL, date_col, li
       list(default_date = date[s])
     }, by = "fid"]
   } else if (is.character(default_date)) {
-    ev <- unique(data.table::data.table(fid = p$fid, default_date = .month_floor(as.Date(dt[[default_date]]))))
+    # p is sorted by (fid, date): read the default date from its own column,
+    # never from `dt`, whose rows are in the caller's order
+    ev <- unique(data.table::data.table(fid = p$fid, default_date = p$.ddate))
     ev <- ev[!is.na(default_date)]
   } else if (is.data.frame(default_date)) {
     dd <- data.table::as.data.table(default_date)
@@ -284,49 +296,75 @@ scr_ead_data <- function(snapshots, facility_id, obligor_id = NULL, date_col, li
   ev[]
 }
 
-#' Reference rows of one default event under the configured horizon
+#' Reference rows of every default event under the configured horizon
+#'
+#' Vectorised over the events with rolling joins on the (facility, month)
+#' panel `p`, sorted by `fid` and `date`:
+#' * the default row `i_d` is the first snapshot at or after the default
+#'   month (next observation carried backward); an event without one is
+#'   dropped;
+#' * `"fixed"`: the last snapshot at or before `D - H` months (last
+#'   observation carried forward), else the first snapshot of the facility;
+#' * `"cohort"`: the last snapshot at or before the latest cohort start
+#'   strictly before `D`, else the first snapshot;
+#' * `"variable"`: every snapshot before `D` at most `H` months before it,
+#'   else the last snapshot before `D`;
+#' * a facility with no snapshot before `D` takes the default row itself
+#'   (`horizon_months = 0`, excluded later as `FAST_DEFAULT_EXCLUDED`).
+#' With `post_default = "ccf"` and a default flag, the realised EAD is the
+#' maximum drawn amount from the default row to the end of the run of
+#' flagged months that follows it.
 #' @keywords internal
 #' @noRd
-.ead_reference_rows <- function(ev, s, horizon, H, cohort_starts, post_default, drivers) {
-  D <- ev$default_date
-  i_d <- match(D, s$date)
-  if (is.na(i_d)) {
-    # default date not a snapshot: take the first snapshot at or after it
-    i_d <- which(s$date >= D)[1]
-    if (is.na(i_d)) return(NULL)
+.ead_reference_table <- function(events, p, horizon, H, cohort_starts, post_default, drivers) {
+  q <- p[fid %in% events$fid]
+  q[, .r := seq_len(.N)]
+  q[, `:=`(.first = .r[1L], .last = .r[.N]), by = "fid"]
+  ev <- data.table::data.table(event_id = events$event_id, fid = events$fid, D = events$default_date)
+  ev[, i_d := q[ev, .r, on = c(fid = "fid", date = "D"), roll = -Inf]]
+  ev <- ev[!is.na(i_d)]
+  if (!nrow(ev)) return(NULL)
+  first <- q$.first[ev$i_d]
+  has_before <- ev$i_d > first
+  # realised EAD: the drawn amount at the default row, or the running maximum
+  # over the flagged months that follow it
+  ead <- q$drawn[ev$i_d]
+  if (identical(post_default, "ccf") && !all(is.na(q$def))) {
+    q[, .run := data.table::rleid(fid, def)]
+    q[, .smax := rev(cummax(rev(data.table::fifelse(is.na(drawn), -Inf, drawn)))), by = ".run"]
+    nxt <- ev$i_d + 1L
+    ok <- nxt <= q$.last[ev$i_d] & q$def[pmin(nxt, nrow(q))] %in% 1L
+    m <- pmax(data.table::fifelse(is.na(ead), -Inf, ead), data.table::fifelse(ok, q$.smax[pmin(nxt, nrow(q))], -Inf))
+    ead <- data.table::fifelse(m == -Inf, NA_real_, m)
   }
-  ead <- s$drawn[i_d]
-  if (identical(post_default, "ccf") && !all(is.na(s$def))) {
-    run <- i_d
-    while (run < nrow(s) && s$def[run + 1L] %in% 1L) run <- run + 1L
-    ead <- max(s$drawn[i_d:run], na.rm = TRUE)
-  }
-  before <- which(s$date < D)
-  if (!length(before)) {
-    refs <- i_d; hm <- 0L
-  } else if (identical(horizon, "fixed")) {
-    target <- .add_months(D, -H)
-    cand <- before[s$date[before] <= target]
-    refs <- if (length(cand)) max(cand) else min(before)
-    hm <- .months_between(s$date[refs], D)
-  } else if (identical(horizon, "cohort")) {
-    cs <- cohort_starts[cohort_starts < D]
-    if (!length(cs)) { refs <- min(before) } else {
-      c0 <- max(cs)
-      cand <- before[s$date[before] <= c0]
-      refs <- if (length(cand)) max(cand) else min(before)
-    }
-    hm <- .months_between(s$date[refs], D)
+  locf <- function(target) q[data.table::data.table(fid = ev$fid, t = target), .r, on = c(fid = "fid", date = "t"), roll = Inf]
+  if (identical(horizon, "variable")) {
+    nb <- data.table::fifelse(has_before, ev$i_d - first, 0L)
+    e <- rep(seq_len(nrow(ev)), nb)
+    r <- rep(first, nb) + sequence(nb) - 1L
+    ok <- .months_between(q$date[r], ev$D[e]) <= H
+    pairs <- data.table::data.table(e = e[ok], r = r[ok])
+    none <- setdiff(seq_len(nrow(ev)), pairs$e)
+    fb <- data.table::data.table(e = none, r = data.table::fifelse(has_before[none], ev$i_d[none] - 1L, ev$i_d[none]))
+    pairs <- data.table::rbindlist(list(pairs, fb))
+    data.table::setorder(pairs, e, r)
+    e <- pairs$e; refs <- pairs$r
   } else {
-    refs <- before[.months_between(s$date[before], D) <= H]
-    if (!length(refs)) refs <- max(before)
-    hm <- .months_between(s$date[refs], D)
+    target <- if (identical(horizon, "fixed")) .add_months(ev$D, -H) else {
+      k <- findInterval(as.double(ev$D) - 0.5, as.double(cohort_starts))
+      cohort_starts[replace(k, k == 0L, NA_integer_)]
+    }
+    refs <- locf(target)
+    refs <- data.table::fifelse(is.na(refs), first, refs)
+    refs <- data.table::fifelse(has_before, refs, ev$i_d)
+    e <- seq_len(nrow(ev))
   }
-  out <- data.table::data.table(event_id = ev$event_id, facility_id = ev$fid, obligor_id = s$oid[1],
-                                ref_date = s$date[refs], default_date = D, horizon_months = as.integer(hm),
-                                limit_ref = s$limit[refs], drawn_ref = s$drawn[refs], limit_default = s$limit[i_d],
-                                ead_realised = ead)
-  for (d in drivers) data.table::set(out, j = d, value = s[[d]][refs])
+  out <- data.table::data.table(event_id = ev$event_id[e], facility_id = ev$fid[e], obligor_id = q$oid[first[e]],
+                                ref_date = q$date[refs], default_date = ev$D[e],
+                                horizon_months = data.table::fifelse(has_before[e], as.integer(.months_between(q$date[refs], ev$D[e])), 0L),
+                                limit_ref = q$limit[refs], drawn_ref = q$drawn[refs], limit_default = q$limit[ev$i_d[e]],
+                                ead_realised = ead[e])
+  for (d in drivers) data.table::set(out, j = d, value = q[[d]][refs])
   out
 }
 
@@ -628,7 +666,10 @@ scr_ead <- function(x, drivers, config = scr_config(), holdout = 0.3, params = N
 .ead_pool_of <- function(d, fit, survivors, cells, main, meta) {
   n <- nrow(d)
   pool <- rep(NA_character_, n)
-  to_lf <- d$measure == "lf"
+  # the LF pool collects the limit-factor rows of a model whose main measure
+  # is another one; when the main measure is the limit factor itself its rows
+  # go through the cells like any other (as the SQL does: LF condition 1 = 0)
+  to_lf <- d$measure == "lf" & !identical(main, "lf")
   if (!length(survivors)) {
     pool[!to_lf] <- "P1"
   } else {
@@ -696,7 +737,10 @@ scr_ead <- function(x, drivers, config = scr_config(), holdout = 0.3, params = N
 .ead_predict_rows <- function(pool, measure, drawn, limit, pools, floor_v) {
   ccf <- .ead_lookup(pools, pool, "ccf_applied")
   undrawn <- pmax(limit - drawn, 0)
-  ead_model <- data.table::fcase(measure == "lf", ccf * limit, measure == "eadf", ccf * drawn, default = drawn + ccf * undrawn)
+  # vector branches through fifelse(): fcase() takes a vector `default` only
+  # from data.table 1.15.0, and DESCRIPTION allows 1.14
+  ead_model <- data.table::fifelse(measure == "lf", ccf * limit,
+                                   data.table::fifelse(measure == "eadf", ccf * drawn, drawn + ccf * undrawn))
   ead_floor <- drawn + floor_v * undrawn
   ead <- pmax(drawn, ead_model, ead_floor)
   list(ccf_applied = ccf, undrawn = undrawn, ead_model = ead_model, ead_floor = ead_floor, ead_predicted = ead,
@@ -731,34 +775,13 @@ scr_ead <- function(x, drivers, config = scr_config(), holdout = 0.3, params = N
 #' Somers' D between a prediction and a realised value, over pairs with distinct realised values
 #'
 #' Concordant when the prediction orders the pair as the realised values do;
-#' pairs tied on the prediction count as neither. gAUC = (D + 1) / 2. The
-#' prediction takes few distinct values (pools), so pairs are counted by
-#' level with sorted searches, O(L^2 n log n); a prediction with more than
-#' 60 distinct values is binned into 60 quantile levels first.
+#' pairs tied on the prediction count as neither. gAUC = (D + 1) / 2. Pairs
+#' are counted exactly in `O(n log n)` by the compiled kernel
+#' (`.scr_somers()`), whatever the number of distinct predictions; a
+#' constant prediction gives 0.
 #' @keywords internal
 #' @noRd
-.somers_d <- function(pred, y) {
-  ok <- is.finite(pred) & is.finite(y); pred <- pred[ok]; y <- y[ok]
-  n <- length(y)
-  if (n < 2L) return(NA_real_)
-  lv <- sort(unique(pred))
-  if (length(lv) > 60L) {
-    br <- unique(stats::quantile(pred, probs = seq(0, 1, length.out = 61L), names = FALSE))
-    pred <- findInterval(pred, br, rightmost.closed = TRUE); lv <- sort(unique(pred))
-  }
-  ty <- table(y)
-  pairs <- n * (n - 1) / 2 - sum(ty * (ty - 1) / 2)
-  if (pairs <= 0) return(NA_real_)
-  if (length(lv) < 2L) return(0)
-  ys <- lapply(lv, function(l) sort(y[pred == l]))
-  C <- 0; D <- 0
-  for (a in seq_len(length(lv) - 1L)) for (b in (a + 1L):length(lv)) {
-    ya <- ys[[a]]; yb <- ys[[b]]
-    C <- C + sum(findInterval(yb, ya, left.open = TRUE))        # y_a < y_b, pred_a < pred_b
-    D <- D + sum(length(ya) - findInterval(yb, ya))              # y_a > y_b
-  }
-  (C - D) / pairs
-}
+.somers_d <- function(pred, y) .scr_somers(pred, y, const_p = 0)
 
 #' gAUC with a percentile bootstrap interval (seeds drawn in the parent)
 #' @keywords internal
@@ -768,8 +791,9 @@ scr_ead <- function(x, drivers, config = scr_config(), holdout = 0.3, params = N
   out <- list(d = d, gauc = (d + 1) / 2, lo = NA_real_, hi = NA_real_, se = NA_real_)
   n <- length(y)
   if (is.na(d) || n_boot < 2L || n < 3L) return(out)
-  if (!is.null(seed)) set.seed(seed)
+  .scr_local_seed(seed)
   seeds <- sample.int(.Machine$integer.max, n_boot)
+  .scr_rng_guard()   # the replicates re-seed; the user's stream moves by the n_boot draws above only
   reps <- .scr_lapply(seeds, function(sd) {
     set.seed(sd)
     j <- sample.int(n, n, replace = TRUE)
@@ -906,7 +930,8 @@ scr_ead_downturn <- function(x, periods = NULL, method = NULL, add_on = 0.15, re
     pd <- data.table::as.data.table(periods)
     if (!all(c("start", "end") %in% names(pd))) stop("scr_ead_downturn(): `periods` needs `start` and `end` columns.", call. = FALSE)
     pd[, `:=`(start = as.Date(start), end = as.Date(end))]
-    for (i in seq_len(nrow(pd))) in_dt <- in_dt | (rds$default_date >= pd$start[i] & rds$default_date <= pd$end[i])
+    # shared with the LGD downturn: refuses missing dates and end < start
+    in_dt <- .lgd_in_periods(rds$default_date, pd)
   } else if (identical(method, "type1")) {
     stop("scr_ead_downturn(): `periods` is needed for the observed-impact method (type1).", call. = FALSE)
   }
@@ -1139,7 +1164,8 @@ scr_ead_validate <- function(x, newdata = NULL, lights = c(0.01, 0.05), adequacy
   cfg <- x$config; main <- x$meta$main_measure; pools <- x$pools
   if (is.null(newdata)) {
     v <- x$rds[sample == "holdout"]; source <- "holdout"
-    if (!nrow(v)) { v <- x$rds; source <- "train (no hold-out)" }
+    # copy: `:=` below must not add columns to the model's own table
+    if (!nrow(v)) { v <- data.table::copy(x$rds); source <- "train (no hold-out)" }
   } else {
     v <- if (inherits(newdata, "scr_ead_data")) data.table::copy(newdata$rds) else data.table::as.data.table(newdata)
     need <- c("ccf", "measure", "ead_realised", "limit_ref", "drawn_ref", "undrawn_ref", "ref_date", "cohort", setdiff(x$survivors, names(v)))
@@ -1277,8 +1303,8 @@ scr_export.scr_ead <- function(x, dir, stamp = TRUE, validation = NULL, tag = "c
     "Validation_Summary" = val$summary,
     "Model_Card"      = .kv_table(x$model_card),
     "Decision_Ledger" = x$ledger)
-  files <- list(xlsx = .scr_write_xlsx(sheets, file.path(out_dir, sprintf("ead_%s.xlsx", tolower(tag)))),
-                sql = file.path(out_dir, sprintf("sql_ead_%s.sql", tolower(tag))))
+  files <- list(xlsx = .scr_write_xlsx(sheets, file.path(out_dir, sprintf("ead_%s.xlsx", .file_tag(tag)))),
+                sql = file.path(out_dir, sprintf("sql_ead_%s.sql", .file_tag(tag))))
   writeLines(scr_sql(x), files$sql)
   for (f in files) msg("  %s", f)
   x$files <- files
@@ -1287,6 +1313,12 @@ scr_export.scr_ead <- function(x, dir, stamp = TRUE, validation = NULL, tag = "c
 
 # NSE column names used in data.table expressions of this file
 utils::globalVariables(c(
+  ".first",
+  ".last",
+  ".r",
+  ".run",
+  ".smax",
+  "i_d",
   "a",
   "admitted",
   "ccf",

@@ -70,9 +70,10 @@ drawings after default and \code{C^ind} the indirect costs allocated by
 
 \itemize{
 \item \strong{Cures.} An event with \code{status == "cured"} returns to performing: the
-balance outstanding at the cure date (\code{ead} net of the cash recovered)
-enters as an artificial recovery on the cure date, so the cure carries
-its costs and the discount effect, never a zero loss by decree.
+balance outstanding at the cure date (\code{ead} plus the drawings after
+default, net of the cash recovered) enters as an artificial recovery
+on the cure date, so the cure carries its costs and the discount
+effect, never a zero loss by decree.
 \item \strong{Multiple defaults.} Two defaults of one facility separated by fewer
 than \code{lgd_cure_window} months (from the close of the first to the start
 of the second), or a new default while the first is still open, are

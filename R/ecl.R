@@ -25,11 +25,17 @@
 #' `config$ecl_sicr_ratio`, else stage 1.
 #'
 #' Scenarios are a named list of shocks applied to the base inputs, each a
-#' list with any of `pd_mult` (multiplier of the hazards, capped at one),
-#' `z` (systematic factor of the one-factor model applied to the hazards
-#' with correlation `rho`, negative in a bad year), `lgd_add` (added to the
-#' LGD) and `ead_mult`; `weights` (normalised to one) give the
-#' probability-weighted result.
+#' list with any of `pd_mult` (non-negative multiplier of the hazards,
+#' capped at one), `z` (systematic factor of the one-factor model applied to
+#' the hazards with correlation `rho`, negative in a bad year), `lgd_add`
+#' (added to the LGD, the result floored at zero) and `ead_mult`
+#' (non-negative); `weights` (normalised to one) give the
+#' probability-weighted result. When a shocked hazard plus the prepayment
+#' hazard exceeds one, the exit probability of that month is capped at one.
+#' The `z` shock is applied to each monthly hazard, not to the annual PD;
+#' because the Vasicek map is non-linear, the implied 12-month stressed PD
+#' is higher than the one obtained by stressing the annual PD with the same
+#' `z` and `rho` (convert the annual PD yourself when that is wanted).
 #'
 #' @param pd_term Marginal monthly PDs: a matrix `n x T`, or a vector of
 #'   length `n` (a flat hazard recycled over `t_max` months), or a single
@@ -87,35 +93,41 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
   t_max <- as.integer(t_max %||% horizon)
   if (t_max < 1L) stop("scr_ecl(): `t_max` must be at least one month.", call. = FALSE)
 
-  # -- shape the inputs into n x T matrices ---------------------------------- #
+  # -- shapes: scalars, vectors of length n or n x T matrices, never expanded -- #
   n <- max(if (is.matrix(pd_term)) nrow(pd_term) else length(pd_term),
            if (is.matrix(lgd)) nrow(lgd) else length(lgd), if (is.matrix(ead)) nrow(ead) else length(ead),
            length(eir), length(stage), length(dpd), length(pd_orig), length(segment), length(id))
   H <- if (is.matrix(pd_term)) ncol(pd_term) else t_max
   if (H < 1L) stop("scr_ecl(): `pd_term` needs at least one column.", call. = FALSE)
-  mat <- function(v, what) {
+  shape <- function(v, what) {
+    if (is.null(v)) return(NULL)
     if (is.matrix(v)) {
       if (ncol(v) != H) stop(sprintf("scr_ecl(): `%s` has %d columns, expected %d.", what, ncol(v), H), call. = FALSE)
-      if (nrow(v) == n) return(unname(v))
-      if (nrow(v) == 1L) return(matrix(v, n, H, byrow = TRUE))
-      stop(sprintf("scr_ecl(): `%s` has %d rows, expected %d.", what, nrow(v), n), call. = FALSE)
+      if (nrow(v) == 1L) return(matrix(as.double(v[1L, ]), nrow = n, ncol = H, byrow = TRUE))
+      if (nrow(v) != n) stop(sprintf("scr_ecl(): `%s` has %d rows, expected %d.", what, nrow(v), n), call. = FALSE)
+      storage.mode(v) <- "double"
+      return(unname(v))
     }
-    matrix(rep_len(as.double(v), n), n, H)
+    if (!length(v) %in% c(1L, n)) stop(sprintf("scr_ecl(): `%s` has length %d, expected 1 or %d.", what, length(v), n), call. = FALSE)
+    as.double(v)
   }
-  h <- mat(pd_term, "pd_term"); L <- mat(lgd, "lgd"); E <- mat(ead, "ead")
+  h <- shape(pd_term, "pd_term"); L <- shape(lgd, "lgd"); E <- shape(ead, "ead")
   if (anyNA(h) || any(h < 0 | h > 1)) stop("scr_ecl(): `pd_term` must hold marginal PDs in [0, 1] without missing values.", call. = FALSE)
   if (anyNA(L) || any(L < 0)) stop("scr_ecl(): `lgd` must be non-negative without missing values.", call. = FALSE)
   if (anyNA(E) || any(E < 0)) stop("scr_ecl(): `ead` must be non-negative without missing values.", call. = FALSE)
-  P <- if (is.null(prepay)) NULL else mat(prepay, "prepay")
-  if (!is.null(P) && (anyNA(P) || any(P < 0 | P + h > 1))) stop("scr_ecl(): `prepay` must be in [0, 1 - pd_term].", call. = FALSE)
+  P <- shape(prepay, "prepay")
+  if (!is.null(P) && (anyNA(P) || any(P < 0) || .ecl_any_exit_above_one(h, P, n, H))) {
+    stop("scr_ecl(): `prepay` must be in [0, 1 - pd_term].", call. = FALSE)
+  }
   r <- rep_len(as.double(eir), n)
   if (anyNA(r) || any(r <= -1)) stop("scr_ecl(): `eir` must be a rate above -1 without missing values.", call. = FALSE)
   discount <- identical(cfg$ecl_discount, "eir")
-  DF <- if (discount) outer(1 + r, -(seq_len(H)) / 12, `^`) else matrix(1, n, H)
   hz <- min(horizon, H)
+  nthr <- .scr_threads(cfg$nthread)
 
   # -- stage ------------------------------------------------------------------ #
-  pd12 <- 1 - .row_prod(1 - h[, seq_len(hz), drop = FALSE])
+  base <- cpp_ecl_paths(h, L, E, P, r, n, H, hz, discount, rep(FALSE, n), NULL, NULL, NULL, NULL, rho, nthr)
+  pd12 <- base$pd_12m
   rule <- NULL
   if (is.null(stage)) {
     st <- rep(1L, n)
@@ -134,8 +146,9 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
                  dpd_stage2 = thr[1], dpd_stage3 = thr[2], sicr_ratio = cfg$ecl_sicr_ratio,
                  uses_dpd = !is.null(dpd), uses_pd_orig = !is.null(pd_orig))
   } else {
-    st <- as.integer(rep_len(stage, n))
+    st <- rep_len(stage, n)
     if (anyNA(st) || !all(st %in% 1:3)) stop("scr_ecl(): `stage` must be 1, 2 or 3.", call. = FALSE)
+    st <- as.integer(st)
     rule <- list(source = "supplied")
   }
 
@@ -153,12 +166,28 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
   runs <- lapply(scenarios, function(s) {
     bad <- setdiff(names(s), ok_keys)
     if (length(bad)) stop("scr_ecl(): unknown scenario key(s): ", lst(bad), ". Use ", lst(ok_keys), ".", call. = FALSE)
-    hs <- h
-    if (!is.null(s$z)) hs <- .vasicek_pit(hs, s$z, rho)
-    if (!is.null(s$pd_mult)) hs <- pmin(hs * s$pd_mult, 1)   # first argument keeps the dims
-    Ls <- if (is.null(s$lgd_add)) L else L + s$lgd_add
-    Es <- if (is.null(s$ead_mult)) E else E * s$ead_mult
-    .ecl_paths(hs, Ls, Es, P, DF, hz, st)
+    for (k in c("pd_mult", "ead_mult")) {
+      if (!is.null(s[[k]]) && (!is.numeric(s[[k]]) || anyNA(s[[k]]) || any(s[[k]] < 0))) {
+        stop(sprintf("scr_ecl(): scenario `%s` must be non-negative.", k), call. = FALSE)
+      }
+    }
+    for (k in c("z", "lgd_add")) {
+      if (!is.null(s[[k]]) && (!is.numeric(s[[k]]) || anyNA(s[[k]]))) stop(sprintf("scr_ecl(): scenario `%s` must be numeric.", k), call. = FALSE)
+    }
+    for (k in ok_keys) {
+      if (!is.null(s[[k]]) && !length(s[[k]]) %in% c(1L, n)) {
+        stop(sprintf("scr_ecl(): scenario `%s` must have length 1 or %d.", k, n), call. = FALSE)
+      }
+    }
+    if (!is.null(s$z) && (length(rho) != 1L || is.na(rho) || rho < 0 || rho >= 1)) {
+      stop("`rho` must be in [0, 1).", call. = FALSE)
+    }
+    # shocks applied month by month inside the kernel (hazards through the
+    # one-factor map, then the multiplier capped at one; LGD floored at zero):
+    # no shocked n x T copy of any input
+    dbl <- function(v) if (is.null(v)) NULL else as.double(v)
+    cpp_ecl_paths(h, L, E, P, r, n, H, hz, discount, st == 3L, dbl(s$z), dbl(s$pd_mult), dbl(s$lgd_add),
+                  dbl(s$ead_mult), as.double(rho), nthr)
   })
   ecl12 <- Reduce(`+`, Map(function(x, wi) x$ecl_12m * wi, runs, w))
   ecll <- Reduce(`+`, Map(function(x, wi) x$ecl_life * wi, runs, w))
@@ -170,10 +199,10 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
     ecl = vapply(runs, function(x) sum(ifelse(st == 1L, x$ecl_12m, x$ecl_life)), numeric(1)))
 
   # -- tables ------------------------------------------------------------------- #
-  ead1 <- E[, 1]
+  ead1 <- if (is.matrix(E)) E[, 1] else rep_len(E, n)
   ex <- data.table::data.table(id = if (is.null(id)) seq_len(n) else rep_len(id, n),
                                segment = if (is.null(segment)) NA_character_ else as.character(rep_len(segment, n)),
-                               stage = st, ead = ead1, pd_12m = pd12, pd_life = 1 - .row_prod(1 - h),
+                               stage = st, ead = ead1, pd_12m = pd12, pd_life = base$pd_life,
                                ecl_12m = ecl12, ecl_life = ecll, ecl = ecl)
   stages <- ex[, list(n = .N, ead = sum(ead), ecl_12m = sum(ecl_12m), ecl_life = sum(ecl_life), ecl = sum(ecl)), by = "stage"]
   stages <- merge(data.table::data.table(stage = 1:3), stages, by = "stage", all.x = TRUE)
@@ -208,25 +237,17 @@ scr_ecl <- function(pd_term, lgd, ead, eir = 0, stage = NULL, dpd = NULL, pd_ori
             class = c("scr_ecl", "list"))
 }
 
-#' Row-wise product of a matrix
+#' Does any month have a default plus prepayment hazard above one?
+#'
+#' Checked column by column when either input is a matrix, so that a vector
+#' input is never expanded to `n x T`.
 #' @keywords internal
 #' @noRd
-.row_prod <- function(M) if (ncol(M) == 1L) M[, 1] else apply(M, 1L, prod)
-
-#' Survival-weighted ECL over the horizon and the lifetime; stage 3 rows carry LGD_1 * EAD_1
-#' @keywords internal
-#' @noRd
-.ecl_paths <- function(h, L, E, P, DF, hz, st) {
-  n <- nrow(h); H <- ncol(h)
-  exit <- if (is.null(P)) h else h + P
-  S_prev <- matrix(1, n, H)
-  if (H > 1L) for (j in 2:H) S_prev[, j] <- S_prev[, j - 1L] * (1 - exit[, j - 1L])
-  loss <- S_prev * h * L * E * DF
-  life <- rowSums(loss)
-  m12 <- rowSums(loss[, seq_len(hz), drop = FALSE])
-  s3 <- st == 3L
-  if (any(s3)) { v <- L[s3, 1] * E[s3, 1]; life[s3] <- v; m12[s3] <- v }
-  list(ecl_12m = m12, ecl_life = life)
+.ecl_any_exit_above_one <- function(h, P, n, H) {
+  if (!is.matrix(h) && !is.matrix(P)) return(any(h + P > 1))
+  col <- function(v, j) if (is.matrix(v)) v[, j] else v
+  for (j in seq_len(H)) if (any(col(h, j) + col(P, j) > 1)) return(TRUE)
+  FALSE
 }
 
 #' @export

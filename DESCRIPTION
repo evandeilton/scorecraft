@@ -21,7 +21,12 @@ Description: Production-grade scorecard engine for binary targets (credit risk,
     loss given default in two stages with downturn and in-default estimates
     (LGD), models credit conversion factors from facility snapshots (EAD),
     and computes expected loss, risk weights, capital and expected credit
-    loss from parameter tables selected by framework preset.
+    loss from parameter tables selected by framework preset. The heavy
+    numeric kernels (rank correlation of wide weight-of-evidence tables,
+    exact concordance counts for Somers' D, streamed expected credit loss
+    paths) are compiled with 'RcppArmadillo', and column-wise stages run in
+    parallel, so that tables with millions of rows and thousands of columns
+    fit in memory and time.
 License: MIT + file LICENSE
 URL: https://github.com/evandeilton/scorecraft
 BugReports: https://github.com/evandeilton/scorecraft/issues
@@ -36,7 +41,11 @@ Imports:
     stats,
     utils,
     graphics,
-    parallel
+    parallel,
+    Rcpp (>= 1.0.10)
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
 Suggests:
     glmnet,
     lightgbm,

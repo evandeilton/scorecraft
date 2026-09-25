@@ -89,7 +89,9 @@ scr_fetch <- function(con, table, sample_frac = 1.0, seed = NULL, max_rows = NUL
   }
   query <- if (sample_frac > 0 && sample_frac < 1) {
     expr <- sample_expr %||% .sample_expr(con, seed)
-    sprintf("select * from %s where %s <= %.6f", table, expr, sample_frac)
+    # full precision: under a tight `max_rows` on a large table the fraction
+    # can be below 1e-6, which "%.6f" would print as 0 (and fetch nothing)
+    sprintf("select * from %s where %s <= %s", table, expr, .sql_num(sample_frac))
   } else sprintf("select * from %s", table)
   msg("SQL: %s", query)
   dt <- DBI::dbGetQuery(con, statement = DBI::SQL(query))

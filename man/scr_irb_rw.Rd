@@ -26,16 +26,18 @@ scr_irb_rw(
 \item{pd, lgd, ead}{Numeric vectors: probability of default, loss given
 default (decimals) and exposure at default (currency).}
 
-\item{m}{Effective maturity in years (wholesale classes only; \code{NULL} or
-\code{NA} uses \code{params$m_default}).}
+\item{m}{Effective maturity in years, non-negative (wholesale classes
+only, ignored and reported as \code{NA} on retail rows; \code{NULL} or \code{NA} uses
+\code{params$m_default}).}
 
 \item{asset_class}{One of \code{"corporate"}, \code{"corporate_sme"}, \code{"bank"},
 \code{"sovereign"}, \code{"hvcre"}, \code{"retail_mortgage"}, \code{"qrre_revolver"},
 \code{"qrre_transactor"}, \code{"retail_other"}; a scalar or a vector.}
 
 \item{sales}{Annual sales of \code{corporate_sme} obligors, in the unit of
-\code{params$correlation$sme} (missing values take the lower bound, the
-largest adjustment).}
+\code{params$correlation$sme}, clipped to its bounds. A missing value takes
+the upper bound, i.e. no firm-size adjustment: the adjustment requires
+reported sales (Basel Framework CRE31.9; CRR Article 153(4)).}
 
 \item{fi}{Logical: regulated financial institution above the size
 threshold, or unregulated one (correlation multiplier).}
@@ -69,7 +71,8 @@ row of \code{params$lgd_firb} (for example \code{"senior_unsecured"} or
 }
 \value{
 A \code{data.table} with one row per exposure: \code{pd_used}, \code{lgd_used}
-(after floors; PD one on defaulted rows), \code{m} (after clipping), \code{r},
+(after floors; PD one on defaulted rows), \code{m} (after clipping;
+\code{params$m_default} under \code{"firb"}; \code{NA} on retail rows), \code{r},
 \code{b}, \code{ma}, \code{k}, \code{rw}, \code{rwa}; attribute \code{floors_hit} counts the rows
 where each floor was binding.
 }
@@ -87,7 +90,13 @@ when missing or under the foundation approach) and
 \details{
 \deqn{K = \left[LGD \cdot N\left(\frac{G(PD) + \sqrt{R}\,G(0.999)}{\sqrt{1-R}}\right) - PD \cdot LGD\right] \cdot MA \cdot s}
 
-with \code{s = params$scaling_factor}. Defaulted rows carry \code{K = max(0, LGD - ELBE)} under \code{"airb"} and zero under \code{"firb"}; a missing \code{elbe} is taken
+with \code{s = params$scaling_factor} and, for wholesale classes,
+\eqn{MA = (1 + (M - 2.5)\,b) / (1 - 1.5\,b)},
+\eqn{b = (0.11852 - 0.05478 \ln PD)^2} (\code{MA = 1} for retail). Below
+\code{PD = 1e-5}, reachable only without a PD floor (sovereigns), \code{b} is
+held at its value at \code{1e-5}: the regulatory \code{b} makes \verb{1 - 1.5 b} vanish
+near \code{PD = 2.9e-6}, where the adjustment would explode and change sign.
+Defaulted rows carry \code{K = max(0, LGD - ELBE)} under \code{"airb"} and zero under \code{"firb"}; a missing \code{elbe} is taken
 equal to \code{lgd}. \verb{RW = 12.5 K} and \code{RWA = RW * ead}.
 }
 \examples{

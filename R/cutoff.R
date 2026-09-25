@@ -2,13 +2,6 @@
 # cutoff.R - Stage 6: cut-off sweep, strategy table, reject inference
 # ============================================================================ #
 
-#' Safe side of the score, given the direction
-#' @keywords internal
-#' @noRd
-.safe_side <- function(score, cut, direction) {
-  if (identical(direction, "higher_is_safer")) score >= cut else score < cut
-}
-
 #' @keywords internal
 #' @noRd
 check_scorecard <- function(x, fn) {
@@ -59,19 +52,28 @@ scr_cutoff <- function(x, n_cuts = NULL, cuts = NULL) {
     cuts <- unique(round(stats::quantile(tr, probs = probs, names = FALSE), 1))
   }
   dir <- x$direction
+  safer <- identical(dir, "higher_is_safer")
   tb <- data.table::rbindlist(lapply(names(x$samples), function(nm) {
-    s <- x$samples[[nm]]; y <- s$y; sc <- s$score
+    s <- x$samples[[nm]]
+    # one sort per sample, then every cut is a binary search on the sorted
+    # scores and a lookup in the cumulative events: O(n log n + cuts log n)
+    # instead of a pass over the sample per cut
+    o <- order(s$score); sc <- s$score[o]; y <- as.integer(s$y[o])
     n <- length(y); e <- sum(y); ne <- n - e
-    data.table::rbindlist(lapply(cuts, function(ct) {
-      safe <- .safe_side(sc, ct, dir)
-      data.table::data.table(
-        sample = nm, cut = ct, n_safe = sum(safe), pct_safe = mean(safe),
-        event_rate_safe = if (any(safe)) mean(y[safe]) else NA_real_,
-        event_rate_risky = if (any(!safe)) mean(y[!safe]) else NA_real_,
-        events_avoided_pct = sum(y[!safe]) / max(1L, e),
-        nonevents_lost_pct = sum(1L - y[!safe]) / max(1L, ne),
-        ks_at_cut = abs(sum(y[!safe]) / max(1L, e) - sum(1L - y[!safe]) / max(1L, ne)))
-    }))
+    cum_e <- c(0L, cumsum(y))
+    n_lo <- findInterval(cuts, sc, left.open = TRUE)   # rows with score < cut
+    e_lo <- cum_e[n_lo + 1L]
+    # safe side: score >= cut under higher_is_safer, score < cut otherwise
+    n_safe <- if (safer) n - n_lo else n_lo
+    e_safe <- if (safer) e - e_lo else e_lo
+    n_risk <- n - n_safe; e_risk <- e - e_safe
+    data.table::data.table(
+      sample = nm, cut = cuts, n_safe = n_safe, pct_safe = n_safe / n,
+      event_rate_safe = data.table::fifelse(n_safe > 0L, e_safe / n_safe, NA_real_),
+      event_rate_risky = data.table::fifelse(n_risk > 0L, e_risk / n_risk, NA_real_),
+      events_avoided_pct = e_risk / max(1L, e),
+      nonevents_lost_pct = (n_risk - e_risk) / max(1L, ne),
+      ks_at_cut = abs(e_risk / max(1L, e) - (n_risk - e_risk) / max(1L, ne)))
   }))
   structure(list(table = tb[], cuts = cuts, direction = dir, target = x$target), class = c("scr_cutoff", "list"))
 }
@@ -201,7 +203,11 @@ print.scr_strategy <- function(x, ...) {
 scr_reject <- function(x, population = NULL, accepted = NULL, multipliers = NULL, sample = "holdout") {
   check_scorecard(x, "scr_reject")
   multipliers <- multipliers %||% x$config$reject_multipliers
+  if (!is.numeric(multipliers) || !length(multipliers) || any(!is.finite(multipliers)) || any(multipliers <= 0)) {
+    stop("scr_reject(): `multipliers` must be positive numbers.", call. = FALSE)
+  }
   s <- x$samples[[sample]]
+  if (is.null(s)) stop("sample '", sample, "' does not exist.", call. = FALSE)
   breaks <- x$breaks
   band_dev <- cut(s$score, breaks = breaks, include.lowest = TRUE)
   dev <- data.table::data.table(band = band_dev, y = s$y)[, .(n_dev = .N, events_dev = sum(y), rate_dev = mean(y)), by = band]
@@ -211,6 +217,7 @@ scr_reject <- function(x, population = NULL, accepted = NULL, multipliers = NULL
     sp <- scr_apply(x, population)$score
     acc <- if (is.null(accepted)) rep(FALSE, length(sp)) else as.logical(accepted)
     if (length(acc) != length(sp)) stop("`accepted` must have the length of `population`.", call. = FALSE)
+    if (anyNA(acc)) stop("`accepted` must be TRUE or FALSE on every row (no NA).", call. = FALSE)
     band_pop <- cut(sp, breaks = breaks, include.lowest = TRUE)
     pop_tb <- data.table::data.table(band = band_pop, acc = acc)[, .(n_pop = .N, n_unknown = sum(!acc)), by = band]
     n_pop <- length(sp); n_unk <- sum(!acc)

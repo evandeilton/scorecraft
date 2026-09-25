@@ -21,7 +21,7 @@ scr_align(
 \item{raw}{Raw score: an event logit (or any score on which a higher
 value means a higher probability of the event).}
 
-\item{y}{0/1 outcome vector, same length as \code{raw}.}
+\item{y}{0/1 outcome vector (numeric or logical), same length as \code{raw}.}
 
 \item{base_score}{Score at which the odds are \code{base_odds}.}
 
@@ -37,7 +37,8 @@ value means a higher probability of the event).}
 
 \item{laplace}{Smoothing of the counts per band.}
 
-\item{weights}{Optional weights per observation (sample reweighting).}
+\item{weights}{Optional non-negative weights per observation (sample
+reweighting), of the length of \code{raw}.}
 }
 \value{
 An \code{scr_align} object with \code{base_score}, \code{base_odds}, \code{pdo},

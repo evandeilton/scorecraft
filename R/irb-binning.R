@@ -33,8 +33,11 @@
 #' missing values become the level `"NA"`, as in the engine. When a
 #' `holdout_idx` is given, the frozen bins are revalidated: the hold-out
 #' bin means are recomputed, the PSI of the bin shares is reported with the
-#' sample-size-adjusted critical value, and a driver whose hold-out means
-#' break the training order is flagged `UNSTABLE_HOLDOUT`.
+#' sample-size-adjusted critical value, a driver whose hold-out means
+#' break the training order is flagged `UNSTABLE_HOLDOUT`, one whose bin
+#' shares shift (fixed PSI flag `"shift"`, PSI at or above 0.25) is flagged
+#' `PSI_ACTION`, and one with more than 1% of hold-out rows outside the
+#' bins `UNBINNED_HOLDOUT`.
 #'
 #' @param data A `data.frame` or `data.table`.
 #' @param target Column name of the continuous target.
@@ -146,13 +149,25 @@ print.scr_cbins <- function(x, ...) {
 #' @noRd
 .cbin_stats <- function(idx, y, k, scale) {
   n_b <- tabulate(idx, nbins = k)
-  s_b <- vapply(seq_len(k), function(b) sum(y[idx == b]), numeric(1))
+  s_b <- .cbin_sum_by(y, idx, k)
   m_b <- ifelse(n_b > 0, s_b / pmax(n_b, 1L), NA_real_)
   ss_tot <- sum((y - mean(y))^2)
   ss_b <- n_b * (m_b - mean(y))^2
   iv <- if (ss_tot > 0) ss_b / ss_tot else rep(0, k)
   w <- if (identical(scale, "logit")) stats::qlogis(pmin(pmax(m_b, 1e-4), 1 - 1e-4)) else m_b
   list(n = n_b, mean = m_b, woe = w, iv = ifelse(is.na(iv), 0, iv), sum = s_b)
+}
+
+#' Sum of `y` by bin index 1..k in one pass (0 for an empty bin)
+#' @keywords internal
+#' @noRd
+.cbin_sum_by <- function(y, idx, k) {
+  out <- numeric(k)
+  ok <- !is.na(idx)
+  if (!any(ok)) return(out)
+  r <- rowsum(as.double(y[ok]), idx[ok], reorder = TRUE)
+  out[as.integer(rownames(r))] <- r[, 1]
+  out
 }
 
 #' Greedy merge of adjacent bins on a sequence of (n, sum) with a size floor
@@ -268,8 +283,9 @@ print.scr_cbins <- function(x, ...) {
   x[is.na(x)] <- "NA"
   if (any(grepl(sep, x, fixed = TRUE))) stop("driver '", f, "': a category contains the bin separator '", sep, "'.", call. = FALSE)
   lv <- sort(unique(x))
-  m_l <- vapply(lv, function(l) mean(y[x == l]), numeric(1))
-  n_l <- vapply(lv, function(l) sum(x == l), numeric(1))
+  li <- match(x, lv)
+  n_l <- stats::setNames(as.double(tabulate(li, nbins = length(lv))), lv)
+  m_l <- .cbin_sum_by(y, li, length(lv)) / n_l
   ord <- order(m_l, n_l)
   lv <- lv[ord]; n_l <- n_l[ord]; s_l <- (m_l * n_l)[ord]
   mg <- .cbin_merge(n_l, s_l, max_bins, min_n, min_share)
@@ -323,7 +339,8 @@ print.scr_cbins <- function(x, ...) {
       d <- diff(st$mean[st$n > 0])
       if (identical(e$direction, "decreasing")) all(d <= 1e-9) else all(d >= -1e-9)
     } else TRUE
-    reason <- c(if (!order_ok) "UNSTABLE_HOLDOUT", if (identical(ps$flag_fixed, "action")) "PSI_ACTION",
+    # scr_psi() flags "stable" / "moderate" / "shift": a shift (PSI >= 0.25) is the action level
+    reason <- c(if (!order_ok) "UNSTABLE_HOLDOUT", if (identical(ps$flag_fixed, "shift")) "PSI_ACTION",
                 if (mean(ok) < 0.99) "UNBINNED_HOLDOUT")
     list(
       bins = data.table::data.table(feature = f, bin = e$bin, n_train = e$count, mean_train = e$mean,

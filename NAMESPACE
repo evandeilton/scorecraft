@@ -138,6 +138,7 @@ export(scr_strategy)
 export(scr_triage)
 export(scr_verbose)
 export(scr_workout)
+importFrom(Rcpp,sourceCpp)
 importFrom(data.table,
   ":=",
   .N,
@@ -179,3 +180,4 @@ importFrom(utils,
   modifyList,
   packageVersion
 )
+useDynLib(scorecraft, .registration = TRUE)

@@ -15,7 +15,10 @@
 #' of most recent periods that already reaches `ratio` of the population.
 #' Without a date column, or with a single period, it falls back to random
 #' stratified by the target. The date column is never a candidate: it is the
-#' key of the split and leaves the contest.
+#' key of the split and leaves the contest. A text date column is read as an
+#' ISO date (`YYYY-MM-DD`, `YYYY/MM/DD`, `YYYY-MM`) or as all-digit periods
+#' (`YYYYMM`); rows with a missing date belong to no period and are left out
+#' of both train and hold-out, with a warning in the log.
 #'
 #' @section Event orientation:
 #'
@@ -32,15 +35,17 @@
 #' @param date_col Date column of the out-of-time cut. `NULL` uses a random
 #'   stratified split.
 #' @param ratio Target hold-out fraction.
-#' @param seed Seed of the random split. `NULL` leaves the random number
-#'   generator untouched, so the split is reproducible only through the
-#'   `seed` of [scr_config()].
+#' @param seed Seed of the random split. `NULL` draws from the session's
+#'   random stream (reproducible only through a `set.seed()` of your own;
+#'   [scr_select()] passes the `seed` of [scr_config()]). A seed is applied
+#'   locally: the session's random stream is restored on exit.
 #' @param event_level Which target value counts as the event. `NULL` uses
 #'   the convention (`1`, or the second alphabetical level).
 #' @param drop Columns that are never candidates (identifiers, sibling
 #'   targets, free text). They stay in the funnel as `00.config`.
 #' @param copy If `TRUE` (default), works on a copy of `data`. `FALSE`
-#'   modifies `data` by reference (typing), saving memory.
+#'   modifies a `data.table` by reference (target and typing), saving
+#'   memory; a `data.frame` is always converted, hence copied.
 #'
 #' @return An `scr_split` object with `data` (typed), `target`, `train_idx`,
 #'   `holdout_idx`, `method`, `cutoff`, `date_col` and `cols` (`features`,
@@ -110,6 +115,7 @@ print.scr_split <- function(x, ...) {
   if (anyNA(y)) stop("Target '", target, "' has NA - a missing target is not accepted.", call. = FALSE)
   raw <- y
   if (is.logical(y)) y <- as.integer(y)
+  if (is.numeric(y) && is.object(y)) y <- as.double(y)   # e.g. bit64::integer64
 
   if (is.factor(y) || is.character(y)) {
     lv <- sort(unique(as.character(y)))
@@ -124,10 +130,11 @@ print.scr_split <- function(x, ...) {
     return(list(y = as.integer(as.character(y) == ev),
                 event = list(label = ev, inverted = FALSE, input_class = class(raw)[1])))
   }
-  y <- as.integer(y)
-  if (!all(y %in% c(0L, 1L))) {
+  # checked BEFORE as.integer(): truncation would silently turn 0.5 into 0
+  if (!all(y %in% c(0, 1))) {
     stop("Target '", target, "' must be 0/1 (found: ", lst(sort(unique(y))), ").", call. = FALSE)
   }
+  y <- as.integer(y)
   label <- "1"; inverted <- FALSE
   if (!is.null(event_level)) {
     el <- suppressWarnings(as.integer(event_level))
@@ -153,7 +160,10 @@ prepare_columns <- function(dt, target, drop_cols = character()) {
     x <- dt[[f]]
     if (is.numeric(x)) {
       var_num <- c(var_num, f)
-      if (!is.double(x)) data.table::set(dt, j = f, value = as.double(x))
+      # is.object(): a classed double such as bit64::integer64 (what DBI
+      # drivers return for BIGINT) is `double` in storage but its bits are
+      # not the value; as.double() dispatches to the method that converts
+      if (!is.double(x) || is.object(x)) data.table::set(dt, j = f, value = as.double(x))
     } else {
       var_cat <- c(var_cat, f)
       if (!is.character(x)) data.table::set(dt, j = f, value = as.character(x))
@@ -168,10 +178,12 @@ prepare_columns <- function(dt, target, drop_cols = character()) {
 split_train_holdout <- function(dt, target, date_col = NULL, ratio = 0.30, seed = NULL) {
   n <- nrow(dt)
   if (!is.null(date_col) && date_col %in% names(dt) && data.table::uniqueN(dt[[date_col]]) > 1L) {
-    d <- as.numeric(dt[[date_col]])
+    d <- .date_as_num(dt[[date_col]], date_col)
+    n_na <- sum(is.na(d))
     u <- sort(unique(d[!is.na(d)]))
     k <- length(u)
-    share_ge <- rev(cumsum(rev(vapply(u, function(v) sum(d == v, na.rm = TRUE), numeric(1)) / n)))
+    # rows per period in one pass (a scan per period is O(n * periods))
+    share_ge <- rev(cumsum(rev(tabulate(match(d, u), nbins = k) / n)))
     cand  <- which(share_ge >= ratio)
     cut_i <- if (length(cand)) max(cand) else k
     if (cut_i == 1L) cut_i <- min(2L, k)
@@ -180,11 +192,15 @@ split_train_holdout <- function(dt, target, date_col = NULL, ratio = 0.30, seed 
       cutoff <- as.character(dt[[date_col]][which(d == u[cut_i])[1]])
       msg("  OOT: %d period(s) in train, %d in hold-out (hold-out starts at %s, %.1f%% of rows)",
           cut_i - 1L, k - cut_i + 1L, cutoff, 100 * length(ho) / n)
+      if (n_na) {
+        msg("  WARNING: %s row(s) with a missing '%s' belong to no period and are left out of both train and hold-out.",
+            n_fmt(n_na), date_col)
+      }
       return(list(train_idx = tr, holdout_idx = ho, method = "out-of-time", cutoff = cutoff))
     }
     msg("  OOT cut degenerate on '%s' - falling back to random stratified.", date_col)
   }
-  if (!is.null(seed)) set.seed(seed)
+  .scr_local_seed(seed)
   y  <- dt[[target]]
   tr <- integer(0)
   for (lv in unique(y)) {
@@ -195,4 +211,33 @@ split_train_holdout <- function(dt, target, date_col = NULL, ratio = 0.30, seed 
   tr <- sort(unique(tr))
   list(train_idx = tr, holdout_idx = setdiff(seq_len(n), tr),
        method = "stratified random", cutoff = NA_character_)
+}
+
+#' Date column as an ordered number (NA where it cannot be read)
+#'
+#' A `Date`, `POSIXct` or number is used as is. Text or a factor (what a database often
+#' returns) is read as an ISO date (`YYYY-MM-DD` or `YYYY/MM/DD`); failing
+#' that, `YYYY-MM` as the first day of the month, and all-digit text
+#' (`YYYYMM`, `YYYYMMDD`) as a number; any other factor keeps the order of
+#' its levels. Without this, `as.numeric()` of text is all `NA` and the out-of-time cut
+#' degenerates into a random split.
+#' @keywords internal
+#' @noRd
+.date_as_num <- function(x, date_col) {
+  fac <- if (is.factor(x)) x
+  if (is.factor(x)) x <- as.character(x)
+  if (!is.character(x)) return(suppressWarnings(as.numeric(x)))
+  ok <- !is.na(x) & nzchar(x)
+  if (!any(ok)) return(rep(NA_real_, length(x)))
+  for (fm in c("%Y-%m-%d", "%Y/%m/%d")) {
+    d <- as.numeric(as.Date(substr(x, 1L, 10L), format = fm))
+    if (!anyNA(d[ok])) return(d)
+  }
+  if (all(grepl("^[0-9]{4}[-/][0-9]{2}$", x[ok]))) {
+    return(as.numeric(as.Date(paste0(gsub("/", "-", x, fixed = TRUE), "-01"), format = "%Y-%m-%d")))
+  }
+  if (all(grepl("^[0-9]+$", x[ok]))) return(as.numeric(x))
+  if (!is.null(fac)) return(as.numeric(fac))   # a factor keeps the order of its levels
+  msg("  '%s' is text that is neither an ISO date nor all digits - it cannot order the periods.", date_col)
+  rep(NA_real_, length(x))
 }

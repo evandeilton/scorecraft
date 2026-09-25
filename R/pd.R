@@ -141,12 +141,11 @@ print.scr_master_scale <- function(x, ...) {
 #' @keywords internal
 #' @noRd
 .pd_auc_implied <- function(p) {
-  p <- as.double(p)
-  o <- order(p); p <- p[o]
+  p <- sort(as.double(p))
   u <- rle(p)
-  ends <- cumsum(u$lengths); starts <- ends - u$lengths + 1L
-  P <- vapply(seq_along(ends), function(k) sum(p[starts[k]:ends[k]]), numeric(1))
-  Q <- vapply(seq_along(ends), function(k) sum(1 - p[starts[k]:ends[k]]), numeric(1))
+  grp <- rep.int(seq_along(u$lengths), u$lengths)
+  P <- as.double(rowsum(p, grp, reorder = FALSE))           # expected defaults per PD value
+  Q <- u$lengths - P                                        # expected non-defaults
   cumQ <- cumsum(Q)
   sum(P * (cumQ - Q + Q / 2)) / (sum(P) * sum(Q))
 }
@@ -156,7 +155,8 @@ print.scr_master_scale <- function(x, ...) {
 #' @noRd
 .pd_solve_a <- function(l, b, ct) {
   f <- function(a) mean(stats::plogis(a + b * l)) - ct
-  stats::uniroot(f, c(-60, 60), tol = 1e-13, maxiter = 2000L)$root
+  # f increases in a; extend the bracket when b * l reaches beyond +-60
+  stats::uniroot(f, c(-60, 60), tol = 1e-13, maxiter = 2000L, extendInt = "upX")$root
 }
 
 #' Solve (a, b) so that the mean PD equals `ct` and the implied AUC equals `auc_target`
@@ -194,10 +194,16 @@ print.scr_master_scale <- function(x, ...) {
 #'     exactly (the closed form is reported as `shift_prior`).}
 #'   \item{`"logodds_ab"`}{Tasche (2013): `ln(odds*) = a + b ln(odds)`, with
 #'     `(a, b)` solving `mean(PD*) = CT` and implied accuracy ratio equal to
-#'     `ar_target` (default: the accuracy ratio observed on the sample).}
-#'   \item{`"qmm"`}{Quasi-moment matching: the same two equations, with the
-#'     target accuracy ratio taken from the PD distribution itself
-#'     (the implied AR of the current PDs), so no outcome is needed.}
+#'     `ar_target` (default: the accuracy ratio observed on the sample).
+#'     With the observed accuracy ratio this is Tasche's quasi-moment
+#'     matching (QMM) proper. The implied AUC is the probability that a
+#'     default has a higher PD than a non-default when the PDs are true:
+#'     each score carries weight `PD*` among the defaults and `1 - PD*`
+#'     among the non-defaults, ties counted one half.}
+#'   \item{`"qmm"`}{The outcome-free variant of the same two equations: the
+#'     target accuracy ratio is the implied AR of the current PDs, so no
+#'     outcome is needed and the implied discriminatory power of the
+#'     uncalibrated curve is carried over to the new level.}
 #'   \item{`"scaling"`}{`PD* = PD * CT / ybar`. The proportional rescaling is
 #'     not a logit map, so the slope is the least-squares projection of
 #'     `logit(PD*)` on the ln(odds) and the intercept is solved to the CT.}
@@ -303,6 +309,7 @@ scr_calibrate <- function(x, target, sample_rate = NULL, method = NULL, ar_targe
   if (!is.null(raw)) {
     ok <- is.finite(raw) & (if (is.null(y)) TRUE else !is.na(y))
     raw <- as.double(raw[ok]); if (!is.null(y)) y <- as.integer(y[ok])
+    if (!length(raw)) stop("scr_calibrate(): no calibration row with a finite ln(odds) and an outcome.", call. = FALSE)
   }
   ybar <- sample_rate %||% (if (!is.null(y)) mean(y) else NULL)
   if (is.null(ybar)) stop("scr_calibrate(): give `sample_rate` or `y`.", call. = FALSE)
@@ -767,8 +774,9 @@ print.scr_grades <- function(x, ...) {
 #' from the cohort series, \eqn{t_{q, T-1}\, sd(DR_t)/\sqrt{T}} per grade;
 #' `"ci_binomial"` uses \eqn{z_q \sqrt{PD(1-PD)/n}} on the obligors (or
 #' obligor-years when a series exists); `"bootstrap"` resamples the
-#' outcomes of the sample within each grade and takes the `level` quantile
-#' of the default rate above the estimate. Categories `"A"` (data and
+#' outcomes of the sample within each grade (drawn as the resampled default
+#' rate, Binomial(n, DR) / n, its exact distribution) and takes the `level`
+#' quantile of the default rate above the estimate. Categories `"A"` (data and
 #' methodological deficiencies) and `"B"` (changes in standards or
 #' environment) are expert quantities: `value` (one number or one per
 #' grade, in PD units) and a non-empty `reason` are mandatory. The ledger
@@ -834,19 +842,25 @@ scr_moc <- function(x, category = c("A", "B", "C"), method = NULL, level = NULL,
       v <- stats::qnorm(level) * sqrt(t$pd_be * (1 - t$pd_be) / pmax(n_use, 1))
     } else {
       seed <- seed %||% cfg$seed
-      set.seed(seed)
-      seeds <- sample.int(.Machine$integer.max, as.integer(n_boot))
+      .scr_local_seed(seed)
+      # the default rate of a with-replacement resample of the n_k outcomes of
+      # grade k is exactly Binomial(n_k, DR_k) / n_k: drawn directly, O(K n_boot)
+      n_boot <- as.integer(n_boot)
       rows <- x$rows
-      ys <- lapply(seq_len(K), function(k) rows$y[rows$grade == k])
-      reps <- .scr_lapply(seeds, function(sd) {
-        set.seed(sd)
-        vapply(ys, function(yy) if (length(yy)) mean(yy[sample.int(length(yy), length(yy), replace = TRUE)]) else NA_real_, numeric(1))
-      }, nthread = cfg$nthread)
-      B <- do.call(rbind, reps)
+      n_k <- tabulate(rows$grade, nbins = K)
+      d_k <- tabulate(rows$grade[rows$y %in% 1L], nbins = K)
+      B <- vapply(seq_len(K), function(k) {
+        if (n_k[k] > 0L) stats::rbinom(n_boot, n_k[k], d_k[k] / n_k[k]) / n_k[k] else rep(NA_real_, n_boot)
+      }, numeric(n_boot))
+      B <- matrix(B, nrow = n_boot)
       v <- pmax(0, apply(B, 2L, stats::quantile, probs = level, na.rm = TRUE, names = FALSE) - t$dr)
     }
     reason <- reason %||% sprintf("estimation error, %s at %.0f%% one-sided", method, 100 * level)
-    if (any(x$moc$category == "C" & x$moc$active)) x$moc[x$moc$category == "C", active := FALSE]
+    # copy first: the ledger is shared with the object passed in, and := would edit it too
+    if (any(x$moc$category == "C" & x$moc$active)) {
+      x$moc <- data.table::copy(x$moc)
+      x$moc[x$moc$category == "C", active := FALSE]
+    }
   }
   new_id <- if (nrow(x$moc)) max(x$moc$id) + 1L else 1L
   entry <- data.table::data.table(id = new_id, category = category, method = method,
@@ -936,7 +950,8 @@ scr_pd <- function(grades, moc = NULL, params = NULL, asset_class = NULL, philos
   if (identical(philosophy, "pit")) {
     if (is.null(rho) || is.null(z)) stop("scr_pd(): philosophy \"pit\" needs `rho` and `z`.", call. = FALSE)
     .scr_num1(rho, "rho", lower = 0, upper = 1, open_lower = TRUE); .scr_num1(z, "z")
-    t[, pd_pit := scr_pd_pit_ttc(pd_moc, z = z, rho = rho, to = "pit")]
+    # a grade without defaults and without a margin has pd_moc 0: the bridge keeps 0 and 1 fixed
+    t[, pd_pit := .vasicek_pit(pd_moc, z, rho)]
     add("philosophy", sprintf("point-in-time bridge with rho %.3f and z %+.3f", rho, z))
   } else t[, pd_pit := NA_real_]
   base_pd <- if (identical(philosophy, "pit")) t$pd_pit else t$pd_ttc
@@ -1152,7 +1167,7 @@ scr_migration <- function(grade_t0, grade_t1, K = NULL) {
   g1 <- suppressWarnings(as.integer(t1c))
   col <- ifelse(is.na(t1c), K + 2L, ifelse(!is.na(g1) & g1 >= 1L & g1 <= K, g1, K + 1L))
   M <- matrix(0L, K, K + 2L, dimnames = list(as.character(seq_len(K)), c(as.character(seq_len(K)), "default", "closed")))
-  for (i in seq_along(g0)) M[g0[i], col[i]] <- M[g0[i], col[i]] + 1L
+  M[] <- tabulate(g0 + (col - 1L) * K, nbins = K * (K + 2L))
   n_i <- rowSums(M)
   P <- M / pmax(n_i, 1)
   idx <- seq_len(K)
@@ -1208,20 +1223,18 @@ print.scr_migration <- function(x, ...) {
   starts <- switch(by, month = dates, quarter = dates[mth %in% c(1L, 4L, 7L, 10L)], year = dates[mth == 1L])
   starts <- starts[.add_months(starts, horizon) <= max(dates)]
   if (!length(starts)) stop("scr_pd_validate(): no cohort has a complete ", horizon, "-month window.", call. = FALSE)
-  def_rows <- dt[dt$default == 1L, c("id", "date"), with = FALSE]
-  data.table::rbindlist(lapply(starts, function(t0) {
-    t1 <- .add_months(t0, horizon)
-    pop <- dt[dt$date == t0 & dt$default == 0L & !is.na(dt$grade)]
-    if (!nrow(pop)) return(NULL)
-    d_ids <- unique(def_rows$id[def_rows$date > t0 & def_rows$date <= t1])
-    pop[, y := as.integer(id %in% d_ids)]
-    end <- dt[dt$date == t1, c("id", "grade"), with = FALSE]
-    data.table::setnames(end, "grade", "grade_t1")
-    pop <- merge(pop, end, by = "id", all.x = TRUE, sort = FALSE)
-    pop[, grade_t1 := ifelse(y == 1L, "default", as.character(grade_t1))]
-    pop[, cohort := t0]
-    pop
-  }), use.names = TRUE)
+  # every cohort at once (cohort-major, panel order within a cohort): one
+  # rolling join for the outcome, one equi-join for the grade at the end
+  pop <- dt[dt$default %in% 0L & !is.na(dt$grade) & as.double(dt$date) %in% as.double(starts)]
+  pop <- pop[order(pop$date)]
+  pop[, cohort := date]
+  t1 <- .add_months_u(pop$cohort, horizon)
+  pop[, y := .dr_outcome(dt[dt$default %in% 1L, c("id", "date"), with = FALSE], id, cohort, t1)]
+  end <- dt[, list(id, t1 = date, g1 = grade)]
+  q <- data.table::data.table(id = pop$id, t1 = t1)     # built outside: in `i`, t1 would be the column of `end`
+  g1 <- end[q, on = c("id", "t1"), mult = "first", g1]
+  pop[, grade_t1 := data.table::fifelse(y == 1L, "default", as.character(g1))]
+  pop
 }
 
 #' Calibration tests on (N, D, PD): Jeffreys, binomial, normal
@@ -1235,17 +1248,22 @@ print.scr_migration <- function(x, ...) {
   p_b[ok] <- stats::pbinom(D[ok] - 1, N[ok], PD[ok], lower.tail = FALSE)
   crit[ok] <- stats::qbinom(1 - alpha, N[ok], PD[ok]) + 1
   z[ok] <- (D[ok] / N[ok] - PD[ok]) / sqrt(PD[ok] * (1 - PD[ok]) / N[ok])
-  list(p_jeffreys = p_j, p_binomial = p_b, critical = crit, z = z, p_normal = 1 - stats::pnorm(z))
+  list(p_jeffreys = p_j, p_binomial = p_b, critical = crit, z = z, p_normal = stats::pnorm(z, lower.tail = FALSE))
 }
 
-#' Hosmer-Lemeshow statistic over the grades: chi2(K - 2)
+#' Hosmer-Lemeshow statistic over the grades: chi2(K)
+#'
+#' The grade PDs are fixed before the validation sample is observed, so the
+#' statistic is referred to a chi-square with K degrees of freedom (K - 2 is
+#' the in-sample case, when the PDs are fitted on the same data): Hosmer and
+#' Lemeshow (2000, sec. 5.2.2); BCBS Working Paper 14 (2005), sec. 5.
 #' @keywords internal
 #' @noRd
 .pd_hl <- function(n, d, pd) {
   ok <- n > 0 & is.finite(pd) & pd > 0 & pd < 1
   n <- as.double(n[ok]); d <- as.double(d[ok]); pd <- pd[ok]
   chi2 <- sum((d - n * pd)^2 / (n * pd * (1 - pd)))
-  df <- length(n) - 2L
+  df <- length(n)
   list(chi2 = chi2, df = df, p = if (df >= 1L) stats::pchisq(chi2, df, lower.tail = FALSE) else NA_real_)
 }
 
@@ -1254,12 +1272,27 @@ print.scr_migration <- function(x, ...) {
 #' @noRd
 .pd_light <- function(p, lights) ifelse(is.na(p), NA_character_, ifelse(p <= lights[1], "red", ifelse(p <= lights[2], "amber", "green")))
 
-#' Hanley-McNeil standard error of an AUC
+#' DeLong standard error of an AUC, from mid-ranks
+#'
+#' The structural components of DeLong et al. (1988): for every event
+#' V10_i is the share of non-events it outranks (ties count one half), for
+#' every non-event V01_j the share of events that outrank it;
+#' Var(AUC) = var(V10) / n1 + var(V01) / n0. This is the estimator of the
+#' ECB instructions for reporting validation results (current AUC against
+#' the initial one) and, unlike the Hanley-McNeil approximation, it holds
+#' under heavy ties (a grade scale).
 #' @keywords internal
 #' @noRd
-.pd_auc_se <- function(auc, n1, n0) {
-  q1 <- auc / (2 - auc); q2 <- 2 * auc^2 / (1 + auc)
-  sqrt((auc * (1 - auc) + (n1 - 1) * (q1 - auc^2) + (n0 - 1) * (q2 - auc^2)) / (n1 * n0))
+.pd_auc_se <- function(score, y, higher_is_event = TRUE) {
+  ok <- !is.na(score) & !is.na(y)
+  s <- as.double(score[ok]); y <- as.integer(y[ok])
+  if (!higher_is_event) s <- -s
+  e <- y == 1L; n1 <- sum(e); n0 <- sum(!e)
+  if (n1 < 2L || n0 < 2L) return(NA_real_)
+  r <- data.table::frank(s, ties.method = "average")
+  v10 <- (r[e] - data.table::frank(s[e], ties.method = "average")) / n0
+  v01 <- 1 - (r[!e] - data.table::frank(s[!e], ties.method = "average")) / n1
+  sqrt(stats::var(v10) / n1 + stats::var(v01) / n0)
 }
 
 #' Validate a PD model on a cohort panel
@@ -1274,13 +1307,15 @@ print.scr_migration <- function(x, ...) {
 #'     grade: Jeffreys `p = F_Beta(PD; D + 1/2, N - D + 1/2)`, the binomial
 #'     `P(X >= D)` with its critical count at `alpha`, the normal `z`, and
 #'     the traffic light on the Jeffreys p-value. Portfolio: the same tests
-#'     on the totals, Hosmer-Lemeshow over the grades (`K - 2` degrees of
-#'     freedom), the multi-period normal test over the cohort default rates
-#'     and the Brier score.}
+#'     on the totals, Hosmer-Lemeshow over the grades (`K` degrees of
+#'     freedom: the grade PDs are not fitted on the validation sample), the
+#'     multi-period normal test over the cohort differences `DR_t - PD_t`
+#'     (BCBS Working Paper 14, 2005) and the Brier score.}
 #'   \item{Discrimination}{AUC, Gini and KS with a bootstrap interval
 #'     ([scr_metrics()]) on the score when a `score` column exists,
 #'     otherwise on the grade; the `S` statistic against `auc_init`
-#'     (`(AUC_init - AUC_curr) / se`, Hanley-McNeil), `p = 1 - Phi(S)`.}
+#'     (`(AUC_init - AUC_curr) / se`, with the DeLong standard error of
+#'     the current AUC), `p = 1 - Phi(S)`.}
 #'   \item{Stability}{PSI of the grade distribution against the development
 #'     sample per cohort ([scr_psi()]); the migration matrix pooled over
 #'     the cohorts whose end date is observed ([scr_migration()]); the
@@ -1393,7 +1428,10 @@ scr_pd_validate <- function(x, newdata, id = "id", date = "date", default = "def
   hl <- .pd_hl(by_g$n, by_g$d, by_g$pd)
   hl_chi2 <- hl$chi2; hl_df <- hl$df; hl_p <- hl$p
   T_c <- nrow(port)
-  mp_z <- if (T_c >= 2L && stats::sd(port$dr) > 0) (mean(port$dr) - mean(port$pd)) / (stats::sd(port$dr) / sqrt(T_c)) else NA_real_
+  # normal test of BCBS WP 14: sum_t (DR_t - PD_t) / (sqrt(T) tau), tau the
+  # standard deviation of the differences (the cohort PD moves with the mix)
+  dd <- port$dr - port$pd
+  mp_z <- if (T_c >= 2L && stats::sd(dd) > 0) mean(dd) / (stats::sd(dd) / sqrt(T_c)) else NA_real_
   brier <- sum(by_g$d * (1 - by_g$pd)^2 + (by_g$n - by_g$d) * by_g$pd^2, na.rm = TRUE) / N
   portfolio_tests <- list(n = N, d = Dn, dr = Dn / N, pd = PDp, p_jeffreys = pt$p_jeffreys, p_binomial = pt$p_binomial, critical = pt$critical,
                           z = pt$z, p_normal = pt$p_normal, hl_chi2 = hl_chi2, hl_df = hl_df, hl_p = hl_p,
@@ -1408,8 +1446,7 @@ scr_pd_validate <- function(x, newdata, id = "id", date = "date", default = "def
     hie <- if (use_score) identical(x$direction, "higher_is_riskier") else TRUE
     m <- scr_metrics(sv, rows$y, higher_is_event = hie, ci = TRUE, n_boot = n_boot, level = cfg$ci_level, seed = seed, nthread = cfg$nthread)
     auc_init <- auc_init %||% x$scorecard$metrics[x$scorecard$metrics$sample == "holdout", ][["auc"]][1]
-    n1 <- sum(rows$y == 1L); n0 <- sum(rows$y == 0L)
-    se <- if (is.na(m$auc) || n1 == 0L || n0 == 0L) NA_real_ else .pd_auc_se(m$auc, n1, n0)
+    se <- if (is.na(m$auc)) NA_real_ else .pd_auc_se(sv, rows$y, higher_is_event = hie)
     S <- if (is.na(se) || se == 0) NA_real_ else (auc_init - m$auc) / se
     disc <- data.table::data.table(basis = if (use_score) "score" else "grade", n = m$n, events = m$events, auc = m$auc, auc_lo = m$auc_lo, auc_hi = m$auc_hi,
                                    gini = m$gini, gini_lo = m$gini_lo, gini_hi = m$gini_hi, ks = m$ks, ks_lo = m$ks_lo, ks_hi = m$ks_hi,
@@ -1421,9 +1458,12 @@ scr_pd_validate <- function(x, newdata, id = "id", date = "date", default = "def
   dev_grade <- x$rows$grade
   cohorts <- sort(unique(rows$cohort))
   if ("psi" %in% tests) {
+    # one pass: the development grades converted once, the panel split once
+    dev_chr <- as.character(dev_grade); lv_k <- as.character(seq_len(K))
+    by_coh <- split(rows$grade, rows$cohort)
     psi_tab <- data.table::rbindlist(lapply(cohorts, function(c0) {
-      g <- rows$grade[rows$cohort == c0]
-      r <- scr_psi(as.character(dev_grade), as.character(g), levels = as.character(seq_len(K)), alpha = alpha)
+      g <- by_coh[[as.character(c0)]]
+      r <- scr_psi(dev_chr, as.character(g), levels = lv_k, alpha = alpha)
       data.table::data.table(cohort = c0, n = length(g), psi = r$psi, flag_fixed = r$flag_fixed, critical = r$critical, flag_adjusted = r$flag_adjusted)
     }))
   }
@@ -1444,7 +1484,8 @@ scr_pd_validate <- function(x, newdata, id = "id", date = "date", default = "def
   row <- function(test, level, stat, p) data.table::data.table(test = test, level = level, statistic = stat, p_value = p, light = .pd_light(p, lights))
   sm <- list()
   if ("jeffreys" %in% tests) { sm[[length(sm) + 1L]] <- row("jeffreys", "portfolio", portfolio_tests$dr, portfolio_tests$p_jeffreys)
-    sm[[length(sm) + 1L]] <- row("jeffreys_grades_red", "grade", sum(by_g$light == "red", na.rm = TRUE), min(by_g$p_jeffreys, na.rm = TRUE)) }
+    sm[[length(sm) + 1L]] <- row("jeffreys_grades_red", "grade", sum(by_g$light == "red", na.rm = TRUE),
+                               if (all(is.na(by_g$p_jeffreys))) NA_real_ else min(by_g$p_jeffreys, na.rm = TRUE)) }
   if ("binomial" %in% tests) sm[[length(sm) + 1L]] <- row("binomial", "portfolio", portfolio_tests$critical, portfolio_tests$p_binomial)
   if ("normal" %in% tests) sm[[length(sm) + 1L]] <- row("normal", "portfolio", portfolio_tests$z, portfolio_tests$p_normal)
   if ("hl" %in% tests) {
@@ -1459,7 +1500,8 @@ scr_pd_validate <- function(x, newdata, id = "id", date = "date", default = "def
   if (!is.null(disc)) sm[[length(sm) + 1L]] <- row("auc_vs_initial", "portfolio", disc$s_stat, disc$p_value)
   if (!is.null(psi_tab)) { last_psi <- psi_tab[nrow(psi_tab)]
     sm[[length(sm) + 1L]] <- data.table::data.table(test = "psi_grades", level = "portfolio", statistic = last_psi$psi, p_value = NA_real_,
-                                                    light = switch(last_psi$flag_fixed, stable = "green", moderate = "amber", "red")) }
+                                                    light = if (is.na(last_psi$flag_fixed)) NA_character_ else
+                                                      switch(last_psi$flag_fixed, stable = "green", moderate = "amber", "red")) }
   if (!is.null(mig)) sm[[length(sm) + 1L]] <- data.table::data.table(test = "migration_mwb_upper", level = "portfolio", statistic = mig$mwb_upper, p_value = NA_real_, light = NA_character_)
   if (!is.null(conc)) sm[[length(sm) + 1L]] <- row("concentration_cv", "portfolio", conc$cv, conc$p_value)
   summary <- data.table::rbindlist(sm)
@@ -1500,7 +1542,7 @@ print.scr_pd_validation <- function(x, ...) {
 scr_export.scr_pd <- function(x, dir, stamp = TRUE, validation = NULL, ...) {
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
-  tag <- tolower(x$target)
+  tag <- .file_tag(x$target)
   na_v <- data.frame(availability = "not_available", reason_code = "NO_VALIDATION_SUPPLIED", stringsAsFactors = FALSE)
   cal <- x$calibration
   cal_kv <- if (is.null(cal)) .kv_table(list(method = "none", note = "PD taken from the scorecard alignment")) else
@@ -1553,5 +1595,5 @@ utils::globalVariables(c(
   "grade", "grade0", "label0", "band", "score_lo", "score_hi", "pd_lo", "pd_hi", "pd_be", "pd_mean", "n_series", "t_series",
   "active", "moc_a", "moc_b", "moc_c", "pd_moc", "pd_ttc", "pd_pit", "floor", "pd_final", "floor_applied",
   "cohort", "d", "dr", "pd", "p_jeffreys", "p_binomial", "critical", "z", "p_normal", "multi_period_z", "multi_period_p",
-  "light", "grade_t1", ".BY"
+  "light", "grade_t1", ".BY", "g1", "y", "id", "date"
 ))

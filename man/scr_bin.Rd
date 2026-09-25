@@ -31,7 +31,9 @@ target), in parallel by column, and applies in sequence:
 same labels, train/hold-out PSI (the fixed threshold decides; the
 n-adjusted one is reported) and the fraction of hold-out without a bin.
 \item \strong{Redundancy pruning} by rank correlation on the WOE space,
-ranked by hold-out IV.
+ranked by hold-out IV. Under \code{allow_derived_final = FALSE} the derived
+flags leave before this step (\code{derived_excluded}), so that a flag
+that cannot be delivered never prunes a real column.
 }
 }
 \section{Parallelism}{
