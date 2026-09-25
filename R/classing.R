@@ -381,6 +381,15 @@ check_lab <- function(lab, fn) {
 #' @seealso [scr_coarse_classing()] for a complete session, from lab to
 #'   scorecard.
 #' @family classing
+#' @examples
+#' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+#'                   use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+#' d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+#'                   "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+#' res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+#' lab <- scr_coarse_classing(res)
+#' scr_classing_view(lab)
+#' scr_classing_view(lab, "ds_region")
 #' @export
 scr_classing_view <- function(lab, variable = NULL) {
   check_lab(lab, "scr_classing_view")
@@ -593,6 +602,23 @@ print.scr_classing_proposal <- function(x, ...) {
 #' @seealso [scr_coarse_classing()] for a complete session, from lab to
 #'   scorecard.
 #' @family classing
+#' @examples
+#' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+#'                   use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+#' d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+#'                   "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+#' res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+#' lab <- scr_coarse_classing(res)
+#' p <- scr_classing_propose(lab, "ds_region",
+#'                           groups = list(edge = c("NORTH", "SOUTH"),
+#'                                         core = c("EAST", "WEST", "CENTRE")))
+#' lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+#' scr_classing_view(lab, "ds_region")
+#' # a second proposal on the same variable, rejected with its reason
+#' p2 <- scr_classing_propose(lab, "ds_region",
+#'                            groups = list(c("NORTH", "SOUTH", "EAST"), c("WEST", "CENTRE")))
+#' lab <- scr_classing_discard(lab, p2, reason = "no business rationale for this grouping")
+#' scr_decisions(lab)
 #' @export
 scr_classing_accept <- function(lab, proposal, reason, override = FALSE) {
   check_lab(lab, "scr_classing_accept")
@@ -676,6 +702,16 @@ scr_classing_discard <- function(lab, proposal, reason) {
 #' @seealso [scr_coarse_classing()] for a complete session, from lab to
 #'   scorecard.
 #' @family classing
+#' @examples
+#' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+#'                   use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+#' d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+#'                   "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+#' res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+#' lab <- scr_coarse_classing(res)
+#' lab <- scr_classing_choose(lab, drop = "vl_score_10",
+#'                            reason = "not available at decision time")
+#' lab
 #' @export
 scr_classing_choose <- function(lab, keep = NULL, drop = NULL, force = NULL, reason = NULL, override = FALSE) {
   check_lab(lab, "scr_classing_choose")
@@ -744,6 +780,25 @@ scr_classing_choose <- function(lab, keep = NULL, drop = NULL, force = NULL, rea
 #' @seealso [scr_coarse_classing()] for a complete session, from lab to
 #'   scorecard.
 #' @family classing
+#' @examples
+#' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+#'                   use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+#' d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+#'                   "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+#' res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+#' lab <- scr_coarse_classing(res)
+#' p <- scr_classing_propose(lab, "ds_region",
+#'                           groups = list(edge = c("NORTH", "SOUTH"),
+#'                                         core = c("EAST", "WEST", "CENTRE")))
+#' lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+#' sp <- scr_classing_spec(lab)
+#' sp
+#' # round trip through a file: a fresh lab receives the manual bins as proposals
+#' f <- tempfile(fileext = ".csv")
+#' scr_classing_spec(lab, file = f)
+#' props <- scr_classing_import(scr_coarse_classing(res), scr_classing_read(f))
+#' names(props)
+#' unlink(f)
 #' @export
 scr_classing_spec <- function(lab, file = NULL) {
   if (inherits(lab, "scr_result")) {
@@ -910,6 +965,20 @@ scr_classing_import <- function(lab, file) {
 #' @seealso [scr_coarse_classing()] for a complete session, from lab to
 #'   scorecard.
 #' @family classing
+#' @examples
+#' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+#'                   use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+#' d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+#'                   "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+#' res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+#' lab <- scr_coarse_classing(res)
+#' p <- scr_classing_propose(lab, "ds_region",
+#'                           groups = list(edge = c("NORTH", "SOUTH"),
+#'                                         core = c("EAST", "WEST", "CENTRE")))
+#' lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+#' res2 <- scr_classing_apply(lab)
+#' scr_selected(res2)
+#' scr_decisions(res2)
 #' @export
 scr_classing_apply <- function(lab) {
   check_lab(lab, "scr_classing_apply")
@@ -1004,6 +1073,20 @@ scr_classing_apply <- function(lab) {
 #' @seealso [scr_coarse_classing()] for a complete session, from lab to
 #'   scorecard.
 #' @family classing
+#' @examples
+#' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+#'                   use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+#' d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+#'                   "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+#' res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+#' lab <- scr_coarse_classing(res)
+#' p <- scr_classing_propose(lab, "ds_region",
+#'                           groups = list(edge = c("NORTH", "SOUTH"),
+#'                                         core = c("EAST", "WEST", "CENTRE")))
+#' lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+#' scr_decisions(lab)
+#' scr_decisions(scr_classing_apply(lab))
+#' scr_decisions(res)   # no manual decision: an empty ledger
 #' @export
 scr_decisions <- function(x) {
   if (inherits(x, "scr_classing")) return(x$ledger[])

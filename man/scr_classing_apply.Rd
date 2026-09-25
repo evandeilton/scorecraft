@@ -24,6 +24,21 @@ the result returns the final list (\code{which = "consensus"} still gives the
 automatic one). The ledger travels with the result and into
 \code{\link[=scr_scorecard]{scr_scorecard()}} and \code{\link[=scr_export]{scr_export()}}. The input result is not modified.
 }
+\examples{
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+                  use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+                  "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+lab <- scr_coarse_classing(res)
+p <- scr_classing_propose(lab, "ds_region",
+                          groups = list(edge = c("NORTH", "SOUTH"),
+                                        core = c("EAST", "WEST", "CENTRE")))
+lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+res2 <- scr_classing_apply(lab)
+scr_selected(res2)
+scr_decisions(res2)
+}
 \seealso{
 \code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
 scorecard.

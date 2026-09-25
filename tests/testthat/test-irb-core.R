@@ -71,8 +71,8 @@ test_that("the default engine applies the trigger, the materiality test and the 
   expect_error(scr_default(scr_demo_panel, "id", "ref_date", config = cfg), "dpd")
   expect_error(scr_default(scr_demo_panel, "id", "ref_date", dpd = "nope", config = cfg), "not found")
   # identical under every backend
-  d_ser <- withr::with_options(list(scorecraft.parallel = "serial"), scr_default(scr_demo_panel, "id", "ref_date", dpd = "dpd", config = scr_config(verbose = FALSE, nthread = 3L)))
-  d_psk <- withr::with_options(list(scorecraft.parallel = "psock"),  scr_default(scr_demo_panel, "id", "ref_date", dpd = "dpd", config = scr_config(verbose = FALSE, nthread = 3L)))
+  d_ser <- withr::with_options(list(scorecraft.parallel = "serial"), scr_default(scr_demo_panel, "id", "ref_date", dpd = "dpd", config = scr_config(verbose = FALSE, nthread = 2L)))
+  d_psk <- withr::with_options(list(scorecraft.parallel = "psock"),  scr_default(scr_demo_panel, "id", "ref_date", dpd = "dpd", config = scr_config(verbose = FALSE, nthread = 2L)))
   expect_equal(d_ser$flags, d0$flags); expect_equal(d_psk$flags, d0$flags)
 })
 
@@ -84,13 +84,13 @@ test_that("a longer probation keeps units in default longer and restructuring le
   expect_gt(sum(d6$flags$default), sum(d3$flags$default))
   expect_lte(d6$summary$n_events, d3$summary$n_events)
   # a hand-made unit: trigger for 2 months, then quiet: exits after 3 quiet months
-  r <- .default_run(trig = c(F, T, T, F, F, F, F, F), utp = rep(FALSE, 8), restr = rep(FALSE, 8), probation = 3L, probation_restr = 12L)
+  r <- .default_run(trig = c(FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE), utp = rep(FALSE, 8), restr = rep(FALSE, 8), probation = 3L, probation_restr = 12L)
   expect_equal(r$default, c(0, 1, 1, 1, 1, 1, 0, 0))
   expect_equal(r$cured, c(0, 0, 0, 0, 0, 1, 0, 0))
   expect_equal(r$trigger[2], "dpd")
-  r2 <- .default_run(trig = c(T, F, F, F, F, F), utp = rep(FALSE, 6), restr = c(T, F, F, F, F, F), probation = 3L, probation_restr = 12L)
+  r2 <- .default_run(trig = c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE), utp = rep(FALSE, 6), restr = c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE), probation = 3L, probation_restr = 12L)
   expect_equal(sum(r2$default), 6L)   # restructured: probation of 12 never completes here
-  r3 <- .default_run(trig = c(T, F, F, F, T, F, F, F, F), utp = rep(FALSE, 9), restr = rep(FALSE, 9), probation = 3L, probation_restr = 12L)
+  r3 <- .default_run(trig = c(TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE), utp = rep(FALSE, 9), restr = rep(FALSE, 9), probation = 3L, probation_restr = 12L)
   expect_equal(max(r3$ev), 2L)        # re-default after the cure is a new event
 })
 

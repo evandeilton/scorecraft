@@ -19,6 +19,21 @@ Returns the append-only ledger of manual decisions: every proposal
 accepted, discarded or superseded, every forced or dropped variable and
 every override, each with its reason.
 }
+\examples{
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+                  use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+                  "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+lab <- scr_coarse_classing(res)
+p <- scr_classing_propose(lab, "ds_region",
+                          groups = list(edge = c("NORTH", "SOUTH"),
+                                        core = c("EAST", "WEST", "CENTRE")))
+lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+scr_decisions(lab)
+scr_decisions(scr_classing_apply(lab))
+scr_decisions(res)   # no manual decision: an empty ledger
+}
 \seealso{
 \code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
 scorecard.

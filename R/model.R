@@ -3,7 +3,7 @@
 # ============================================================================ #
 # Different families of evidence over the SAME WOE columns:
 #   glmnet   - regularisation (elastic net): who survives the shrinkage
-#   xgboost  - boosting: accumulated gain (required Import, D8)
+#   xgboost  - boosting: accumulated gain (required Import)
 #   lightgbm - alternative boosting, optional (Suggests)
 #   ranger   - random forest: permutation importance
 # Each model is trained on train and evaluated on the HOLD-OUT; its hold-out
@@ -147,9 +147,8 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
 #' @noRd
 .fit_glmnet <- function(x_tr, y_tr, x_ho, y_ho, cfg) {
   if (!requireNamespace("glmnet", quietly = TRUE)) stop("package 'glmnet' is not installed")
-  set.seed(cfg$seed)
-  cv <- glmnet::cv.glmnet(x_tr, y_tr, family = "binomial", alpha = cfg$en_alpha,
-                          nfolds = cfg$cv_folds, standardize = TRUE)
+  cv <- .scr_with_seed(cfg$seed, glmnet::cv.glmnet(x_tr, y_tr, family = "binomial", alpha = cfg$en_alpha,
+                                                   nfolds = cfg$cv_folds, standardize = TRUE))
   s <- "lambda.1se"; b <- as.numeric(stats::coef(cv, s = s))[-1L]; note <- ""
   if (all(b == 0)) {
     s <- "lambda.min"; b <- as.numeric(stats::coef(cv, s = s))[-1L]
@@ -165,7 +164,6 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
 #' @keywords internal
 #' @noRd
 .fit_xgboost <- function(x_tr, y_tr, x_ho, y_ho, cfg) {
-  set.seed(cfg$seed)
   p <- list(objective = "binary:logistic", eval_metric = "auc", eta = cfg$xgb_eta,
             max_depth = cfg$xgb_max_depth, subsample = cfg$xgb_subsample,
             colsample_bytree = cfg$xgb_colsample, min_child_weight = cfg$xgb_min_child_weight,
@@ -176,7 +174,7 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
   args <- list(params = p, data = d_tr, nrounds = cfg$xgb_rounds,
                early_stopping_rounds = cfg$xgb_early_stopping, verbose = 0L)
   args[[arg_eval]] <- list(valid = d_ho)
-  m <- do.call(xgboost::xgb.train, args)
+  m <- .scr_with_seed(cfg$seed, do.call(xgboost::xgb.train, args))
   imp <- data.table::as.data.table(xgboost::xgb.importance(model = m))
   imp <- if (nrow(imp)) imp[, .(feature = Feature, importance = Gain)] else
     data.table::data.table(feature = character(), importance = numeric())
@@ -194,11 +192,12 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
   if (!requireNamespace("ranger", quietly = TRUE)) stop("package 'ranger' is not installed")
   df <- as.data.frame(x_tr, check.names = FALSE)
   df[["target__"]] <- factor(y_tr, levels = c(0L, 1L))
-  m <- ranger::ranger(dependent.variable.name = "target__", data = df, num.trees = cfg$rf_trees,
-                      importance = cfg$rf_importance, probability = TRUE, num.threads = cfg$nthread,
-                      seed = cfg$seed, respect.unordered.factors = "order")
+  # ranger draws from the R stream even when `seed` is given, and so does its predict()
+  m <- .scr_keep_rng(ranger::ranger(dependent.variable.name = "target__", data = df, num.trees = cfg$rf_trees,
+                                    importance = cfg$rf_importance, probability = TRUE, num.threads = cfg$nthread,
+                                    seed = cfg$seed, respect.unordered.factors = "order"))
   imp <- ranger::importance(m)
-  pr  <- stats::predict(m, data = as.data.frame(x_ho, check.names = FALSE))$predictions
+  pr  <- .scr_keep_rng(stats::predict(m, data = as.data.frame(x_ho, check.names = FALSE)))$predictions
   list(importance = data.table::data.table(feature = names(imp), importance = as.numeric(imp)),
        vote = NULL, score = as.numeric(pr[, "1"]), note = sprintf("importance=%s", cfg$rf_importance))
 }
@@ -208,7 +207,6 @@ run_classifiers <- function(app_train, app_holdout, y_train, y_holdout, features
 #' @noRd
 .fit_lightgbm <- function(x_tr, y_tr, x_ho, y_ho, cfg) {
   if (!requireNamespace("lightgbm", quietly = TRUE)) stop("package 'lightgbm' is not installed")
-  set.seed(cfg$seed)
   d_tr <- lightgbm::lgb.Dataset(data = x_tr, label = y_tr)
   d_ho <- lightgbm::lgb.Dataset.create.valid(d_tr, data = x_ho, label = y_ho)
   m <- lightgbm::lgb.train(

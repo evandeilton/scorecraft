@@ -251,9 +251,9 @@ test_that("the list form applies fitted models through scr_apply() and records t
 test_that("scr_capital is identical under the serial and PSOCK backends", {
   d <- scr_demo_portfolio[1:400, ]
   a <- withr::with_options(list(scorecraft.parallel = "serial"),
-    do.call(scr_capital, c(list(d, config = cfg_test(nthread = 3L)), cap_args())))
+    do.call(scr_capital, c(list(d, config = cfg_test(nthread = 2L)), cap_args())))
   b <- withr::with_options(list(scorecraft.parallel = "psock"),
-    do.call(scr_capital, c(list(d, config = cfg_test(nthread = 3L)), cap_args())))
+    do.call(scr_capital, c(list(d, config = cfg_test(nthread = 2L)), cap_args())))
   expect_equal(a$sensitivity, b$sensitivity)
   expect_equal(a$totals, b$totals)
   expect_equal(a$segments, b$segments)

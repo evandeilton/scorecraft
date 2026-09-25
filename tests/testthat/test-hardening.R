@@ -40,9 +40,9 @@ test_that("the PSOCK backend gives results identical to serial and fork", {
 
 test_that("triage is parallel by column and identical to the serial profile", {
   sp <- scr_split(scr_demo, "default", date_col = "ref_date", drop = c("id", "churn"))
-  t1 <- withr::with_options(list(scorecraft.parallel = "serial"), scr_triage(sp, cfg_test(nthread = 4L)))
-  t2 <- withr::with_options(list(scorecraft.parallel = "fork"),   scr_triage(sp, cfg_test(nthread = 4L)))
-  t3 <- withr::with_options(list(scorecraft.parallel = "psock"),  scr_triage(sp, cfg_test(nthread = 4L)))
+  t1 <- withr::with_options(list(scorecraft.parallel = "serial"), scr_triage(sp, cfg_test(nthread = 2L)))
+  t2 <- withr::with_options(list(scorecraft.parallel = "fork"),   scr_triage(sp, cfg_test(nthread = 2L)))
+  t3 <- withr::with_options(list(scorecraft.parallel = "psock"),  scr_triage(sp, cfg_test(nthread = 2L)))
   expect_equal(t1$profile, t2$profile); expect_equal(t1$profile, t3$profile)
   expect_equal(t1$ledger, t2$ledger);   expect_equal(t1$ledger, t3$ledger)
   expect_identical(t1$keep, t2$keep);   expect_identical(t1$derived, t3$derived)
@@ -66,7 +66,7 @@ test_that("the fork backend caps the workers by the memory available", {
     expect_identical(.scr_fork_cap(8L), 1L)
     old <- scr_verbose(TRUE); on.exit(scr_verbose(old), add = TRUE)
     expect_message(.scr_fork_cap(8L), "capped at 1 of 8")
-    expect_identical(.scr_lapply(1:3, function(i) Sys.getpid(), nthread = 4L), as.list(rep(Sys.getpid(), 3)))
+    expect_identical(.scr_lapply(1:3, function(i) Sys.getpid(), nthread = 2L), as.list(rep(Sys.getpid(), 3)))
   })
   # a generous budget keeps the requested workers
   withr::with_options(list(scorecraft.parallel = "fork", scorecraft.fork_mem_fraction = Inf),
@@ -175,8 +175,8 @@ test_that("workers never fail silently: errors, deaths, warnings, NULLs and data
   })
   # the real pipeline under a worker warning: nothing lost, nothing duplicated
   withr::with_options(list(scorecraft.parallel = "psock"), {
-    r <- suppressWarnings(.scr_lapply(1:6, function(i) { if (i %% 2L == 0L) warning("even"); i }, nthread = 3L))
+    r <- suppressWarnings(.scr_lapply(1:6, function(i) { if (i %% 2L == 0L) warning("even"); i }, nthread = 2L))
     expect_identical(unlist(r), 1:6)
-    expect_warning(.scr_lapply(1:6, function(i) { if (i %% 2L == 0L) warning("even"); i }, nthread = 3L), "even")
+    expect_warning(.scr_lapply(1:6, function(i) { if (i %% 2L == 0L) warning("even"); i }, nthread = 2L), "even")
   })
 })

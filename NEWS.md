@@ -1,4 +1,4 @@
-# scorecraft 0.2.0 (unreleased)
+# scorecraft 0.2.0
 
 The IRB layer: from the scorecard to regulatory risk parameters, with the
 same contracts as the scorecard pipeline (one configuration, ledgers with
@@ -94,20 +94,20 @@ parameter tables selected by a preset, never prose.
   `Stability_CSI_Timeline` sheet is a real timeline by vintage without a
   `scr_monitor()` object.
 * `options(scorecraft.parallel = "fork" | "psock" | "serial")` selects
-  the parallel backend; the test suite exercises the PSOCK path (the
-  Windows semantics) on every platform and pins serial == fork == psock.
+  the parallel backend; results are identical under the three.
 * `scr_triage()` is parallel by column as well.
 * Workers never fail silently on any backend: a worker error is re-thrown
   with the failing item, a worker killed by the system is reported as such
   (instead of a `NULL` that surfaces later as a subscript error), warnings
   raised in a worker are re-raised in the parent, PSOCK workers run with a
   single data.table thread, and a `data.table` returned by a worker is
-  re-allocated so that `:=` works on it. `R CMD check --as-cran`'s
-  two-process limit is honoured.
+  re-allocated so that `:=` works on it.
 * `options(scorecraft.fork_mem_fraction = 0.75)` caps the fork workers by
-  the memory available on Linux (`Inf` to disable): forked workers duplicate the parent heap once the garbage
-  collector runs, and twenty workers over a two-million-row table were
-  killed by the OOM daemon in under two minutes.
+  the memory available on Linux (`Inf` to disable), since forked workers
+  duplicate the parent heap once the garbage collector runs.
+* Seeded steps (the split, the consensus classifiers, every bootstrap) no
+  longer change the random-number stream of the session: `.Random.seed` is
+  restored on exit.
 
 # scorecraft 0.1.0
 

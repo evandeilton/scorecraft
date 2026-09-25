@@ -67,13 +67,12 @@ time_it <- function(label, expr) {
   res
 }
 
-# -- Parallelism by column (D12) -------------------------------------------- #
+# -- Parallelism by column -------------------------------------------------- #
 
 #' Parallel lapply with a serial fallback
 #'
-#' The single real speed lever found in the research: none of the 37 binning
-#' algorithms runs in parallel, but columns are embarrassingly parallel. The
-#' backend is chosen by `getOption("scorecraft.parallel")`: `"fork"`
+#' None of the binning algorithms runs in parallel, but columns are
+#' embarrassingly parallel. The backend is chosen by `getOption("scorecraft.parallel")`: `"fork"`
 #' ([parallel::mclapply()], the default on unix), `"psock"` (a
 #' [parallel::makeCluster()] cluster, the default on Windows and the path
 #' exercised by the tests on every platform, since PSOCK workers share no
@@ -247,6 +246,38 @@ time_it <- function(label, expr) {
 
 # -- Sampling --------------------------------------------------------------- #
 
+#' Evaluate `code` without touching the caller's random-number stream
+#'
+#' The state of `.Random.seed` is saved before `code` and restored after it,
+#' as [stats::simulate()] does, so that a seeded resample or a model fitted
+#' with `config$seed` never moves the stream of the session that called it.
+#' @keywords internal
+#' @noRd
+.scr_keep_rng <- function(code) {
+  env <- globalenv()
+  had <- exists(".Random.seed", envir = env, inherits = FALSE)
+  old <- if (had) get(".Random.seed", envir = env, inherits = FALSE)
+  on.exit({
+    if (had) assign(".Random.seed", old, envir = env)
+    else if (exists(".Random.seed", envir = env, inherits = FALSE)) rm(".Random.seed", envir = env)
+  }, add = TRUE)
+  code
+}
+
+#' Evaluate `code` under `set.seed(seed)`, restoring the caller's stream
+#'
+#' `seed = NULL` evaluates `code` on the caller's stream, unseeded, which then
+#' advances as it would for any random draw.
+#' @keywords internal
+#' @noRd
+.scr_with_seed <- function(seed, code) {
+  if (is.null(seed)) return(code)
+  .scr_keep_rng({
+    set.seed(seed)
+    code
+  })
+}
+
 #' Indices of a subsample stratified by the target
 #'
 #' Used only for the classifiers: permutation importance and cross-validation
@@ -257,15 +288,16 @@ time_it <- function(label, expr) {
 subsample_stratified <- function(y, max_n, seed = NULL) {
   n <- length(y)
   if (!is.finite(max_n) || n <= max_n) return(seq_len(n))
-  if (!is.null(seed)) set.seed(seed)
   frac <- max_n / n
-  idx  <- integer(0)
-  for (lv in unique(y)) {
-    pos <- which(y == lv)
-    k   <- max(1L, min(length(pos), floor(frac * length(pos))))
-    idx <- c(idx, if (length(pos) == 1L) pos else sample(pos, k))
-  }
-  sort(idx)
+  .scr_with_seed(seed, {
+    idx <- integer(0)
+    for (lv in unique(y)) {
+      pos <- which(y == lv)
+      k   <- max(1L, min(length(pos), floor(frac * length(pos))))
+      idx <- c(idx, if (length(pos) == 1L) pos else sample(pos, k))
+    }
+    sort(idx)
+  })
 }
 
 # -- Ranking and formatting ------------------------------------------------- #

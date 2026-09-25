@@ -76,7 +76,7 @@ triage_plan <- function(dt, target, cols, train_idx, cfg) {
   n  <- length(train_idx)
   sp <- cfg$special_values
 
-  # One candidate per task, parallel by column (D12). The training slice is
+  # One candidate per task, parallel by column. The training slice is
   # taken inside the worker, so under fork nothing is copied up front.
   feats <- cols$features
   out <- .scr_lapply(feats, function(f) {

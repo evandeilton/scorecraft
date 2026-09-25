@@ -21,6 +21,17 @@ A vector of the length of \code{score}.
 \description{
 Grade a score vector with the cut points of an scr_grades object
 }
+\examples{
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+                  use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+                  "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+sc <- scr_scorecard(res)
+gr <- scr_grades(sc, scr_calibrate(sc, target = 0.06), n_grades = 7, min_defaults = 10)
+predict(gr, score = c(480, 560, 640))
+predict(gr, score = c(480, 560, 640), type = "pd")
+}
 \seealso{
 Other irb-pd:
 \code{\link[=predict.scr_pd]{predict.scr_pd()}},

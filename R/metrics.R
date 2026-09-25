@@ -74,16 +74,15 @@ scr_metrics <- function(score, y, higher_is_event = TRUE, ci = TRUE, n_boot = 20
 
   if (isTRUE(ci) && n_boot >= 2L) {
     i1 <- which(y == 1L); i0 <- which(y == 0L)
-    if (!is.null(seed)) set.seed(seed)
     # The seed of every resample is drawn HERE, in the main process, so the
     # result is identical with 1 or N workers.
-    seeds <- sample.int(.Machine$integer.max, n_boot)
-    reps <- .scr_lapply(seeds, function(sd) {
+    seeds <- .scr_with_seed(seed, sample.int(.Machine$integer.max, n_boot))
+    reps <- .scr_keep_rng(.scr_lapply(seeds, function(sd) {
       set.seed(sd)
       j <- c(i1[sample.int(n1, n1, replace = TRUE)], i0[sample.int(n0, n0, replace = TRUE)])
       r <- .auc_ks(score[j], y[j])
       c(r$auc, r$ks)
-    }, nthread = nthread)
+    }, nthread = nthread))
     b <- do.call(rbind, reps)
     a <- (1 - level) / 2
     q_auc <- stats::quantile(b[, 1], c(a, 1 - a), na.rm = TRUE, names = FALSE)

@@ -1,27 +1,34 @@
 Package: scorecraft
-Title: Scorecard Engine with Scale Alignment, Cut-Off Strategy, IRB Risk Parameters and Production SQL
+Title: Scorecard Development and Internal Ratings-Based Risk Parameters
 Version: 0.2.0
 Authors@R: c(
     person("Jose Evandeilton", "Lopes", email = "evandeilton@gmail.com",
            role = c("aut", "cre", "cph"))
   )
-Description: Production-grade scorecard engine for binary targets (credit risk,
-    fraud, propensity), built on 'OptimalBinningWoE'. Selects variables through
-    optimal binning, eight admission rules, hold-out revalidation with frozen
-    bins and a multi-strategy consensus ('glmnet', 'xgboost', 'lightgbm',
-    'ranger') weighted by out-of-sample performance; fits the points scorecard
-    with an explicit, auditable scale alignment (log-odds regression on the raw
-    score composed with the PDO map); sweeps cut-offs with frozen cuts; performs
-    honest reject inference through a sensitivity band; monitors PSI/CSI with
-    both the fixed and the sample-size-adjusted threshold; and emits production
-    SQL in fourteen dialects, with R-SQL equivalence verified by test. The audit
-    funnel never drops a candidate from the report. The IRB layer builds the
-    default flag, calibrates the scorecard to a long-run default rate with
-    rating grades, margins of conservatism and floors (PD), models workout
-    loss given default in two stages with downturn and in-default estimates
-    (LGD), models credit conversion factors from facility snapshots (EAD),
-    and computes expected loss, risk weights, capital and expected credit
-    loss from parameter tables selected by framework preset.
+Description: Builds points scorecards for binary targets (credit risk, fraud,
+    propensity) on the optimal binning and weight of evidence engine of
+    'OptimalBinningWoE', and takes them to the risk parameters of the internal
+    ratings-based (IRB) approach. Variables are selected through optimal
+    binning, eight admission rules, hold-out revalidation with frozen bins and
+    a consensus of 'glmnet', 'xgboost', 'lightgbm' and 'ranger' models weighted
+    by out-of-sample performance; the audit funnel never drops a candidate
+    from the report. The scorecard is fitted with an explicit, auditable scale
+    alignment (a log-odds regression on the raw score composed with the
+    points-to-double-the-odds map); cut-offs are swept with frozen cuts;
+    reject inference is reported as a sensitivity band; the population and
+    characteristic stability indices (PSI and CSI) are monitored with both the
+    fixed and the sample-size-adjusted threshold; and production SQL is
+    generated in fourteen dialects, with the agreement between R and SQL
+    verified by test. The IRB layer builds the default flag; calibrates the
+    scorecard to a long-run default rate with rating grades, margins of
+    conservatism and floors to give the probability of default (PD); models
+    workout loss given default (LGD) in two stages with downturn and
+    in-default estimates; models credit conversion factors from facility
+    snapshots to give the exposure at default (EAD); and computes expected
+    loss, risk weights, regulatory capital and expected credit loss from
+    parameter tables selected by framework preset. The scorecard methodology
+    follows Siddiqi (2017) <doi:10.1002/9781119282396> and Thomas et al. (2017)
+    <doi:10.1137/1.9781611974560>.
 License: MIT + file LICENSE
 URL: https://github.com/evandeilton/scorecraft
 BugReports: https://github.com/evandeilton/scorecraft/issues

@@ -42,6 +42,26 @@ context columns that are regenerated on read. Open ends are written as
 lab's current ones into a proposal, so a spreadsheet edit never enters
 silently.
 }
+\examples{
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+                  use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+                  "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+lab <- scr_coarse_classing(res)
+p <- scr_classing_propose(lab, "ds_region",
+                          groups = list(edge = c("NORTH", "SOUTH"),
+                                        core = c("EAST", "WEST", "CENTRE")))
+lab <- scr_classing_accept(lab, p, reason = "edge/core is what pricing uses")
+sp <- scr_classing_spec(lab)
+sp
+# round trip through a file: a fresh lab receives the manual bins as proposals
+f <- tempfile(fileext = ".csv")
+scr_classing_spec(lab, file = f)
+props <- scr_classing_import(scr_coarse_classing(res), scr_classing_read(f))
+names(props)
+unlink(f)
+}
 \seealso{
 \code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
 scorecard.

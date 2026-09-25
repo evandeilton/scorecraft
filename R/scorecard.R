@@ -112,7 +112,7 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   link_tr <- .glm_link(fitres$coef, w_tr, features)
   link_ho <- .glm_link(fitres$coef, w_ho, features)
 
-  # -- alignment (D9: always) --------------------------------------------- #
+  # -- alignment (always) ------------------------------------------------- #
   al <- scr_align(link_tr, y_tr, base_score = cfg$base_score, base_odds = cfg$base_odds, pdo = cfg$pdo,
                   direction = dir, method = cfg$align_method, n_bands = cfg$align_bands)
   msg("  alignment: score = %.4f + %.4f * logit (%s%s)", al$a, al$b, al$calibration$method,
@@ -148,7 +148,7 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   calibration <- .calibration(samples$holdout, breaks, al)
   rank_order  <- .rank_order(gains[sample == "holdout"])
 
-  # -- challenger (D10) ---------------------------------------------------- #
+  # -- challenger ---------------------------------------------------------- #
   chall <- NULL
   if (!is.null(cfg$challenger)) {
     chall <- tryCatch(.fit_challenger(cfg$challenger, w_tr, w_ho, y_tr, y_ho, features, cfg, al, samples),
@@ -354,7 +354,7 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   g[, .(id, band, n, events, event_rate, prev_rate, monotone, p_value, break_flag)]
 }
 
-# -- challenger (D10) ------------------------------------------------------- #
+# -- challenger ------------------------------------------------------------- #
 
 #' Tree challenger on the same WOE columns, aligned to the same scale
 #' @keywords internal

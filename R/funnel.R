@@ -4,7 +4,7 @@
 # The central deliverable is the FUNNEL: one row per input variable (plus the
 # derived ones), with the verdict of every gate and the exact stage each one
 # died at. No candidate disappears from the report. One row per run, no
-# run_id (D14).
+# run_id.
 # ============================================================================ #
 
 #' Consolidate the fate of every input variable

@@ -731,6 +731,16 @@ scr_grades <- function(x, calibration = NULL, master_scale = NULL, n_grades = NU
 #' @return A vector of the length of `score`.
 #'
 #' @family irb-pd
+#' @examples
+#' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+#'                   use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+#' d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+#'                   "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+#' res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+#' sc <- scr_scorecard(res)
+#' gr <- scr_grades(sc, scr_calibrate(sc, target = 0.06), n_grades = 7, min_defaults = 10)
+#' predict(gr, score = c(480, 560, 640))
+#' predict(gr, score = c(480, 560, 640), type = "pd")
 #' @export
 predict.scr_grades <- function(object, score, type = c("grade", "pd"), ...) {
   type <- match.arg(type)
@@ -834,14 +844,13 @@ scr_moc <- function(x, category = c("A", "B", "C"), method = NULL, level = NULL,
       v <- stats::qnorm(level) * sqrt(t$pd_be * (1 - t$pd_be) / pmax(n_use, 1))
     } else {
       seed <- seed %||% cfg$seed
-      set.seed(seed)
-      seeds <- sample.int(.Machine$integer.max, as.integer(n_boot))
+      seeds <- .scr_with_seed(seed, sample.int(.Machine$integer.max, as.integer(n_boot)))
       rows <- x$rows
       ys <- lapply(seq_len(K), function(k) rows$y[rows$grade == k])
-      reps <- .scr_lapply(seeds, function(sd) {
+      reps <- .scr_keep_rng(.scr_lapply(seeds, function(sd) {
         set.seed(sd)
         vapply(ys, function(yy) if (length(yy)) mean(yy[sample.int(length(yy), length(yy), replace = TRUE)]) else NA_real_, numeric(1))
-      }, nthread = cfg$nthread)
+      }, nthread = cfg$nthread))
       B <- do.call(rbind, reps)
       v <- pmax(0, apply(B, 2L, stats::quantile, probs = level, na.rm = TRUE, names = FALSE) - t$dr)
     }
@@ -1019,6 +1028,16 @@ print.scr_pd <- function(x, ...) {
 #' @return A vector of the length of the input.
 #'
 #' @family irb-pd
+#' @examples
+#' cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+#'                   use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+#' d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+#'                   "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+#' res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+#' sc <- scr_scorecard(res)
+#' pd <- scr_pd(scr_grades(sc, n_grades = 6, min_defaults = 10))
+#' predict(pd, score = c(480, 560, 640), type = "pd_final")
+#' head(predict(pd, newdata = scr_demo[1:10, ], type = "grade"))
 #' @export
 predict.scr_pd <- function(object, newdata = NULL, score = NULL, type = c("grade", "pd", "pd_final", "score"), ...) {
   type <- match.arg(type)

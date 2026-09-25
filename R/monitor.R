@@ -1,5 +1,5 @@
 # ============================================================================ #
-# monitor.R - PSI/CSI over time (D19: exported, never runs by itself)
+# monitor.R - PSI/CSI over time (exported, never runs by itself)
 # ============================================================================ #
 
 #' Monitoring plan read by scr_monitor()

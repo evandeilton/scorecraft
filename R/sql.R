@@ -1,5 +1,5 @@
 # ============================================================================ #
-# sql.R - production SQL engine (D11, non-negotiable requirement)
+# sql.R - production SQL engine
 # ============================================================================ #
 # Two blocks, in this order: a pre-processing CTE (training median,
 # special-population flags, categorical COALESCE) and the WOE/BIN

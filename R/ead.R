@@ -2,7 +2,7 @@
 # ead.R - exposure at default: realised CCF data set, pools, downturn,
 #         application, production SQL, validation and export
 # ============================================================================ #
-# Notation (research note ead_basel.md): R the reference date, D the default
+# Notation: R the reference date, D the default
 # date, E and L the drawn amount and the limit. The realised measures are
 #   ULF / CCF = (E_D - E_R) / (L_R - E_R)      undrawn part material at R,
 #   LF        = E_D / L_R                       region of instability, over
@@ -768,13 +768,12 @@ scr_ead <- function(x, drivers, config = scr_config(), holdout = 0.3, params = N
   out <- list(d = d, gauc = (d + 1) / 2, lo = NA_real_, hi = NA_real_, se = NA_real_)
   n <- length(y)
   if (is.na(d) || n_boot < 2L || n < 3L) return(out)
-  if (!is.null(seed)) set.seed(seed)
-  seeds <- sample.int(.Machine$integer.max, n_boot)
-  reps <- .scr_lapply(seeds, function(sd) {
+  seeds <- .scr_with_seed(seed, sample.int(.Machine$integer.max, n_boot))
+  reps <- .scr_keep_rng(.scr_lapply(seeds, function(sd) {
     set.seed(sd)
     j <- sample.int(n, n, replace = TRUE)
     .somers_d(pred[j], y[j])
-  }, nthread = nthread)
+  }, nthread = nthread))
   b <- (unlist(reps) + 1) / 2
   a <- (1 - level) / 2
   q <- stats::quantile(b, c(a, 1 - a), na.rm = TRUE, names = FALSE)

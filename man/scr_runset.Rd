@@ -20,6 +20,20 @@ Object returned by \code{\link[=scr_run]{scr_run()}}: a named list of \code{scr_
 errors of the targets that failed. Use \code{\link[=scr_compare]{scr_compare()}} for the comparison
 table and \code{\link[=scr_core]{scr_core()}} for the variables that cross several targets.
 }
+\examples{
+\dontshow{if (requireNamespace("RSQLite", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+con <- scr_connect(driver = RSQLite::SQLite(), dbname = ":memory:")
+d <- scr_demo[, c("default", "ds_region", "ds_band", "vl_score_01",
+                  "vl_score_02", "vl_score_05", "vl_hist_01")]
+DBI::dbWriteTable(con, "dtm", d)
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+                  use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+rs <- scr_run(con, "dtm", targets = "default", config = cfg)
+rs
+names(rs)
+DBI::dbDisconnect(con)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other portfolio:
 \code{\link[=scr_compare]{scr_compare()}},

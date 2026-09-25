@@ -3,7 +3,7 @@
 .onAttach <- function(libname, pkgname) {
   missing <- character()
   for (p in c("glmnet", "ranger", "lightgbm", "openxlsx")) {
-    if (!requireNamespace(p, quietly = TRUE)) missing <- c(missing, p)
+    if (!nzchar(system.file(package = p))) missing <- c(missing, p)  # installed? without loading it
   }
   if (length(missing)) {
     packageStartupMessage(

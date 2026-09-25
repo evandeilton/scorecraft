@@ -4,7 +4,7 @@
 # Almost everything here is delegation to the engine: obwoe() bins,
 # obwoe_select() applies the eight admission rules, obwoe_apply()
 # materialises the WOE space and obwoe_prune() removes redundancy. What is
-# ours: parallelising by column (D12) and revalidating on the hold-out with
+# ours: parallelising by column and revalidating on the hold-out with
 # FROZEN bins (recomputed IV + PSI), because the engine's screening looks at
 # the training rows only.
 # ============================================================================ #

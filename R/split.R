@@ -184,14 +184,16 @@ split_train_holdout <- function(dt, target, date_col = NULL, ratio = 0.30, seed 
     }
     msg("  OOT cut degenerate on '%s' - falling back to random stratified.", date_col)
   }
-  if (!is.null(seed)) set.seed(seed)
   y  <- dt[[target]]
-  tr <- integer(0)
-  for (lv in unique(y)) {
-    idx <- which(y == lv)
-    k   <- min(length(idx), max(1L, floor((1 - ratio) * length(idx))))
-    tr  <- c(tr, if (length(idx) == 1L) idx else sample(idx, k))
-  }
+  tr <- .scr_with_seed(seed, {
+    tr <- integer(0)
+    for (lv in unique(y)) {
+      idx <- which(y == lv)
+      k   <- min(length(idx), max(1L, floor((1 - ratio) * length(idx))))
+      tr  <- c(tr, if (length(idx) == 1L) idx else sample(idx, k))
+    }
+    tr
+  })
   tr <- sort(unique(tr))
   list(train_idx = tr, holdout_idx = setdiff(seq_len(n), tr),
        method = "stratified random", cutoff = NA_character_)

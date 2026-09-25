@@ -38,6 +38,17 @@ variables that reached binning; a variable failed for \code{IV_SUSPICIOUS}
 \code{reason} is one string for every variable named, or a character vector
 named by variable.
 }
+\examples{
+cfg <- scr_config(verbose = FALSE, nthread = 1, use_ranger = FALSE,
+                  use_lightgbm = FALSE, xgb_rounds = 40, n_boot = 10)
+d <- scr_demo[, c("default", "ref_date", "ds_region", "ds_band", "vl_score_01",
+                  "vl_score_02", "vl_score_05", "vl_score_10", "vl_hist_01")]
+res <- scr_select(d, "default", config = cfg, date_col = "ref_date")
+lab <- scr_coarse_classing(res)
+lab <- scr_classing_choose(lab, drop = "vl_score_10",
+                           reason = "not available at decision time")
+lab
+}
 \seealso{
 \code{\link[=scr_coarse_classing]{scr_coarse_classing()}} for a complete session, from lab to
 scorecard.

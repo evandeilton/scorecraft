@@ -490,8 +490,7 @@ print.scr_workout <- function(x, ...) {
   out$lcr <- .lgd_lcr(pred, real, ead)
   out <- c(out, na, list(n_boot = 0L, level = level))
   if (n_boot >= 2L) {
-    if (!is.null(seed)) set.seed(seed)
-    seeds <- sample.int(.Machine$integer.max, n_boot)
+    seeds <- .scr_with_seed(seed, sample.int(.Machine$integer.max, n_boot))
     # a sealed closure: only base/stats inside, so a PSOCK worker with an
     # older installed namespace still evaluates it
     env <- list2env(list(pred = pred, real = real, ead = ead, n = n, somers = .lgd_somers, lcr = .lgd_lcr),
@@ -503,7 +502,7 @@ print.scr_workout <- function(x, ...) {
       c(somers(pred[j], real[j]), lcr(pred[j], real[j], ead[j]))
     }
     environment(fun) <- env
-    b <- do.call(rbind, .scr_lapply(seeds, fun, nthread = nthread))
+    b <- do.call(rbind, .scr_keep_rng(.scr_lapply(seeds, fun, nthread = nthread)))
     a <- (1 - level) / 2
     qs <- stats::quantile(b[, 1], c(a, 1 - a), na.rm = TRUE, names = FALSE)
     ql <- stats::quantile(b[, 2], c(a, 1 - a), na.rm = TRUE, names = FALSE)
@@ -524,7 +523,7 @@ print.scr_workout <- function(x, ...) {
   ho <- dates > cutoff
   method <- "cohort"
   if (!any(ho) || all(ho)) {
-    set.seed(seed); ho <- seq_len(n) %in% sample.int(n, max(1L, round(holdout * n))); method <- "random"; cutoff <- as.Date(NA)
+    ho <- seq_len(n) %in% .scr_with_seed(seed, sample.int(n, max(1L, round(holdout * n)))); method <- "random"; cutoff <- as.Date(NA)
   }
   list(holdout = ho, cutoff = cutoff, method = method, n_train = sum(!ho), n_holdout = sum(ho))
 }
