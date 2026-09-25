@@ -73,7 +73,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>scorecraft: from raw table to production SQL and monitoring</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/scorecraft.Rmd" class="external-link"><code>vignettes/scorecraft.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.3.0/vignettes/scorecraft.Rmd" class="external-link"><code>vignettes/scorecraft.Rmd</code></a></small>
       <div class="d-none name"><code>scorecraft.Rmd</code></div>
     </div>
 
@@ -693,11 +693,11 @@ as text, which the split reads as a date.</p>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbWriteTable.html" class="external-link">dbWriteTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, <span class="va">d</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_fetch.html">scr_fetch</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, sample_frac <span class="op">=</span> <span class="fl">0.5</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.5</span></span>
-<span><span class="co">#&gt; [1] 2107</span></span>
+<span><span class="co">#&gt; [1] 2090</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_fetch.html">scr_fetch</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, max_rows <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.23809523809523808</span></span>
-<span><span class="co">#&gt; [1] 1013</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 978</span></span></code></pre></div>
 <p><code><a href="../reference/scr_fetch.html">scr_fetch()</a></code> samples <strong>on the server</strong>: the
 fraction becomes a <code>WHERE</code> clause on a random expression
 chosen by the connection class, and <code>max_rows</code> lowers the

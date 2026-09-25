@@ -660,11 +660,11 @@ d$ref_date <- as.character(d$ref_date)
 DBI::dbWriteTable(con, "dtm", d)
 nrow(scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42))
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.5
-#> [1] 2107
+#> [1] 2090
 nrow(scr_fetch(con, "dtm", max_rows = 1000))
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.23809523809523808
-#> [1] 1013
+#> [1] 978
 ```
 
 [`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)

@@ -62,7 +62,7 @@ defaults to the system user.
 
 lab <- scr_coarse_classing(res, author = "analyst")
 lab
-#> <scr_classing> target "default" | opened 2026-09-25 22:37 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
+#> <scr_classing> target "default" | opened 2026-09-25 22:41 by analyst | 37 variables | 0 proposals: 0 accepted, 0 discarded
 #>   final choice: 12 variables | consensus 12 | force: (none) | drop: (none)
 ```
 
@@ -185,7 +185,7 @@ Suppose underwriting quotes `vl_score_01` in the bands below 40, 40 to
 
 p_breaks <- scr_classing_propose(lab, "vl_score_01", breaks = c(40, 55, 70))
 p_breaks
-#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-25 22:37
+#> <scr_classing_proposal> P001 vl_score_01 | breaks = c(40, 55, 70) | 2026-09-25 22:41
 #>                         optimal     manual      delta
 #>   n_bins                      7          4         -3
 #>   iv_train               0.3464     0.2993    -0.0471
@@ -225,7 +225,7 @@ p_merge$entry$cutpoints
 p_split <- scr_classing_propose(lab, "vl_score_01",
                                 split = c(1, res$fit$results$vl_score_01$cutpoints[1] - 5))
 p_split
-#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-25 22:37
+#> <scr_classing_proposal> P003 vl_score_01 | split = c(1, 28.36) | 2026-09-25 22:41
 #>                         optimal     manual      delta
 #>   n_bins                      7          8          1
 #>   iv_train               0.3464     0.3561     0.0098
@@ -275,7 +275,7 @@ p_groups <- scr_classing_propose(lab, "ds_region",
                                  groups = list(edge = c("NORTH", "SOUTH"),
                                                core = c("EAST", "WEST", "CENTRE")))
 p_groups
-#> <scr_classing_proposal> P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-25 22:37
+#> <scr_classing_proposal> P004 ds_region | groups = list(edge = c("NORTH", "SOUTH"), core = c("EAST", "WEST", "CENTRE")) | 2026-09-25 22:41
 #>                         optimal     manual      delta
 #>   n_bins                      5          2         -3
 #>   iv_train               0.0846     0.0739    -0.0107
@@ -468,7 +468,7 @@ final choice.
 ``` r
 
 lab
-#> <scr_classing> target "default" | opened 2026-09-25 22:37 by analyst | 37 variables | 7 proposals: 2 accepted, 1 discarded
+#> <scr_classing> target "default" | opened 2026-09-25 22:41 by analyst | 37 variables | 7 proposals: 2 accepted, 1 discarded
 #>   variable                   action      bins          IV train       IV hold-out verdict     reason
 #>   vl_score_01                accepted  7->4     0.3464->0.2993     0.2877->0.2740   ACCEPTABLE  policy bands 40/55/70 used by underwriti
 #>   ds_region                  accepted  5->2     0.0846->0.0739     0.0971->0.0786   REVIEW      edge/core is what pricing uses
@@ -600,7 +600,7 @@ names(imported)
 imported$vl_score_01$imported_reason
 #> [1] "reviewer: first cut moved to 42 to match the bureau band"
 imported$vl_score_01
-#> <scr_classing_proposal> P008 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-25 22:37
+#> <scr_classing_proposal> P008 vl_score_01 | breaks = c(42, 55, 70) | 2026-09-25 22:41
 #>                         optimal    current     manual      delta
 #>   n_bins                      7          4          4         -3
 #>   iv_train               0.3464     0.2993     0.2990    -0.0474
