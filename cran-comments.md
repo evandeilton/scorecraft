@@ -7,3 +7,4 @@
 ## Test environments
 
 * Local: Ubuntu 26.04, R 4.6.1
+* win-builder: R-devel
