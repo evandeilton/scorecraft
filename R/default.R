@@ -87,14 +87,13 @@ scr_default <- function(data, id, date, dpd = NULL, arrears = NULL, exposure = N
   p[, trig := trig_dpd | utp %in% TRUE]
 
   # -- state machine per unit ------------------------------------------- #
-  ids <- split(seq_len(nrow(p)), p$id)
-  runs <- .scr_lapply(ids, function(ix) .default_run(p$trig[ix], p$utp[ix], p$restr[ix],
-                                                     cfg$default_probation, cfg$default_probation_restructured),
-                      nthread = cfg$nthread, fork_only = TRUE)
-  p[, c("default", "ev", "trigger", "months", "cured") := {
-    r <- data.table::rbindlist(runs)
-    list(r$default, r$ev, r$trigger, r$months, r$cured)
-  }]
+  # vectorised over the sorted panel; units with a restructuring (when its
+  # probation differs) run the row loop. Results are placed by row position:
+  # split() orders the units by the locale collation, setorder() by the C
+  # locale, so a positional rbindlist() of split() groups can misalign rows.
+  n_ids <- data.table::uniqueN(p$id)
+  p[, c("default", "ev", "trigger", "months", "cured") :=
+      .default_flags(p$id, p$trig, p$utp, p$restr, cfg$default_probation, cfg$default_probation_restructured, cfg$nthread)]
 
   # -- pulling effect at obligor level ------------------------------------ #
   pulled <- 0L
@@ -109,13 +108,8 @@ scr_default <- function(data, id, date, dpd = NULL, arrears = NULL, exposure = N
       p[pull, `:=`(default = 1L, trigger = "pulling")]
       # re-run the probation with the pulled months as triggers
       p[, trig := trig | trigger %in% "pulling"]
-      runs <- .scr_lapply(ids, function(ix) .default_run(p$trig[ix], p$utp[ix], p$restr[ix],
-                                                         cfg$default_probation, cfg$default_probation_restructured),
-                          nthread = cfg$nthread, fork_only = TRUE)
-      p[, c("default", "ev", "trigger2", "months", "cured") := {
-        r <- data.table::rbindlist(runs)
-        list(r$default, r$ev, r$trigger, r$months, r$cured)
-      }]
+      p[, c("default", "ev", "trigger2", "months", "cured") :=
+          .default_flags(p$id, p$trig, p$utp, p$restr, cfg$default_probation, cfg$default_probation_restructured, cfg$nthread)]
       p[trigger2 != "" & !(trigger %in% "pulling"), trigger := trigger2]
       p[, trigger2 := NULL]
     }
@@ -123,16 +117,19 @@ scr_default <- function(data, id, date, dpd = NULL, arrears = NULL, exposure = N
   }
 
   p[, event_id := data.table::fifelse(ev > 0L, paste0(id, "#", ev), NA_character_)]
-  events <- p[default == 1L, list(id = id[1], start = min(date), end = max(date),
-                                  trigger = trigger[trigger != ""][1], months = .N,
-                                  cured = as.integer(any(cured == 1L))), by = "event_id"]
+  # grouped aggregates GForce can run (no per-event R call), then the trigger
+  events <- p[default == 1L, list(id = id[1L], start = min(date), end = max(date), months = .N,
+                                  cured = max(cured)), by = "event_id"]
+  ev_trig <- p[default == 1L & trigger != "", list(trigger = trigger[1L]), by = "event_id"]
+  events[, trigger := ev_trig$trigger[match(event_id, ev_trig$event_id)]]
+  data.table::setcolorder(events, c("event_id", "id", "start", "end", "trigger", "months", "cured"))
   data.table::setorder(events, id, start)
 
   flags <- p[, list(id, date, default, event_id, trigger, months_in_default = months, cured)]
   n_ev <- nrow(events)
   by_trig <- if (n_ev) prop.table(table(events$trigger)) else numeric()
   summary <- list(
-    n_ids = length(ids), n_rows = nrow(p), n_events = n_ev,
+    n_ids = n_ids, n_rows = nrow(p), n_events = n_ev,
     share_by_trigger = as.list(by_trig),
     median_months_in_default = if (n_ev) stats::median(events$months) else NA_real_,
     share_cured = if (n_ev) mean(events$cured == 1L) else NA_real_,
@@ -149,7 +146,7 @@ scr_default <- function(data, id, date, dpd = NULL, arrears = NULL, exposure = N
                      cfg$default_probation, cfg$default_probation_restructured, cfg$default_level,
                      if (!is.null(obligor)) sprintf("; pulling > %s", format(cfg$default_pulling)) else ""),
     date = format(Sys.Date()))
-  msg("  default flag: %s units, %s events, %s cured (%.2fs)", n_fmt(length(ids)), n_fmt(n_ev),
+  msg("  default flag: %s units, %s events, %s cured (%.2fs)", n_fmt(n_ids), n_fmt(n_ev),
       if (n_ev) fmt_pct(summary$share_cured) else "-", as.numeric(difftime(Sys.time(), t0, units = "secs")))
   structure(list(flags = flags, events = events, summary = summary, ledger = ledger, config = cfg),
             class = c("scr_default", "list"))
@@ -185,6 +182,44 @@ isTRUE_vec <- function(x) {
     }
   }
   list(default = default, ev = ev, trigger = trigger, months = months, cured = cured)
+}
+
+#' The state machine of .default_run() over a whole panel sorted by (id, date)
+#'
+#' With a constant probation `P` the machine has a closed form: a row is in
+#' default when the last trigger of its unit is at most `P` observed months
+#' before it (`dist <= P`), it cures when `dist == P`, and an event starts on
+#' a default row whose predecessor was not in default or had just cured.
+#' Units with a restructuring flag (when `probation_restr != probation`)
+#' change `P` inside an event and go through the row loop.
+#' @keywords internal
+#' @noRd
+.default_flags <- function(id, trig, utp, restr, probation, probation_restr, nthread = 1L) {
+  n <- length(trig)
+  if (!n) return(list(integer(), integer(), character(), integer(), integer()))
+  i <- seq_len(n)
+  first <- c(TRUE, id[-1L] != id[-n])
+  gstart <- cummax(data.table::fifelse(first, i, 0L))           # first row of the unit
+  lt <- cummax(data.table::fifelse(trig %in% TRUE, i, 0L))      # last trigger so far
+  dist <- i - lt
+  default <- as.integer(lt >= gstart & dist <= probation)
+  cured <- as.integer(default == 1L & dist == probation)
+  start <- default == 1L & (first | c(0L, default[-n]) == 0L | c(0L, cured[-n]) == 1L)
+  cs <- cumsum(start)
+  ev <- data.table::fifelse(default == 1L, cs - c(0L, cs)[gstart], 0L)
+  estart <- cummax(data.table::fifelse(start, i, 0L))
+  months <- data.table::fifelse(default == 1L, i - estart + 1L, 0L)
+  trigger <- data.table::fifelse(start, data.table::fifelse(utp %in% TRUE, "utp", "dpd"), "")
+  if (!identical(as.integer(probation_restr), as.integer(probation)) && any(restr %in% TRUE)) {
+    rix <- which(id %in% unique(id[restr %in% TRUE]))
+    grp <- split(rix, id[rix])
+    runs <- .scr_lapply(grp, function(ix) .default_run(trig[ix], utp[ix], restr[ix], probation, probation_restr),
+                        nthread = nthread, fork_only = TRUE)
+    pos <- unlist(grp, use.names = FALSE)
+    r <- data.table::rbindlist(runs)
+    default[pos] <- r$default; ev[pos] <- r$ev; trigger[pos] <- r$trigger; months[pos] <- r$months; cured[pos] <- r$cured
+  }
+  list(default, as.integer(ev), trigger, as.integer(months), cured)
 }
 
 #' @export
@@ -282,22 +317,17 @@ scr_default_rate <- function(x, id = "id", date = "date", default = "default", h
   starts <- starts[.add_months(starts, horizon) <= last_ok]
   if (!length(starts)) stop("scr_default_rate(): no cohort has a complete ", horizon, "-month window.", call. = FALSE)
 
-  def_rows <- dt[default == 1L, list(id, date)]
   keys <- c("grade", "segment")
-  rows <- lapply(starts, function(t0) {
-    t1 <- .add_months(t0, horizon)
-    pop <- dt[date == t0 & default == 0L, list(id, grade, segment, exposure)]
-    if (!nrow(pop)) return(NULL)
-    d_ids <- unique(def_rows[date > t0 & date <= t1, id])
-    pop[, d := as.integer(id %in% d_ids)]
-    out <- pop[, list(n = .N, defaults = sum(d), dr = mean(d),
-                      ead = if (all(is.na(exposure))) NA_real_ else sum(exposure, na.rm = TRUE),
-                      dr_weighted = if (all(is.na(exposure))) NA_real_ else sum(exposure * d, na.rm = TRUE) / sum(exposure, na.rm = TRUE)),
-               by = keys]
-    out[, cohort := t0]
-    out
-  })
-  tab <- data.table::rbindlist(rows, use.names = TRUE)
+  # every cohort at once: the population at each start and one rolling join
+  # for the first default after it
+  # plain logical subset (a data.table auto-index on a big panel costs a sort)
+  sel <- dt$default %in% 0L & as.double(dt$date) %in% as.double(starts)
+  pop <- dt[sel, list(id, cohort = date, grade, segment, exposure)]
+  pop[, d := .dr_outcome(dt[default == 1L, list(id, date)], id, cohort, .add_months_u(cohort, horizon))]
+  tab <- pop[, list(n = .N, defaults = sum(d), dr = mean(d),
+                    ead = if (all(is.na(exposure))) NA_real_ else sum(exposure, na.rm = TRUE),
+                    dr_weighted = if (all(is.na(exposure))) NA_real_ else sum(exposure * d, na.rm = TRUE) / sum(exposure, na.rm = TRUE)),
+             by = c("cohort", keys)]
   data.table::setcolorder(tab, c("cohort", keys))
   if (all(is.na(tab$grade))) tab[, grade := NULL]
   if (all(is.na(tab$segment))) tab[, segment := NULL]
@@ -333,6 +363,31 @@ scr_default_rate <- function(x, id = "id", date = "date", default = "default", h
   out
 }
 
+#' .add_months() evaluated once per distinct date (cohort starts repeat on
+#' every row of the population)
+#' @keywords internal
+#' @noRd
+.add_months_u <- function(d, k) {
+  u <- unique(d)
+  .add_months(u, k)[match(as.double(d), as.double(u))]
+}
+
+#' Default within (t0, t1]: 1 when the unit has a default row dated after t0
+#' and at most t1
+#'
+#' One rolling join (next observation carried backward) finds the first
+#' default date strictly after `t0` for every (id, t0).
+#' @keywords internal
+#' @noRd
+.dr_outcome <- function(def_rows, id, t0, t1) {
+  if (!length(id)) return(integer())
+  if (!nrow(def_rows)) return(integer(length(id)))
+  x <- unique(data.table::data.table(id = as.character(def_rows$id), t = as.double(def_rows$date)))
+  q <- data.table::data.table(id = as.character(id), t = as.double(t0) + 0.5)
+  nxt <- x[q, on = c("id", "t"), roll = -Inf, mult = "first", x.t]
+  as.integer(!is.na(nxt) & nxt <= as.double(t1))
+}
+
 #' @export
 print.scr_dr <- function(x, ...) {
   l <- x$lra
@@ -363,5 +418,6 @@ utils::globalVariables(c(
   "trig",
   "trig_dpd",
   "trigger",
-  "trigger2"
+  "trigger2",
+  "x.t"
 ))
