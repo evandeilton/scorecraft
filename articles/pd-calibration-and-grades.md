@@ -655,8 +655,8 @@ an availability row, never a fabricated number.
 
 out <- file.path(tempdir(), "scorecraft-pd-vignette")
 ex <- scr_export(pd, out, stamp = FALSE, validation = v)
-#>   /tmp/Rtmp9Sgk1q/scorecraft-pd-vignette/pd_default.xlsx
-#>   /tmp/Rtmp9Sgk1q/scorecraft-pd-vignette/sql_pd_default.sql
+#>   /tmp/Rtmps6yeqT/scorecraft-pd-vignette/pd_default.xlsx
+#>   /tmp/Rtmps6yeqT/scorecraft-pd-vignette/sql_pd_default.sql
 basename(unlist(ex$files))
 #> [1] "pd_default.xlsx"    "sql_pd_default.sql"
 openxlsx::getSheetNames(ex$files$pd)
