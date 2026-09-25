@@ -179,3 +179,5 @@ importFrom(utils,
   modifyList,
   packageVersion
 )
+useDynLib(scorecraft, .registration = TRUE)
+importFrom(Rcpp,sourceCpp)

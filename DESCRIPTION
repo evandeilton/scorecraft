@@ -36,7 +36,11 @@ Imports:
     stats,
     utils,
     graphics,
-    parallel
+    parallel,
+    Rcpp (>= 1.0.10)
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
 Suggests:
     glmnet,
     lightgbm,
