@@ -1303,8 +1303,8 @@ scr_export.scr_ead <- function(x, dir, stamp = TRUE, validation = NULL, tag = "c
     "Validation_Summary" = val$summary,
     "Model_Card"      = .kv_table(x$model_card),
     "Decision_Ledger" = x$ledger)
-  files <- list(xlsx = .scr_write_xlsx(sheets, file.path(out_dir, sprintf("ead_%s.xlsx", tolower(tag)))),
-                sql = file.path(out_dir, sprintf("sql_ead_%s.sql", tolower(tag))))
+  files <- list(xlsx = .scr_write_xlsx(sheets, file.path(out_dir, sprintf("ead_%s.xlsx", .file_tag(tag)))),
+                sql = file.path(out_dir, sprintf("sql_ead_%s.sql", .file_tag(tag))))
   writeLines(scr_sql(x), files$sql)
   for (f in files) msg("  %s", f)
   x$files <- files

@@ -897,7 +897,7 @@ scr_sql.scr_capital <- function(x, table = NULL, dialect = NULL, file = NULL, le
 scr_export.scr_capital <- function(x, dir, stamp = TRUE, ...) {
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
-  tag <- tolower(x$framework)
+  tag <- .file_tag(x$framework)
   t <- x$totals
   p <- x$params
   cfg_rows <- c(list(framework = p$framework, source = p$source, approach = x$approach, params_modified = isTRUE(p$modified),

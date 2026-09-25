@@ -1542,7 +1542,7 @@ print.scr_pd_validation <- function(x, ...) {
 scr_export.scr_pd <- function(x, dir, stamp = TRUE, validation = NULL, ...) {
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
-  tag <- tolower(x$target)
+  tag <- .file_tag(x$target)
   na_v <- data.frame(availability = "not_available", reason_code = "NO_VALIDATION_SUPPLIED", stringsAsFactors = FALSE)
   cal <- x$calibration
   cal_kv <- if (is.null(cal)) .kv_table(list(method = "none", note = "PD taken from the scorecard alignment")) else

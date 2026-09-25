@@ -1447,7 +1447,7 @@ print.scr_lgd_validation <- function(x, ...) {
 scr_export.scr_lgd <- function(x, dir, stamp = TRUE, validation = NULL, elbe = NULL, tag = "model", ...) {
   .need_openxlsx()
   out_dir <- .export_dir(dir, stamp)
-  tag <- tolower(tag)
+  tag <- .file_tag(tag)
   v <- validation %||% scr_lgd_validate(x)
   e <- elbe %||% scr_elbe(x)
   ws <- x$workout$summary
@@ -1495,6 +1495,7 @@ utils::globalVariables(c(
 
 # NSE column names used in data.table expressions of this file
 utils::globalVariables(c(
+  "drawing_nominal",
   "end",
   "lgd_final",
   "somers",
