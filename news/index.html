@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,9 +42,19 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.3.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="scorecraft-development-version">scorecraft (development version)<a class="anchor" aria-label="anchor" href="#scorecraft-development-version"></a></h2>
+<ul><li>
+<code><a href="../reference/scr_strategy.html">scr_strategy()</a></code> reports the event and non-event distributions of each band (<code>pct_event</code>, <code>pct_nonevent</code>, <code>odds_event</code> and <code>log_odds</code>, the band WOE) and the score where they cross (<code>crossing</code>); <code>rule = "crossing"</code> sets the decisions at that boundary.</li>
+<li>
+<code><a href="../reference/scr_strategy.html">scr_strategy()</a></code> follows the objective of the scorecard: under propensity the table starts at the most likely band, <code>revenue_good</code> is the revenue of an event and the decisions are <code>"target"</code>, <code>"review"</code> and <code>"skip"</code>. Credit and fraud results are unchanged.</li>
+<li>
+<code><a href="../reference/scr_score_gains.html">scr_score_gains()</a></code> adds <code>pct_event</code>, <code>pct_nonevent</code> and <code>woe</code>. Under <code>higher_is_riskier</code>, <code>odds</code> and <code>log_odds</code> are now events per non-event, the orientation of the scale, so <code>log_odds</code> rises with the score in both directions.</li>
+<li>The points table and the <code>Variable_Gains_IV</code> sheet of <code><a href="../reference/scr_export.html">scr_export()</a></code> add <code>pct_event</code> and <code>pct_nonevent</code> per bin.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="scorecraft-030">scorecraft 0.3.0<a class="anchor" aria-label="anchor" href="#scorecraft-030"></a></h2>
 <ul><li>

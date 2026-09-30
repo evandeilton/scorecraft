@@ -7,16 +7,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/evandeilton/scorecraft/blob/v0.3.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/evandeilton/scorecraft/blob/main/DESCRIPTION)
 
 Lopes J (2026). *scorecraft: Scorecard Development and Internal
-Ratings-Based Risk Parameters*. R package version 0.3.0,
+Ratings-Based Risk Parameters*. R package version 0.3.0.9000,
 <https://github.com/evandeilton/scorecraft>.
 
     @Manual{,
       title = {scorecraft: Scorecard Development and Internal Ratings-Based Risk Parameters},
       author = {Jose Evandeilton Lopes},
       year = {2026},
-      note = {R package version 0.3.0},
+      note = {R package version 0.3.0.9000},
       url = {https://github.com/evandeilton/scorecraft},
     }

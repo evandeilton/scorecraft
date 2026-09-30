@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Scaling, alignment and challengers</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.3.0/vignettes/alignment-and-portfolio.Rmd" class="external-link"><code>vignettes/alignment-and-portfolio.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/alignment-and-portfolio.Rmd" class="external-link"><code>vignettes/alignment-and-portfolio.Rmd</code></a></small>
       <div class="d-none name"><code>alignment-and-portfolio.Rmd</code></div>
     </div>
 
@@ -456,9 +456,10 @@ one constant and twelve bin points.</p>
 </h2>
 <p>The scale is a claim about odds: at 600 points 50:1, and twice the
 odds every 20 points. <code><a href="../reference/scr_score_gains.html">scr_score_gains()</a></code> gives the observed
-odds (non-events per event) in each band of the score, the training
-deciles applied frozen to the hold-out, and the claim can be checked
-against them.</p>
+odds in each band of the score, in the orientation of the scale
+(non-events per event for this risk scorecard), the training deciles
+applied frozen to the hold-out, and the claim can be checked against
+them.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_score_gains.html">scr_score_gains</a></span><span class="op">(</span><span class="va">sc_risk</span><span class="op">)</span></span>
 <span><span class="va">g</span><span class="op">[</span>, <span class="va">scale_odds</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">(</span><span class="va">mean_score</span> <span class="op">-</span> <span class="va">al</span><span class="op">$</span><span class="va">offset</span><span class="op">)</span> <span class="op">/</span> <span class="va">al</span><span class="op">$</span><span class="va">factor</span><span class="op">)</span><span class="op">]</span></span>

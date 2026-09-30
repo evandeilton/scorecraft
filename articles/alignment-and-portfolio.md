@@ -416,9 +416,10 @@ sc_new[, .(score = round(score, 2), score_points,
 The scale is a claim about odds: at 600 points 50:1, and twice the odds
 every 20 points.
 [`scr_score_gains()`](https://evandeilton.github.io/scorecraft/reference/scr_score_gains.md)
-gives the observed odds (non-events per event) in each band of the
-score, the training deciles applied frozen to the hold-out, and the
-claim can be checked against them.
+gives the observed odds in each band of the score, in the orientation of
+the scale (non-events per event for this risk scorecard), the training
+deciles applied frozen to the hold-out, and the claim can be checked
+against them.
 
 ``` r
 

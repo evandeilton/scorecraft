@@ -269,18 +269,20 @@ review, and the rest is declined; `decisions` imposes a policy by hand.
 
 st <- scr_strategy(sc, revenue_good = 1080, loss_bad = 4500)
 st
-#> <scr_strategy> target "default" | sample holdout | break-even event rate: 19.35% (revenue 1080, loss 4500)
-#>   band                       vol%    event decision     EP/acct       profit
-#>   (590, Inf]                11.2%    3.18% approve       902.29       141660
-#>   (577,590]                  8.9%    3.23% approve       900.00       111600
-#>   (567,577]                  9.1%    3.91% approve       862.03       110340
-#>   (558,567]                 10.6%    7.38% approve       668.05        99540
-#>   (550,558]                 10.6%   12.16% approve       401.35        59400
-#>   (542,550]                 10.8%   11.26% approve       451.79        68220
-#>   (533,542]                 10.6%   17.45% approve       106.31        15840
-#>   (524,533]                  9.9%   26.62% decline      -405.32       -56340
-#>   (510,524]                  9.1%   27.34% decline      -445.78       -57060
-#>   [-Inf,510]                 9.1%   35.43% decline      -897.17      -113940
+#> <scr_strategy> target "default" | objective risk | rule breakeven | sample holdout
+#>   break-even event rate: 19.35% (revenue 1080, loss 4500)
+#>   band                       vol%    event log_odds decision     EP/acct       profit
+#>   (590, Inf]                11.2%    3.18%   -1.640 approve       902.29       141660
+#>   (577,590]                  8.9%    3.23%   -1.627 approve       900.00       111600
+#>   (567,577]                  9.1%    3.91%   -1.428 approve       862.03       110340
+#>   (558,567]                 10.6%    7.38%   -0.755 approve       668.05        99540
+#>   (550,558]                 10.6%   12.16%   -0.203 approve       401.35        59400
+#>   (542,550]                 10.8%   11.26%   -0.290 approve       451.79        68220
+#>   (533,542]                 10.6%   17.45%    0.220 approve       106.31        15840
+#>   (524,533]                  9.9%   26.62%    0.760 decline      -405.32       -56340
+#>   (510,524]                  9.1%   27.34%    0.797 decline      -445.78       -57060
+#>   [-Inf,510]                 9.1%   35.43%    1.174 decline      -897.17      -113940
+#>   event and non-event distributions cross at score 542.1 (KS 0.370)
 st$table[, .(band, event_rate = round(event_rate, 4), decision, cum_pct = round(cum_pct, 3), cum_profit)]
 #>           band event_rate decision cum_pct cum_profit
 #>         <char>      <num>   <char>   <num>      <num>
@@ -305,6 +307,46 @@ modelled in the article on [LGD and
 EAD](https://evandeilton.github.io/scorecraft/articles/lgd-and-ead-under-irb.html)
 and combined in [expected loss and
 capital](https://evandeilton.github.io/scorecraft/articles/expected-loss-and-capital.html).
+
+The table also carries the two distributions the score separates:
+`pct_event` and `pct_nonevent` are the band’s shares of all events and
+of all non-events, and `log_odds`, the log of their ratio `odds_event`,
+is the WOE of the band, positive exactly when the band event rate is
+above the portfolio rate. The two distributions cross where their
+cumulative shares are furthest apart, at the KS of the table;
+`st$crossing` records that boundary, and `rule = "crossing"` approves
+the bands on its safe side and declines the rest, a cut that needs no
+revenue or loss figures.
+
+``` r
+
+st$crossing[c("cut", "ks", "single_crossing")]
+#> $cut
+#> [1] 542.0954
+#> 
+#> $ks
+#> [1] 0.3702647
+#> 
+#> $single_crossing
+#> [1] TRUE
+scr_strategy(sc, rule = "crossing")$table[, .(band, event_rate = round(event_rate, 4),
+                                              log_odds = round(log_odds, 3), decision)]
+#>           band event_rate log_odds decision
+#>         <char>      <num>    <num>   <char>
+#>  1: (590, Inf]     0.0318   -1.640  approve
+#>  2:  (577,590]     0.0323   -1.627  approve
+#>  3:  (567,577]     0.0391   -1.428  approve
+#>  4:  (558,567]     0.0738   -0.755  approve
+#>  5:  (550,558]     0.1216   -0.203  approve
+#>  6:  (542,550]     0.1126   -0.290  approve
+#>  7:  (533,542]     0.1745    0.220  decline
+#>  8:  (524,533]     0.2662    0.760  decline
+#>  9:  (510,524]     0.2734    0.797  decline
+#> 10: [-Inf,510]     0.3543    1.174  decline
+```
+
+The crossing falls one band above break-even and declines the 17.4%
+band: the prudent cut that loses money.
 
 ## 5. Reject inference
 
@@ -660,11 +702,11 @@ d$ref_date <- as.character(d$ref_date)
 DBI::dbWriteTable(con, "dtm", d)
 nrow(scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42))
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.5
-#> [1] 2090
+#> [1] 2072
 nrow(scr_fetch(con, "dtm", max_rows = 1000))
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.23809523809523808
-#> [1] 978
+#> [1] 963
 ```
 
 [`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)

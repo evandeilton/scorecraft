@@ -1,5 +1,25 @@
 # Changelog
 
+## scorecraft (development version)
+
+- [`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md)
+  reports the event and non-event distributions of each band
+  (`pct_event`, `pct_nonevent`, `odds_event` and `log_odds`, the band
+  WOE) and the score where they cross (`crossing`); `rule = "crossing"`
+  sets the decisions at that boundary.
+- [`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md)
+  follows the objective of the scorecard: under propensity the table
+  starts at the most likely band, `revenue_good` is the revenue of an
+  event and the decisions are `"target"`, `"review"` and `"skip"`.
+  Credit and fraud results are unchanged.
+- [`scr_score_gains()`](https://evandeilton.github.io/scorecraft/reference/scr_score_gains.md)
+  adds `pct_event`, `pct_nonevent` and `woe`. Under `higher_is_riskier`,
+  `odds` and `log_odds` are now events per non-event, the orientation of
+  the scale, so `log_odds` rises with the score in both directions.
+- The points table and the `Variable_Gains_IV` sheet of
+  [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
+  add `pct_event` and `pct_nonevent` per bin.
+
 ## scorecraft 0.3.0
 
 - [`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md)

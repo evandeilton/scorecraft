@@ -1,9 +1,10 @@
 # Score gains per frozen band
 
-How the score behaves in each band: count, event rate, KS, lift,
-cumulative capture and the score interval of the band, which is what
-lets a cut-off be read straight from the table. The bands are the
-deciles of the score on **train**, applied frozen to the other samples.
+How the score behaves in each band: count, event rate, the event and
+non-event distributions, KS, lift, cumulative capture, odds and the
+score interval of the band, which is what lets a cut-off be read
+straight from the table. The bands are the deciles of the score on
+**train**, applied frozen to the other samples.
 
 ## Usage
 
@@ -24,8 +25,27 @@ scr_score_gains(x, sample = NULL)
 
 ## Value
 
-A `data.table` with one row per sample and band, from the riskiest band
-to the safest.
+A `data.table` with one row per sample and band, the band richest in
+events first (the riskiest under `objective = "risk"`): `sample`, `id`,
+`band`, `n`, `pct`, `events`, `non_events`, `event_rate`, `pct_event`
+and `pct_nonevent` (the band's share of all events and of all
+non-events), `woe`, `min_score`, `mean_score`, `max_score`, `cum_pct`,
+`cum_event_pct`, `cum_nonevent_pct`, `ks`, `lift`, `cum_lift`, `odds`
+and `log_odds`.
+
+## Details
+
+`woe` is `log(pct_event / pct_nonevent)`, event-oriented like the WOE of
+the variables (positive when the band event rate is above the overall
+rate) and equal to `log_odds` in
+[`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md)
+for the same sample and bands; when a band has no events or no
+non-events, 0.5 is added to the counts of every band for `woe` only.
+`odds` follows the odds orientation of the scale: non-events per event
+under `higher_is_safer`, events per non-event under `higher_is_riskier`,
+with 0.5 added to each count. `log_odds` therefore rises with the score
+under both directions, and its slope against `mean_score` can be read
+against `log(2) / pdo`.
 
 ## See also
 

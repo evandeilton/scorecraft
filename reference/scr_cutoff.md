@@ -76,18 +76,20 @@ ct
 #>      592.8     10.0%      2.86%     15.79%      98.0%    0.094
 st <- scr_strategy(sc, revenue_good = 1080, loss_bad = 4500)
 st
-#> <scr_strategy> target "default" | sample holdout | break-even event rate: 19.35% (revenue 1080, loss 4500)
-#>   band                       vol%    event decision     EP/acct       profit
-#>   (590, Inf]                11.2%    3.18% approve       902.29       141660
-#>   (577,590]                  8.9%    3.23% approve       900.00       111600
-#>   (567,577]                  9.1%    3.91% approve       862.03       110340
-#>   (558,567]                 10.6%    7.38% approve       668.05        99540
-#>   (550,558]                 10.6%   12.16% approve       401.35        59400
-#>   (542,550]                 10.8%   11.26% approve       451.79        68220
-#>   (533,542]                 10.6%   17.45% approve       106.31        15840
-#>   (524,533]                  9.9%   26.62% decline      -405.32       -56340
-#>   (510,524]                  9.1%   27.34% decline      -445.78       -57060
-#>   [-Inf,510]                 9.1%   35.43% decline      -897.17      -113940
+#> <scr_strategy> target "default" | objective risk | rule breakeven | sample holdout
+#>   break-even event rate: 19.35% (revenue 1080, loss 4500)
+#>   band                       vol%    event log_odds decision     EP/acct       profit
+#>   (590, Inf]                11.2%    3.18%   -1.640 approve       902.29       141660
+#>   (577,590]                  8.9%    3.23%   -1.627 approve       900.00       111600
+#>   (567,577]                  9.1%    3.91%   -1.428 approve       862.03       110340
+#>   (558,567]                 10.6%    7.38%   -0.755 approve       668.05        99540
+#>   (550,558]                 10.6%   12.16%   -0.203 approve       401.35        59400
+#>   (542,550]                 10.8%   11.26%   -0.290 approve       451.79        68220
+#>   (533,542]                 10.6%   17.45%    0.220 approve       106.31        15840
+#>   (524,533]                  9.9%   26.62%    0.760 decline      -405.32       -56340
+#>   (510,524]                  9.1%   27.34%    0.797 decline      -445.78       -57060
+#>   [-Inf,510]                 9.1%   35.43%    1.174 decline      -897.17      -113940
+#>   event and non-event distributions cross at score 542.1 (KS 0.370)
 rj <- scr_reject(sc)
 rj
 #> <scr_reject> target "default" | multipliers 2x, 4x, 8x

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>scorecraft: from raw table to production SQL and monitoring</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/v0.3.0/vignettes/scorecraft.Rmd" class="external-link"><code>vignettes/scorecraft.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/vignettes/scorecraft.Rmd" class="external-link"><code>vignettes/scorecraft.Rmd</code></a></small>
       <div class="d-none name"><code>scorecraft.Rmd</code></div>
     </div>
 
@@ -327,18 +327,20 @@ rest is declined; <code>decisions</code> imposes a policy by hand.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_strategy.html">scr_strategy</a></span><span class="op">(</span><span class="va">sc</span>, revenue_good <span class="op">=</span> <span class="fl">1080</span>, loss_bad <span class="op">=</span> <span class="fl">4500</span><span class="op">)</span></span>
 <span><span class="va">st</span></span>
-<span><span class="co">#&gt; &lt;scr_strategy&gt; target "default" | sample holdout | break-even event rate: 19.35% (revenue 1080, loss 4500)</span></span>
-<span><span class="co">#&gt;   band                       vol%    event decision     EP/acct       profit</span></span>
-<span><span class="co">#&gt;   (590, Inf]                11.2%    3.18% approve       902.29       141660</span></span>
-<span><span class="co">#&gt;   (577,590]                  8.9%    3.23% approve       900.00       111600</span></span>
-<span><span class="co">#&gt;   (567,577]                  9.1%    3.91% approve       862.03       110340</span></span>
-<span><span class="co">#&gt;   (558,567]                 10.6%    7.38% approve       668.05        99540</span></span>
-<span><span class="co">#&gt;   (550,558]                 10.6%   12.16% approve       401.35        59400</span></span>
-<span><span class="co">#&gt;   (542,550]                 10.8%   11.26% approve       451.79        68220</span></span>
-<span><span class="co">#&gt;   (533,542]                 10.6%   17.45% approve       106.31        15840</span></span>
-<span><span class="co">#&gt;   (524,533]                  9.9%   26.62% decline      -405.32       -56340</span></span>
-<span><span class="co">#&gt;   (510,524]                  9.1%   27.34% decline      -445.78       -57060</span></span>
-<span><span class="co">#&gt;   [-Inf,510]                 9.1%   35.43% decline      -897.17      -113940</span></span>
+<span><span class="co">#&gt; &lt;scr_strategy&gt; target "default" | objective risk | rule breakeven | sample holdout</span></span>
+<span><span class="co">#&gt;   break-even event rate: 19.35% (revenue 1080, loss 4500)</span></span>
+<span><span class="co">#&gt;   band                       vol%    event log_odds decision     EP/acct       profit</span></span>
+<span><span class="co">#&gt;   (590, Inf]                11.2%    3.18%   -1.640 approve       902.29       141660</span></span>
+<span><span class="co">#&gt;   (577,590]                  8.9%    3.23%   -1.627 approve       900.00       111600</span></span>
+<span><span class="co">#&gt;   (567,577]                  9.1%    3.91%   -1.428 approve       862.03       110340</span></span>
+<span><span class="co">#&gt;   (558,567]                 10.6%    7.38%   -0.755 approve       668.05        99540</span></span>
+<span><span class="co">#&gt;   (550,558]                 10.6%   12.16%   -0.203 approve       401.35        59400</span></span>
+<span><span class="co">#&gt;   (542,550]                 10.8%   11.26%   -0.290 approve       451.79        68220</span></span>
+<span><span class="co">#&gt;   (533,542]                 10.6%   17.45%    0.220 approve       106.31        15840</span></span>
+<span><span class="co">#&gt;   (524,533]                  9.9%   26.62%    0.760 decline      -405.32       -56340</span></span>
+<span><span class="co">#&gt;   (510,524]                  9.1%   27.34%    0.797 decline      -445.78       -57060</span></span>
+<span><span class="co">#&gt;   [-Inf,510]                 9.1%   35.43%    1.174 decline      -897.17      -113940</span></span>
+<span><span class="co">#&gt;   event and non-event distributions cross at score 542.1 (KS 0.370)</span></span>
 <span><span class="va">st</span><span class="op">$</span><span class="va">table</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">band</span>, event_rate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">event_rate</span>, <span class="fl">4</span><span class="op">)</span>, <span class="va">decision</span>, cum_pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cum_pct</span>, <span class="fl">3</span><span class="op">)</span>, <span class="va">cum_profit</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;           band event_rate decision cum_pct cum_profit</span></span>
 <span><span class="co">#&gt;         &lt;char&gt;      &lt;num&gt;   &lt;char&gt;   &lt;num&gt;      &lt;num&gt;</span></span>
@@ -360,6 +362,42 @@ IRB setting it is the product of the exposure at default and the loss
 given default, modelled in the article on <a href="https://evandeilton.github.io/scorecraft/articles/lgd-and-ead-under-irb.html">LGD
 and EAD</a> and combined in <a href="https://evandeilton.github.io/scorecraft/articles/expected-loss-and-capital.html">expected
 loss and capital</a>.</p>
+<p>The table also carries the two distributions the score separates:
+<code>pct_event</code> and <code>pct_nonevent</code> are the band’s
+shares of all events and of all non-events, and <code>log_odds</code>,
+the log of their ratio <code>odds_event</code>, is the WOE of the band,
+positive exactly when the band event rate is above the portfolio rate.
+The two distributions cross where their cumulative shares are furthest
+apart, at the KS of the table; <code>st$crossing</code> records that
+boundary, and <code>rule = "crossing"</code> approves the bands on its
+safe side and declines the rest, a cut that needs no revenue or loss
+figures.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">st</span><span class="op">$</span><span class="va">crossing</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cut"</span>, <span class="st">"ks"</span>, <span class="st">"single_crossing"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; $cut</span></span>
+<span><span class="co">#&gt; [1] 542.0954</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $ks</span></span>
+<span><span class="co">#&gt; [1] 0.3702647</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $single_crossing</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="../reference/scr_strategy.html">scr_strategy</a></span><span class="op">(</span><span class="va">sc</span>, rule <span class="op">=</span> <span class="st">"crossing"</span><span class="op">)</span><span class="op">$</span><span class="va">table</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">band</span>, event_rate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">event_rate</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>                                              log_odds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">log_odds</span>, <span class="fl">3</span><span class="op">)</span>, <span class="va">decision</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;           band event_rate log_odds decision</span></span>
+<span><span class="co">#&gt;         &lt;char&gt;      &lt;num&gt;    &lt;num&gt;   &lt;char&gt;</span></span>
+<span><span class="co">#&gt;  1: (590, Inf]     0.0318   -1.640  approve</span></span>
+<span><span class="co">#&gt;  2:  (577,590]     0.0323   -1.627  approve</span></span>
+<span><span class="co">#&gt;  3:  (567,577]     0.0391   -1.428  approve</span></span>
+<span><span class="co">#&gt;  4:  (558,567]     0.0738   -0.755  approve</span></span>
+<span><span class="co">#&gt;  5:  (550,558]     0.1216   -0.203  approve</span></span>
+<span><span class="co">#&gt;  6:  (542,550]     0.1126   -0.290  approve</span></span>
+<span><span class="co">#&gt;  7:  (533,542]     0.1745    0.220  decline</span></span>
+<span><span class="co">#&gt;  8:  (524,533]     0.2662    0.760  decline</span></span>
+<span><span class="co">#&gt;  9:  (510,524]     0.2734    0.797  decline</span></span>
+<span><span class="co">#&gt; 10: [-Inf,510]     0.3543    1.174  decline</span></span></code></pre></div>
+<p>The crossing falls one band above break-even and declines the 17.4%
+band: the prudent cut that loses money.</p>
 </div>
 </div>
 <div class="section level2">
@@ -382,7 +420,7 @@ declined a further 5% above that cut (high-side overrides). The declined
 rows form the applicants without an outcome. The booked accounts also
 contain applicants below the old cut (low-side overrides), which is why
 the lowest bands keep some outcomes.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></span>
 <span><span class="va">train</span> <span class="op">&lt;-</span> <span class="va">scr_demo</span><span class="op">[</span><span class="va">res</span><span class="op">$</span><span class="va">split</span><span class="op">$</span><span class="va">train_idx</span>, <span class="op">]</span></span>
 <span><span class="va">old_score</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">train</span><span class="op">)</span><span class="op">$</span><span class="va">score</span> <span class="op">+</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">train</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
@@ -427,7 +465,7 @@ choose it.</p>
 does: the frozen pre-processing (training median for missing and
 sentinel values, <code>"MISSING"</code> for absent categories), the
 frozen bins and the points. Nothing is refitted.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scr_demo</span>, <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">new</span>, what <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">prob</span>, <span class="fl">4</span><span class="op">)</span>, score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">score</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">score_points</span>,</span>
 <span>                                     vl_score_01_woe <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">vl_score_01_woe</span>, <span class="fl">3</span><span class="op">)</span>, <span class="va">vl_score_01_points</span><span class="op">)</span><span class="op">]</span></span>
@@ -444,7 +482,7 @@ which is what a points table on paper gives. <code><a href="../reference/scr_rea
 returns the decline reasons: the variables whose points fall furthest
 below a reference, the mean points on the training population by default
 (<code>reference = "max"</code> uses the best bin).</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_reasons.html">scr_reasons</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">new</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       reason_1 shortfall_1    reason_2 shortfall_2</span></span>
 <span><span class="co">#&gt;         &lt;char&gt;       &lt;num&gt;      &lt;char&gt;       &lt;num&gt;</span></span>
@@ -466,7 +504,7 @@ variable next to its points, and <code>keep_columns</code> carries key
 columns through untransformed, so the output can be joined back to the
 customer. Fourteen dialects are supported; <code>file</code> writes the
 script.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">sc</span>, table <span class="op">=</span> <span class="st">"prd.customers"</span>, dialect <span class="op">=</span> <span class="st">"databricks"</span>,</span>
 <span>               what <span class="op">=</span> <span class="st">"all"</span>, keep_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"ref_date"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sql</span><span class="op">)</span></span>
@@ -486,7 +524,7 @@ script.</p>
 <p>The claim that R and SQL agree is tested in the package; here it is
 also demonstrated. DuckDB runs in-process and executes the
 <code>duckdb</code> dialect on <code>scr_demo</code>.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span>, config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>threads <span class="op">=</span> <span class="st">"1"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbWriteTable.html" class="external-link">dbWriteTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"scr_demo"</span>, <span class="va">scr_demo</span><span class="op">)</span></span>
 <span><span class="va">got</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">sc</span>, table <span class="op">=</span> <span class="st">"scr_demo"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span>, what <span class="op">=</span> <span class="st">"all"</span>,</span>
@@ -514,7 +552,7 @@ variable with the signed points shift and, when the target is present,
 the performance by vintage. It schedules nothing. Here the new data are
 <code>scr_demo</code> itself: the first four periods are the training
 vintages, the last two the hold-out.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_monitor.html">scr_monitor</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">scr_demo</span>, date_col <span class="op">=</span> <span class="st">"ref_date"</span>, target <span class="op">=</span> <span class="st">"default"</span>, n_boot <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="va">mo</span></span>
 <span><span class="co">#&gt; &lt;scr_monitor&gt; target "default" | 6 period(s) | plan: PSI 0.1/0.25, CSI 0.1/0.25, alpha 0.05, min events 100</span></span>
@@ -558,7 +596,7 @@ unsigned; the <code>points_shift</code> gives the direction: the change
 in bin shares weighted by the points of each bin, the amount by which
 the variable moved the mean score. <code>vl_late</code> is stable for
 five periods and then shifts far above both thresholds:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mo</span><span class="op">$</span><span class="va">csi</span><span class="op">[</span><span class="va">variable</span> <span class="op">==</span> <span class="st">"vl_late"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">period</span>, csi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">csi</span>, <span class="fl">4</span><span class="op">)</span>, <span class="va">flag_fixed</span>, <span class="va">flag_adjusted</span>,</span>
 <span>                                points_shift <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">points_shift</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        period    csi flag_fixed flag_adjusted points_shift</span></span>
@@ -585,7 +623,7 @@ calibration and rating grades</a>.</p>
 the <code>Monitoring_Plan</code> sheet, and
 <code>scr_monitor(plan = )</code> reads it back, from the table or from
 the workbook. Edit the plan and the flags follow it:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plan</span> <span class="op">&lt;-</span> <span class="va">sc</span><span class="op">$</span><span class="va">monitoring_plan</span></span>
 <span><span class="va">plan</span><span class="op">[</span><span class="va">plan</span><span class="op">$</span><span class="va">item</span> <span class="op">!=</span> <span class="st">"threshold_source"</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;                          item</span></span>
@@ -631,7 +669,7 @@ validation and strategy workbooks plus the SQL for an
 so the workbooks carry what was read in this session.
 <code>stamp = TRUE</code> (the default) writes into a new timestamped
 directory, so an earlier run is never overwritten.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"scorecraft-get-started"</span><span class="op">)</span></span>
 <span><span class="va">files_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">files</span></span>
 <span><span class="va">files_sc</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_export.html">scr_export</a></span><span class="op">(</span><span class="va">sc</span>, <span class="va">out</span>, stamp <span class="op">=</span> <span class="cn">FALSE</span>, cutoff <span class="op">=</span> <span class="va">ct</span>, strategy <span class="op">=</span> <span class="va">st</span>, reject <span class="op">=</span> <span class="va">rj</span>,</span>
@@ -686,18 +724,18 @@ so a BIGINT is not read as a high-cardinality categorical), with a
 <code>driver</code> through any DBI driver. SQLite stands in for the
 warehouse here. It has no date type, so <code>ref_date</code> is stored
 as text, which the split reads as a date.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_connect.html">scr_connect</a></span><span class="op">(</span>driver <span class="op">=</span> <span class="fu">RSQLite</span><span class="fu">::</span><span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html" class="external-link">SQLite</a></span><span class="op">(</span><span class="op">)</span>, dbname <span class="op">=</span> <span class="st">":memory:"</span><span class="op">)</span></span>
 <span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">scr_demo</span></span>
 <span><span class="va">d</span><span class="op">$</span><span class="va">ref_date</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">ref_date</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbWriteTable.html" class="external-link">dbWriteTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, <span class="va">d</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_fetch.html">scr_fetch</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, sample_frac <span class="op">=</span> <span class="fl">0.5</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.5</span></span>
-<span><span class="co">#&gt; [1] 2090</span></span>
+<span><span class="co">#&gt; [1] 2072</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_fetch.html">scr_fetch</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, max_rows <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)</span></span>
 <span><span class="co">#&gt; SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) &lt;= 0.23809523809523808</span></span>
-<span><span class="co">#&gt; [1] 978</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 963</span></span></code></pre></div>
 <p><code><a href="../reference/scr_fetch.html">scr_fetch()</a></code> samples <strong>on the server</strong>: the
 fraction becomes a <code>WHERE</code> clause on a random expression
 chosen by the connection class, and <code>max_rows</code> lowers the
@@ -708,7 +746,7 @@ targets, dropping each sibling target from the candidates and recording
 a failure on one target without stopping the others. With
 <code>date_col</code> the split is out-of-time, as in section 2, and the
 table name is recorded for the SQL.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_run.html">scr_run</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"dtm"</span>, targets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"churn"</span><span class="op">)</span>, config <span class="op">=</span> <span class="va">cfg</span>, drop <span class="op">=</span> <span class="st">"id"</span>,</span>
 <span>              date_col <span class="op">=</span> <span class="st">"ref_date"</span><span class="op">)</span></span>
 <span><span class="va">rs</span></span>
