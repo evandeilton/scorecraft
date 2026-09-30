@@ -24,3 +24,19 @@ sc_demo <- function() {
 
 noise_names  <- function() grep("^vl_noise_", names(scr_demo), value = TRUE)
 signal_names <- function() grep("^vl_score_", names(scr_demo), value = TRUE)
+
+# fraud-like: the same model on a mirrored scale (higher score, more risk)
+sc_fraud_demo <- function() {
+  if (is.null(.fx$sc_fraud)) .fx$sc_fraud <- scr_scorecard(res_demo(), direction = "higher_is_riskier")
+  .fx$sc_fraud
+}
+
+# propensity: churn is the desirable event, more points = more likely
+sc_prop_demo <- function() {
+  if (is.null(.fx$sc_prop)) {
+    res <- scr_select(scr_demo, "churn", config = cfg_test(objective = "propensity"),
+                      drop = c("id", "default"), date_col = "ref_date")
+    .fx$sc_prop <- scr_scorecard(res)
+  }
+  .fx$sc_prop
+}

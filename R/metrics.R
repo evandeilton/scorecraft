@@ -235,6 +235,35 @@ woe_subpop <- function(mask, y, laplace = 0.5) {
   log(((s1 + laplace) / (n1 + 2 * laplace)) / ((s0 + laplace) / (n0 + 2 * laplace)))
 }
 
+#' Event and non-event shares per band and their log ratio (the band WOE)
+#'
+#' `pct_event` and `pct_nonevent` are exact (`NA` when that side has no
+#' case). `odds_event = pct_event / pct_nonevent` and `log_odds` are
+#' event-oriented, like the WOE of the binning engine: `log_odds > 0` when
+#' the band event rate is above the overall rate. As in `.psi_counts()`,
+#' 0.5 is added to every populated band only when one of them lacks events
+#' or non-events, so a fully populated table keeps the exact ratio. A band
+#' with no case, or with a missing count, gets `NA` odds; a zero total on
+#' either side leaves every odds `NA`.
+#' @keywords internal
+#' @noRd
+.band_woe <- function(events, non_events) {
+  e <- as.double(events); ne <- as.double(non_events)
+  # a band with an unknown count on either side is unknown on both
+  bad <- !is.finite(e) | !is.finite(ne); e[bad] <- NA_real_; ne[bad] <- NA_real_
+  # only populated bands with known counts enter the totals and the smoothing
+  live <- !bad & (e + ne) > 0
+  E <- sum(e[live]); NE <- sum(ne[live]); K <- sum(live)
+  pe <- if (E > 0) e / E else rep(NA_real_, length(e))
+  pn <- if (NE > 0) ne / NE else rep(NA_real_, length(ne))
+  odds <- rep(NA_real_, length(e))
+  if (E > 0 && NE > 0) {
+    sm <- if (any(e[live] == 0) || any(ne[live] == 0)) 0.5 else 0
+    odds[live] <- ((e[live] + sm) / (E + sm * K)) / ((ne[live] + sm) / (NE + sm * K))
+  }
+  list(pct_event = pe, pct_nonevent = pn, odds_event = odds, log_odds = log(odds))
+}
+
 # -- PSI / CSI with adjusted threshold -------------------------------------- #
 
 #' Population stability index, with the fixed and the sample-size-adjusted threshold

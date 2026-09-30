@@ -93,27 +93,102 @@ print.scr_cutoff <- function(x, ...) {
 #' Stage 6: strategy table per band, with marginal expected profit
 #'
 #' Score bands (by default the deciles frozen on train) with volume, event
-#' rate, decision and the expected result per account:
+#' rate, the event and non-event distributions, decision and the expected
+#' result per account. The good case is the non-event under
+#' `objective = "risk"` (credit, fraud) and the event under
+#' `"propensity"`; the bad case is the other one. With \eqn{p} the rate of
+#' the bad case in the band (the event rate under risk, one minus it under
+#' propensity):
 #' \deqn{EP = (1 - p)\,\mathrm{revenue\_good} - p\,\mathrm{loss\_bad},}
 #' which makes visible the band that is profitable **at the margin** even
-#' with a high event rate. The break-even event rate, where `EP = 0`, is
-#' `revenue_good / (revenue_good + loss_bad)`.
+#' with a high rate of the bad case. `EP = 0` at the break-even rate of the
+#' bad case, `revenue_good / (revenue_good + loss_bad)`. The object stores
+#' it as an event rate (`breakeven`): the same value under risk, and
+#' `loss_bad / (revenue_good + loss_bad)` under propensity, where a band is
+#' targeted at or above it.
 #'
-#' The automatic decision approves a band whose rate is below break-even,
-#' sends to review a band up to 25% above it and declines the rest; pass
-#' `decisions` to fix the policy.
+#' The table runs from the band richest in the good case to the poorest:
+#' the safest band first under risk, the most likely first under
+#' propensity.
+#'
+#' @section Event and non-event distributions:
+#'
+#' With \eqn{e_k} events and \eqn{m_k} non-events in band \eqn{k}, and
+#' \eqn{E} and \eqn{M} their totals over the sample:
+#' \deqn{\mathrm{pct\_event}_k = e_k / E, \qquad
+#'       \mathrm{pct\_nonevent}_k = m_k / M,}
+#' \deqn{\mathrm{odds\_event}_k = \mathrm{pct\_event}_k / \mathrm{pct\_nonevent}_k,
+#'       \qquad \mathrm{log\_odds}_k = \ln \mathrm{odds\_event}_k.}
+#' `log_odds` is the WOE of the band, event-oriented like the WOE of the
+#' variables: `log_odds > 0` if and only if the band event rate is above the
+#' overall event rate, that is, the lift of the band is above 1 (exact when
+#' every band has both classes; under the smoothing below, a band at the
+#' overall rate can fall on either side). When a band has no events or no
+#' non-events, 0.5 is added to the counts of every band for `odds_event`
+#' and `log_odds`; the shares stay exact. With a single class in the
+#' sample, the shares of the missing class and every ratio are `NA`. This
+#' `log_odds` is the `woe` column of [scr_score_gains()], not its
+#' `log_odds`, which is the log of the band odds in the orientation of the
+#' scale.
+#'
+#' @section Decision rules:
+#'
+#' `rule = "breakeven"` (default) gives the good label (`"approve"` under
+#' risk, `"target"` under propensity) to a band whose rate of the bad case
+#' is at or below break-even, `"review"` to one up to 25% above it, and the
+#' bad label (`"decline"` or `"skip"`) to the rest.
+#'
+#' `rule = "crossing"` cuts where the event and non-event distributions are
+#' furthest apart. With
+#' \deqn{D_k = \left|\sum_{j \le k} \mathrm{pct\_event}_j -
+#'       \sum_{j \le k} \mathrm{pct\_nonevent}_j\right|}
+#' over the first \eqn{k} rows of the table, the first maximum of \eqn{D_k}
+#' over the boundaries between rows is the KS of the table; the rows up to
+#' it get the good label and the rest the bad label, with no review band.
+#' When `log_odds` is monotone along the table this is where it changes
+#' sign, the band event rate crossing the overall rate; when it is not, the
+#' cut still gives a contiguous set of bands. The boundary is always
+#' computed and stored in `crossing`. It is undefined with fewer than two
+#' bands or a single class in the sample, and `rule = "crossing"` is then an
+#' error. Scores outside `breaks` form a last row with a missing `band`,
+#' which gets no decision (`NA`) under the crossing rule; the shares, and
+#' hence `ks`, stay relative to the whole sample, that row included.
+#'
+#' `decisions`, when given, overrides either rule.
 #'
 #' @param x An object from [scr_scorecard()].
 #' @param breaks Band cut points. `NULL` uses the deciles frozen on train.
-#' @param decisions Vector of decisions, one per band (from the safest to
-#'   the riskiest). `NULL` derives them from break-even.
-#' @param revenue_good Expected revenue per account without the event
-#'   (default `1`).
-#' @param loss_bad Expected loss per account with the event (default `1`;
-#'   with both defaults the break-even event rate is 50%).
+#' @param decisions Vector of decisions, one per band (from the first row
+#'   of the table to the last). `NULL` derives them from `rule`; when
+#'   given, it overrides `rule`.
+#' @param revenue_good Expected revenue per account of the good case (the
+#'   non-event under risk, the event under propensity; default `1`).
+#' @param loss_bad Expected loss per account of the bad case (default `1`;
+#'   with both defaults the break-even is 50%). `revenue_good` and
+#'   `loss_bad` cannot both be 0.
 #' @param sample `"holdout"` (default) or `"train"`.
+#' @param rule `"breakeven"` (default) or `"crossing"`; see the section
+#'   Decision rules.
 #'
-#' @return An `scr_strategy` object with `table`, `breakeven` and the parameters.
+#' @return An `scr_strategy` object with
+#'   \describe{
+#'     \item{`table`}{One row per band: `id`, `band`, `min_score`,
+#'       `max_score`, `n`, `pct`, `events`, `event_rate`, `pct_event`,
+#'       `pct_nonevent`, `odds_event`, `log_odds`, `decision`,
+#'       `ep_per_account`, `band_profit`, `cum_pct`, `cum_event_rate` and
+#'       `cum_profit`.}
+#'     \item{`breakeven`}{The break-even event rate.}
+#'     \item{`crossing`}{A list: `cut`, the score boundary of the crossing
+#'       rule; `ks`, the distance \eqn{D_k} at it; `after_band`, the last
+#'       band on the good side; `single_crossing`, whether `log_odds`
+#'       changes sign exactly once along the table. All `NA` when
+#'       undefined; only `cut` is `NA` when `breaks` is a single number (a
+#'       count of intervals, whose edges are not kept).}
+#'     \item{`objective`, `rule`}{The objective of the scorecard and the
+#'       rule used.}
+#'     \item{`revenue_good`, `loss_bad`, `sample`, `direction`, `target`}{
+#'       The parameters and the scorecard's direction and target.}
+#'   }
 #'
 #' @family stages
 #' @examples
@@ -123,44 +198,114 @@ print.scr_cutoff <- function(x, ...) {
 #'                   date_col = "ref_date")
 #' sc <- scr_scorecard(res)
 #' scr_strategy(sc, revenue_good = 1080, loss_bad = 4500)
+#' # approve down to where the event and non-event distributions cross
+#' st <- scr_strategy(sc, rule = "crossing")
+#' st$crossing
+#' st$table[, .(band, event_rate, log_odds, decision)]
 #' @export
 scr_strategy <- function(x, breaks = NULL, decisions = NULL, revenue_good = 1, loss_bad = 1,
-                         sample = "holdout") {
+                         sample = "holdout", rule = c("breakeven", "crossing")) {
   check_scorecard(x, "scr_strategy")
+  rule <- match.arg(rule)
   .scr_num1(revenue_good, "revenue_good", lower = 0); .scr_num1(loss_bad, "loss_bad", lower = 0)
+  if (revenue_good + loss_bad <= 0) stop("`revenue_good` and `loss_bad` cannot both be 0: the break-even is undefined.", call. = FALSE)
+  # the good case is the non-event under risk and the event under propensity
+  prop <- identical(x$config$objective, "propensity")
   breaks <- breaks %||% x$breaks
   s <- x$samples[[sample]]
   if (is.null(s)) stop("sample '", sample, "' does not exist.", call. = FALSE)
   band <- cut(s$score, breaks = breaks, include.lowest = TRUE)
   d <- data.table::data.table(band = band, y = s$y, score = s$score)[
     , .(n = .N, events = sum(y), event_rate = mean(y), min_score = min(score), max_score = max(score)), by = band]
-  d <- if (identical(x$direction, "higher_is_safer")) d[order(-as.integer(band))] else d[order(band)]
+  # band richest in the good case first: descending score when the good case sits at the high end
+  d <- if (xor(identical(x$direction, "higher_is_safer"), prop)) d[order(-as.integer(band))] else d[order(band)]
+  idx <- as.integer(d$band)   # band index, kept for the score boundary of the crossing
   d[, `:=`(id = seq_len(.N), pct = n / sum(n), band = as.character(band))]
-  breakeven <- revenue_good / (revenue_good + loss_bad)
-  d[, ep_per_account := (1 - event_rate) * revenue_good - event_rate * loss_bad]
+  bw <- .band_woe(d$events, d$n - d$events)
+  d[, `:=`(pct_event = bw$pct_event, pct_nonevent = bw$pct_nonevent, odds_event = bw$odds_event, log_odds = bw$log_odds)]
+  # EP and break-even on the rate of the bad case; `breakeven` is stored as an event rate
+  p_bad <- if (prop) 1 - d$event_rate else d$event_rate
+  be_bad <- revenue_good / (revenue_good + loss_bad)
+  breakeven <- if (prop) loss_bad / (revenue_good + loss_bad) else be_bad
+  d[, ep_per_account := (1 - p_bad) * revenue_good - p_bad * loss_bad]
   d[, band_profit := n * ep_per_account]
+  cr <- .strategy_crossing(d$pct_event, d$pct_nonevent, d$log_odds, idx, d$band, breaks)
+  lab <- if (prop) c("target", "review", "skip") else c("approve", "review", "decline")
   if (is.null(decisions)) {
-    d[, decision := data.table::fifelse(event_rate <= breakeven, "approve",
-                     data.table::fifelse(event_rate <= 1.25 * breakeven, "review", "decline"))]
+    if (rule == "crossing") {
+      if (is.na(cr$k)) stop("scr_strategy(): rule = \"crossing\" needs at least two bands and both classes in the sample.", call. = FALSE)
+      # scores outside the breaks (a last row without band) get no decision
+      d[, decision := data.table::fifelse(is.na(idx), NA_character_,
+                       data.table::fifelse(seq_len(.N) <= cr$k, lab[1], lab[3]))]
+    } else {
+      d[, decision := data.table::fifelse(p_bad <= be_bad, lab[1],
+                       data.table::fifelse(p_bad <= 1.25 * be_bad, lab[2], lab[3]))]
+    }
   } else {
     if (length(decisions) != nrow(d)) stop("`decisions` needs one decision per band (", nrow(d), ").", call. = FALSE)
     d[, decision := as.character(decisions)]
   }
   d[, `:=`(cum_pct = cumsum(pct), cum_event_rate = cumsum(events) / cumsum(n), cum_profit = cumsum(band_profit))]
   data.table::setcolorder(d, c("id", "band", "min_score", "max_score", "n", "pct", "events", "event_rate",
+                               "pct_event", "pct_nonevent", "odds_event", "log_odds",
                                "decision", "ep_per_account", "band_profit", "cum_pct", "cum_event_rate", "cum_profit"))
   structure(list(table = d[], breakeven = breakeven, revenue_good = revenue_good, loss_bad = loss_bad,
-                 sample = sample, direction = x$direction, target = x$target), class = c("scr_strategy", "list"))
+                 sample = sample, direction = x$direction, target = x$target,
+                 objective = if (prop) "propensity" else "risk", rule = rule, crossing = cr$crossing),
+            class = c("scr_strategy", "list"))
+}
+
+#' Boundary where the cumulative event and non-event shares of the strategy
+#' table are furthest apart (the KS of the table), in the row order given
+#'
+#' `idx` is the band index of every row (`NA` for scores outside the
+#' breaks). The cut is the upper edge of the lower of the two bands, which
+#' also holds when an empty band lies between them. `k` is the last row on
+#' the good side, `NA` when the crossing is undefined.
+#' @keywords internal
+#' @noRd
+.strategy_crossing <- function(pct_event, pct_nonevent, log_odds, idx, band, breaks) {
+  none <- list(crossing = list(cut = NA_real_, ks = NA_real_, after_band = NA_character_, single_crossing = NA),
+               k = NA_integer_)
+  v <- which(!is.na(idx))
+  pe <- pct_event[v]; pn <- pct_nonevent[v]
+  # fewer than two bands, or a single class (shares NA): no boundary to find
+  if (length(v) < 2L || anyNA(pe) || anyNA(pn)) return(none)
+  D <- abs(cumsum(pe) - cumsum(pn))[-length(v)]
+  k <- which.max(D)
+  # cut() sorts the breaks; a single number is a count of intervals, whose edges are not kept
+  b <- if (length(breaks) > 1L) sort(as.double(breaks)) else NULL
+  cut_at <- if (is.null(b)) NA_real_ else b[min(idx[v[k]], idx[v[k + 1L]]) + 1L]
+  sg <- sign(log_odds[v]); sg <- sg[!is.na(sg) & sg != 0]
+  list(crossing = list(cut = cut_at, ks = D[k], after_band = band[v[k]],
+                       single_crossing = sum(diff(sg) != 0) == 1L),
+       k = v[k])
 }
 
 #' @export
 print.scr_strategy <- function(x, ...) {
-  cat(sprintf("<scr_strategy> target \"%s\" | sample %s | break-even event rate: %.2f%% (revenue %s, loss %s)\n",
-              x$target, x$sample, 100 * x$breakeven, format(x$revenue_good), format(x$loss_bad)))
+  prop <- identical(x$objective, "propensity")
+  cat(sprintf("<scr_strategy> target \"%s\" | objective %s | rule %s | sample %s\n",
+              x$target, x$objective %||% "risk", x$rule %||% "breakeven", x$sample))
+  cat(sprintf("  break-even event rate: %s%.2f%% (revenue %s, loss %s)\n", if (prop) "target at or above " else "",
+              100 * x$breakeven, format(x$revenue_good), format(x$loss_bad)))
   d <- x$table
-  cat(sprintf("  %-24s %6s %8s %-9s %10s %12s\n", "band", "vol%", "event", "decision", "EP/acct", "profit"))
-  for (i in seq_len(nrow(d))) cat(sprintf("  %-24s %5.1f%% %7.2f%% %-9s %10.2f %12.0f\n", substr(d$band[i], 1, 24), 100 * d$pct[i],
-                                          100 * d$event_rate[i], d$decision[i], d$ep_per_account[i], d$band_profit[i]))
+  # an object saved before log_odds existed prints without that column
+  lo <- if (is.null(d$log_odds)) rep("", nrow(d)) else sprintf("%8.3f ", d$log_odds)
+  cat(sprintf("  %-24s %6s %8s %s%-9s %10s %12s\n", "band", "vol%", "event", if (is.null(d$log_odds)) "" else "log_odds ",
+              "decision", "EP/acct", "profit"))
+  for (i in seq_len(nrow(d))) cat(sprintf("  %-24s %5.1f%% %7.2f%% %s%-9s %10.2f %12.0f\n", substr(d$band[i], 1, 24), 100 * d$pct[i],
+                                          100 * d$event_rate[i], lo[i], d$decision[i], d$ep_per_account[i], d$band_profit[i]))
+  cr <- x$crossing
+  if (!is.null(cr)) {
+    if (is.na(cr$ks)) {
+      cat("  event and non-event distributions: crossing undefined (fewer than two bands or a single class)\n")
+    } else {
+      cat(sprintf("  event and non-event distributions cross %s (KS %.3f)%s\n",
+                  if (is.na(cr$cut)) paste("after band", cr$after_band) else sprintf("at score %.1f", cr$cut), cr$ks,
+                  if (isFALSE(cr$single_crossing)) "; log_odds does not change sign exactly once" else ""))
+    }
+  }
   invisible(x)
 }
 

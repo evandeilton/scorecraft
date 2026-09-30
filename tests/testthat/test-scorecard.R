@@ -48,6 +48,39 @@ test_that("gains use bands frozen on train and run from the risky to the safe si
   expect_equal(nrow(scr_score_gains(sc, "holdout")), sc$config$score_groups)
 })
 
+test_that("gains carry the band shares, the band WOE and odds in the orientation of the scale", {
+  sc <- sc_demo()
+  g <- scr_score_gains(sc)
+  expect_identical(names(g), c("sample", "id", "band", "n", "pct", "events", "non_events", "event_rate",
+                               "pct_event", "pct_nonevent", "woe", "min_score", "mean_score", "max_score",
+                               "cum_pct", "cum_event_pct", "cum_nonevent_pct", "ks", "lift", "cum_lift",
+                               "odds", "log_odds"))
+  expect_equal(g[, sum(pct_event), by = sample]$V1, c(1, 1))
+  expect_equal(g[, sum(pct_nonevent), by = sample]$V1, c(1, 1))
+  expect_true(all(g$events > 0 & g$non_events > 0))
+  expect_equal(g$woe, log(g$pct_event / g$pct_nonevent))
+  expect_equal(sign(g$woe), sign(g$lift - 1))
+  # higher_is_safer: non-events per event
+  expect_equal(g$odds, (g$n - g$events + 0.5) / (g$events + 0.5))
+  expect_true(all(g[, stats::cor(log_odds, mean_score), by = sample]$V1 > 0))
+  # higher_is_riskier: events per non-event; log_odds still rises with the score
+  gf <- scr_score_gains(sc_fraud_demo())
+  expect_equal(gf$odds, (gf$events + 0.5) / (gf$n - gf$events + 0.5))
+  expect_true(all(gf[, stats::cor(log_odds, mean_score), by = sample]$V1 > 0))
+  expect_equal(gf$woe, log(gf$pct_event / gf$pct_nonevent))
+  expect_equal(gf[, sum(pct_event), by = sample]$V1, c(1, 1))
+})
+
+test_that("the points table carries the event and non-event shares of every bin", {
+  p <- sc_demo()$points
+  i <- match("pos_rate", names(p))
+  expect_identical(names(p)[i + 1:2], c("pct_event", "pct_nonevent"))
+  tot <- p[, .(e = sum(pct_event), ne = sum(pct_nonevent)), by = variable]
+  expect_equal(tot$e, rep(1, nrow(tot)))
+  expect_equal(tot$ne, rep(1, nrow(tot)))
+  expect_true(all(p$pct_event >= 0 & p$pct_nonevent >= 0))
+})
+
 test_that("stability, calibration and rank-order diagnostics are populated", {
   sc <- sc_demo()
   st <- sc$stability

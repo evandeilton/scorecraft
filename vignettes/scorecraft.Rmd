@@ -155,6 +155,24 @@ in the article on
 and combined in
 [expected loss and capital](https://evandeilton.github.io/scorecraft/articles/expected-loss-and-capital.html).
 
+The table also carries the two distributions the score separates:
+`pct_event` and `pct_nonevent` are the band's shares of all events and of
+all non-events, and `log_odds`, the log of their ratio `odds_event`, is the
+WOE of the band, positive exactly when the band event rate is above the
+portfolio rate. The two distributions cross where their cumulative shares
+are furthest apart, at the KS of the table; `st$crossing` records that
+boundary, and `rule = "crossing"` approves the bands on its safe side and
+declines the rest, a cut that needs no revenue or loss figures.
+
+```{r strategy-crossing}
+st$crossing[c("cut", "ks", "single_crossing")]
+scr_strategy(sc, rule = "crossing")$table[, .(band, event_rate = round(event_rate, 4),
+                                              log_odds = round(log_odds, 3), decision)]
+```
+
+The crossing falls one band above break-even and declines the 17.4% band:
+the prudent cut that loses money.
+
 ## 5. Reject inference
 
 The scorecard is fitted on accounts that were accepted and therefore have an

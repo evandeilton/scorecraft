@@ -130,7 +130,7 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
   )
   validation <- list(
     "Score_Gains_Frozen"      = x$gains,
-    "Variable_Gains_IV"       = x$points[, c("variable", "bin_id", "bin", "count_fit", "pos_rate", "woe", "iv", "points")],
+    "Variable_Gains_IV"       = .points_shares(x$points)[, c("variable", "bin_id", "bin", "count_fit", "pos_rate", "pct_event", "pct_nonevent", "woe", "iv", "points")],
     "Discrimination_CI"       = x$metrics,
     "Stability_PSI_Timeline"  = tl$psi %||% na_tl,
     "Stability_CSI_Timeline"  = tl$csi %||% na_tl,
@@ -204,6 +204,23 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
       }))
     }))
   list(psi = psi, csi = csi, vintage = vintage)
+}
+
+#' Event and non-event shares of every bin, rebuilt per variable from
+#' `count_fit` and `pos_rate` when the points table was fitted before they
+#' were stored
+#' @keywords internal
+#' @noRd
+.points_shares <- function(p) {
+  if (all(c("pct_event", "pct_nonevent") %in% names(p))) return(p)
+  # pos_rate = count_pos / count, so the event count is recovered exactly
+  pos <- round(p$pos_rate * p$count_fit)
+  pe <- pn <- rep(NA_real_, nrow(p))
+  for (i in split(seq_len(nrow(p)), p$variable)) {
+    bw <- .band_woe(pos[i], p$count_fit[i] - pos[i])
+    pe[i] <- bw$pct_event; pn[i] <- bw$pct_nonevent
+  }
+  data.table::copy(p)[, `:=`(pct_event = pe, pct_nonevent = pn)]
 }
 
 #' @keywords internal

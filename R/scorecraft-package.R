@@ -121,5 +121,6 @@ utils::globalVariables(c(
   "rate_implied", "points_shift", "Feature", "Gain", ".tmp", ".i",
   "n_vote", "count_train", "pct_train", "observed", "expected",
   "psi_critical", "psi_flag_adjusted", "provenance", "manual_reason", "status", "pct_shift",
-  "pct_holdout", "current", "metric", "optimal", "manual", "delta", "blocking"
+  "pct_holdout", "current", "metric", "optimal", "manual", "delta", "blocking",
+  "pct_event", "pct_nonevent", "odds_event"
 ))

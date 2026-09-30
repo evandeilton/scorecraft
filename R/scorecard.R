@@ -239,9 +239,12 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
     p_raw <- al$b * beta * r$woe + if (distrib) base_raw / k else 0
     bl <- w_tr[[paste0(f, "_bin")]]
     cnt <- as.integer(tabulate(match(bl, r$bin), nbins = length(r$bin)))
+    # event and non-event shares per bin, from the fit counts behind pos_rate
+    bw <- .band_woe(r$count_pos, r$count - r$count_pos)
     data.table::data.table(variable = f, bin_id = as.integer(r$id), bin = r$bin, woe = r$woe,
                            count_train = cnt, pct_train = cnt / n_tr, count_fit = r$count,
-                           pos_rate = r$count_pos / pmax(1L, r$count), iv = r$iv, coef = beta,
+                           pos_rate = r$count_pos / pmax(1L, r$count),
+                           pct_event = bw$pct_event, pct_nonevent = bw$pct_nonevent, iv = r$iv, coef = beta,
                            points_raw = p_raw,
                            points = if (isTRUE(cfg$points_round)) round(p_raw) else p_raw)
   })
@@ -314,14 +317,21 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   d <- if (identical(direction, "higher_is_safer")) d[order(band)] else d[order(-as.integer(band))]
   n_tot <- sum(d$n); e_tot <- sum(d$events); ne_tot <- n_tot - e_tot
   d[, `:=`(id = seq_len(.N), pct = n / n_tot, event_rate = events / n, non_events = n - events)]
+  # event-oriented band WOE, the same values as log_odds in scr_strategy()
+  bw <- .band_woe(d$events, d$non_events)
+  d[, `:=`(pct_event = bw$pct_event, pct_nonevent = bw$pct_nonevent, woe = bw$log_odds)]
   d[, `:=`(cum_pct = cumsum(pct), cum_event_pct = cumsum(events) / max(1, e_tot),
            cum_nonevent_pct = cumsum(non_events) / max(1, ne_tot))]
+  # odds in the orientation of the scale (safe:event or event:safe), so
+  # log_odds rises with the score under both directions
+  safer <- identical(direction, "higher_is_safer")
   d[, `:=`(ks = abs(cum_event_pct - cum_nonevent_pct),
            lift = event_rate / (e_tot / n_tot),
            cum_lift = (cumsum(events) / cumsum(n)) / (e_tot / n_tot),
-           odds = (n - events + 0.5) / (events + 0.5))]
+           odds = if (safer) (n - events + 0.5) / (events + 0.5) else (events + 0.5) / (n - events + 0.5))]
   d[, log_odds := log(odds)]
   data.table::setcolorder(d, c("id", "band", "n", "pct", "events", "non_events", "event_rate",
+                               "pct_event", "pct_nonevent", "woe",
                                "min_score", "mean_score", "max_score", "cum_pct", "cum_event_pct",
                                "cum_nonevent_pct", "ks", "lift", "cum_lift", "odds", "log_odds"))
   d[, band := as.character(band)]
@@ -498,16 +508,32 @@ print.scr_scorecard <- function(x, ...) {
 
 #' Score gains per frozen band
 #'
-#' How the score behaves in each band: count, event rate, KS, lift,
-#' cumulative capture and the score interval of the band, which is what lets
-#' a cut-off be read straight from the table. The bands are the deciles of
-#' the score on **train**, applied frozen to the other samples.
+#' How the score behaves in each band: count, event rate, the event and
+#' non-event distributions, KS, lift, cumulative capture, odds and the score
+#' interval of the band, which is what lets a cut-off be read straight from
+#' the table. The bands are the deciles of the score on **train**, applied
+#' frozen to the other samples.
+#'
+#' `woe` is `log(pct_event / pct_nonevent)`, event-oriented like the WOE of
+#' the variables (positive when the band event rate is above the overall
+#' rate) and equal to `log_odds` in [scr_strategy()] for the same sample and
+#' bands; when a band has no events or no non-events, 0.5 is added to the
+#' counts of every band for `woe` only. `odds` follows the odds
+#' orientation of the scale: non-events per event under `higher_is_safer`,
+#' events per non-event under `higher_is_riskier`, with 0.5 added to each
+#' count. `log_odds` therefore rises with the score under both directions,
+#' and its slope against `mean_score` can be read against `log(2) / pdo`.
 #'
 #' @param x An object from [scr_scorecard()].
 #' @param sample `NULL` (all), `"train"` or `"holdout"`.
 #'
-#' @return A `data.table` with one row per sample and band, from the riskiest
-#'   band to the safest.
+#' @return A `data.table` with one row per sample and band, the band
+#'   richest in events first (the riskiest under `objective = "risk"`):
+#'   `sample`, `id`, `band`, `n`, `pct`, `events`, `non_events`,
+#'   `event_rate`, `pct_event` and `pct_nonevent` (the band's share of all
+#'   events and of all non-events), `woe`, `min_score`, `mean_score`,
+#'   `max_score`, `cum_pct`, `cum_event_pct`, `cum_nonevent_pct`, `ks`,
+#'   `lift`, `cum_lift`, `odds` and `log_odds`.
 #'
 #' @family accessors
 #' @examples
