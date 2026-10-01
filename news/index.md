@@ -134,6 +134,7 @@
   [`scr_psi()`](https://evandeilton.github.io/scorecraft/reference/scr_psi.md)
   assign the bands as integer indices, without a factor per row. No
   other result changes.
+- The cheat sheet gains a third page on the score studies.
 
 ## scorecraft 0.3.1
 
