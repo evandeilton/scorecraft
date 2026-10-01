@@ -68,7 +68,8 @@ scr_segments(
 - segment:
 
   Name of the segment column. A missing segment is the segment
-  `"(missing)"`.
+  `"(missing)"`. The segments of a factor column are listed in the order
+  of its levels.
 
 - by:
 
@@ -264,7 +265,8 @@ force.
 With `by` (a period, a sample label), the analysis is repeated within
 each group: the pooled reference of a segment is the whole of its group.
 The bands are frozen once, on all rows. Groups and segments are listed
-in the order of their labels; numeric columns in numeric order.
+in the order of their labels; numeric columns in numeric order, and a
+factor segment column in the order of its levels.
 
 ## References
 

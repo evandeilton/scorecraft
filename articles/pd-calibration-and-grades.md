@@ -550,7 +550,7 @@ v
 #>   3         324    55   16.98%   18.74%    0.7906    0.8110 green 
 #>   4         391    86   21.99%   24.66%    0.8905    0.9014 green 
 #>   5         185    76   41.08%   44.53%    0.8276    0.8459 green 
-#>   discrimination (score): AUC 0.7564 [0.7333, 0.7794] vs initial 0.7394 | S -1.44, p 0.9250 | KS 0.4027
+#>   discrimination (score): AUC 0.7564 [0.7344, 0.7781] vs initial 0.7394 | S -1.44, p 0.9250 | KS 0.4027
 #>   stability: grade PSI 0.9634 (shift, adjusted shift) at cohort 2024-10-01 | MWB up - / down - | CV 1.245 vs 0.452 (p 0.1869)
 ```
 

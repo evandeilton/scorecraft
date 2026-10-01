@@ -180,7 +180,7 @@ v
 #>   2         498   103   20.68%   15.26%    0.0006    0.0007 red   
 #>   3         475   125   26.32%   30.54%    0.9782    0.9808 green 
 #>   4         222   100   45.05%   45.23%    0.5217    0.5485 green 
-#>   discrimination (score): AUC 0.7682 [0.7517, 0.7832] vs initial 0.7394 | S -2.81, p 0.9976 | KS 0.4177
+#>   discrimination (score): AUC 0.7682 [0.7567, 0.7855] vs initial 0.7394 | S -2.81, p 0.9976 | KS 0.4177
 #>   stability: grade PSI 0.7658 (shift, adjusted shift) at cohort 2024-10-01 | MWB up - / down - | CV 1.158 vs 0.462 (p 0.2213)
 v$summary
 #>                    test     level   statistic      p_value  light

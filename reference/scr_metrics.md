@@ -58,7 +58,9 @@ scr_metrics(
 
 - nthread:
 
-  Parallel workers for the resamples.
+  Parallel workers for the resamples on the rows; not used when the
+  resamples are drawn on the counts (see Details). The result does not
+  depend on it.
 
 ## Value
 
@@ -72,9 +74,19 @@ A list of class `scr_metrics` with `auc`, `ks`, `gini`, the bounds
 The confidence interval is **always** computed by default: a bootstrap
 stratified by outcome, percentile method, with `n_boot` resamples. Gini
 is derived from AUC (`2 * AUC - 1`) inside each resample, never
-bootstrapped separately. The cost is absorbed by `nthread` (parallelism
-by resample). DeLong's analytic variance is not used: the interval is a
-stratified percentile bootstrap, which also covers KS.
+bootstrapped separately. DeLong's analytic variance is not used: the
+interval is a stratified percentile bootstrap, which also covers KS.
+
+The resamples are drawn in one of two ways. With \\K\\ distinct scores
+in the \\n\\ rows used (those with a score and an outcome) and \\K \le n
+/ 2\\ (many ties: scorecard points, a grade scale, a WOE score on a
+large sample), each class is redrawn on the counts, as a multinomial
+over the score values with its observed shares, at a cost of \\O(K)\\
+per resample. Otherwise the rows of each class are resampled, at
+\\O(n)\\ per resample, over `nthread` workers. Rows of one class with
+the same score are exchangeable, so both are the same bootstrap
+stratified by outcome and differ only in how the draws are made: for a
+given seed, the bounds depend on which of the two ran.
 
 The AUC is computed from the counts per unique score after one sort, so
 its cost is \\O(n \log n)\\, never the \\O(n_1 n_0)\\ of the pairwise
