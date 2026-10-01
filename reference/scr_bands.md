@@ -98,7 +98,8 @@ scr_bands(
 
   For a scorecard: the sample the bands are frozen on (`"train"`). For a
   data.frame: the label of the reference sample; `NULL` takes the first
-  level of the `sample` column.
+  level of the `sample` column (the levels of a factor in their order,
+  numbers in numeric order, text sorted).
 
 - breaks:
 
@@ -326,11 +327,17 @@ to assign the bands in production.
 
 Other score-studies:
 [`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md),
+[`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md),
+[`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md),
+[`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md),
 [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md),
+[`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md),
 [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md),
 [`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md),
 [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md),
-[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
+[`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md),
+[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md),
+[`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md)
 
 ## Examples
 

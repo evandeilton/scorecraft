@@ -49,6 +49,7 @@
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_demo_panel.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_demo_portfolio.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_demo_rates.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_detection.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_ead.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_ead_data.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_ead_downturn.html</loc></url>
@@ -71,13 +72,16 @@
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_lgd_pools.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_lgd_validate.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_master_scale.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_maturity.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_metrics.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_migration.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_moc.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_model.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_monitor.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_monitoring_plan.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_operating.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_overlap.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_pd.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_pd_pit_ttc.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_pd_stress.html</loc></url>
@@ -96,6 +100,7 @@
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_score_gains.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_score_metrics.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_scorecard.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_segments.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_select.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_selected.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_split.html</loc></url>
@@ -103,6 +108,7 @@
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_strategy.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_tiers.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_triage.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_uplift.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_verbose.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_workout.html</loc></url>
 </urlset>

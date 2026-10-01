@@ -7,14 +7,17 @@ How does the event rate move along the score? Which few groups can be
 named and defended? Is the score still fit on new data? What can be
 promised about a group, and with what confidence? Where should the cut
 be under a budget or a team’s capacity? How do two scores read on the
-same customers relate?
+same customers relate? When the event rate moves, is it the population
+or the score bands? Does one score serve every segment?
 
 Every study aggregates the scored rows once into a table of counts and
 works on that table afterwards, so a study of millions of rows costs one
 grouped pass plus work proportional to the number of distinct scores.
-The one exception is the rank association of
+The exceptions are the rank association of
 [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md),
-which sorts the rows of the two scores once more.
+which sorts the rows of the two scores once more, and
+[`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md),
+which sorts the rows of the entities with an event.
 
 ## 1. Three scores on the demo data
 
@@ -400,7 +403,108 @@ to leave. The overlap table says how far that goes at the top of each
 score, and the rates of the “A only” and “B only” sets say what changes
 when one list is replaced by the other.
 
-## 6. Production
+## 6. Why the default rate moved
+
+The hold-out defaults at a different rate than the training sample. Two
+things can move a rate: the population shifted along the score (the
+mix), or the same score now carries a different risk (the rates).
+[`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md)
+splits the change between the two, band by band, on bands frozen on the
+base. The two effects add up to the change exactly.
+
+``` r
+
+ms <- scr_mix_shift(credit, n_bands = 5)
+ms
+#> <scr_mix_shift> target "default" | objective risk | higher_is_safer
+#>   base 'train' | 5 bands frozen on the base | 1 comparison
+#>   holdout      rate 14.2% -> 14.5% (+0.25 pp): mix -0.35 pp, rate +0.60 pp | PSI 0.0027 (critical 0.0102)
+#> 
+#> Largest band effects on 'holdout' (p_adj: Holm-adjusted test of the band rate)
+#>   band score                               share               rate        mix       rate      total   p_adj
+#>      1 [-Inf, 523.5026)           20.0% -> 18.2%     36.1% -> 31.4%   -0.60 pp   -0.90 pp   -1.50 pp   0.955
+#>      2 [523.5026, 542.0923)       20.0% -> 20.6%     18.8% -> 21.9%   +0.12 pp   +0.63 pp   +0.75 pp   0.955
+#>      3 [542.0923, 557.7648)       20.0% -> 21.4%      9.1% -> 11.7%   +0.14 pp   +0.54 pp   +0.68 pp   0.955
+#>      4 [557.7648, 576.5187)       20.0% -> 19.8%       4.8% -> 5.8%   -0.01 pp   +0.19 pp   +0.18 pp   1.000
+#>      5 [576.5187, Inf)            20.0% -> 20.1%       2.5% -> 3.2%   +0.00 pp   +0.14 pp   +0.14 pp   1.000
+```
+
+Of the change of +0.25 percentage points, -0.35 come from the mix and
++0.60 from the band rates; 0 band(s) changed their rate significantly
+after the Holm adjustment, and the PSI of the band shares sits below its
+critical value. With `by`, every period is compared with the base, here
+the first month of the scored rows:
+
+``` r
+
+scr_mix_shift(credit, by = "date", n_bands = 5)$summary[
+  , .(group, rate_base, rate_cmp, delta, mix_total, rate_total, psi)]
+#>         group rate_base  rate_cmp        delta     mix_total    rate_total
+#>        <char>     <num>     <num>        <num>         <num>         <num>
+#> 1: 2026-02-01 0.1414286 0.1457143  0.004285714 -2.762334e-04  0.0045619477
+#> 2: 2026-03-01 0.1414286 0.1371429 -0.004285714  1.721942e-05 -0.0043029337
+#> 3: 2026-04-01 0.1414286 0.1457143  0.004285714 -9.430080e-03  0.0137157940
+#> 4: 2026-05-01 0.1414286 0.1400000 -0.001428571 -1.060643e-03 -0.0003679283
+#> 5: 2026-06-01 0.1414286 0.1500000  0.008571429 -9.716728e-03  0.0182881565
+#>            psi
+#>          <num>
+#> 1: 0.002097308
+#> 2: 0.005328688
+#> 3: 0.013627112
+#> 4: 0.006771972
+#> 5: 0.009641191
+```
+
+## 7. One score, many segments
+
+A single scorecard is applied to every channel.
+[`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md)
+reads the score within each segment against the pooled rows: the AUC
+with its DeLong standard error and a chi-square test of equal AUC across
+the segments, the observed events against those expected from the pooled
+bands (indirect standardization), the offset on the log-odds scale and
+the slope of the score relative to the pooled slope. The `action` column
+summarizes them under stated tolerances: a shared score, an intercept
+offset, a separate model, or too few events to say.
+
+``` r
+
+sg <- scr_segments(credit, ho, segment = "ds_channel")
+sg
+#> <scr_segments> target "default" | objective risk | higher_is_safer | segments of 'ds_channel'
+#>   tolerances: AUC 0.03, offset 0.25, slope 0.25 | fewest events 20 | level 95%
+#> 
+#> Pooled: n 1,400 | rate 14.5% | AUC 0.7394 | equal AUC across 3 segments: chi-square 1.17 (df 2), p 0.5577
+#>   segment                n     rate AUC [lo, hi]                 PSI O/E [lo, hi]          offset slope ratio  action
+#>   APP                  701    17.1% 0.7184 [0.671, 0.766]     0.0357 1.05 [0.89, 1.23]      +0.06        0.92  shared
+#>   STORE                267    12.0% 0.7383 [0.647, 0.829]     0.0955 1.03 [0.73, 1.40]      +0.03        1.00  shared
+#>   WEB                  432    11.8% 0.7636 [0.697, 0.831]     0.0304 0.89 [0.68, 1.14]      -0.13        1.14  shared
+```
+
+The test of equal AUC has a p-value of 0.56, and the O/E intervals all
+cover 1: the hold-out gives no reason to treat a channel apart.
+
+## 8. Time, treatment, rules and episodes
+
+Four more studies need columns the demo table does not have; each help
+page has a worked example.
+
+- [`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md)
+  follows each band over time with censoring (a Kaplan-Meier curve per
+  band) and shows where the event rate flattens: the performance window.
+- [`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md)
+  reads a score on a treated and a control group: the uplift per band
+  with its interval, the Qini coefficient and a check of the
+  randomization.
+- [`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md)
+  compares expert rules with the alerts of a score: what each catches
+  alone, and which rules the score already covers.
+- [`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md)
+  measures, per alert threshold, how many fraud episodes are detected,
+  after how many fraudulent transactions and with how much of the loss
+  prevented.
+
+## 9. Production
 
 Bands and tiers are assigned to new scores in R and in SQL from the same
 frozen cuts, and every study writes a workbook. A tier label carries its
@@ -426,5 +530,6 @@ substr(sql[10], 1, 80)
 
 [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
 writes `study_tiers_<target>.xlsx`, `claims_<target>.xlsx`,
-`operating_<target>.xlsx` and `score_cross_<a>_<b>.xlsx` for the objects
+`operating_<target>.xlsx`, `score_cross_<a>_<b>.xlsx`,
+`mix_shift_<target>.xlsx` and `segments_<target>.xlsx` for the objects
 above.

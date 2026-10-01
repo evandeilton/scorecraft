@@ -199,10 +199,16 @@ for the cuts of each score.
 Other score-studies:
 [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
 [`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md),
+[`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md),
+[`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md),
+[`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md),
 [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md),
+[`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md),
 [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md),
 [`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md),
-[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
+[`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md),
+[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md),
+[`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md)
 
 ## Examples
 

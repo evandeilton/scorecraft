@@ -207,7 +207,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-10-01 18:57:46
+#> -- Generated on 2026-10-01 21:20:31
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().

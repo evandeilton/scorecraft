@@ -64,6 +64,19 @@
 <li>
 <code><a href="../reference/scr_score_cross.html">scr_score_cross()</a></code> crosses two scores on the same rows: the table of their bands with one or two outcomes, Spearman’s rho and Kendall’s tau-b, and the overlap of the rows each selects, with the swap-in and swap-out rates.</li>
 <li>The three write a workbook with <code><a href="../reference/scr_export.html">scr_export()</a></code>; the vignette “Score studies” walks through them on credit, fraud and churn scores.</li>
+<li>
+<code><a href="../reference/scr_mix_shift.html">scr_mix_shift()</a></code> splits the change of the event rate between two samples, or between each period and a base, into a mix effect and a rate effect per band; the effects add up to the change exactly.</li>
+<li>
+<code><a href="../reference/scr_segments.html">scr_segments()</a></code> reads one score on many segments: AUC with the DeLong standard error and a test of equal AUC, observed against expected events, the log-odds offset and the slope ratio, with a suggested action per segment.</li>
+<li>
+<code><a href="../reference/scr_maturity.html">scr_maturity()</a></code> estimates the cumulative incidence of the event by band and horizon under censoring (Kaplan-Meier with Greenwood’s variance), and the discrimination at each horizon.</li>
+<li>
+<code><a href="../reference/scr_uplift.html">scr_uplift()</a></code> reads a score on a treated and a control group: uplift per band with the Newcombe interval, the Qini coefficient and the AUUC with bootstrap intervals, and a randomization check.</li>
+<li>
+<code><a href="../reference/scr_overlap.html">scr_overlap()</a></code> compares rule flags with the alerts of a score: what each catches, the incremental recall of one over the other and the rules the score makes redundant.</li>
+<li>
+<code><a href="../reference/scr_detection.html">scr_detection()</a></code> measures, per alert threshold, the fraud episodes detected, the fraudulent transactions and the time before the first alert, and the loss prevented.</li>
+<li>The six write a workbook with <code><a href="../reference/scr_export.html">scr_export()</a></code>.</li>
 </ul></li>
 <li>New configuration keys for the score studies (stage 13): <code>study_bands</code>, <code>study_level</code>, <code>tier_min_pct</code>, <code>tier_min_events</code> and <code>tier_max_bins</code>.</li>
 <li>

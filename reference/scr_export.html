@@ -49,7 +49,7 @@ scr_scorecard: three workbooks, as separate files, plus the score SQL:"><meta pr
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Write the deliverables</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/export.R" class="external-link"><code>R/export.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/capital.R" class="external-link"><code>R/capital.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/claims.R" class="external-link"><code>R/claims.R</code></a>, and 8 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/export.R" class="external-link"><code>R/export.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/capital.R" class="external-link"><code>R/capital.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/claims.R" class="external-link"><code>R/claims.R</code></a>, and 14 more</small>
       <div class="d-none name"><code>scr_export.Rd</code></div>
     </div>
 
@@ -73,6 +73,9 @@ redundancy), the WOE SQL and the executive summary in Markdown. For an
 <span><span class="co"># S3 method for class 'scr_classing'</span></span>
 <span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'scr_detection'</span></span>
+<span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S3 method for class 'scr_ead'</span></span>
 <span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, validation <span class="op">=</span> <span class="cn">NULL</span>, tag <span class="op">=</span> <span class="st">"ccf"</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
@@ -93,7 +96,16 @@ redundancy), the WOE SQL and the executive summary in Markdown. For an
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'scr_maturity'</span></span>
+<span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'scr_mix_shift'</span></span>
+<span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S3 method for class 'scr_operating'</span></span>
+<span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'scr_overlap'</span></span>
 <span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'scr_pd'</span></span>
@@ -105,8 +117,14 @@ redundancy), the WOE SQL and the executive summary in Markdown. For an
 <span><span class="co"># S3 method for class 'scr_score_cross'</span></span>
 <span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'scr_segments'</span></span>
+<span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S3 method for class 'scr_study'</span></span>
-<span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, rag <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, rag <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'scr_uplift'</span></span>
+<span><span class="fu">scr_export</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, stamp <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -117,7 +135,9 @@ redundancy), the WOE SQL and the executive summary in Markdown. For an
 <dd><p>An object from <code><a href="scr_select.html">scr_select()</a></code>, <code><a href="scr_scorecard.html">scr_scorecard()</a></code>,
 <code><a href="scr_coarse_classing.html">scr_coarse_classing()</a></code>, <code><a href="scr_pd.html">scr_pd()</a></code>, <code><a href="scr_lgd.html">scr_lgd()</a></code>, <code><a href="scr_ead.html">scr_ead()</a></code>,
 <code><a href="scr_capital.html">scr_capital()</a></code>, <code><a href="scr_bands.html">scr_bands()</a></code>, <code><a href="scr_tiers.html">scr_tiers()</a></code>, <code><a href="scr_rag.html">scr_rag()</a></code>,
-<code><a href="scr_claims.html">scr_claims()</a></code>, <code><a href="scr_operating.html">scr_operating()</a></code> or <code><a href="scr_score_cross.html">scr_score_cross()</a></code>.</p></dd>
+<code><a href="scr_claims.html">scr_claims()</a></code>, <code><a href="scr_operating.html">scr_operating()</a></code>, <code><a href="scr_score_cross.html">scr_score_cross()</a></code>,
+<code><a href="scr_mix_shift.html">scr_mix_shift()</a></code>, <code><a href="scr_segments.html">scr_segments()</a></code>, <code><a href="scr_maturity.html">scr_maturity()</a></code>, <code><a href="scr_uplift.html">scr_uplift()</a></code>,
+<code><a href="scr_overlap.html">scr_overlap()</a></code> or <code><a href="scr_detection.html">scr_detection()</a></code>.</p></dd>
 
 
 <dt id="arg-dir">dir<a class="anchor" aria-label="anchor" href="#arg-dir"></a></dt>
@@ -196,7 +216,12 @@ lights from <code><a href="scr_rag.html">scr_rag()</a></code> writes <code>rag_&
 <code><a href="scr_operating.html">scr_operating()</a></code> writes <code>operating_&lt;target&gt;.xlsx</code> (curve, optimum,
 constraints); two crossed scores from <code><a href="scr_score_cross.html">scr_score_cross()</a></code> write
 <code>score_cross_&lt;score_a&gt;_&lt;score_b&gt;.xlsx</code> (cross table, overlap, overlap
-rates, association).</p>
+rates, association). The other score studies write one workbook each:
+<code>mix_shift_&lt;target&gt;.xlsx</code> from <code><a href="scr_mix_shift.html">scr_mix_shift()</a></code>,
+<code>segments_&lt;target&gt;.xlsx</code> from <code><a href="scr_segments.html">scr_segments()</a></code>, <code>maturity_&lt;event&gt;.xlsx</code>
+from <code><a href="scr_maturity.html">scr_maturity()</a></code>, <code>uplift_&lt;target&gt;.xlsx</code> from <code><a href="scr_uplift.html">scr_uplift()</a></code>,
+<code>overlap_&lt;target&gt;.xlsx</code> from <code><a href="scr_overlap.html">scr_overlap()</a></code> and
+<code>detection_&lt;target&gt;.xlsx</code> from <code><a href="scr_detection.html">scr_detection()</a></code>.</p>
 <p>The timeline and vintage sheets need the date column of the split; when it
 is absent they carry an availability row instead of a fabricated number.</p>
     </div>

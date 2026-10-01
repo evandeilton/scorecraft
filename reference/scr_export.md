@@ -19,6 +19,9 @@ scr_export(x, dir, stamp = TRUE, ...)
 # S3 method for class 'scr_classing'
 scr_export(x, dir, stamp = TRUE, ...)
 
+# S3 method for class 'scr_detection'
+scr_export(x, dir, stamp = TRUE, ...)
+
 # S3 method for class 'scr_ead'
 scr_export(x, dir, stamp = TRUE, validation = NULL, tag = "ccf", ...)
 
@@ -39,7 +42,16 @@ scr_export(
   ...
 )
 
+# S3 method for class 'scr_maturity'
+scr_export(x, dir, stamp = TRUE, ...)
+
+# S3 method for class 'scr_mix_shift'
+scr_export(x, dir, stamp = TRUE, ...)
+
 # S3 method for class 'scr_operating'
+scr_export(x, dir, stamp = TRUE, ...)
+
+# S3 method for class 'scr_overlap'
 scr_export(x, dir, stamp = TRUE, ...)
 
 # S3 method for class 'scr_pd'
@@ -51,8 +63,14 @@ scr_export(x, dir, stamp = TRUE, ...)
 # S3 method for class 'scr_score_cross'
 scr_export(x, dir, stamp = TRUE, ...)
 
+# S3 method for class 'scr_segments'
+scr_export(x, dir, stamp = TRUE, ...)
+
 # S3 method for class 'scr_study'
 scr_export(x, dir, stamp = TRUE, rag = NULL, ...)
+
+# S3 method for class 'scr_uplift'
+scr_export(x, dir, stamp = TRUE, ...)
 ```
 
 ## Arguments
@@ -71,9 +89,15 @@ scr_export(x, dir, stamp = TRUE, rag = NULL, ...)
   [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md),
   [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md),
   [`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md),
-  [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md)
+  [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md),
+  [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md),
+  [`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md),
+  [`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md),
+  [`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md),
+  [`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md),
+  [`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md)
   or
-  [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md).
+  [`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md).
 
 - dir:
 
@@ -165,7 +189,19 @@ writes `operating_<target>.xlsx` (curve, optimum, constraints); two
 crossed scores from
 [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md)
 write `score_cross_<score_a>_<score_b>.xlsx` (cross table, overlap,
-overlap rates, association).
+overlap rates, association). The other score studies write one workbook
+each: `mix_shift_<target>.xlsx` from
+[`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md),
+`segments_<target>.xlsx` from
+[`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md),
+`maturity_<event>.xlsx` from
+[`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md),
+`uplift_<target>.xlsx` from
+[`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md),
+`overlap_<target>.xlsx` from
+[`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md)
+and `detection_<target>.xlsx` from
+[`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md).
 
 The timeline and vintage sheets need the date column of the split; when
 it is absent they carry an availability row instead of a fabricated

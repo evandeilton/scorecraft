@@ -160,7 +160,8 @@ labels, or <code>NULL</code> (all rows are one sample, reference and study at on
 <dt id="arg-reference">reference<a class="anchor" aria-label="anchor" href="#arg-reference"></a></dt>
 <dd><p>For a scorecard: the sample the bands are frozen on
 (<code>"train"</code>). For a data.frame: the label of the reference sample;
-<code>NULL</code> takes the first level of the <code>sample</code> column.</p></dd>
+<code>NULL</code> takes the first level of the <code>sample</code> column (the levels of a
+factor in their order, numbers in numeric order, text sorted).</p></dd>
 
 
 <dt id="arg-breaks">breaks<a class="anchor" aria-label="anchor" href="#arg-breaks"></a></dt>
@@ -363,11 +364,17 @@ for traffic lights, <code><a href="scr_apply.html">scr_apply()</a></code> and <c
 production.</p>
 <p>Other score-studies:
 <code><a href="scr_claims.html">scr_claims()</a></code>,
+<code><a href="scr_detection.html">scr_detection()</a></code>,
+<code><a href="scr_maturity.html">scr_maturity()</a></code>,
+<code><a href="scr_mix_shift.html">scr_mix_shift()</a></code>,
 <code><a href="scr_operating.html">scr_operating()</a></code>,
+<code><a href="scr_overlap.html">scr_overlap()</a></code>,
 <code><a href="scr_rag.html">scr_rag()</a></code>,
 <code><a href="scr_rag_plan.html">scr_rag_plan()</a></code>,
 <code><a href="scr_score_cross.html">scr_score_cross()</a></code>,
-<code><a href="scr_tiers.html">scr_tiers()</a></code></p></div>
+<code><a href="scr_segments.html">scr_segments()</a></code>,
+<code><a href="scr_tiers.html">scr_tiers()</a></code>,
+<code><a href="scr_uplift.html">scr_uplift()</a></code></p></div>
     </div>
 
     <div class="section level2">

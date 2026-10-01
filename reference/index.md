@@ -114,23 +114,36 @@ Scoring in R, production SQL, deliverables.
 ## Score studies
 
 Percentile bands, tiers, red / amber / green lights, claims about event
-rates, the operating point under constraints and two scores on the same
-rows.
+rates, the operating point under constraints, two scores on the same
+rows, mix and rate effects, segments, maturity under censoring, uplift,
+rules against the score and time to detection.
 
 - [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md)
   : Percentile study of a score
 - [`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md)
   : Probability statements about the event rate of score groups
+- [`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md)
+  : Time to detection of fraud episodes
+- [`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md)
+  : Maturity of the event by score band
+- [`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md)
+  : Mix and rate effects of a change in the event rate
 - [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md)
   : Operating point of a score under constraints
+- [`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md)
+  : Overlap of rules and a score
 - [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md)
   : Red / amber / green lights of a score against its reference
 - [`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md)
   : Thresholds of the red / amber / green lights
 - [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md)
   : Two scores on the same rows
+- [`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md)
+  : One score on many segments
 - [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
   : Tiers of a score: a few labeled levels of risk or propensity
+- [`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md)
+  : Uplift of a treatment along a score
 
 ## Portfolio and database
 

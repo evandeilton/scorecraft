@@ -54,6 +54,33 @@
     [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md);
     the vignette “Score studies” walks through them on credit, fraud and
     churn scores.
+  - [`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md)
+    splits the change of the event rate between two samples, or between
+    each period and a base, into a mix effect and a rate effect per
+    band; the effects add up to the change exactly.
+  - [`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md)
+    reads one score on many segments: AUC with the DeLong standard error
+    and a test of equal AUC, observed against expected events, the
+    log-odds offset and the slope ratio, with a suggested action per
+    segment.
+  - [`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md)
+    estimates the cumulative incidence of the event by band and horizon
+    under censoring (Kaplan-Meier with Greenwood’s variance), and the
+    discrimination at each horizon.
+  - [`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md)
+    reads a score on a treated and a control group: uplift per band with
+    the Newcombe interval, the Qini coefficient and the AUUC with
+    bootstrap intervals, and a randomization check.
+  - [`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md)
+    compares rule flags with the alerts of a score: what each catches,
+    the incremental recall of one over the other and the rules the score
+    makes redundant.
+  - [`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md)
+    measures, per alert threshold, the fraud episodes detected, the
+    fraudulent transactions and the time before the first alert, and the
+    loss prevented.
+  - The six write a workbook with
+    [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md).
 - New configuration keys for the score studies (stage 13):
   `study_bands`, `study_level`, `tier_min_pct`, `tier_min_events` and
   `tier_max_bins`.

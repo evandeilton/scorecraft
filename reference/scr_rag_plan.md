@@ -101,10 +101,16 @@ population stability index. *Journal of Risk Model Validation*, 14(4),
 Other score-studies:
 [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
 [`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md),
+[`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md),
+[`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md),
+[`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md),
 [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md),
+[`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md),
 [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md),
 [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md),
-[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
+[`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md),
+[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md),
+[`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md)
 
 ## Examples
 

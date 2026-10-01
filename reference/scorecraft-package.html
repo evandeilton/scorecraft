@@ -133,7 +133,13 @@ its outcome from one table of counts per score value: <code><a href="scr_bands.h
 labeled tiers), <code><a href="scr_rag.html">scr_rag()</a></code> (red, amber and green lights against the
 reference), <code><a href="scr_claims.html">scr_claims()</a></code> (tested statements about event rates),
 <code><a href="scr_operating.html">scr_operating()</a></code> (the cut under volume, budget and capacity constraints)
-and <code><a href="scr_score_cross.html">scr_score_cross()</a></code> (two scores on the same rows).</p>
+and <code><a href="scr_score_cross.html">scr_score_cross()</a></code> (two scores on the same rows). Six more read the
+score against a second dimension: <code><a href="scr_mix_shift.html">scr_mix_shift()</a></code> (a change of the
+event rate split into mix and rate effects), <code><a href="scr_segments.html">scr_segments()</a></code> (one score
+on many segments), <code><a href="scr_maturity.html">scr_maturity()</a></code> (events over time by band, with
+censoring), <code><a href="scr_uplift.html">scr_uplift()</a></code> (a treated against a control group),
+<code><a href="scr_overlap.html">scr_overlap()</a></code> (rules against the alerts of a score) and
+<code><a href="scr_detection.html">scr_detection()</a></code> (time to detection of fraud episodes).</p>
     </div>
     <div class="section level2">
     <h2 id="parallelism">Parallelism<a class="anchor" aria-label="anchor" href="#parallelism"></a></h2>

@@ -142,7 +142,20 @@ value:
 [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md)
 (the cut under volume, budget and capacity constraints) and
 [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md)
-(two scores on the same rows).
+(two scores on the same rows). Six more read the score against a second
+dimension:
+[`scr_mix_shift()`](https://evandeilton.github.io/scorecraft/reference/scr_mix_shift.md)
+(a change of the event rate split into mix and rate effects),
+[`scr_segments()`](https://evandeilton.github.io/scorecraft/reference/scr_segments.md)
+(one score on many segments),
+[`scr_maturity()`](https://evandeilton.github.io/scorecraft/reference/scr_maturity.md)
+(events over time by band, with censoring),
+[`scr_uplift()`](https://evandeilton.github.io/scorecraft/reference/scr_uplift.md)
+(a treated against a control group),
+[`scr_overlap()`](https://evandeilton.github.io/scorecraft/reference/scr_overlap.md)
+(rules against the alerts of a score) and
+[`scr_detection()`](https://evandeilton.github.io/scorecraft/reference/scr_detection.md)
+(time to detection of fraud episodes).
 
 ## Parallelism
 

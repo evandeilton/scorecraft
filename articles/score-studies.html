@@ -87,13 +87,15 @@ the cuts. How does the event rate move along the score? Which few groups
 can be named and defended? Is the score still fit on new data? What can
 be promised about a group, and with what confidence? Where should the
 cut be under a budget or a team’s capacity? How do two scores read on
-the same customers relate?</p>
+the same customers relate? When the event rate moves, is it the
+population or the score bands? Does one score serve every segment?</p>
 <p>Every study aggregates the scored rows once into a table of counts
 and works on that table afterwards, so a study of millions of rows costs
 one grouped pass plus work proportional to the number of distinct
-scores. The one exception is the rank association of
+scores. The exceptions are the rank association of
 <code><a href="../reference/scr_score_cross.html">scr_score_cross()</a></code>, which sorts the rows of the two scores
-once more.</p>
+once more, and <code><a href="../reference/scr_detection.html">scr_detection()</a></code>, which sorts the rows of the
+entities with an event.</p>
 <div class="section level2">
 <h2 id="three-scores-on-the-demo-data">1. Three scores on the demo data<a class="anchor" aria-label="anchor" href="#three-scores-on-the-demo-data"></a>
 </h2>
@@ -433,7 +435,103 @@ each score, and the rates of the “A only” and “B only” sets say what
 changes when one list is replaced by the other.</p>
 </div>
 <div class="section level2">
-<h2 id="production">6. Production<a class="anchor" aria-label="anchor" href="#production"></a>
+<h2 id="why-the-default-rate-moved">6. Why the default rate moved<a class="anchor" aria-label="anchor" href="#why-the-default-rate-moved"></a>
+</h2>
+<p>The hold-out defaults at a different rate than the training sample.
+Two things can move a rate: the population shifted along the score (the
+mix), or the same score now carries a different risk (the rates).
+<code><a href="../reference/scr_mix_shift.html">scr_mix_shift()</a></code> splits the change between the two, band by
+band, on bands frozen on the base. The two effects add up to the change
+exactly.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_mix_shift.html">scr_mix_shift</a></span><span class="op">(</span><span class="va">credit</span>, n_bands <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">ms</span></span>
+<span><span class="co">#&gt; &lt;scr_mix_shift&gt; target "default" | objective risk | higher_is_safer</span></span>
+<span><span class="co">#&gt;   base 'train' | 5 bands frozen on the base | 1 comparison</span></span>
+<span><span class="co">#&gt;   holdout      rate 14.2% -&gt; 14.5% (+0.25 pp): mix -0.35 pp, rate +0.60 pp | PSI 0.0027 (critical 0.0102)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Largest band effects on 'holdout' (p_adj: Holm-adjusted test of the band rate)</span></span>
+<span><span class="co">#&gt;   band score                               share               rate        mix       rate      total   p_adj</span></span>
+<span><span class="co">#&gt;      1 [-Inf, 523.5026)           20.0% -&gt; 18.2%     36.1% -&gt; 31.4%   -0.60 pp   -0.90 pp   -1.50 pp   0.955</span></span>
+<span><span class="co">#&gt;      2 [523.5026, 542.0923)       20.0% -&gt; 20.6%     18.8% -&gt; 21.9%   +0.12 pp   +0.63 pp   +0.75 pp   0.955</span></span>
+<span><span class="co">#&gt;      3 [542.0923, 557.7648)       20.0% -&gt; 21.4%      9.1% -&gt; 11.7%   +0.14 pp   +0.54 pp   +0.68 pp   0.955</span></span>
+<span><span class="co">#&gt;      4 [557.7648, 576.5187)       20.0% -&gt; 19.8%       4.8% -&gt; 5.8%   -0.01 pp   +0.19 pp   +0.18 pp   1.000</span></span>
+<span><span class="co">#&gt;      5 [576.5187, Inf)            20.0% -&gt; 20.1%       2.5% -&gt; 3.2%   +0.00 pp   +0.14 pp   +0.14 pp   1.000</span></span></code></pre></div>
+<p>Of the change of +0.25 percentage points, -0.35 come from the mix and
++0.60 from the band rates; 0 band(s) changed their rate significantly
+after the Holm adjustment, and the PSI of the band shares sits below its
+critical value. With <code>by</code>, every period is compared with the
+base, here the first month of the scored rows:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/scr_mix_shift.html">scr_mix_shift</a></span><span class="op">(</span><span class="va">credit</span>, by <span class="op">=</span> <span class="st">"date"</span>, n_bands <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">$</span><span class="va">summary</span><span class="op">[</span></span>
+<span>  , <span class="fu">.</span><span class="op">(</span><span class="va">group</span>, <span class="va">rate_base</span>, <span class="va">rate_cmp</span>, <span class="va">delta</span>, <span class="va">mix_total</span>, <span class="va">rate_total</span>, <span class="va">psi</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;         group rate_base  rate_cmp        delta     mix_total    rate_total</span></span>
+<span><span class="co">#&gt;        &lt;char&gt;     &lt;num&gt;     &lt;num&gt;        &lt;num&gt;         &lt;num&gt;         &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: 2026-02-01 0.1414286 0.1457143  0.004285714 -2.762334e-04  0.0045619477</span></span>
+<span><span class="co">#&gt; 2: 2026-03-01 0.1414286 0.1371429 -0.004285714  1.721942e-05 -0.0043029337</span></span>
+<span><span class="co">#&gt; 3: 2026-04-01 0.1414286 0.1457143  0.004285714 -9.430080e-03  0.0137157940</span></span>
+<span><span class="co">#&gt; 4: 2026-05-01 0.1414286 0.1400000 -0.001428571 -1.060643e-03 -0.0003679283</span></span>
+<span><span class="co">#&gt; 5: 2026-06-01 0.1414286 0.1500000  0.008571429 -9.716728e-03  0.0182881565</span></span>
+<span><span class="co">#&gt;            psi</span></span>
+<span><span class="co">#&gt;          &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1: 0.002097308</span></span>
+<span><span class="co">#&gt; 2: 0.005328688</span></span>
+<span><span class="co">#&gt; 3: 0.013627112</span></span>
+<span><span class="co">#&gt; 4: 0.006771972</span></span>
+<span><span class="co">#&gt; 5: 0.009641191</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="one-score-many-segments">7. One score, many segments<a class="anchor" aria-label="anchor" href="#one-score-many-segments"></a>
+</h2>
+<p>A single scorecard is applied to every channel.
+<code><a href="../reference/scr_segments.html">scr_segments()</a></code> reads the score within each segment against
+the pooled rows: the AUC with its DeLong standard error and a chi-square
+test of equal AUC across the segments, the observed events against those
+expected from the pooled bands (indirect standardization), the offset on
+the log-odds scale and the slope of the score relative to the pooled
+slope. The <code>action</code> column summarizes them under stated
+tolerances: a shared score, an intercept offset, a separate model, or
+too few events to say.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_segments.html">scr_segments</a></span><span class="op">(</span><span class="va">credit</span>, <span class="va">ho</span>, segment <span class="op">=</span> <span class="st">"ds_channel"</span><span class="op">)</span></span>
+<span><span class="va">sg</span></span>
+<span><span class="co">#&gt; &lt;scr_segments&gt; target "default" | objective risk | higher_is_safer | segments of 'ds_channel'</span></span>
+<span><span class="co">#&gt;   tolerances: AUC 0.03, offset 0.25, slope 0.25 | fewest events 20 | level 95%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Pooled: n 1,400 | rate 14.5% | AUC 0.7394 | equal AUC across 3 segments: chi-square 1.17 (df 2), p 0.5577</span></span>
+<span><span class="co">#&gt;   segment                n     rate AUC [lo, hi]                 PSI O/E [lo, hi]          offset slope ratio  action</span></span>
+<span><span class="co">#&gt;   APP                  701    17.1% 0.7184 [0.671, 0.766]     0.0357 1.05 [0.89, 1.23]      +0.06        0.92  shared</span></span>
+<span><span class="co">#&gt;   STORE                267    12.0% 0.7383 [0.647, 0.829]     0.0955 1.03 [0.73, 1.40]      +0.03        1.00  shared</span></span>
+<span><span class="co">#&gt;   WEB                  432    11.8% 0.7636 [0.697, 0.831]     0.0304 0.89 [0.68, 1.14]      -0.13        1.14  shared</span></span></code></pre></div>
+<p>The test of equal AUC has a p-value of 0.56, and the O/E intervals
+all cover 1: the hold-out gives no reason to treat a channel apart.</p>
+</div>
+<div class="section level2">
+<h2 id="time-treatment-rules-and-episodes">8. Time, treatment, rules and episodes<a class="anchor" aria-label="anchor" href="#time-treatment-rules-and-episodes"></a>
+</h2>
+<p>Four more studies need columns the demo table does not have; each
+help page has a worked example.</p>
+<ul>
+<li>
+<code><a href="../reference/scr_maturity.html">scr_maturity()</a></code> follows each band over time with
+censoring (a Kaplan-Meier curve per band) and shows where the event rate
+flattens: the performance window.</li>
+<li>
+<code><a href="../reference/scr_uplift.html">scr_uplift()</a></code> reads a score on a treated and a control
+group: the uplift per band with its interval, the Qini coefficient and a
+check of the randomization.</li>
+<li>
+<code><a href="../reference/scr_overlap.html">scr_overlap()</a></code> compares expert rules with the alerts of
+a score: what each catches alone, and which rules the score already
+covers.</li>
+<li>
+<code><a href="../reference/scr_detection.html">scr_detection()</a></code> measures, per alert threshold, how many
+fraud episodes are detected, after how many fraudulent transactions and
+with how much of the loss prevented.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="production">9. Production<a class="anchor" aria-label="anchor" href="#production"></a>
 </h2>
 <p>Bands and tiers are assigned to new scores in R and in SQL from the
 same frozen cuts, and every study writes a workbook. A tier label
@@ -442,7 +540,7 @@ highest event rate, so that the labels sort from the event-richest tier
 in a report or an <code>ORDER BY</code>; the tiers table has the same
 value in <code>tier_label</code>, and <code>numbered = FALSE</code>
 returns the plain labels.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">tr</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">495</span>, <span class="fl">520</span>, <span class="fl">560</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    score  tier   tier_label</span></span>
 <span><span class="co">#&gt;    &lt;num&gt; &lt;int&gt;       &lt;char&gt;</span></span>
@@ -457,9 +555,10 @@ returns the plain labels.</p>
 <p><code><a href="../reference/scr_export.html">scr_export()</a></code> writes
 <code>study_tiers_&lt;target&gt;.xlsx</code>,
 <code>claims_&lt;target&gt;.xlsx</code>,
-<code>operating_&lt;target&gt;.xlsx</code> and
-<code>score_cross_&lt;a&gt;_&lt;b&gt;.xlsx</code> for the objects
-above.</p>
+<code>operating_&lt;target&gt;.xlsx</code>,
+<code>score_cross_&lt;a&gt;_&lt;b&gt;.xlsx</code>,
+<code>mix_shift_&lt;target&gt;.xlsx</code> and
+<code>segments_&lt;target&gt;.xlsx</code> for the objects above.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
