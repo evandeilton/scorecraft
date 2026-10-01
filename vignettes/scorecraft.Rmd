@@ -149,7 +149,7 @@ The lowest approved band has an event rate of 17.4%, above the portfolio
 rate of 14.5%, yet a positive expected profit: declining it would look
 prudent and lose money. The cumulative profit peaks at that band.
 `loss_bad` is a flat loss per bad account here; in an IRB setting it is
-the product of the exposure at default and the loss given default, modelled
+the product of the exposure at default and the loss given default, modeled
 in the article on
 [LGD and EAD](https://evandeilton.github.io/scorecraft/articles/lgd-and-ead-under-irb.html)
 and combined in
@@ -176,7 +176,7 @@ the prudent cut that loses money.
 ## 5. Reject inference
 
 The scorecard is fitted on accounts that were accepted and therefore have an
-outcome. Classical reject inference (parcelling, augmentation,
+outcome. Classical reject inference (parceling, augmentation,
 extrapolation) assigns outcomes to the declined applicants, and it cannot
 be validated on the data at hand: every method rests on an assumption about
 the rejects that the accepts cannot test (Hand and Henley, 1993).
@@ -358,7 +358,7 @@ mo3 <- scr_monitor(sc, scr_demo, date_col = "ref_date", target = "default", n_bo
 identical(mo3$psi$flag_adjusted, mo$psi$flag_adjusted)
 ```
 
-Every sheet is sanitised before it is written (a cell starting with `=`,
+Every sheet is sanitized before it is written (a cell starting with `=`,
 `+`, `-` or `@` cannot become a formula), and each workbook is verified
 after writing. `?scr_export` lists the sheets.
 

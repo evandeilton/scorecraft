@@ -4,19 +4,19 @@
 # Run with: Rscript data-raw/scr_demo_ead.R
 #
 # 1,200 revolving facilities (cards, overdrafts, revolving lines) of about
-# 950 obligors, observed at month ends over 30 months. Utilisation follows
+# 950 obligors, observed at month ends over 30 months. Utilization follows
 # a facility-specific level with a mild AR(1) drift. About 10% of the
-# facilities default: their utilisation ramps up over the twelve months
+# facilities default: their utilization ramps up over the twelve months
 # before the default month, with an intensity that depends on the drivers
-# a CCF model is expected to find (utilisation, product, months on book,
+# a CCF model is expected to find (utilization, product, months on book,
 # days past due) so that the pools have something to separate. Some
 # defaulters are fully drawn or over the limit at the reference date, some
-# repay before default (negative realised CCF), some have their limit cut
+# repay before default (negative realized CCF), some have their limit cut
 # by the lender two months before default, and a share of all facilities
 # gets a limit change during the window. A few facilities originate inside
 # the window, so that fast defaults exist. Days past due are multiples of
 # 30 and reach 90 at the default month; `defaulted` stays 1 from the
-# default month onwards.
+# default month onward.
 # ============================================================================ #
 
 set.seed(20260904)
@@ -32,11 +32,11 @@ limit0 <- vapply(product, function(p) switch(p,
   line      = sample(c(10000, 20000, 50000), 1)), numeric(1))
 # months on book at the first window month; negative = originates later
 mob0 <- sample(c(-11:-1, 0:72), n_fac, TRUE, prob = c(rep(1.2, 11), rep(1, 73)))
-u0 <- stats::rbeta(n_fac, 2, 3)                  # long-run utilisation level
+u0 <- stats::rbeta(n_fac, 2, 3)                  # long-run utilization level
 defaulter <- stats::runif(n_fac) < 0.105
 d_month <- ifelse(defaulter, sample(6:30, n_fac, TRUE, prob = c(rep(0.4, 7), rep(1, 18))), NA_integer_)
-# drawdown intensity before default: lower at high utilisation, higher for
-# cards, lower with age; the realised CCF follows it
+# drawdown intensity before default: lower at high utilization, higher for
+# cards, lower with age; the realized CCF follows it
 intensity <- stats::plogis(0.8 - 3.5 * u0 + 1.2 * (product == "card") - 0.025 * pmax(mob0, 0) +
                              stats::rnorm(n_fac, 0, 0.25))
 repayer  <- defaulter & stats::runif(n_fac) < 0.05      # drawn falls before default

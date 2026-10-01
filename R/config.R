@@ -41,7 +41,7 @@
 #' | `odds_orientation` | `safe:event` | `event:safe` |
 #'
 #' **`objective` does not touch the selection.** It does not change the
-#' modelled target, the cut points, the IV or the shortlist; it acts on the
+#' modeled target, the cut points, the IV or the shortlist; it acts on the
 #' direction of the points scale, on the odds orientation of the alignment
 #' and on the vocabulary of the reports. To model the other class as the
 #' event, the argument is `event_level` in [scr_split()] and [scr_select()],
@@ -614,7 +614,7 @@ scr_config_keys <- function(stage = NULL) {
     .ck("algorithm", 2, "jedi", "Binning algorithm (see obwoe_algorithms())"),
     .ck("bin_cutoff", 2, "0.03", "Minimum fraction per bin inside the algorithm"),
     .ck("max_n_prebins", 2, "30", "Pre-bins; strongly affects numerics"),
-    .ck("max_iterations", 2, "1000", "Maximum optimiser iterations"),
+    .ck("max_iterations", 2, "1000", "Maximum optimizer iterations"),
     .ck("bin_separator", 2, "%;%", "Separator of merged categories"),
     .ck("iv_min", 2, "0.02", "IV admission floor"),
     .ck("iv_max", 2, "1.00", "IV admission ceiling (leakage)"),
@@ -693,8 +693,8 @@ scr_config_keys <- function(stage = NULL) {
     .ck("pd_dr_by", 9, "quarter", "Cohort frequency of the default-rate series"),
     .ck("lgd_discount_add_on", 10, "0.05", "Add-on over the reference rate in the workout discount rate"),
     .ck("lgd_discount_rate", 10, "NA", "Flat annual discount rate when no rates table is given"),
-    .ck("lgd_cap_at_one", 10, "FALSE", "Cap realised LGD at 1"),
-    .ck("lgd_floor_at_zero", 10, "TRUE", "Floor realised LGD at 0 for the averages (raw value kept)"),
+    .ck("lgd_cap_at_one", 10, "FALSE", "Cap realized LGD at 1"),
+    .ck("lgd_floor_at_zero", 10, "TRUE", "Floor realized LGD at 0 for the averages (raw value kept)"),
     .ck("lgd_t_max", 10, "60", "Maximum workout period in months; older open defaults close with no further recovery"),
     .ck("lgd_cure_window", 10, "9", "Months within which two defaults of one facility are one event"),
     .ck("lgd_min_defaults_bin", 10, "100", "Minimum defaults per LGD bin or pool"),
@@ -706,20 +706,20 @@ scr_config_keys <- function(stage = NULL) {
     .ck("lgd_elbe_grid", 10, "0, 6, 12, 24, 36", "Months since default of the in-default grid"),
     .ck("ccf_horizon", 11, "fixed", "Reference-date approach: fixed, cohort, variable"),
     .ck("ccf_horizon_months", 11, "12", "Months between reference date and default under the fixed horizon"),
-    .ck("ccf_measure", 11, "auto", "Realised measure: auto (ULF below u_star, LF above), ulf, lf, eadf"),
-    .ck("ccf_u_star", 11, "0.95", "Utilisation above which the limit factor replaces the CCF"),
-    .ck("ccf_floor_realised", 11, "0", "Floor on the realised CCF (NA keeps the raw value)"),
-    .ck("ccf_cap_realised", 11, "NA", "Cap on the realised CCF (NA: none)"),
+    .ck("ccf_measure", 11, "auto", "Realized measure: auto (ULF below u_star, LF above), ulf, lf, eadf"),
+    .ck("ccf_u_star", 11, "0.95", "Utilization above which the limit factor replaces the CCF"),
+    .ck("ccf_floor_realised", 11, "0", "Floor on the realized CCF (NA keeps the raw value)"),
+    .ck("ccf_cap_realised", 11, "NA", "Cap on the realized CCF (NA: none)"),
     .ck("ccf_min_defaults", 11, "30", "Minimum defaults per CCF bin or pool"),
     .ck("ccf_n_pools", 11, "5", "Target number of CCF pools"),
     .ck("ccf_moc_alpha", 11, "0.05", "One-sided alpha of the estimation-error margin on the CCF"),
     .ck("ccf_downturn", 11, "type1", "Downturn quantification of the CCF: type1, type3, none"),
-    .ck("ccf_sa_ccf", 11, "0.40", "Standardised CCF used for the own-estimate floor"),
+    .ck("ccf_sa_ccf", 11, "0.40", "Standardized CCF used for the own-estimate floor"),
     .ck("post_default_drawings_in", 11, "lgd", "Where drawings after default are booked: lgd or ccf"),
     .ck("framework", 12, "bcb", "Parameter preset: bcb, basel3_final, crr3"),
     .ck("capital_approach", 12, "airb", "Capital approach: airb (own LGD, floored) or firb (supervisory LGD, fixed maturity)"),
     .ck("capital_target_ratio", 12, "0.08", "Capital ratio applied to the reported RWA"),
-    .ck("capital_output_floor", 12, "TRUE", "Compute the standardised comparison and the output floor"),
+    .ck("capital_output_floor", 12, "TRUE", "Compute the standardized comparison and the output floor"),
     .ck("capital_sensitivity", 12, "TRUE", "Run the fixed sensitivity grid"),
     .ck("ecl_discount", 12, "eir", "Discount the expected credit loss at the effective interest rate, or not"),
     .ck("ecl_stage_dpd", 12, "30, 90", "Days past due that move an exposure to stage 2 and stage 3"),

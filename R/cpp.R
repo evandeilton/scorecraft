@@ -28,7 +28,7 @@ NULL
 #' Correlation matrix of the columns of a list or data.frame
 #'
 #' Pearson, or Spearman (Pearson on mid-ranks), through one cross-product of
-#' the standardised columns (`cpp_cor_matrix()`). The columns are read in
+#' the standardized columns (`cpp_cor_matrix()`). The columns are read in
 #' place; only integer or logical columns are converted to double.
 #' @return A `p x p` matrix with dimnames; constant columns give `NA`.
 #' @keywords internal
@@ -93,13 +93,13 @@ NULL
   list(keep = ranking[ranking %in% vars[alive]], dropped = dropped)
 }
 
-#' Somers' D of a prediction against a realised outcome
+#' Somers' D of a prediction against a realized outcome
 #'
 #' `(C - D) / (n(n-1)/2 - T_r)`: concordant minus discordant pairs over the
 #' pairs not tied on the outcome, counted exactly in `O(n log n)`
 #' (`cpp_concordance()`, Knight 1966). Pairs with a non-finite member are
 #' dropped first.
-#' @param p Prediction. @param r Realised outcome.
+#' @param p Prediction. @param r Realized outcome.
 #' @param const_p What a constant prediction returns: `NA` or `0`.
 #' @keywords internal
 #' @noRd

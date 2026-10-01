@@ -45,7 +45,7 @@ function turns a through-the-cycle PD into the PD of a year at the 99.9% quantil
 of a one-factor model, and charges capital for the difference
 between the loss at that quantile and the expected loss. Every number that
 a regime fixes in that calculation (PD and LGD floors, asset correlations,
-the maturity rule, the confidence level, the standardised risk weights
+the maturity rule, the confidence level, the standardized risk weights
 that the output floor compares against) lives in a table returned by
 `scr_irb_params()` and selected by a preset; nothing is hard-coded in the
 functions that consume it, and an edited table is recorded as such on
@@ -54,7 +54,7 @@ every object built from it.
 ## 2. The parameter tables
 
 `scr_irb_params()` returns every regime-specific number as a table; the
-print summarises them.
+print summarizes them.
 
 ```{r params}
 p <- scr_irb_params("bcb")
@@ -151,10 +151,10 @@ scr_irb_rw(0.01, 0.10, asset_class = c("retail_other", "qrre_revolver", "corpora
 scr_irb_rw(0.01, 0.05, asset_class = "retail_other", collateral = "real_estate", params = p)$lgd_used
 ```
 
-## 4. The standardised comparison
+## 4. The standardized comparison
 
 The output floor compares the IRB result with a fraction of what the
-standardised approach would require, so the same book needs a standardised
+standardized approach would require, so the same book needs a standardized
 risk weight per exposure. `scr_sa_rw()` looks it up in `params$sa_rw`:
 regulatory retail, mortgages by loan-to-value band, corporates by rating
 bucket or the SME weight, defaulted exposures by provision ratio.
@@ -191,7 +191,7 @@ cap
 ### Totals and the reconciliation by segment
 
 Every figure on the print is in `cap$totals`, and `cap$segments` breaks it
-down: EAD-weighted inputs, the IRB and standardised risk-weighted assets
+down: EAD-weighted inputs, the IRB and standardized risk-weighted assets
 side by side, expected loss and provisions.
 
 ```{r totals}
@@ -200,12 +200,12 @@ cap$segments[, .(segment, n, ead, pd_mean, lgd_mean, rw, rwa_irb, irb_sa_ratio, 
 ```
 
 The `irb_sa_ratio` column says where the IRB approach saves the most
-against the standardised one; mortgages sit far below the 72.5% line on
+against the standardized one; mortgages sit far below the 72.5% line on
 their own, the large corporate book just above it and the SME book well
 above, and the output floor is
 applied to the total, not by segment. The total here is credit risk only:
 the regulatory floor compares the whole of the risk-weighted assets, market
-and operational risk included, with 72.5% of their standardised
+and operational risk included, with 72.5% of their standardized
 counterparts, so the figure below is a credit-portfolio view of the floor,
 not the bank's.
 

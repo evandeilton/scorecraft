@@ -31,7 +31,7 @@ test_that(".scr_chunks preserves order and covers every item", {
   expect_identical(.scr_chunks(character(), 2L), list(character()))
 })
 
-test_that(".sql_num keeps full double precision and is vectorised", {
+test_that(".sql_num keeps full double precision and is vectorized", {
   x <- c(-1.3003598122031599, 1/3, 1e-7, 123456789.123)
   expect_identical(as.numeric(.sql_num(x)), x)
   expect_identical(.sql_num(NA_real_), "NULL")

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="en-US">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -598,7 +598,7 @@ sc2 &lt;- <span class="fx">scr_scorecard</span>(res2)</pre>
 </div>
 
 <footer class="foot">
-  <span><b>scorecraft</b> 0.2.0<span class="dot">|</span>MIT licence<span class="dot">|</span>Jose Evandeilton Lopes</span>
+  <span><b>scorecraft</b> 0.3.1<span class="dot">|</span>MIT license<span class="dot">|</span>Jose Evandeilton Lopes</span>
   <span>Learn more at <b>evandeilton.github.io/scorecraft</b><span class="dot">|</span><code class="inl">help(package = "scorecraft")</code></span>
   <span>Updated: 2026-09<span class="dot">|</span>1 / 2</span>
 </footer>
@@ -664,7 +664,7 @@ rs &lt;- <span class="fx">scr_run</span>(con, <span class="st">"dtm"</span>, con
 
 <section style="--c: var(--c-default)">
   <h2>Parameters and default</h2>
-  <p class="fn"><code><b>scr_irb_params</b>(framework)</code> Editable tables: PD and LGD floors, supervisory LGD, CCFs, correlations, maturity, output floor, standardised weights.</p>
+  <p class="fn"><code><b>scr_irb_params</b>(framework)</code> Editable tables: PD and LGD floors, supervisory LGD, CCFs, correlations, maturity, output floor, standardized weights.</p>
   <div class="chips"><span>"bcb"</span><span>"basel3_final"</span><span>"crr3"</span></div>
   <p class="fn"><code><b>scr_default</b>(data, id, date, dpd, arrears, exposure, utp, restructured, obligor)</code> Default flag from a monthly panel: 90 days past due with material arrears, or unlikeliness to pay; probation 3 months (12 if restructured); obligor pulling effect.</p>
   <p class="fn"><code><b>scr_default_rate</b>(x, horizon = 12, by = "quarter")</code> One-year default rates by cohort and the long-run average; <code class="inl">lra_adjusted</code> is benchmarked, never applied.</p>
@@ -737,12 +737,12 @@ lgd &lt;- <span class="fx">scr_lgd_downturn</span>(lgd, periods = dt,
          reason = <span class="st">"rates above 13% in 2022-23"</span>)
 lgd &lt;- <span class="fx">scr_lgd_floor</span>(lgd, params = params)
 <span class="cm"># dt: data.frame(start, end) of downturn dates</span></pre>
-  <p class="fn"><code><b>scr_workout</b>(defaults, cashflows, rates)</code> Realised LGD per default: recoveries, direct costs and drawings discounted to the default date.</p>
+  <p class="fn"><code><b>scr_workout</b>(defaults, cashflows, rates)</code> Realized LGD per default: recoveries, direct costs and drawings discounted to the default date.</p>
   <p class="fn"><code><b>scr_lgd</b>(x, drivers, holdout = 0.3)</code> Cure &times; severity on cohort split, then pools.</p>
   <p class="fn"><code><b>scr_lgd_pools</b>(x, n_pools)</code> Re-pool the predicted LGD.</p>
   <p class="fn"><code><b>scr_lgd_downturn</b>(x, periods, method, reason)</code> Downturn per pool: <code class="inl">"type1"</code> observed impact, <code class="inl">"type3"</code> add-on, <code class="inl">"none"</code>.</p>
   <p class="fn"><code><b>scr_lgd_floor</b>(x, params, asset_class, secured_share)</code> Input floors by collateral.</p>
-  <p class="fn"><code><b>scr_lgd_validate</b>(x)</code> Calibration, discrimination (generalised AUC) and stability battery.</p>
+  <p class="fn"><code><b>scr_lgd_validate</b>(x)</code> Calibration, discrimination (generalized AUC) and stability battery.</p>
   <p class="fn"><code><b>scr_elbe</b>(x, grid = c(0, 6, 12, 24, 36))</code> ELBE and in-default LGD by months since default.</p>
   <p class="fn"><code><b>scr_bin_continuous</b>(data, target, features)</code> Monotone bins against a continuous target.</p>
 </section>
@@ -767,8 +767,8 @@ lgd &lt;- <span class="fx">scr_lgd_floor</span>(lgd, params = params)
          drivers = c(<span class="st">"product"</span>, <span class="st">"months_on_book"</span>))
 ead &lt;- <span class="fx">scr_ead</span>(rds, drivers = c(<span class="st">"product"</span>,
          <span class="st">"utilisation_ref"</span>, <span class="st">"months_on_book"</span>))</pre>
-  <p class="fn"><code><b>scr_ead_data</b>(snapshots, facility_id, date_col, limit, drawn, defaulted, drivers)</code> Realised CCF from monthly facility snapshots.</p>
-  <p class="fn"><code><b>scr_ead</b>(x, drivers, holdout = 0.3)</code> Driver admission (<code class="inl">TOO_FEW_DEFAULTS</code>, <code class="inl">NO_SEPARATION</code>, <code class="inl">NOT_MONOTONIC</code>, <code class="inl">UNSTABLE_HOLDOUT</code>) and CCF pools with MoC and the standardised floor.</p>
+  <p class="fn"><code><b>scr_ead_data</b>(snapshots, facility_id, date_col, limit, drawn, defaulted, drivers)</code> Realized CCF from monthly facility snapshots.</p>
+  <p class="fn"><code><b>scr_ead</b>(x, drivers, holdout = 0.3)</code> Driver admission (<code class="inl">TOO_FEW_DEFAULTS</code>, <code class="inl">NO_SEPARATION</code>, <code class="inl">NOT_MONOTONIC</code>, <code class="inl">UNSTABLE_HOLDOUT</code>) and CCF pools with MoC and the standardized floor.</p>
   <p class="fn"><code><b>scr_ead_downturn</b>(x, periods, method, reason)</code> Downturn CCF per pool.</p>
   <p class="fn"><code><b>scr_ead_validate</b>(x, newdata)</code> Calibration, discrimination, back-testing, stability.</p>
 </section>
@@ -784,7 +784,7 @@ ead &lt;- <span class="fx">scr_ead</span>(rds, drivers = c(<span class="st">"pro
   <p class="fn"><code><b>scr_irb_rw</b>(pd, lgd, ead, m, asset_class, approach = "airb")</code> IRB risk weight of the one-factor model, with floors, correlation and maturity adjustment.</p>
   <div class="eq">K = LGD&middot;(scr_pd_stress(PD, R, 0.999) &minus; PD)&middot;MA<br>RWA = 12.5&middot;K&middot;EAD</div>
   <div class="chips"><span>corporate</span><span>corporate_sme</span><span>bank</span><span>sovereign</span><span>hvcre</span><span>retail_mortgage</span><span>qrre_revolver</span><span>qrre_transactor</span><span>retail_other</span></div>
-  <p class="fn"><code><b>scr_sa_rw</b>(asset_class, ltv, rating, ...)</code> Standardised risk weight.</p>
+  <p class="fn"><code><b>scr_sa_rw</b>(asset_class, ltv, rating, ...)</code> Standardized risk weight.</p>
   <p class="fn"><code><b>scr_pd_stress</b>(pd, rho, q = 0.999)</code> Conditional PD of the one-factor model.</p>
 <pre class="code">cap &lt;- <span class="fx">scr_capital</span>(scr_demo_portfolio,
          segment = <span class="st">"segment"</span>,
@@ -792,7 +792,7 @@ ead &lt;- <span class="fx">scr_ead</span>(rds, drivers = c(<span class="st">"pro
          provisions = <span class="st">"provision"</span>,
          params = params)
 cap$totals; cap$segments</pre>
-  <p class="fn"><code><b>scr_capital</b>(x, pd, lgd, ead, segment, asset_class, provisions, params)</code> RWA under IRB and the standardised approach, output floor, EL against provisions, floor impact, sensitivity and concentration.</p>
+  <p class="fn"><code><b>scr_capital</b>(x, pd, lgd, ead, segment, asset_class, provisions, params)</code> RWA under IRB and the standardized approach, output floor, EL against provisions, floor impact, sensitivity and concentration.</p>
   <p class="fn"><code><b>scr_ecl</b>(pd_term, lgd, ead, eir, stage, dpd, pd_orig, scenarios, weights)</code> Expected credit loss from monthly hazards, discounted at the EIR, with weighted scenarios:</p>
   <div class="eq">ECL = &Sigma;<sub>t</sub> S(t&minus;1)&middot;h<sub>t</sub>&middot;LGD<sub>t</sub>&middot;EAD<sub>t</sub>&middot;(1 + r)<sup>&minus;t/12</sup></div>
   <svg class="fig" viewBox="0 0 250 33" role="img" aria-label="Stage 1 twelve-month loss, stages 2 and 3 lifetime loss">
@@ -839,7 +839,7 @@ cap$totals; cap$segments</pre>
 </div>
 
 <footer class="foot">
-  <span><b>scorecraft</b> 0.2.0<span class="dot">|</span>MIT licence<span class="dot">|</span>Jose Evandeilton Lopes</span>
+  <span><b>scorecraft</b> 0.3.1<span class="dot">|</span>MIT license<span class="dot">|</span>Jose Evandeilton Lopes</span>
   <span>Learn more at <b>evandeilton.github.io/scorecraft</b><span class="dot">|</span><code class="inl">help(package = "scorecraft")</code></span>
   <span>Updated: 2026-09<span class="dot">|</span>2 / 2</span>
 </footer>

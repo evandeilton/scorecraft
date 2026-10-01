@@ -313,7 +313,7 @@ test_that("the migration matrix and its bandwidths are pinned on a hand matrix",
   expect_equal(m$mobility$share_stable, 230 / 300)
   expect_equal(m$mobility$share_up, 40 / 300); expect_equal(m$mobility$share_down, 30 / 300)
   expect_equal(m$mobility$mean_distance, (15 + 10 + 20 + 15 + 2 * 5 + 2 * 5) / 300)
-  # z of the cell two steps away against its neighbour: p decays, so z is negative
+  # z of the cell two steps away against its neighbor: p decays, so z is negative
   expect_lt(m$z[1, 3], 0)
   expect_equal(m$n_significant, 0L)
   expect_true(is.na(m$z[1, 1]))

@@ -18,7 +18,7 @@ chains them for the common case:
 \item \strong{Triage} (\code{\link[=scr_triage]{scr_triage()}}): structural filters, decomposition of
 sentinels and missing values, exact duplicates. The data leaves with no
 \code{NA}.
-\item \strong{Binning and screening} (\code{\link[=scr_bin]{scr_bin()}}): optimal bins parallelised
+\item \strong{Binning and screening} (\code{\link[=scr_bin]{scr_bin()}}): optimal bins parallelized
 by column, eight admission rules, hold-out revalidation with frozen
 bins, redundancy pruning.
 \item \strong{Multi-strategy selection} (\code{\link[=scr_model]{scr_model()}}): elastic net, boosting
@@ -57,10 +57,10 @@ PD: \code{\link[=scr_calibrate]{scr_calibrate()}} anchors the scorecard to a cen
 tests with traffic lights; \code{\link[=scr_master_scale]{scr_master_scale()}}, \code{\link[=scr_migration]{scr_migration()}} and
 \code{\link[=scr_pd_pit_ttc]{scr_pd_pit_ttc()}} support the grade structure, the migration analysis
 and the point-in-time bridge. LGD: \code{\link[=scr_workout]{scr_workout()}} discounts recovery cash
-flows into realised LGD, \code{\link[=scr_lgd]{scr_lgd()}} fits the cure and severity stages
+flows into realized LGD, \code{\link[=scr_lgd]{scr_lgd()}} fits the cure and severity stages
 and the pools, \code{\link[=scr_lgd_downturn]{scr_lgd_downturn()}}, \code{\link[=scr_lgd_floor]{scr_lgd_floor()}} and \code{\link[=scr_elbe]{scr_elbe()}}
 complete the estimate, \code{\link[=scr_lgd_pools]{scr_lgd_pools()}} and \code{\link[=scr_lgd_validate]{scr_lgd_validate()}} close
-the pools and the validation. EAD: \code{\link[=scr_ead_data]{scr_ead_data()}} builds the realised
+the pools and the validation. EAD: \code{\link[=scr_ead_data]{scr_ead_data()}} builds the realized
 conversion factors from facility snapshots and \code{\link[=scr_ead]{scr_ead()}} the pools;
 \code{\link[=scr_ead_downturn]{scr_ead_downturn()}} and \code{\link[=scr_ead_validate]{scr_ead_validate()}} add the downturn and the
 validation. \code{\link[=scr_el]{scr_el()}}, \code{\link[=scr_irb_rw]{scr_irb_rw()}}, \code{\link[=scr_sa_rw]{scr_sa_rw()}}, \code{\link[=scr_capital]{scr_capital()}},
@@ -94,8 +94,8 @@ when the cap applies. Set the option to \code{Inf} to disable it.
 
 \code{objective} declares the vocabulary and the direction of the scale
 (\code{"risk"}: more points, safer; \code{"propensity"}: more points, more likely)
-and does \strong{not} change what is modelled. \code{event_level} changes what is
-modelled. Both are documented in \code{\link[=scr_config]{scr_config()}} and \code{\link[=scr_split]{scr_split()}}.
+and does \strong{not} change what is modeled. \code{event_level} changes what is
+modeled. Both are documented in \code{\link[=scr_config]{scr_config()}} and \code{\link[=scr_split]{scr_split()}}.
 }
 
 \seealso{

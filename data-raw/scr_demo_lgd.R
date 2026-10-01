@@ -28,7 +28,7 @@ obs_date <- as.Date("2026-06-30")
 add_m <- function(d, k) as.Date(vapply(seq_along(d), function(i)
   as.character(seq(d[i], by = "month", length.out = k[i] + 1L)[k[i] + 1L]), character(1)))
 
-# -- reference rate: monthly annualised rate, 2019-01 to 2026-06 ------------ #
+# -- reference rate: monthly annualized rate, 2019-01 to 2026-06 ------------ #
 dates_r <- seq(as.Date("2019-01-01"), as.Date("2026-06-01"), by = "month")
 knots <- data.frame(
   date = as.Date(c("2019-01-01", "2019-12-01", "2020-04-01", "2020-08-01", "2021-03-01", "2021-12-01",
