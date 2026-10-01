@@ -1288,10 +1288,11 @@ print.scr_migration <- function(x, ...) {
   list(chi2 = chi2, df = df, p = if (df >= 1L) stats::pchisq(chi2, df, lower.tail = FALSE) else NA_real_)
 }
 
-#' Traffic light of a p-value
+#' Traffic light of a p-value; "grey" when the p-value is missing (no testable
+#' result), as in the LGD validation
 #' @keywords internal
 #' @noRd
-.pd_light <- function(p, lights) ifelse(is.na(p), NA_character_, ifelse(p <= lights[1], "red", ifelse(p <= lights[2], "amber", "green")))
+.pd_light <- function(p, lights) ifelse(is.na(p), "grey", ifelse(p <= lights[1], "red", ifelse(p <= lights[2], "amber", "green")))
 
 #' DeLong standard error of an AUC, from mid-ranks
 #'
@@ -1356,7 +1357,8 @@ print.scr_migration <- function(x, ...) {
 #' @param alpha Significance level of the binomial critical count.
 #' @param lights Two p-value thresholds (red at or below the first, amber at
 #'   or below the second, green above; the convention shared with the LGD
-#'   and EAD validations); `NULL` reads `config$pd_lights`.
+#'   and EAD validations); `NULL` reads `config$pd_lights`. A missing
+#'   p-value gives `"grey"`.
 #' @param pd_column Grade PD tested: `"pd_final"` (default), `"pd_moc"` or `"pd_be"`.
 #' @param horizon,by Cohort window in months and frequency (`NULL` reads `config$pd_dr_by`).
 #' @param n_boot,seed Bootstrap resamples and seed of the discrimination interval.
@@ -1367,8 +1369,11 @@ print.scr_migration <- function(x, ...) {
 #'   `pd`, `p_jeffreys`, `p_binomial`, `hl_chi2`, `hl_df`, `hl_p`,
 #'   `multi_period_z`, `multi_period_p`, `brier`), `discrimination`,
 #'   `stability` (`psi` table, `migration`, `concentration`), `summary`
-#'   (one row per test with `statistic`, `p_value`, `light`), `light`
-#'   (the worst light of the summary), `n_cohorts`, `alpha`, `lights`.
+#'   (one row per test with `statistic`, `p_value`, `light`; the light is
+#'   `"grey"` when the row has no testable result, such as a missing p-value
+#'   or the descriptive migration bandwidth), `light` (the worst light of the
+#'   summary: red, then amber, then green; `"grey"` when no row has a
+#'   testable result), `n_cohorts`, `alpha`, `lights`.
 #'   `portfolio_tests` also carries `critical`, `z`, `p_normal`, `n_cohorts`
 #'   and `pd_column`; the object also has `horizon`, `by`, `pd_column` and
 #'   `target`.
@@ -1521,12 +1526,14 @@ scr_pd_validate <- function(x, newdata, id = "id", date = "date", default = "def
   if (!is.null(disc)) sm[[length(sm) + 1L]] <- row("auc_vs_initial", "portfolio", disc$s_stat, disc$p_value)
   if (!is.null(psi_tab)) { last_psi <- psi_tab[nrow(psi_tab)]
     sm[[length(sm) + 1L]] <- data.table::data.table(test = "psi_grades", level = "portfolio", statistic = last_psi$psi, p_value = NA_real_,
-                                                    light = if (is.na(last_psi$flag_fixed)) NA_character_ else
+                                                    light = if (is.na(last_psi$flag_fixed)) "grey" else
                                                       switch(last_psi$flag_fixed, stable = "green", moderate = "amber", "red")) }
-  if (!is.null(mig)) sm[[length(sm) + 1L]] <- data.table::data.table(test = "migration_mwb_upper", level = "portfolio", statistic = mig$mwb_upper, p_value = NA_real_, light = NA_character_)
+  if (!is.null(mig)) sm[[length(sm) + 1L]] <- data.table::data.table(test = "migration_mwb_upper", level = "portfolio", statistic = mig$mwb_upper, p_value = NA_real_, light = "grey")
   if (!is.null(conc)) sm[[length(sm) + 1L]] <- row("concentration_cv", "portfolio", conc$cv, conc$p_value)
   summary <- data.table::rbindlist(sm)
-  worst <- if (any(summary$light == "red", na.rm = TRUE)) "red" else if (any(summary$light == "amber", na.rm = TRUE)) "amber" else "green"
+  # grey (no testable result) never rolls up to green: all grey stays grey
+  worst <- if (any(summary$light == "red", na.rm = TRUE)) "red" else if (any(summary$light == "amber", na.rm = TRUE)) "amber" else
+    if (any(summary$light == "green", na.rm = TRUE)) "green" else "grey"
   structure(list(calibration = by_g[], calibration_cohort = by_cg[], portfolio = port[], portfolio_tests = portfolio_tests,
                  discrimination = disc, stability = list(psi = psi_tab, migration = mig, concentration = conc),
                  summary = summary[], light = worst, n_cohorts = T_c, alpha = alpha, lights = lights, horizon = as.integer(horizon), by = by,

@@ -1132,7 +1132,7 @@ scr_sql.scr_ead <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
 #' (sum of realized EAD over sum of predicted EAD) and traffic lights
 #' (red at or below `lights[1]`, amber at or below `lights[2]`, green above;
 #' adequacy green at or below `adequacy_lights[1]`, amber up to
-#' `adequacy_lights[2]`, red above). Adds the
+#' `adequacy_lights[2]`, red above; grey when the value is missing). Adds the
 #' discrimination block (gAUC with a bootstrap interval against the
 #' development value, Spearman correlation, cumulative EAD accuracy
 #' ratio), the back-test by cohort and the stability of the pool
@@ -1149,7 +1149,9 @@ scr_sql.scr_ead <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
 #'
 #' @return An object of class `scr_ead_validation`: `calibration`,
 #'   `discrimination`, `backtest`, `stability`, `summary` (test,
-#'   statistic, p, light), `n`, `source`.
+#'   statistic, p, light; the light is `"grey"` when the test has no
+#'   result), `light` (the worst light of the summary: red, then amber,
+#'   then green; `"grey"` when no test has a result), `n`, `source`.
 #'
 #' @family irb-ead
 #' @examples
@@ -1178,8 +1180,9 @@ scr_ead_validate <- function(x, newdata = NULL, lights = c(0.01, 0.05), adequacy
     v[, pool := .ead_pool_of(v, x$bins, x$survivors, x$cells, main, x$meta)]
     source <- "newdata"
   }
-  light_p <- function(p) data.table::fcase(is.na(p), NA_character_, p <= lights[1], "red", p <= lights[2], "amber", default = "green")
-  light_a <- function(a) data.table::fcase(is.na(a), NA_character_, a <= adequacy_lights[1], "green", a <= adequacy_lights[2], "amber", default = "red")
+  # a missing value (no testable result) is grey, as in the PD and LGD validations
+  light_p <- function(p) data.table::fcase(is.na(p), "grey", p <= lights[1], "red", p <= lights[2], "amber", default = "green")
+  light_a <- function(a) data.table::fcase(is.na(a), "grey", a <= adequacy_lights[1], "green", a <= adequacy_lights[2], "amber", default = "red")
   pr <- .ead_predict_rows(v$pool, v$measure, v$drawn_ref, v$limit_ref, pools, x$meta$floor)
   v[, `:=`(predicted = .ead_lookup(pools, pool, "ccf_applied"), ead_predicted = pr$ead_predicted)]
   calib_row <- function(r, label) {
@@ -1236,7 +1239,7 @@ scr_ead_validate <- function(x, newdata = NULL, lights = c(0.01, 0.05), adequacy
                              critical = q$critical, flag_adjusted = q$flag_adjusted)
     })))
   }
-  stab[, light := data.table::fcase(is.na(flag_fixed), NA_character_, flag_fixed == "stable", "green", flag_fixed == "moderate", "amber", default = "red")]
+  stab[, light := data.table::fcase(is.na(flag_fixed), "grey", flag_fixed == "stable", "green", flag_fixed == "moderate", "amber", default = "red")]
   tot <- calibration[pool == "TOTAL"]
   summary <- data.table::data.table(
     test = c("calibration_t_total", "ead_adequacy_total", "gauc_vs_development", "pool_psi"),
@@ -1247,14 +1250,19 @@ scr_ead_validate <- function(x, newdata = NULL, lights = c(0.01, 0.05), adequacy
                    sprintf("sum realized / sum predicted EAD; amber above %s, red above %s (package convention)", adequacy_lights[1], adequacy_lights[2]),
                    "z of development minus current gAUC over the bootstrap standard errors",
                    "PSI 0.10/0.25 fixed; adjusted: Yurdakul & Naranjo (2020)"))
+  # overall light: grey (no testable result) never rolls up to green; all grey stays grey
+  sl <- summary$light
+  worst <- if ("red" %in% sl) "red" else if ("amber" %in% sl) "amber" else if ("green" %in% sl) "green" else "grey"
   structure(list(calibration = calibration, discrimination = discrimination, backtest = backtest, stability = stab,
-                 summary = summary, n = nrow(v), source = source, lights = lights, adequacy_lights = adequacy_lights),
+                 summary = summary, light = worst, n = nrow(v), source = source, lights = lights, adequacy_lights = adequacy_lights),
             class = c("scr_ead_validation", "list"))
 }
 
 #' @export
 print.scr_ead_validation <- function(x, ...) {
-  cat(sprintf("<scr_ead_validation> %s rows (%s)\n", n_fmt(x$n), x$source))
+  # an object saved before the overall light existed prints without it
+  cat(sprintf("<scr_ead_validation> %s rows (%s)%s\n", n_fmt(x$n), x$source,
+              if (is.null(x[["light"]])) "" else sprintf(" | overall light: %s", toupper(x[["light"]]))))
   cat(sprintf("  %-6s %6s %9s %9s %8s %8s %6s %9s %6s\n", "pool", "n", "realised", "predicted", "t", "p", "light", "adequacy", "light"))
   c <- x$calibration
   for (i in seq_len(nrow(c))) {

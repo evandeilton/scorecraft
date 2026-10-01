@@ -178,12 +178,20 @@ print.scr_cutoff <- function(x, ...) {
 #'       `ep_per_account`, `band_profit`, `cum_pct`, `cum_event_rate` and
 #'       `cum_profit`.}
 #'     \item{`breakeven`}{The break-even event rate.}
-#'     \item{`crossing`}{A list: `cut`, the score boundary of the crossing
-#'       rule; `ks`, the distance \eqn{D_k} at it; `after_band`, the last
-#'       band on the good side; `single_crossing`, whether `log_odds`
-#'       changes sign exactly once along the table. All `NA` when
-#'       undefined; only `cut` is `NA` when `breaks` is a single number (a
-#'       count of intervals, whose edges are not kept).}
+#'     \item{`crossing`}{A list: `cut`, the score where the upper side of
+#'       the crossing starts (`score >= cut`, the convention of
+#'       [scr_cutoff()]), frozen on the training scores like the bands:
+#'       midway between the largest training score at or below the band
+#'       edge of the crossing and the smallest training score above it.
+#'       `score >= cut` then reproduces the split of the bands on train and
+#'       on any score seen in training; a score of another sample strictly
+#'       between those two training scores can fall on the other side. When
+#'       `breaks` is a number of intervals (whose edges come from `sample`),
+#'       or no training score lies on one side of the edge, the cut is the
+#'       midpoint between the bands on `sample`; `ks`, the distance
+#'       \eqn{D_k} at it; `after_band`, the last band on the good side;
+#'       `single_crossing`, whether `log_odds` changes sign exactly once
+#'       along the table. All `NA` when undefined.}
 #'     \item{`objective`, `rule`}{The objective of the scorecard and the
 #'       rule used.}
 #'     \item{`revenue_good`, `loss_bad`, `sample`, `direction`, `target`}{
@@ -229,7 +237,8 @@ scr_strategy <- function(x, breaks = NULL, decisions = NULL, revenue_good = 1, l
   breakeven <- if (prop) loss_bad / (revenue_good + loss_bad) else be_bad
   d[, ep_per_account := (1 - p_bad) * revenue_good - p_bad * loss_bad]
   d[, band_profit := n * ep_per_account]
-  cr <- .strategy_crossing(d$pct_event, d$pct_nonevent, d$log_odds, idx, d$band, breaks)
+  cr <- .strategy_crossing(d$pct_event, d$pct_nonevent, d$log_odds, idx, d$band, d$min_score, d$max_score,
+                           breaks, x$samples$train$score)
   lab <- if (prop) c("target", "review", "skip") else c("approve", "review", "decline")
   if (is.null(decisions)) {
     if (rule == "crossing") {
@@ -259,12 +268,20 @@ scr_strategy <- function(x, breaks = NULL, decisions = NULL, revenue_good = 1, l
 #' table are furthest apart (the KS of the table), in the row order given
 #'
 #' `idx` is the band index of every row (`NA` for scores outside the
-#' breaks). The cut is the upper edge of the lower of the two bands, which
-#' also holds when an empty band lies between them. `k` is the last row on
-#' the good side, `NA` when the crossing is undefined.
+#' breaks). The cut is frozen on the reference (training) scores `ref`, like
+#' the bands: the midpoint between the largest reference score at or below
+#' the band edge of the boundary (the upper edge of the lower band) and the
+#' smallest one above it, so that `score >= cut` (the convention of
+#' scr_cutoff()) reproduces the right-closed split on the reference and on
+#' any score seen in it. When `breaks` is a number of intervals (the edges
+#' come from the evaluated sample), or no reference score lies on one side
+#' of the edge, the midpoint is taken on the evaluated sample: the largest
+#' score of the lower band and the smallest of the upper one. `k` is the
+#' last row on the good side, `NA` when the crossing is undefined.
 #' @keywords internal
 #' @noRd
-.strategy_crossing <- function(pct_event, pct_nonevent, log_odds, idx, band, breaks) {
+.strategy_crossing <- function(pct_event, pct_nonevent, log_odds, idx, band, min_score, max_score,
+                               breaks = NULL, ref = NULL) {
   none <- list(crossing = list(cut = NA_real_, ks = NA_real_, after_band = NA_character_, single_crossing = NA),
                k = NA_integer_)
   v <- which(!is.na(idx))
@@ -273,9 +290,21 @@ scr_strategy <- function(x, breaks = NULL, decisions = NULL, revenue_good = 1, l
   if (length(v) < 2L || anyNA(pe) || anyNA(pn)) return(none)
   D <- abs(cumsum(pe) - cumsum(pn))[-length(v)]
   k <- which.max(D)
-  # cut() sorts the breaks; a single number is a count of intervals, whose edges are not kept
-  b <- if (length(breaks) > 1L) sort(as.double(breaks)) else NULL
-  cut_at <- if (is.null(b)) NA_real_ else b[min(idx[v[k]], idx[v[k + 1L]]) + 1L]
+  # rows at the edge of a right-closed band belong to the lower band: cut
+  # strictly between the two bands, by band index (either table order)
+  lo <- if (idx[v[k]] < idx[v[k + 1L]]) v[k] else v[k + 1L]
+  hi <- if (lo == v[k]) v[k + 1L] else v[k]
+  a <- max_score[lo]; b <- min_score[hi]
+  # frozen like the bands: the reference scores on either side of the band
+  # edge (cut() sorts the breaks; band i is (edge_i, edge_i+1])
+  if (length(breaks) > 1L && length(ref)) {
+    edge <- sort(as.double(breaks))[idx[lo] + 1L]
+    ref <- ref[!is.na(ref)]
+    if (any(ref <= edge) && any(ref > edge)) { a <- max(ref[ref <= edge]); b <- min(ref[ref > edge]) }
+  }
+  cut_at <- (a + b) / 2
+  # adjacent doubles: the midpoint can round onto the lower score
+  if (!(cut_at > a)) cut_at <- b
   sg <- sign(log_odds[v]); sg <- sg[!is.na(sg) & sg != 0]
   list(crossing = list(cut = cut_at, ks = D[k], after_band = band[v[k]],
                        single_crossing = sum(diff(sg) != 0) == 1L),

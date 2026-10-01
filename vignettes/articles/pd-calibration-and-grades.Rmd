@@ -335,7 +335,8 @@ v
 ```
 
 The summary is one row per test with its statistic, p-value and light; the
-overall light is the worst of them.
+overall light is the worst of them. A row without a testable result is
+grey, and grey never counts as green.
 
 ```{r validate-summary}
 v$summary
