@@ -28,8 +28,10 @@ scr_lgd_validate(x, newdata = NULL)
 
 An object of class `scr_lgd_validation`: `calibration` (per pool),
 `portfolio`, `discrimination`, `stability` (`pools`, `drivers`),
-`homogeneity`, `heterogeneity`, `summary` (test, statistic, p, light),
-`sample`, `n`.
+`homogeneity`, `heterogeneity`, `summary` (test, statistic, p, light;
+the light is `"grey"` when the test has no result, and a row that sums
+up several pools or drivers is the worst of their lights: red, then
+amber, then green, otherwise grey), `sample`, `n`.
 
 ## Details
 
@@ -53,8 +55,8 @@ An object of class `scr_lgd_validation`: `calibration` (per pool),
   (Welch test; a large p-value means pools that do not differ).
 
 Traffic lights use the p-value thresholds of `config$pd_lights` (shared
-with the PD validation) (red below the first, amber below the second)
-and the fixed PSI thresholds.
+with the PD validation) (red at or below the first, amber at or below
+the second) and the fixed PSI thresholds.
 
 ## See also
 

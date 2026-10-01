@@ -77,7 +77,8 @@ scr_pd_validate(
 
   Two p-value thresholds (red at or below the first, amber at or below
   the second, green above; the convention shared with the LGD and EAD
-  validations); `NULL` reads `config$pd_lights`.
+  validations); `NULL` reads `config$pd_lights`. A missing p-value gives
+  `"grey"`.
 
 - pd_column:
 
@@ -100,8 +101,11 @@ cohort), `portfolio_tests` (list: `n`, `d`, `dr`, `pd`, `p_jeffreys`,
 `p_binomial`, `hl_chi2`, `hl_df`, `hl_p`, `multi_period_z`,
 `multi_period_p`, `brier`), `discrimination`, `stability` (`psi` table,
 `migration`, `concentration`), `summary` (one row per test with
-`statistic`, `p_value`, `light`), `light` (the worst light of the
-summary), `n_cohorts`, `alpha`, `lights`. `portfolio_tests` also carries
+`statistic`, `p_value`, `light`; the light is `"grey"` when the row has
+no testable result, such as a missing p-value or the descriptive
+migration bandwidth), `light` (the worst light of the summary: red, then
+amber, then green; `"grey"` when no row has a testable result),
+`n_cohorts`, `alpha`, `lights`. `portfolio_tests` also carries
 `critical`, `z`, `p_normal`, `n_cohorts` and `pd_column`; the object
 also has `horizon`, `by`, `pd_column` and `target`.
 
@@ -189,6 +193,6 @@ v$summary
 #>  6:        multi_period portfolio   3.8442315 6.046541e-05    red
 #>  7:      auc_vs_initial portfolio  -2.8144151 9.975567e-01  green
 #>  8:          psi_grades portfolio   0.7658293           NA    red
-#>  9: migration_mwb_upper portfolio          NA           NA   <NA>
+#>  9: migration_mwb_upper portfolio          NA           NA   grey
 #> 10:    concentration_cv portfolio   1.1575073 2.213365e-01  green
 ```

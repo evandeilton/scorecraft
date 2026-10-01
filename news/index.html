@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,6 +45,18 @@
       <small>Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="scorecraft-development-version">scorecraft (development version)<a class="anchor" aria-label="anchor" href="#scorecraft-development-version"></a></h2>
+<ul><li>
+<code><a href="../reference/scr_pd_validate.html">scr_pd_validate()</a></code> gives the light <code>"grey"</code> to a row without a testable result (a missing p-value) instead of <code>NA</code>, and the overall light is <code>"grey"</code>, not <code>"green"</code>, when no row has a testable result. <code><a href="../reference/scr_ead_validate.html">scr_ead_validate()</a></code> does the same and adds the overall <code>light</code>. In <code><a href="../reference/scr_lgd_validate.html">scr_lgd_validate()</a></code>, a summary row over pools or drivers that are all grey is now grey, not green.</li>
+<li>
+<code><a href="../reference/scr_monitor.html">scr_monitor()</a></code> and the CSI timelines of <code><a href="../reference/scr_export.html">scr_export()</a></code> compute the CSI as <code><a href="../reference/scr_psi.html">scr_psi()</a></code> does: a bin empty in both samples is left out of the smoothing and of the degrees of freedom of the adjusted threshold, and the CSI and its critical value are missing when the period has no rows in the bins or fewer than two bins are populated. Other results are unchanged.</li>
+<li>
+<code><a href="../reference/scr_strategy.html">scr_strategy()</a></code> freezes <code>crossing$cut</code> on the training scores, like the bands: midway between the training scores on either side of the band edge of the crossing. <code>score &gt;= cut</code>, the convention of <code><a href="../reference/scr_cutoff.html">scr_cutoff()</a></code>, then reproduces the split of the bands on train and on any score seen in training, so rows at a band edge seen in training no longer change side between the two functions. <code>breaks</code> given as a number of intervals now also gets a cut, taken on the evaluated sample.</li>
+<li>The rank-order diagnostics of <code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code> test each band against the previous one with a one-sided Fisher exact test. The binomial test used before took the previous band’s rate as known and flagged too many breaks when that band was small.</li>
+<li>
+<code><a href="../reference/scr_scorecard.html">scr_scorecard()</a></code> says when ties in the training score give fewer score bands than <code>score_groups</code>.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="scorecraft-031">scorecraft 0.3.1<a class="anchor" aria-label="anchor" href="#scorecraft-031"></a></h2>
 <ul><li>

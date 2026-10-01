@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,8 +75,10 @@ table with the drivers, <code>lgd_real</code>, <code>ead</code> and the default 
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>scr_lgd_validation</code>: <code>calibration</code> (per
 pool), <code>portfolio</code>, <code>discrimination</code>, <code>stability</code> (<code>pools</code>, <code>drivers</code>),
-<code>homogeneity</code>, <code>heterogeneity</code>, <code>summary</code> (test, statistic, p, light),
-<code>sample</code>, <code>n</code>.</p>
+<code>homogeneity</code>, <code>heterogeneity</code>, <code>summary</code> (test, statistic, p, light;
+the light is <code>"grey"</code> when the test has no result, and a row that sums
+up several pools or drivers is the worst of their lights: red, then
+amber, then green, otherwise grey), <code>sample</code>, <code>n</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -97,8 +99,8 @@ the pool split at its median prediction; a small p-value means a pool
 that still discriminates) and heterogeneity between adjacent pools
 (Welch test; a large p-value means pools that do not differ).</p></li>
 </ul><p>Traffic lights use the p-value thresholds of <code>config$pd_lights</code> (shared
-with the PD validation) (red below the
-first, amber below the second) and the fixed PSI thresholds.</p>
+with the PD validation) (red at or below the
+first, amber at or below the second) and the fixed PSI thresholds.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

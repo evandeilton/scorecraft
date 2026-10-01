@@ -1,5 +1,43 @@
 # Changelog
 
+## scorecraft (development version)
+
+- [`scr_pd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_validate.md)
+  gives the light `"grey"` to a row without a testable result (a missing
+  p-value) instead of `NA`, and the overall light is `"grey"`, not
+  `"green"`, when no row has a testable result.
+  [`scr_ead_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_validate.md)
+  does the same and adds the overall `light`. In
+  [`scr_lgd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_validate.md),
+  a summary row over pools or drivers that are all grey is now grey, not
+  green.
+- [`scr_monitor()`](https://evandeilton.github.io/scorecraft/reference/scr_monitor.md)
+  and the CSI timelines of
+  [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
+  compute the CSI as
+  [`scr_psi()`](https://evandeilton.github.io/scorecraft/reference/scr_psi.md)
+  does: a bin empty in both samples is left out of the smoothing and of
+  the degrees of freedom of the adjusted threshold, and the CSI and its
+  critical value are missing when the period has no rows in the bins or
+  fewer than two bins are populated. Other results are unchanged.
+- [`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md)
+  freezes `crossing$cut` on the training scores, like the bands: midway
+  between the training scores on either side of the band edge of the
+  crossing. `score >= cut`, the convention of
+  [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md),
+  then reproduces the split of the bands on train and on any score seen
+  in training, so rows at a band edge seen in training no longer change
+  side between the two functions. `breaks` given as a number of
+  intervals now also gets a cut, taken on the evaluated sample.
+- The rank-order diagnostics of
+  [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
+  test each band against the previous one with a one-sided Fisher exact
+  test. The binomial test used before took the previous band’s rate as
+  known and flagged too many breaks when that band was small.
+- [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
+  says when ties in the training score give fewer score bands than
+  `score_groups`.
+
 ## scorecraft 0.3.1
 
 - [`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md)

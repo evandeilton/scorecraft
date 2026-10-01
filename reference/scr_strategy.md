@@ -82,11 +82,20 @@ An `scr_strategy` object with
 
 - `crossing`:
 
-  A list: `cut`, the score boundary of the crossing rule; `ks`, the
-  distance \\D_k\\ at it; `after_band`, the last band on the good side;
-  `single_crossing`, whether `log_odds` changes sign exactly once along
-  the table. All `NA` when undefined; only `cut` is `NA` when `breaks`
-  is a single number (a count of intervals, whose edges are not kept).
+  A list: `cut`, the score where the upper side of the crossing starts
+  (`score >= cut`, the convention of
+  [`scr_cutoff()`](https://evandeilton.github.io/scorecraft/reference/scr_cutoff.md)),
+  frozen on the training scores like the bands: midway between the
+  largest training score at or below the band edge of the crossing and
+  the smallest training score above it. `score >= cut` then reproduces
+  the split of the bands on train and on any score seen in training; a
+  score of another sample strictly between those two training scores can
+  fall on the other side. When `breaks` is a number of intervals (whose
+  edges come from `sample`), or no training score lies on one side of
+  the edge, the cut is the midpoint between the bands on `sample`; `ks`,
+  the distance \\D_k\\ at it; `after_band`, the last band on the good
+  side; `single_crossing`, whether `log_odds` changes sign exactly once
+  along the table. All `NA` when undefined.
 
 - `objective`, `rule`:
 
@@ -187,7 +196,7 @@ scr_strategy(sc, revenue_good = 1080, loss_bad = 4500)
 st <- scr_strategy(sc, rule = "crossing")
 st$crossing
 #> $cut
-#> [1] 542.0954
+#> [1] 542.0923
 #> 
 #> $ks
 #> [1] 0.3702647

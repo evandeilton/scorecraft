@@ -13,7 +13,7 @@ horizon months, exactly as scr_default_rate() does."><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -127,7 +127,8 @@ from <code>score</code> with the cut points of <code>x</code>.</p></dd>
 <dt id="arg-lights">lights<a class="anchor" aria-label="anchor" href="#arg-lights"></a></dt>
 <dd><p>Two p-value thresholds (red at or below the first, amber at
 or below the second, green above; the convention shared with the LGD
-and EAD validations); <code>NULL</code> reads <code>config$pd_lights</code>.</p></dd>
+and EAD validations); <code>NULL</code> reads <code>config$pd_lights</code>. A missing
+p-value gives <code>"grey"</code>.</p></dd>
 
 
 <dt id="arg-pd-column">pd_column<a class="anchor" aria-label="anchor" href="#arg-pd-column"></a></dt>
@@ -150,8 +151,11 @@ grade, pooled), <code>calibration_cohort</code> (per cohort and grade),
 <code>pd</code>, <code>p_jeffreys</code>, <code>p_binomial</code>, <code>hl_chi2</code>, <code>hl_df</code>, <code>hl_p</code>,
 <code>multi_period_z</code>, <code>multi_period_p</code>, <code>brier</code>), <code>discrimination</code>,
 <code>stability</code> (<code>psi</code> table, <code>migration</code>, <code>concentration</code>), <code>summary</code>
-(one row per test with <code>statistic</code>, <code>p_value</code>, <code>light</code>), <code>light</code>
-(the worst light of the summary), <code>n_cohorts</code>, <code>alpha</code>, <code>lights</code>.
+(one row per test with <code>statistic</code>, <code>p_value</code>, <code>light</code>; the light is
+<code>"grey"</code> when the row has no testable result, such as a missing p-value
+or the descriptive migration bandwidth), <code>light</code> (the worst light of the
+summary: red, then amber, then green; <code>"grey"</code> when no row has a
+testable result), <code>n_cohorts</code>, <code>alpha</code>, <code>lights</code>.
 <code>portfolio_tests</code> also carries <code>critical</code>, <code>z</code>, <code>p_normal</code>, <code>n_cohorts</code>
 and <code>pd_column</code>; the object also has <code>horizon</code>, <code>by</code>, <code>pd_column</code> and
 <code>target</code>.</p>
@@ -237,7 +241,7 @@ cohort against <code>cv_init</code>.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  6:        multi_period portfolio   3.8442315 6.046541e-05    red</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  7:      auc_vs_initial portfolio  -2.8144151 9.975567e-01  green</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  8:          psi_grades portfolio   0.7658293           NA    red</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9: migration_mwb_upper portfolio          NA           NA   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9: migration_mwb_upper portfolio          NA           NA   grey</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10:    concentration_cv portfolio   1.1575073 2.213365e-01  green</span>
 </code></pre></div>
     </div>

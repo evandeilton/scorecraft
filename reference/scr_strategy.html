@@ -33,7 +33,7 @@ targeted at or above it.'><meta property="og:image" content="https://evandeilton
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -153,12 +153,20 @@ Decision rules.</p></dd>
 <dd><p>The break-even event rate.</p></dd>
 
 <dt><code>crossing</code></dt>
-<dd><p>A list: <code>cut</code>, the score boundary of the crossing
-rule; <code>ks</code>, the distance \(D_k\) at it; <code>after_band</code>, the last
-band on the good side; <code>single_crossing</code>, whether <code>log_odds</code>
-changes sign exactly once along the table. All <code>NA</code> when
-undefined; only <code>cut</code> is <code>NA</code> when <code>breaks</code> is a single number (a
-count of intervals, whose edges are not kept).</p></dd>
+<dd><p>A list: <code>cut</code>, the score where the upper side of
+the crossing starts (<code>score &gt;= cut</code>, the convention of
+<code><a href="scr_cutoff.html">scr_cutoff()</a></code>), frozen on the training scores like the bands:
+midway between the largest training score at or below the band
+edge of the crossing and the smallest training score above it.
+<code>score &gt;= cut</code> then reproduces the split of the bands on train and
+on any score seen in training; a score of another sample strictly
+between those two training scores can fall on the other side. When
+<code>breaks</code> is a number of intervals (whose edges come from <code>sample</code>),
+or no training score lies on one side of the edge, the cut is the
+midpoint between the bands on <code>sample</code>; <code>ks</code>, the distance
+\(D_k\) at it; <code>after_band</code>, the last band on the good side;
+<code>single_crossing</code>, whether <code>log_odds</code> changes sign exactly once
+along the table. All <code>NA</code> when undefined.</p></dd>
 
 <dt><code>objective</code>, <code>rule</code></dt>
 <dd><p>The objective of the scorecard and the
@@ -264,7 +272,7 @@ hence <code>ks</code>, stay relative to the whole sample, that row included.</p>
 <span class="r-in"><span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu">scr_strategy</span><span class="op">(</span><span class="va">sc</span>, rule <span class="op">=</span> <span class="st">"crossing"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">st</span><span class="op">$</span><span class="va">crossing</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $cut</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 542.0954</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 542.0923</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3702647</span>

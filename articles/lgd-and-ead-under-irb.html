@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scorecraft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -520,7 +520,7 @@ floored result.</p>
 <code class="sourceCode R"><span><span class="va">sql</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_sql.html">scr_sql</a></span><span class="op">(</span><span class="va">m</span>, table <span class="op">=</span> <span class="st">"prd.defaults"</span>, dialect <span class="op">=</span> <span class="st">"duckdb"</span><span class="op">)</span></span>
 <span><span class="va">sql_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">sql</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"AS pool$|AS lgd_dt,$|AS lgd_floor$|AS lgd_final$"</span>, <span class="va">sql_lines</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294908 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998066 THEN 2 ELSE 3 END AS pool</span></span>
+<span><span class="co">#&gt;     CASE WHEN lgd_pred &lt;= 0.37690454385294925 THEN 1 WHEN lgd_pred &lt;= 0.45265644452998088 THEN 2 ELSE 3 END AS pool</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.31513536760296268 WHEN 2 THEN 0.50598910528854668 WHEN 3 THEN 0.67415168383886248 ELSE 0.67415168383886248 END AS lgd_dt,</span></span>
 <span><span class="co">#&gt;     CASE pool WHEN 1 THEN 0.22 WHEN 2 THEN 0.22 WHEN 3 THEN 0.22 ELSE 0.22 END AS lgd_floor</span></span>
 <span><span class="co">#&gt;     GREATEST(lgd_dt, lgd_floor) AS lgd_final</span></span></code></pre></div>
@@ -879,7 +879,7 @@ last column.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">v_ead</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scr_ead_validate.html">scr_ead_validate</a></span><span class="op">(</span><span class="va">m_ead</span><span class="op">)</span></span>
 <span><span class="va">v_ead</span></span>
-<span><span class="co">#&gt; &lt;scr_ead_validation&gt; 71 rows (holdout)</span></span>
+<span><span class="co">#&gt; &lt;scr_ead_validation&gt; 71 rows (holdout) | overall light: GREEN</span></span>
 <span><span class="co">#&gt;   pool        n  realised predicted        t        p  light  adequacy  light</span></span>
 <span><span class="co">#&gt;   P1         50    0.2763    0.3856   -1.832   0.9635 green     0.7709 green </span></span>
 <span><span class="co">#&gt;   P2         18    0.4536    0.6576   -2.346   0.9843 green     0.7600 green </span></span>

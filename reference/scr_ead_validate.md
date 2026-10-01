@@ -7,10 +7,11 @@ predicted (under-estimation) with its p-value, the EAD adequacy ratio
 (sum of realized EAD over sum of predicted EAD) and traffic lights (red
 at or below `lights[1]`, amber at or below `lights[2]`, green above;
 adequacy green at or below `adequacy_lights[1]`, amber up to
-`adequacy_lights[2]`, red above). Adds the discrimination block (gAUC
-with a bootstrap interval against the development value, Spearman
-correlation, cumulative EAD accuracy ratio), the back-test by cohort and
-the stability of the pool distribution and of the driver bins
+`adequacy_lights[2]`, red above; grey when the value is missing). Adds
+the discrimination block (gAUC with a bootstrap interval against the
+development value, Spearman correlation, cumulative EAD accuracy ratio),
+the back-test by cohort and the stability of the pool distribution and
+of the driver bins
 ([`scr_psi()`](https://evandeilton.github.io/scorecraft/reference/scr_psi.md),
 fixed and sample-size-adjusted thresholds). The numeric limits of the
 lights are a convention of the package, stated as such in the output.
@@ -53,7 +54,9 @@ scr_ead_validate(
 
 An object of class `scr_ead_validation`: `calibration`,
 `discrimination`, `backtest`, `stability`, `summary` (test, statistic,
-p, light), `n`, `source`.
+p, light; the light is `"grey"` when the test has no result), `light`
+(the worst light of the summary: red, then amber, then green; `"grey"`
+when no test has a result), `n`, `source`.
 
 ## See also
 
@@ -73,11 +76,11 @@ ed <- scr_ead_data(scr_demo_ead, facility_id = "facility_id", date_col = "ref_da
 m <- scr_ead(ed, drivers = c("utilisation_ref", "product"), config = cfg)
 v <- scr_ead_validate(m)
 v
-#> <scr_ead_validation> 42 rows (holdout)
+#> <scr_ead_validation> 42 rows (holdout) | overall light: GREEN
 #>   pool        n  realised predicted        t        p  light  adequacy  light
 #>   P1         20    0.4073    0.4377   -0.243   0.5947 green     0.9725 green 
 #>   P2         21    0.5698    0.6245   -0.800   0.7835 green     0.9747 green 
-#>   LF          1    1.0400    0.9962        -        - NA        1.0000 green 
+#>   LF          1    1.0400    0.9962        -        - grey      1.0000 green 
 #>   TOTAL      42    0.4905    0.5334   -0.606   0.7261 green     0.9733 green 
 #>   gAUC 0.6248 [0.5159, 0.6777] vs development 0.5953 (p 0.6899) | Spearman 0.4169 | CEAR -0.2516
 #>   stability: pool PSI 0.0625 (stable) | product PSI 0.0005 (stable)
@@ -94,7 +97,7 @@ v$calibration
 #>         <num>     <num>  <char>        <num>         <num>     <num>
 #> 1: -0.2428832 0.5946507   green       119370     122740.82 0.9725371
 #> 2: -0.8000456 0.7834575   green        59740      61291.56 0.9746855
-#> 3:         NA        NA    <NA>          520        520.00 1.0000000
+#> 3:         NA        NA    grey          520        520.00 1.0000000
 #> 4: -0.6061024 0.7260644   green       179630     184552.38 0.9733280
 #>    light_adequacy
 #>            <char>

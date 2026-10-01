@@ -478,8 +478,8 @@ cat(tail(sql, 6), sep = "\n")
 #> -- Block 4: rating grade and final PD from the score cut points (5 grades, higher_is_safer)
 #> SELECT
 #>     s.*,
-#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947994 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
-#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947994 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
+#>     CASE WHEN score <= 497.65810792199238 THEN 5 WHEN score <= 525.006786354523 THEN 4 WHEN score <= 548.82434894947983 THEN 3 WHEN score <= 571.2740854703145 THEN 2 ELSE 1 END AS grade,
+#>     CASE WHEN score <= 497.65810792199238 THEN 0.44534566116911861 WHEN score <= 525.006786354523 THEN 0.24662988720215417 WHEN score <= 548.82434894947983 THEN 0.1873880268001506 WHEN score <= 571.2740854703145 THEN 0.18375476313787917 ELSE 0.054173526552942053 END AS pd_final
 #> FROM score_scr s;
 ```
 
@@ -555,7 +555,8 @@ v
 ```
 
 The summary is one row per test with its statistic, p-value and light;
-the overall light is the worst of them.
+the overall light is the worst of them. A row without a testable result
+is grey, and grey never counts as green.
 
 ``` r
 
@@ -570,7 +571,7 @@ v$summary
 #>  6:        multi_period portfolio -11.19460843 1.00000000  green
 #>  7:      auc_vs_initial portfolio  -1.43959713 0.92500929  green
 #>  8:          psi_grades portfolio   0.96337125         NA    red
-#>  9: migration_mwb_upper portfolio           NA         NA   <NA>
+#>  9: migration_mwb_upper portfolio           NA         NA   grey
 #> 10:    concentration_cv portfolio   1.24524312 0.18694109  green
 ```
 
