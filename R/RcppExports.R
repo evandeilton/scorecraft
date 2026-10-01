@@ -52,3 +52,22 @@ cpp_ecl_paths <- function(h, L, E, P, r, n, H, hz, discount, stage3, z, pd_mult,
     .Call(`_scorecraft_cpp_ecl_paths`, h, L, E, P, r, n, H, hz, discount, stage3, z, pd_mult, lgd_add, ead_mult, rho, nthreads)
 }
 
+#' Optimal tier segmentation over ordered blocks (internal)
+#'
+#' @param e,n Weighted events and weighted volume with a known outcome per
+#'   block (the objective).
+#' @param vol Weighted volume per block (the share constraint).
+#' @param e_raw,n_raw Unweighted events and rows with a known outcome per
+#'   block (the event constraints and the Fisher exact test).
+#' @param L Number of segments.
+#' @param criterion 0 for the binomial log-likelihood, 1 for the
+#'   information value.
+#' @param min_share,min_events,alpha The constraints.
+#' @return A list: `feasible`, `ends` (1-based end block of every segment,
+#'   empty when infeasible) and `objective`.
+#' @keywords internal
+#' @noRd
+cpp_tier_dp <- function(e, n, vol, e_raw, n_raw, L, criterion, min_share, min_events, alpha) {
+    .Call(`_scorecraft_cpp_tier_dp`, e, n, vol, e_raw, n_raw, L, criterion, min_share, min_events, alpha)
+}
+

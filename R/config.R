@@ -286,7 +286,14 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
     ecl_discount         = "eir",
     ecl_stage_dpd        = c(30L, 90L),
     ecl_sicr_ratio       = 2.0,
-    ecl_horizon_months   = 12L
+    ecl_horizon_months   = 12L,
+
+    # ---- Stage 13: score studies ----------------------------------------- #
+    study_bands     = 20L,
+    study_level     = 0.95,
+    tier_min_pct    = 0.05,
+    tier_min_events = 20L,
+    tier_max_bins   = 100L
   )
 
   tight <- switch(preset,
@@ -491,6 +498,17 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
   if (length(cfg$pd_lights) != 2L || any(!is.finite(cfg$pd_lights)) || cfg$pd_lights[1] >= cfg$pd_lights[2]) {
     stop("`pd_lights` must be two increasing p-value thresholds (red at or below the first, amber at or below the second).", call. = FALSE)
   }
+
+  # ---- score-study keys ------------------------------------------------------ #
+  # a configuration saved before these keys existed takes their defaults
+  st <- list(study_bands = 20L, study_level = 0.95, tier_min_pct = 0.05, tier_min_events = 20L, tier_max_bins = 100L)
+  for (key in names(st)) if (is.null(cfg[[key]])) cfg[[key]] <- st[[key]]
+  .int("study_bands", 1)
+  .scr_num1(cfg$study_level, "study_level", lower = 0, upper = 1, open_lower = TRUE)
+  if (cfg$study_level >= 1) stop("`study_level` must be below 1.", call. = FALSE)
+  .scr_num1(cfg$tier_min_pct, "tier_min_pct", lower = 0, upper = 0.5)
+  .int("tier_min_events", 0)
+  .int("tier_max_bins", 2, 500)
   structure(cfg, class = c("scr_config", "list"))
 }
 
@@ -580,7 +598,8 @@ scr_presets <- function() {
 #' value and what it controls.
 #'
 #' @param stage Optional filter by stage: `0` to `7` for the scorecard
-#'   pipeline, `8` to `12` for the IRB models. `NULL` returns everything.
+#'   pipeline, `8` to `12` for the IRB models, `13` for the score studies.
+#'   `NULL` returns everything.
 #'
 #' @return A `data.frame` with `key`, `stage`, `default` and `description`.
 #'
@@ -724,7 +743,12 @@ scr_config_keys <- function(stage = NULL) {
     .ck("ecl_discount", 12, "eir", "Discount the expected credit loss at the effective interest rate, or not"),
     .ck("ecl_stage_dpd", 12, "30, 90", "Days past due that move an exposure to stage 2 and stage 3"),
     .ck("ecl_sicr_ratio", 12, "2", "PD deterioration ratio (now over origination) that signals stage 2"),
-    .ck("ecl_horizon_months", 12, "12", "Horizon of the 12-month expected credit loss")
+    .ck("ecl_horizon_months", 12, "12", "Horizon of the 12-month expected credit loss"),
+    .ck("study_bands", 13, "20", "Bands of the percentile study (scr_bands())"),
+    .ck("study_level", 13, "0.95", "Confidence level of the score studies (bands, tiers, lights)"),
+    .ck("tier_min_pct", 13, "0.05", "Smallest volume share of a tier (scr_tiers())"),
+    .ck("tier_min_events", 13, "20", "Fewest events, and non-events, per tier"),
+    .ck("tier_max_bins", 13, "100", "Pre-bins of the tier search (at most 500)")
   )
   if (!is.null(stage)) d <- d[d$stage %in% stage, , drop = FALSE]
   rownames(d) <- NULL
