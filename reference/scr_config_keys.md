@@ -15,7 +15,8 @@ scr_config_keys(stage = NULL)
 - stage:
 
   Optional filter by stage: `0` to `7` for the scorecard pipeline, `8`
-  to `12` for the IRB models. `NULL` returns everything.
+  to `12` for the IRB models, `13` for the score studies. `NULL` returns
+  everything.
 
 ## Value
 

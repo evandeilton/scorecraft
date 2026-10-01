@@ -290,6 +290,20 @@ Scoring in R, production SQL, deliverables.
   : Population stability index, with the fixed and the
   sample-size-adjusted threshold
 
+## Score studies
+
+Percentile bands, tiers and red / amber / green lights of a score
+against its reference.
+
+- [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md)
+  : Percentile study of a score
+- [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md)
+  : Red / amber / green lights of a score against its reference
+- [`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md)
+  : Thresholds of the red / amber / green lights
+- [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
+  : Tiers of a score: a few labeled levels of risk or propensity
+
 ## Portfolio and database
 
 - [`scr_compare()`](https://evandeilton.github.io/scorecraft/reference/scr_compare.md)

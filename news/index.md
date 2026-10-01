@@ -2,6 +2,36 @@
 
 ## scorecraft (development version)
 
+- New score studies, computed from one pass over the scored rows into a
+  table of counts per score value:
+  - [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md)
+    cuts a score into percentile or tail bands frozen on a reference
+    sample and reports, per band and sample, the event rate with a
+    Jeffreys interval, lift, capture, KS, WOE, IV, PSI and a one-sided
+    Fisher exact test of rank order, plus the AUC, Gini and KS with a
+    bootstrap interval. Accepts a scorecard, a data.frame (with weights,
+    a value column and sample labels) or pre-aggregated counts.
+  - [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
+    fits 3, 5 or 7 labeled tiers (from “very low” to “very high”) by an
+    exact dynamic program under share, event and distinctness
+    constraints, by event-rate anchors or by equal shares; `round_to`
+    gives policy-friendly cuts, and `n_boot` measures the stability of
+    the cuts. An infeasible tier count falls back and is recorded in a
+    ledger.
+  - [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md)
+    lights discrimination, calibration, stability and, for a scorecard,
+    the variables red, amber or green, per period or segment with `by`;
+    the thresholds are an editable table from
+    [`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md).
+  - [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+    [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+    and
+    [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
+    assign the bands or tiers in R and in SQL and write the study to a
+    workbook.
+- New configuration keys for the score studies (stage 13):
+  `study_bands`, `study_level`, `tier_min_pct`, `tier_min_events` and
+  `tier_max_bins`.
 - [`scr_pd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_validate.md)
   gives the light `"grey"` to a row without a testable result (a missing
   p-value) instead of `NA`, and the overall light is `"grey"`, not

@@ -19,6 +19,7 @@
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scorecraft-package.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_align.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_apply.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_bands.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_bin.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_bin_continuous.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_calibrate.html</loc></url>
@@ -80,6 +81,8 @@
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_pd_validate.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_presets.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_psi.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_rag.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_reasons.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_reject.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_result.html</loc></url>
@@ -94,6 +97,7 @@
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_split.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_sql.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_strategy.html</loc></url>
+<url><loc>https://evandeilton.github.io/scorecraft/reference/scr_tiers.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_triage.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_verbose.html</loc></url>
 <url><loc>https://evandeilton.github.io/scorecraft/reference/scr_workout.html</loc></url>

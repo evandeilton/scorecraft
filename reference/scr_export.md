@@ -38,6 +38,12 @@ scr_export(
 
 # S3 method for class 'scr_pd'
 scr_export(x, dir, stamp = TRUE, validation = NULL, ...)
+
+# S3 method for class 'scr_rag'
+scr_export(x, dir, stamp = TRUE, ...)
+
+# S3 method for class 'scr_study'
+scr_export(x, dir, stamp = TRUE, rag = NULL, ...)
 ```
 
 ## Arguments
@@ -50,9 +56,12 @@ scr_export(x, dir, stamp = TRUE, validation = NULL, ...)
   [`scr_coarse_classing()`](https://evandeilton.github.io/scorecraft/reference/scr_coarse_classing.md),
   [`scr_pd()`](https://evandeilton.github.io/scorecraft/reference/scr_pd.md),
   [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md),
-  [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
+  [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md),
+  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md),
+  [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
+  [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
   or
-  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md).
+  [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md).
 
 - dir:
 
@@ -91,6 +100,12 @@ scr_export(x, dir, stamp = TRUE, validation = NULL, ...)
   [`scr_elbe()`](https://evandeilton.github.io/scorecraft/reference/scr_elbe.md)
   object; `NULL` computes it.
 
+- rag:
+
+  For `scr_study`: an optional
+  [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md)
+  object whose lights are written to the same workbook.
+
 ## Value
 
 The object `x`, with `$files` filled, invisibly.
@@ -121,6 +136,16 @@ the specification, the bins, the checks and the decision ledger. The IRB
 models write one workbook and one SQL file each (`pd_<target>.xlsx`,
 `lgd_<tag>.xlsx`, `ead_<tag>.xlsx`, `capital_<framework>.xlsx`), with
 the validation, the ledger and the model card as sheets.
+
+A score study
+([`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
+[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md))
+writes one workbook, `study_bands_<target>.xlsx` or
+`study_tiers_<target>.xlsx`, with its summary, its table, the cuts and
+the settings (plus the ledger and the stability of the tiers, and the
+lights of `rag` when given); a set of lights from
+[`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md)
+writes `rag_<target>.xlsx`.
 
 The timeline and vintage sheets need the date column of the split; when
 it is absent they carry an availability row instead of a fabricated

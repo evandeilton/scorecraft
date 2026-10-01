@@ -40,6 +40,9 @@ scr_sql(
   keep_columns = NULL,
   ...
 )
+
+# S3 method for class 'scr_study'
+scr_sql(x, table = NULL, dialect = NULL, file = NULL, score = "score", ...)
 ```
 
 ## Arguments
@@ -51,9 +54,11 @@ scr_sql(
   [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md),
   [`scr_pd()`](https://evandeilton.github.io/scorecraft/reference/scr_pd.md),
   [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md),
-  [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
+  [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md),
+  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md),
+  [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md)
   or
-  [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md).
+  [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md).
 
 - table:
 
@@ -101,6 +106,10 @@ scr_sql(
   (for example the customer identifier and the reference date); `NULL`
   uses `config$sql_keep_columns`.
 
+- score:
+
+  For `scr_study`: name of the score column of `table`.
+
 ## Value
 
 A character vector with the SQL (invisibly, when `file` is given).
@@ -145,6 +154,19 @@ risk weight) in a `pool_params` table joined on segment and grade, so no
 normal quantile is evaluated at run time; `level` chooses the exposure
 or the portfolio output.
 
+## Score studies
+
+For a score study
+([`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
+[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)),
+the SQL reads the score column of `table` and adds `tier` and
+`tier_label` with a `CASE` on the frozen cuts (`score >= cut` is the
+upper side; a `NULL` score gives a `NULL` tier). `table` and `dialect`
+default to the configuration of the scorecard the study came from, else
+to `"your_table"` and `"ansi"`. The tiers computed by the SQL match
+[`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+by an automated test.
+
 ## See also
 
 Other production:
@@ -165,7 +187,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-10-01 02:30:36
+#> -- Generated on 2026-10-01 04:11:33
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().

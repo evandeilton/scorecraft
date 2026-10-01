@@ -44,7 +44,7 @@ variables (or those of the scorecard), in blocks in this order:"><meta property=
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Production SQL</h1>
-      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/sql.R" class="external-link"><code>R/sql.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/capital.R" class="external-link"><code>R/capital.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/ead.R" class="external-link"><code>R/ead.R</code></a>, and 2 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/evandeilton/scorecraft/blob/main/R/sql.R" class="external-link"><code>R/sql.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/capital.R" class="external-link"><code>R/capital.R</code></a>, <a href="https://github.com/evandeilton/scorecraft/blob/main/R/ead.R" class="external-link"><code>R/ead.R</code></a>, and 3 more</small>
       <div class="d-none name"><code>scr_sql.Rd</code></div>
     </div>
 
@@ -88,7 +88,10 @@ variables (or those of the scorecard), in blocks in this order:</p>
 <span>  what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"score"</span>, <span class="st">"woe"</span>, <span class="st">"all"</span><span class="op">)</span>,</span>
 <span>  keep_columns <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'scr_study'</span></span>
+<span><span class="fu">scr_sql</span><span class="op">(</span><span class="va">x</span>, table <span class="op">=</span> <span class="cn">NULL</span>, dialect <span class="op">=</span> <span class="cn">NULL</span>, file <span class="op">=</span> <span class="cn">NULL</span>, score <span class="op">=</span> <span class="st">"score"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -97,7 +100,8 @@ variables (or those of the scorecard), in blocks in this order:</p>
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>An object from <code><a href="scr_select.html">scr_select()</a></code>, <code><a href="scr_scorecard.html">scr_scorecard()</a></code>, <code><a href="scr_pd.html">scr_pd()</a></code>,
-<code><a href="scr_lgd.html">scr_lgd()</a></code>, <code><a href="scr_ead.html">scr_ead()</a></code> or <code><a href="scr_capital.html">scr_capital()</a></code>.</p></dd>
+<code><a href="scr_lgd.html">scr_lgd()</a></code>, <code><a href="scr_ead.html">scr_ead()</a></code>, <code><a href="scr_capital.html">scr_capital()</a></code>, <code><a href="scr_bands.html">scr_bands()</a></code> or
+<code><a href="scr_tiers.html">scr_tiers()</a></code>.</p></dd>
 
 
 <dt id="arg-table">table<a class="anchor" aria-label="anchor" href="#arg-table"></a></dt>
@@ -146,6 +150,10 @@ each variable next to the score).</p></dd>
 into the output (for example the customer identifier and the reference
 date); <code>NULL</code> uses <code>config$sql_keep_columns</code>.</p></dd>
 
+
+<dt id="arg-score">score<a class="anchor" aria-label="anchor" href="#arg-score"></a></dt>
+<dd><p>For <code>scr_study</code>: name of the score column of <code>table</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -190,6 +198,18 @@ normal quantile is evaluated at run time; <code>level</code> chooses the exposur
 or the portfolio output.</p>
     </div>
     <div class="section level2">
+    <h2 id="score-studies">Score studies<a class="anchor" aria-label="anchor" href="#score-studies"></a></h2>
+
+
+
+<p>For a score study (<code><a href="scr_bands.html">scr_bands()</a></code>, <code><a href="scr_tiers.html">scr_tiers()</a></code>), the SQL reads the score
+column of <code>table</code> and adds <code>tier</code> and <code>tier_label</code> with a <code>CASE</code> on the
+frozen cuts (<code>score &gt;= cut</code> is the upper side; a <code>NULL</code> score gives a
+<code>NULL</code> tier). <code>table</code> and <code>dialect</code> default to the configuration of the
+scorecard the study came from, else to <code>"your_table"</code> and <code>"ansi"</code>. The
+tiers computed by the SQL match <code><a href="scr_apply.html">scr_apply()</a></code>, by an automated test.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other production:
 <code><a href="predict.scr_align.html">predict.scr_align()</a></code>,
@@ -209,7 +229,7 @@ or the portfolio output.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">scr_sql</span><span class="op">(</span><span class="va">res</span>, table <span class="op">=</span> <span class="st">"prd.customers"</span>, dialect <span class="op">=</span> <span class="st">"databricks"</span><span class="op">)</span>, <span class="fl">20</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- =============================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- scorecraft | target: default | 12 approved variables | dialect: databricks</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -- Generated on 2026-10-01 02:30:36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -- Generated on 2026-10-01 04:11:33</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> --   and sentinel values by the TRAINING median, special-population flags.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().</span>

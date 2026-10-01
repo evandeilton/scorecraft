@@ -31,6 +31,9 @@ scr_apply(x, newdata, what = c("pool", "lgd", "all"), ...)
 
 # S3 method for class 'scr_pd'
 scr_apply(x, newdata, ...)
+
+# S3 method for class 'scr_study'
+scr_apply(x, newdata, score = "score", ...)
 ```
 
 ## Arguments
@@ -39,9 +42,13 @@ scr_apply(x, newdata, ...)
 
   An object from
   [`scr_select()`](https://evandeilton.github.io/scorecraft/reference/scr_select.md)
-  (returns WOE/bin of the approved variables) or from
+  (returns WOE/bin of the approved variables), from
   [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
-  (returns score and points).
+  (returns score and points), or a score study from
+  [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md)
+  or
+  [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
+  (returns the band or tier of a score).
 
 - newdata:
 
@@ -65,6 +72,11 @@ scr_apply(x, newdata, ...)
   (adds the cure probability and the severity). For `scr_ead`: `"all"`
   (default), `"ead"` (pool, measure, applied CCF, predicted EAD and the
   floor flag) or `"pool"` (pool and measure).
+
+- score:
+
+  For `scr_study`: name of the score column of `newdata`. `newdata` may
+  also be a numeric vector of scores.
 
 ## Value
 
@@ -92,6 +104,15 @@ below the drawn amount.
 reads `pd_final`, `lgd_final` and `ead_predicted` from these outputs in
 its list form.
 
+## Score studies
+
+For a score study
+([`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
+[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)),
+`newdata` is returned (as a copy) with `tier`, the band or tier number,
+and `tier_label`. The intervals are left-closed: `score >= cut` is the
+upper side, and a missing score gives a missing tier.
+
 ## See also
 
 Other production:
@@ -115,7 +136,7 @@ str(scr_apply(res, new)[, 1:3])
 #>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...
 #>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...
 #>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...
-#>  - attr(*, ".internal.selfref")=<pointer: 0x559e3097ea30> 
+#>  - attr(*, ".internal.selfref")=<pointer: 0x55ed5c694a30> 
 sc <- scr_scorecard(res)
 head(scr_apply(sc, new))
 #>         link       prob    score score_points
