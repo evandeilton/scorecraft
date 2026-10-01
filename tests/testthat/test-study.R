@@ -465,3 +465,21 @@ test_that("the score-study configuration keys are registered and validated", {
   old <- unclass(cfg)[setdiff(names(cfg), k$key)]
   expect_equal(.scr_validate_config(old)$tier_max_bins, 100L)
 })
+
+test_that("a numeric sample column is read in numeric order", {
+  d <- study_df(2000, 15)
+  d$k <- sample(c(9, 10, 100), nrow(d), TRUE)
+  b <- scr_bands(d, sample = "k", n_bands = 5, n_boot = 0)
+  # as text "10" would come before "9" and become the reference
+  expect_identical(b$reference, "9"); expect_identical(b$samples, c("9", "10", "100"))
+  expect_equal(b$cuts, scr_bands(d[d$k == 9, ], n_bands = 5, n_boot = 0)$cuts)
+  # text and factors keep their order
+  d$kc <- as.character(d$k)
+  expect_identical(scr_bands(d, sample = "kc", n_bands = 5, n_boot = 0)$reference, "10")
+  d$kf <- factor(d$k, levels = c(100, 9, 10))
+  expect_identical(scr_bands(d, sample = "kf", n_bands = 5, n_boot = 0)$samples, c("100", "9", "10"))
+  expect_identical(.study_levels(c(2.5, 10, 2.5, NA)), c("2.5", "10"))
+  expect_identical(.study_levels(as.Date(c("2026-02-01", "2026-01-01"))), c("2026-01-01", "2026-02-01"))
+  expect_null(.study_num_levels(list(c("a", "b")))); expect_null(.study_num_levels(list(factor(1:3))))
+  expect_identical(.study_num_levels(list(c(10L, 9L), 100L)), c("9", "10", "100"))
+})

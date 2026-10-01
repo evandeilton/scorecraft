@@ -637,6 +637,7 @@
   h <- .study_hist(score, y, prob = prob, by = keys, max_cells = max_cells, breaks = breaks, fn = fn)
   list(hist = h, reference = reference, samples = samples,
        objective = x$config$objective %||% "risk", direction = x$direction, target = x$target,
+       group_levels = if (!is.null(by)) .study_num_levels(lapply(s, `[[`, by)),
        sql_table = x$config$sql_table, sql_dialect = x$config$sql_dialect,
        meta = list(weighted = FALSE, has_value = FALSE, has_prob = TRUE, quantized = !is.null(attr(h, "edges"))))
 }
@@ -675,7 +676,7 @@
   } else {
     sv <- x[[sample]]
     if (anyNA(sv)) stop(fn, "(): the sample column '", sample, "' has missing values.", call. = FALSE)
-    lv <- if (is.factor(sv)) levels(droplevels(sv)) else sort(unique(as.character(sv)))
+    lv <- .study_levels(sv)
     lab <- as.character(sv)
   }
   if (!is.null(reference)) .study_chr1(reference, "reference", fn)
@@ -701,9 +702,33 @@
                 max_cells = max_cells, breaks = breaks, fn = fn)
   }
   list(hist = h, reference = reference, samples = samples, objective = objective, direction = direction,
-       target = if (counts) events else y,
+       target = if (counts) events else y, group_levels = if (!is.null(by)) .study_num_levels(list(x[[by]])),
        meta = list(weighted = !is.null(weight), has_value = !is.null(value), has_prob = !is.null(prob),
                    quantized = !is.null(attr(h, "edges"))))
+}
+
+#' Labels of a sample column, in their reading order
+#'
+#' The levels of a factor; numbers in numeric order (as text, "10" would
+#' sort before "9"); anything else as sorted text.
+#' @keywords internal
+#' @noRd
+.study_levels <- function(v) {
+  if (is.factor(v)) return(levels(droplevels(v)))
+  if (is.numeric(v)) return(unique(as.character(sort(unique(v)))))
+  sort(unique(as.character(v)))
+}
+
+#' Labels of a numeric group column in numeric order; NULL when not numeric
+#'
+#' `vals` is a list of vectors (the column in every sample). A column that
+#' is not numeric keeps the order of its labels.
+#' @keywords internal
+#' @noRd
+.study_num_levels <- function(vals) {
+  num <- vapply(vals, function(v) is.numeric(v) && !is.factor(v), logical(1))
+  if (!length(vals) || !all(num)) return(NULL)
+  unique(as.character(sort(unique(unlist(vals, use.names = FALSE)))))
 }
 
 #' @keywords internal
@@ -744,6 +769,14 @@
   as.integer(x)
 }
 
+#' A finite number in a range, with the calling function named in the error
+#' @keywords internal
+#' @noRd
+.study_num1 <- function(x, name, fn, lower = -Inf, upper = Inf, open_lower = FALSE) {
+  tryCatch(.scr_num1(x, name, lower = lower, upper = upper, open_lower = open_lower),
+           error = function(e) stop(fn, "(): ", conditionMessage(e), call. = FALSE))
+}
+
 #' Cells of the bootstrap: a number of at least 2, `Inf` for no pooling
 #' @keywords internal
 #' @noRd
@@ -761,6 +794,71 @@
     stop(fn, "(): `level` must be a number in (0, 1).", call. = FALSE)
   }
   level
+}
+
+# -- one score, cuts and shares --------------------------------------------------- #
+
+#' Objective and direction of one score, checked
+#'
+#' `objective` and `direction` are the arguments as given (`NULL` when not
+#' given). A score study passed as `cuts` sets both, and a given argument
+#' that disagrees with it is an error; without a study the objective falls
+#' back on `default` and the direction follows the objective.
+#' @keywords internal
+#' @noRd
+.study_one_direction <- function(objective, direction, cuts, default, fn) {
+  if (!is.null(objective) && (!is.character(objective) || length(objective) != 1L ||
+                              !objective %in% c("risk", "propensity"))) {
+    stop(fn, "(): `objective` must be \"risk\" or \"propensity\".", call. = FALSE)
+  }
+  if (!is.null(direction) && (!is.character(direction) || length(direction) != 1L ||
+                              !direction %in% c("higher_is_safer", "higher_is_riskier"))) {
+    stop(fn, "(): `direction` must be NULL, \"higher_is_safer\" or \"higher_is_riskier\".", call. = FALSE)
+  }
+  if (inherits(cuts, "scr_study")) {
+    for (nm in c("objective", "direction")) {
+      given <- get(nm)
+      if (!is.null(given) && !identical(given, cuts[[nm]])) {
+        stop(fn, "(): `", nm, "` is \"", given, "\" but the study given as `cuts` was fitted with \"",
+             cuts[[nm]], "\". Drop the argument, or pass a study of that ", nm, ".", call. = FALSE)
+      }
+    }
+    return(list(objective = cuts$objective, direction = cuts$direction))
+  }
+  objective <- objective %||% default
+  list(objective = objective, direction = resolve_direction(list(objective = objective, direction = direction)))
+}
+
+#' Tie-safe cut that selects a share of the volume from the event-rich end
+#'
+#' The boundary between two distinct scores nearest to the share. A share of
+#' 1 selects every row (`-Inf` from the high scores, `Inf` from the low
+#' ones); when every score is tied there is no boundary, and the nearer of
+#' "no row" and "every row" is taken.
+#' @keywords internal
+#' @noRd
+.study_share_cut <- function(h, shares, side) {
+  none <- if (side == "high") Inf else -Inf
+  every <- -none
+  vapply(shares, function(d) {
+    if (d >= 1) return(every)
+    cs <- .study_cuts(h, 1L, "tail", d, side)$cuts
+    if (length(cs)) cs else if (d > 0.5) every else none
+  }, numeric(1))
+}
+
+#' Share of the volume on the alert side of each cut, from the score cells
+#'
+#' The alert side is `score >= cut` from the high scores and `score < cut`
+#' from the low ones.
+#' @keywords internal
+#' @noRd
+.study_alert_share <- function(cells, cuts, side) {
+  N <- sum(cells$n)
+  if (!(N > 0)) return(rep(NA_real_, length(cuts)))
+  # volume strictly below each cut: the cells are in ascending score
+  below <- c(0, cumsum(cells$n))[findInterval(cuts, cells$s_lo, left.open = TRUE) + 1L]
+  if (side == "high") (N - below) / N else below / N
 }
 
 # -- production methods ---------------------------------------------------------- #

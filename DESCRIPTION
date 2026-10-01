@@ -62,6 +62,7 @@ Suggests:
     openxlsx,
     betareg,
     bit64,
+    survival,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,

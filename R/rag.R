@@ -168,7 +168,8 @@ scr_rag_plan <- function(objective = c("risk", "propensity")) {
 #' With `by`, a group of the study sample is compared with the same group
 #' of the reference when the reference has it (a segment), and with the
 #' whole reference otherwise (a new period). Without a sample column, every
-#' group is compared with the whole data.
+#' group is compared with the whole data. The groups are listed in the order
+#' of their labels, those of a numeric column in numeric order.
 #'
 #' @inheritParams scr_bands
 #' @param x An object from [scr_scorecard()], [scr_bands()] or [scr_tiers()],
@@ -411,6 +412,12 @@ scr_rag.scr_study <- function(x, plan = NULL, sample = NULL, level = NULL, min_e
   ref_all <- .study_cells(h, reference)
   units <- if (grouped) unique(h[h[["sample"]] %in% study, list(sample, group)])[order(sample, group)] else
     data.table::data.table(sample = study, group = "all")
+  # the groups of a numeric `by` in numeric order (their labels sort "10" before "9")
+  glv <- inp$group_levels
+  if (grouped && !is.null(glv)) {
+    pos <- order(match(units$sample, unique(units$sample)), match(units$group, glv))
+    units <- units[pos]
+  }
   # the reference results are reused across groups compared with the same reference
   ref_memo <- new.env(parent = emptyenv())
   rows <- list(); summ <- list()

@@ -43,7 +43,12 @@
 #' [scr_operating()] writes `operating_<target>.xlsx` (curve, optimum,
 #' constraints); two crossed scores from [scr_score_cross()] write
 #' `score_cross_<score_a>_<score_b>.xlsx` (cross table, overlap, overlap
-#' rates, association).
+#' rates, association). The other score studies write one workbook each:
+#' `mix_shift_<target>.xlsx` from [scr_mix_shift()],
+#' `segments_<target>.xlsx` from [scr_segments()], `maturity_<event>.xlsx`
+#' from [scr_maturity()], `uplift_<target>.xlsx` from [scr_uplift()],
+#' `overlap_<target>.xlsx` from [scr_overlap()] and
+#' `detection_<target>.xlsx` from [scr_detection()].
 #'
 #' The timeline and vintage sheets need the date column of the split; when it
 #' is absent they carry an availability row instead of a fabricated number.
@@ -51,7 +56,9 @@
 #' @param x An object from [scr_select()], [scr_scorecard()],
 #'   [scr_coarse_classing()], [scr_pd()], [scr_lgd()], [scr_ead()],
 #'   [scr_capital()], [scr_bands()], [scr_tiers()], [scr_rag()],
-#'   [scr_claims()], [scr_operating()] or [scr_score_cross()].
+#'   [scr_claims()], [scr_operating()], [scr_score_cross()],
+#'   [scr_mix_shift()], [scr_segments()], [scr_maturity()], [scr_uplift()],
+#'   [scr_overlap()] or [scr_detection()].
 #' @param dir Output directory. Created if it does not exist.
 #' @param stamp If `TRUE` (default), writes to a timestamped subdirectory,
 #'   preserving earlier runs.

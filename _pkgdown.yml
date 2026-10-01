@@ -58,7 +58,7 @@ reference:
   contents:
   - has_concept("metrics")
 - title: Score studies
-  desc: Percentile bands, tiers, red / amber / green lights, claims about event rates, the operating point under constraints and two scores on the same rows.
+  desc: Percentile bands, tiers, red / amber / green lights, claims about event rates, the operating point under constraints, two scores on the same rows, mix and rate effects, segments, maturity under censoring, uplift, rules against the score and time to detection.
   contents:
   - has_concept("score-studies")
 - title: Portfolio and database

@@ -73,7 +73,8 @@ labels, or \code{NULL} (all rows are one sample, reference and study at once).}
 
 \item{reference}{For a scorecard: the sample the bands are frozen on
 (\code{"train"}). For a data.frame: the label of the reference sample;
-\code{NULL} takes the first level of the \code{sample} column.}
+\code{NULL} takes the first level of the \code{sample} column (the levels of a
+factor in their order, numbers in numeric order, text sorted).}
 
 \item{breaks}{Explicit ascending cut points; overrides \code{n_bands} and
 \code{spacing}. Infinite values are ignored.}
@@ -267,10 +268,16 @@ production.
 
 Other score-studies:
 \code{\link[=scr_claims]{scr_claims()}},
+\code{\link[=scr_detection]{scr_detection()}},
+\code{\link[=scr_maturity]{scr_maturity()}},
+\code{\link[=scr_mix_shift]{scr_mix_shift()}},
 \code{\link[=scr_operating]{scr_operating()}},
+\code{\link[=scr_overlap]{scr_overlap()}},
 \code{\link[=scr_rag]{scr_rag()}},
 \code{\link[=scr_rag_plan]{scr_rag_plan()}},
 \code{\link[=scr_score_cross]{scr_score_cross()}},
-\code{\link[=scr_tiers]{scr_tiers()}}
+\code{\link[=scr_segments]{scr_segments()}},
+\code{\link[=scr_tiers]{scr_tiers()}},
+\code{\link[=scr_uplift]{scr_uplift()}}
 }
 \concept{score-studies}

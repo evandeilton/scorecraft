@@ -71,7 +71,13 @@
 #' labeled tiers), [scr_rag()] (red, amber and green lights against the
 #' reference), [scr_claims()] (tested statements about event rates),
 #' [scr_operating()] (the cut under volume, budget and capacity constraints)
-#' and [scr_score_cross()] (two scores on the same rows).
+#' and [scr_score_cross()] (two scores on the same rows). Six more read the
+#' score against a second dimension: [scr_mix_shift()] (a change of the
+#' event rate split into mix and rate effects), [scr_segments()] (one score
+#' on many segments), [scr_maturity()] (events over time by band, with
+#' censoring), [scr_uplift()] (a treated against a control group),
+#' [scr_overlap()] (rules against the alerts of a score) and
+#' [scr_detection()] (time to detection of fraud episodes).
 #'
 #' @section Parallelism:
 #'
