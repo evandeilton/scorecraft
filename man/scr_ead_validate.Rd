@@ -28,11 +28,11 @@ An object of class \code{scr_ead_validation}: \code{calibration},
 statistic, p, light), \code{n}, \code{source}.
 }
 \description{
-Per pool and in total, compares realised and predicted values on the
+Per pool and in total, compares realized and predicted values on the
 validation rows (the hold-out of the model by default): simple and
-exposure-weighted averages, the one-sided t-test of realised above
+exposure-weighted averages, the one-sided t-test of realized above
 predicted (under-estimation) with its p-value, the EAD adequacy ratio
-(sum of realised EAD over sum of predicted EAD) and traffic lights
+(sum of realized EAD over sum of predicted EAD) and traffic lights
 (red at or below \code{lights[1]}, amber at or below \code{lights[2]}, green above;
 adequacy green at or below \code{adequacy_lights[1]}, amber up to
 \code{adequacy_lights[2]}, red above). Adds the

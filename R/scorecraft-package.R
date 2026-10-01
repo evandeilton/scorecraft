@@ -11,7 +11,7 @@
 #'   \item **Triage** ([scr_triage()]): structural filters, decomposition of
 #'     sentinels and missing values, exact duplicates. The data leaves with no
 #'     `NA`.
-#'   \item **Binning and screening** ([scr_bin()]): optimal bins parallelised
+#'   \item **Binning and screening** ([scr_bin()]): optimal bins parallelized
 #'     by column, eight admission rules, hold-out revalidation with frozen
 #'     bins, redundancy pruning.
 #'   \item **Multi-strategy selection** ([scr_model()]): elastic net, boosting
@@ -49,10 +49,10 @@
 #' tests with traffic lights; [scr_master_scale()], [scr_migration()] and
 #' [scr_pd_pit_ttc()] support the grade structure, the migration analysis
 #' and the point-in-time bridge. LGD: [scr_workout()] discounts recovery cash
-#' flows into realised LGD, [scr_lgd()] fits the cure and severity stages
+#' flows into realized LGD, [scr_lgd()] fits the cure and severity stages
 #' and the pools, [scr_lgd_downturn()], [scr_lgd_floor()] and [scr_elbe()]
 #' complete the estimate, [scr_lgd_pools()] and [scr_lgd_validate()] close
-#' the pools and the validation. EAD: [scr_ead_data()] builds the realised
+#' the pools and the validation. EAD: [scr_ead_data()] builds the realized
 #' conversion factors from facility snapshots and [scr_ead()] the pools;
 #' [scr_ead_downturn()] and [scr_ead_validate()] add the downturn and the
 #' validation. [scr_el()], [scr_irb_rw()], [scr_sa_rw()], [scr_capital()],
@@ -82,8 +82,8 @@
 #'
 #' `objective` declares the vocabulary and the direction of the scale
 #' (`"risk"`: more points, safer; `"propensity"`: more points, more likely)
-#' and does **not** change what is modelled. `event_level` changes what is
-#' modelled. Both are documented in [scr_config()] and [scr_split()].
+#' and does **not** change what is modeled. `event_level` changes what is
+#' modeled. Both are documented in [scr_config()] and [scr_split()].
 #'
 #' @keywords internal
 #' @importFrom data.table := .N .SD as.data.table copy data.table dcast fcase

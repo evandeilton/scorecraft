@@ -20,7 +20,7 @@ cpp_concordance <- function(p, r) {
 #'   values.
 #' @param spearman `TRUE` for Spearman (Pearson on mid-ranks), `FALSE` for
 #'   Pearson.
-#' @param nthreads Threads used to standardise the columns (OpenMP); the
+#' @param nthreads Threads used to standardize the columns (OpenMP); the
 #'   cross-product runs on the BLAS R is linked to.
 #' @return A `p x p` matrix; rows and columns of a constant column are `NA`
 #'   (the diagonal included).

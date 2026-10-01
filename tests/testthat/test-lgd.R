@@ -1,7 +1,7 @@
 # LGD module: workout engine, two-stage model, pools, downturn, floors, ELBE,
 # production (R and SQL), validation and export.
 
-test_that("the present value and the realised LGD of a hand-made workout are exact", {
+test_that("the present value and the realized LGD of a hand-made workout are exact", {
   cfg <- lgd_cfg(lgd_discount_rate = 0.12, lgd_discount_add_on = 0)
   wo <- scr_workout(hand_defaults(), hand_cashflows(), config = cfg)
   expect_s3_class(wo, "scr_workout")
@@ -154,7 +154,7 @@ test_that("the two-stage model fits, scores every default, and the pools are mon
   # Somers' D and the loss capture ratio on tiny hand vectors
   expect_equal(.lgd_somers(c(1, 2, 3, 4), c(0.1, 0.2, 0.3, 0.4)), 1)
   expect_equal(.lgd_somers(c(4, 3, 2, 1), c(0.1, 0.2, 0.3, 0.4)), -1)
-  expect_equal(.lgd_somers(c(1, 2, 3, 4), c(0.1, 0.1, 0.3, 0.3)), 1)     # ties on the realised value are excluded
+  expect_equal(.lgd_somers(c(1, 2, 3, 4), c(0.1, 0.1, 0.3, 0.3)), 1)     # ties on the realized value are excluded
   expect_equal(.lgd_lcr(c(0.9, 0.5, 0.1), c(0.9, 0.5, 0.1), c(1, 1, 1)), 1)
   expect_lt(.lgd_lcr(c(0.1, 0.5, 0.9), c(0.9, 0.5, 0.1), c(1, 1, 1)), 0)
   expect_error(scr_lgd(wo_demo(), drivers = "nope", config = lgd_cfg()), "not found")
@@ -178,7 +178,7 @@ test_that("downturn: observed impact per pool, the type-3 add-on, the reference 
   tb <- d1$downturn$table
   expect_equal(d1$downturn$status, "final")
   expect_true(all(tb$method_used %in% c("type1", "type3_fallback")))
-  # observed: default-weighted realised LGD of the pool's training defaults inside the periods
+  # observed: default-weighted realized LGD of the pool's training defaults inside the periods
   s <- m$scored[sample == "train" & default_date >= per$start & default_date <= per$end]
   obs <- s[, list(v = mean(lgd_real), n = .N), by = pool][order(pool)]
   expect_equal(tb$dt_observed[match(obs$pool, tb$pool)], obs$v)

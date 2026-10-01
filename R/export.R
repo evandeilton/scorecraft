@@ -1,7 +1,7 @@
 # ============================================================================ #
 # export.R - deliverables: hardened xlsx writer, four workbooks, SQL, summary
 # ============================================================================ #
-# Writer contract: sanitise
+# Writer contract: sanitize
 # formula injection -> write to a temporary file -> reopen and verify sheet
 # names and row counts -> rename atomically. An empty sheet receives an
 # availability/reason_code row, never a fabricated zero.
@@ -258,7 +258,7 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
   out_dir
 }
 
-#' Hardened xlsx writer: sanitise, write to a temporary file, reopen and verify, rename
+#' Hardened xlsx writer: sanitize, write to a temporary file, reopen and verify, rename
 #' @keywords internal
 #' @noRd
 .scr_write_xlsx <- function(sheets, file) {
@@ -289,7 +289,7 @@ scr_export.scr_scorecard <- function(x, dir, stamp = TRUE, ...) {
   file
 }
 
-#' Sanitise a sheet: plain data.frame, no formula injection, no empty table
+#' Sanitize a sheet: plain data.frame, no formula injection, no empty table
 #' @keywords internal
 #' @noRd
 .sanitise_sheet <- function(d) {

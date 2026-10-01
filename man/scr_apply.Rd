@@ -50,7 +50,7 @@ predicted EAD and the floor flag) or \code{"pool"} (pool and measure).}
 A \code{data.table} with one row per row of \code{newdata}.
 }
 \description{
-Materialises in R exactly what the production SQL does: the frozen Stage
+Materializes in R exactly what the production SQL does: the frozen Stage
 1 pre-processing (training median, special-population flags,
 \code{"MISSING"}) followed by the frozen Stage 2 binning and, for a scorecard,
 by the points. Nothing is refitted. The two paths, R and SQL, produce the

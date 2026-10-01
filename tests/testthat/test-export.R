@@ -48,7 +48,7 @@ test_that("the bin shares are rebuilt for a scorecard fitted before they were st
   expect_equal(vg$pct_nonevent, sc$points$pct_nonevent, tolerance = 1e-8)
 })
 
-test_that("the hardened writer sanitises formula injection and never fabricates a row", {
+test_that("the hardened writer sanitizes formula injection and never fabricates a row", {
   skip_if_not_installed("openxlsx")
   f <- file.path(tempdir(), "scr-hardened.xlsx")
   sheets <- list(A = data.frame(x = c("=cmd()", "+1", "-1", "@x", "plain"), stringsAsFactors = FALSE),

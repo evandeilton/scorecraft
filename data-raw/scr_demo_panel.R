@@ -7,7 +7,7 @@
 # chain whose transition to arrears depends on a latent risk score, arrears
 # are proportional to the exposure, a few obligors are restructured, and
 # some arrears are immaterial on purpose (below the absolute threshold) so
-# that the materiality test has something to do. `score` is a behavioural
+# that the materiality test has something to do. `score` is a behavioral
 # score (higher = safer) with genuine rank-ordering power.
 # ============================================================================ #
 

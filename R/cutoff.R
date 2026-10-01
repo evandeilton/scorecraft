@@ -311,7 +311,7 @@ print.scr_strategy <- function(x, ...) {
 
 #' Stage 6: honest reject inference through a sensitivity band
 #'
-#' Does not ship parcelling as the default behaviour: instead
+#' Does not ship parceling as the default behavior: instead
 #' of inventing a single multiplier and reweighting, it declares the
 #' **population scope** of the scorecard, measures the **coverage per band**
 #' (where an observed outcome exists, and in what volume) and presents a

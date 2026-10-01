@@ -397,12 +397,12 @@ print.scr_pd_calibration <- function(x, ...) {
 #' `"geometric"` builds a [scr_master_scale()] between percentiles 1
 #' and 99 of the calibrated PD and converts its PD bounds into scores
 #' through the calibrated alignment; `"quantile"` cuts equal-count score
-#' bands (cut points moved half-way between neighbouring scores, so a
+#' bands (cut points moved half-way between neighboring scores, so a
 #' boundary never sits on an observed value); `"supplied"` grades by the PD
 #' bands of a given master scale.
 #'
 #' Grades below `min_obligors` obligors or `min_defaults` defaults are
-#' merged with the neighbour of closer default rate; the sequence of grade
+#' merged with the neighbor of closer default rate; the sequence of grade
 #' PDs is then repaired by pool-adjacent-violators when `monotone = TRUE`,
 #' and every merge is recorded in `repairs`. The grade PD (`pd_be`) is the
 #' long-run average of the grade default rates when a default-rate series
@@ -622,7 +622,7 @@ scr_grades <- function(x, calibration = NULL, master_scale = NULL, n_grades = NU
   ), class = c("scr_grades", "list"))
 }
 
-#' Equal-count score cut points moved half-way between neighbouring scores
+#' Equal-count score cut points moved half-way between neighboring scores
 #' @keywords internal
 #' @noRd
 .pd_quantile_breaks <- function(score, n_groups) {
@@ -1153,7 +1153,7 @@ scr_pd_pit_ttc <- function(pd, z, rho, to = c("pit", "ttc")) {
 #' weighted bandwidths
 #' \deqn{MWB_{up} = \frac{\sum_{i<j} |i-j|\, N_i\, p_{ij}}{\sum_i \max(|i-K|, |i-1|)\, N_i \sum_{j>i} p_{ij}},}
 #' (and the mirror image for downgrades), the `z` statistic of every
-#' off-diagonal cell against its neighbour closer to the diagonal (a
+#' off-diagonal cell against its neighbor closer to the diagonal (a
 #' significantly positive value means the probability does not decay away
 #' from the diagonal) and the mobility summary. Values of `grade_t1`
 #' outside `1..K` count as `default`, `NA` as `closed`; both stay out of
@@ -1199,7 +1199,7 @@ scr_migration <- function(grade_t0, grade_t1, K = NULL) {
   norm_l <- sum(vapply(idx, function(i) max(abs(i - K), abs(i - 1)) * n_i[i] * sum(Pk[i, dn[i, ]]), numeric(1)))
   mwb_u <- if (norm_u > 0) sum((D * Pk * n_i)[up]) / norm_u else NA_real_
   mwb_l <- if (norm_l > 0) sum((D * Pk * n_i)[dn]) / norm_l else NA_real_
-  # z of each off-diagonal cell against the neighbour closer to the diagonal
+  # z of each off-diagonal cell against the neighbor closer to the diagonal
   Z <- matrix(NA_real_, K, K, dimnames = list(rownames(M), as.character(idx)))
   for (i in idx) for (j in idx) {
     if (j == i || n_i[i] == 0) next

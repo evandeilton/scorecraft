@@ -110,9 +110,9 @@ paths.
 \code{scr_pd} wraps the scorecard SQL in a common table expression and adds a
 \code{CASE} on the score cut points that yields \code{grade} and \code{pd_final}.
 \code{scr_lgd} chains the driver bins of both stages, the logits, the pool
-\code{CASE} and the floored result. \code{scr_ead} computes the utilisation and the
+\code{CASE} and the floored result. \code{scr_ead} computes the utilization and the
 undrawn amount, assigns the pool from the frozen cut points and applies
-the greatest of the model, the drawn amount and the standardised floor.
+the greatest of the model, the drawn amount and the standardized floor.
 \code{scr_capital} carries the constants of every pool (PD, LGD, \code{k}, risk
 weight) in a \code{pool_params} table joined on segment and grade, so no
 normal quantile is evaluated at run time; \code{level} chooses the exposure

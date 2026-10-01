@@ -10,7 +10,7 @@
 # segment, so that segment x grade is a homogeneous pool: the production SQL
 # emits one row of constants per pool and reproduces R exactly. About 3 % of
 # the exposures are in default with a best estimate of expected loss (ELBE)
-# and a larger provision; the remaining columns feed the standardised
+# and a larger provision; the remaining columns feed the standardized
 # comparison (LTV, rating, transactor flag, sales) and the accounting stage
 # rule (days past due, PD at origination, effective interest rate).
 # ============================================================================ #
