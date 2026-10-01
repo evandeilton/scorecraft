@@ -41,7 +41,15 @@ scr_sql(x, table = NULL, dialect = NULL, file = NULL, ...)
   ...
 )
 
-\method{scr_sql}{scr_study}(x, table = NULL, dialect = NULL, file = NULL, score = "score", ...)
+\method{scr_sql}{scr_study}(
+  x,
+  table = NULL,
+  dialect = NULL,
+  file = NULL,
+  score = "score",
+  numbered = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{An object from \code{\link[=scr_select]{scr_select()}}, \code{\link[=scr_scorecard]{scr_scorecard()}}, \code{\link[=scr_pd]{scr_pd()}},
@@ -80,6 +88,9 @@ into the output (for example the customer identifier and the reference
 date); \code{NULL} uses \code{config$sql_keep_columns}.}
 
 \item{score}{For \code{scr_study}: name of the score column of \code{table}.}
+
+\item{numbered}{For a tiers study: \code{TRUE} (default) emits the tier
+labels with their order in front, \code{FALSE} the plain labels.}
 }
 \value{
 A character vector with the SQL (invisibly, when \code{file} is given).
@@ -135,6 +146,12 @@ frozen cuts (\code{score >= cut} is the upper side; a \code{NULL} score gives a
 \code{NULL} tier). \code{table} and \code{dialect} default to the configuration of the
 scorecard the study came from, else to \code{"your_table"} and \code{"ansi"}. The
 tiers computed by the SQL match \code{\link[=scr_apply]{scr_apply()}}, by an automated test.
+
+The labels of a tiers study carry their order, \code{'01.very high'} for the
+tier with the highest event rate down to the tier with the lowest, as in
+\code{\link[=scr_apply]{scr_apply()}}, so \verb{ORDER BY tier_label} lists the event-richest tier
+first; \code{numbered = FALSE} emits the plain labels. Band labels are
+intervals and never get a prefix.
 }
 
 \examples{

@@ -324,6 +324,13 @@ test_that("scr_bands on a scorecard: frozen on train, read on hold-out, config k
   expect_equal(bg$table[sample == "holdout", n],
                as.numeric(tabulate(findInterval(ho, sc$breaks[is.finite(sc$breaks)]) + 1L, length(sc$breaks) - 1L)))
   expect_output(print(b), "scr_study_bands")
+  # the rate is printed with its interval, and the p-value column is the Holm-adjusted one
+  expect_output(print(b), "rate \\[lo, hi\\]")
+  expect_output(print(b), "p_rev_adj")
+  hb <- b$table[sample == "holdout"]
+  expect_output(print(b), sprintf("%.2f%% [%.2f%%, %.2f%%]", 100 * hb$rate[1], 100 * hb$rate_lo[1], 100 * hb$rate_hi[1]),
+                fixed = TRUE)
+  expect_output(print(b), sprintf("%.3f", hb$p_reversal_adj[2]), fixed = TRUE)
   expect_error(scr_bands(sc, sample = "oot"), "not in the scorecard")
   expect_error(scr_bands(sc, n_bandz = 3), "unused argument")
 })

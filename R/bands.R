@@ -288,13 +288,15 @@ print.scr_study_bands <- function(x, ...) {
   .study_print_summary(x$summary, x$level)
   for (nm in study) {
     t <- x$table[x$table$sample == nm]
-    cat(sprintf("\nBands on '%s' (event-richest first)\n", nm))
-    cat(sprintf("  %4s %-24s %7s %8s %9s %7s %8s %6s %8s\n", "band", "score", "pct", "rate", "rate_hi", "lift",
-                "capture", "KS", "p_rev"))
+    cat(sprintf("\nBands on '%s' (event-richest first; %.0f%% Jeffreys interval of the rate)\n", nm, 100 * x$level))
+    cat(sprintf("  %4s %-24s %7s %-26s %7s %8s %6s %9s\n", "band", "score", "pct", "rate [lo, hi]", "lift",
+                "capture", "KS", "p_rev_adj"))
     for (i in seq_len(nrow(t))) {
-      cat(sprintf("  %4d %-24s %7s %8s %9s %7s %8s %6s %8s\n", t$band[i], substr(t$label[i], 1, 24),
-                  .study_f(100 * t$pct[i], "%.1f%%"), .study_f(100 * t$rate[i], "%.2f%%"),
-                  .study_f(100 * t$rate_hi[i], "%.2f%%"), .study_f(t$lift[i], "%.2f"),
+      # the rate with its interval; p_rev_adj is the Holm-adjusted p-value of the reversal test
+      ri <- if (is.na(t$rate[i])) "-" else if (is.na(t$rate_lo[i])) sprintf("%.2f%%", 100 * t$rate[i]) else
+        sprintf("%.2f%% [%.2f%%, %.2f%%]", 100 * t$rate[i], 100 * t$rate_lo[i], 100 * t$rate_hi[i])
+      cat(sprintf("  %4d %-24s %7s %-26s %7s %8s %6s %9s\n", t$band[i], substr(t$label[i], 1, 24),
+                  .study_f(100 * t$pct[i], "%.1f%%"), ri, .study_f(t$lift[i], "%.2f"),
                   .study_f(100 * t$capture[i], "%.1f%%"), .study_f(t$ks[i], "%.3f"),
                   .study_f(t$p_reversal_adj[i], "%.3f")))
     }

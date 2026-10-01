@@ -87,7 +87,10 @@ population stability index. \emph{Journal of Risk Model Validation}, 14(4),
 \seealso{
 Other score-studies:
 \code{\link[=scr_bands]{scr_bands()}},
+\code{\link[=scr_claims]{scr_claims()}},
+\code{\link[=scr_operating]{scr_operating()}},
 \code{\link[=scr_rag]{scr_rag()}},
+\code{\link[=scr_score_cross]{scr_score_cross()}},
 \code{\link[=scr_tiers]{scr_tiers()}}
 }
 \concept{score-studies}

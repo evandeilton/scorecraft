@@ -70,13 +70,27 @@
 #'
 #' @section Labels:
 #'
-#' Tiers are numbered by event rate, lowest first: 3 tiers are labeled
-#' `"low"`, `"medium"`, `"high"`; 5 tiers `"very low"`, `"low"`,
-#' `"medium"`, `"high"`, `"very high"`; 7 tiers add `"extremely low"` and
-#' `"extremely high"`; any other count `"T1"`, `"T2"`, ... The labels
+#' Tiers are numbered by event rate, lowest first: 2 tiers are labeled
+#' `"low"`, `"high"`; 3 tiers `"low"`, `"medium"`, `"high"`; 4 tiers
+#' `"low"`, `"medium low"`, `"medium high"`, `"high"`; 5 tiers `"very low"`,
+#' `"low"`, `"medium"`, `"high"`, `"very high"`; 6 tiers `"very low"`,
+#' `"low"`, `"medium low"`, `"medium high"`, `"high"`, `"very high"`; 7
+#' tiers add `"extremely low"` and `"extremely high"` to the five; 1, 8 and 9
+#' tiers are numbered `"T1"`, `"T2"`, ... The labels
 #' describe the event rate, so under `objective = "risk"` they read as
 #' risk and under `"propensity"` as propensity (`measure`). The table lists
 #' the event-richest tier first.
+#'
+#' For production, every label also exists with its order in front
+#' (`tier_label`): `"01."` for the event-richest tier, the first row of the
+#' table, then `"02."`, ... down to the tier with the lowest event rate,
+#' under every objective and direction, and for labels given in `labels`
+#' too. With five tiers of a credit score, tier 5 is `"01.very high"` and
+#' tier 1 is `"05.very low"`: the number `tier` rises with the event rate,
+#' the prefix sorts from the highest rate down. The prefix is zero-padded to
+#' two digits. [scr_apply()] and [scr_sql()] return these numbered labels
+#' (`numbered = FALSE` gives the plain ones), so their output joins to the
+#' table by `tier_label`.
 #'
 #' @inheritParams scr_bands
 #' @param n_tiers Number of tiers requested (2 to 9).
@@ -97,7 +111,7 @@
 #' @param max_bins Pre-bins of the search (2 to 500). For a scorecard, `NULL`
 #'   uses `config$tier_max_bins` (100).
 #' @param labels Optional labels, one per tier achieved, in ascending order
-#'   of the event rate.
+#'   of the event rate. They get the order prefix of `tier_label` too.
 #' @param round_to Optional positive number: cuts are rounded to its
 #'   multiples.
 #' @param n_boot Bootstrap resamples of the stability study (`0`, the
@@ -112,7 +126,9 @@
 #' @return An object of class `c("scr_study_tiers", "scr_study", "list")`:
 #'   \describe{
 #'     \item{`table`}{One row per sample and tier, event-richest tier first:
-#'       `sample`, `tier`, `label`, `score_lo`, `score_hi`, `n`, `pct`,
+#'       `sample`, `tier`, `label`, `tier_label` (the label with its order
+#'       in front, `"01."` for the event-richest tier; see the section
+#'       Labels), `score_lo`, `score_hi`, `n`, `pct`,
 #'       `events`, `rate`, `rate_lo`, `rate_hi`, `lift`, `pct_event`,
 #'       `pct_nonevent`, `woe`, `p_adjacent` (one-sided Fisher exact test
 #'       that the tier has a higher event rate than the next lower tier) and
@@ -123,9 +139,11 @@
 #'       mix against the reference).}
 #'     \item{`cuts`, `cuts_raw`}{The cuts in use (rounded when `round_to` is
 #'       given) and the fitted ones.}
-#'     \item{`labels`}{The tier labels, lowest rate first.}
-#'     \item{`codes`, `code_labels`}{Tier number and label of every interval
-#'       in ascending score order, used by [scr_apply()] and [scr_sql()].}
+#'     \item{`labels`, `tier_labels`}{The tier labels, plain and numbered,
+#'       lowest rate first.}
+#'     \item{`codes`, `code_labels`}{Tier number and plain label of every
+#'       interval in ascending score order, used by [scr_apply()] and
+#'       [scr_sql()].}
 #'     \item{`method`, `criterion`, `measure`, `n_tiers_requested`,
 #'       `n_tiers`}{The fit.}
 #'     \item{`ledger`}{One row per step: `step`, `n_tiers`, `status` and
@@ -214,14 +232,33 @@ scr_tiers.data.frame <- function(x, score = "score", y = "y", objective = "risk"
 }
 
 #' Default tier labels by count, lowest event rate first
+#'
+#' Words for 2 to 7 tiers (an even count has no "medium"); 1, 8 and 9 tiers
+#' are numbered "T1", "T2", ...
 #' @keywords internal
 #' @noRd
 .tier_labels <- function(L) {
   switch(as.character(L),
+         "2" = c("low", "high"),
          "3" = c("low", "medium", "high"),
+         "4" = c("low", "medium low", "medium high", "high"),
          "5" = c("very low", "low", "medium", "high", "very high"),
+         "6" = c("very low", "low", "medium low", "medium high", "high", "very high"),
          "7" = c("extremely low", "very low", "low", "medium", "high", "very high", "extremely high"),
          paste0("T", seq_len(L)))
+}
+
+#' Tier labels prefixed by their order, "01" for the event-richest tier
+#'
+#' `labels` are in tier order (lowest event rate first), so the order runs
+#' the other way. The prefix is zero-padded to at least two digits, which
+#' makes the labels sort from the highest event rate to the lowest.
+#' @keywords internal
+#' @noRd
+.tier_numbered <- function(labels) {
+  L <- length(labels)
+  if (!L) return(character())
+  paste0(formatC(rev(seq_len(L)), width = max(2L, nchar(L)), flag = "0"), ".", labels)
 }
 
 #' Stack pool-adjacent-violators: block of every input so that e / n does
@@ -419,6 +456,8 @@ scr_tiers.data.frame <- function(x, score = "score", y = "y", objective = "risk"
   if (length(warn)) warning(fn, "(): ", paste(warn, collapse = "; "), " - see `ledger`.", call. = FALSE)
   # tier number of every ascending interval: 1 is the lowest event rate
   codes <- if (side == "high") seq_len(L) else rev(seq_len(L))
+  # production labels carry their order: "01" is the event-richest tier
+  num <- .tier_numbered(labs)
   # pooled cells can straddle a rounded cut: count again with the rounded
   # cuts as forced edges, so the tables agree with scr_apply() and the SQL
   if (!is.null(round_to) && length(cuts) && isTRUE(inp$meta$quantized) && is.function(rebuild)) {
@@ -435,7 +474,7 @@ scr_tiers.data.frame <- function(x, score = "score", y = "y", objective = "risk"
     tier <- codes[o]
     # each tier against the next lower one (the next row)
     pa <- c(.study_fisher_gt(raw$e[-L], raw$n[-L], raw$e[-1L], raw$n[-1L]), NA_real_)[seq_len(L)]
-    tt <- data.table::data.table(sample = nm, tier = tier, label = labs[tier], tb[, list(score_lo, score_hi, n, pct, events, rate, rate_lo, rate_hi, lift, pct_event, pct_nonevent, woe)],
+    tt <- data.table::data.table(sample = nm, tier = tier, label = labs[tier], tier_label = num[tier], tb[, list(score_lo, score_hi, n, pct, events, rate, rate_lo, rate_hi, lift, pct_event, pct_nonevent, woe)],
                                  p_adjacent = pa, p_adjacent_adj = .study_holm(pa))
     tabs[[nm]] <- tt
     ps <- attr(tb, "psi")
@@ -453,7 +492,7 @@ scr_tiers.data.frame <- function(x, score = "score", y = "y", objective = "risk"
                                            conservative, level, min_pct, min_events, alpha, side, n_boot, seed) else NULL
   structure(list(
     table = data.table::rbindlist(tabs), summary = data.table::rbindlist(summ), cuts = cuts, cuts_raw = cuts_raw,
-    labels = labs, codes = codes, code_labels = labs[codes], method = method,
+    labels = labs, tier_labels = num, codes = codes, code_labels = labs[codes], method = method,
     criterion = if (identical(method, "optimal")) criterion else NA_character_,
     measure = inp$objective, n_tiers_requested = fit$n_req, n_tiers = L,
     ledger = data.table::rbindlist(ledger), stability = stab, objective = inp$objective, direction = inp$direction,
@@ -518,10 +557,12 @@ print.scr_study_tiers <- function(x, ...) {
   for (nm in study) {
     t <- x$table[x$table$sample == nm]
     cat(sprintf("\nTiers on '%s' (event-richest first)\n", nm))
-    cat(sprintf("  %4s %-15s %-24s %7s %8s %-19s %8s\n", "tier", "label", "score", "pct", "rate",
+    # the numbered label, as scr_apply() and scr_sql() assign it (objects fitted before it existed print the plain one)
+    lab <- if (is.null(t$tier_label)) t$label else t$tier_label
+    cat(sprintf("  %4s %-18s %-24s %7s %8s %-19s %8s\n", "tier", "label", "score", "pct", "rate",
                 sprintf("[%.0f%% CI]", 100 * x$level), "p_adj"))
     for (i in seq_len(nrow(t))) {
-      cat(sprintf("  %4d %-15s %-24s %7s %8s %-19s %8s\n", t$tier[i], substr(t$label[i], 1, 15),
+      cat(sprintf("  %4d %-18s %-24s %7s %8s %-19s %8s\n", t$tier[i], substr(lab[i], 1, 18),
                   substr(sprintf("[%s, %s)", format(t$score_lo[i]), format(t$score_hi[i])), 1, 24),
                   .study_f(100 * t$pct[i], "%.1f%%"), .study_f(100 * t$rate[i], "%.2f%%"),
                   if (is.na(t$rate_lo[i])) "" else sprintf("[%.2f%%, %.2f%%]", 100 * t$rate_lo[i], 100 * t$rate_hi[i]),

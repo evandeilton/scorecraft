@@ -97,7 +97,7 @@ scorecard, \code{NULL} uses \code{config$tier_min_events} (20).}
 uses \code{config$tier_max_bins} (100).}
 
 \item{labels}{Optional labels, one per tier achieved, in ascending order
-of the event rate.}
+of the event rate. They get the order prefix of \code{tier_label} too.}
 
 \item{round_to}{Optional positive number: cuts are rounded to its
 multiples.}
@@ -144,7 +144,9 @@ and \code{value_events}).}
 An object of class \code{c("scr_study_tiers", "scr_study", "list")}:
 \describe{
 \item{\code{table}}{One row per sample and tier, event-richest tier first:
-\code{sample}, \code{tier}, \code{label}, \code{score_lo}, \code{score_hi}, \code{n}, \code{pct},
+\code{sample}, \code{tier}, \code{label}, \code{tier_label} (the label with its order
+in front, \code{"01."} for the event-richest tier; see the section
+Labels), \code{score_lo}, \code{score_hi}, \code{n}, \code{pct},
 \code{events}, \code{rate}, \code{rate_lo}, \code{rate_hi}, \code{lift}, \code{pct_event},
 \code{pct_nonevent}, \code{woe}, \code{p_adjacent} (one-sided Fisher exact test
 that the tier has a higher event rate than the next lower tier) and
@@ -155,9 +157,11 @@ that the tier has a higher event rate than the next lower tier) and
 mix against the reference).}
 \item{\code{cuts}, \code{cuts_raw}}{The cuts in use (rounded when \code{round_to} is
 given) and the fitted ones.}
-\item{\code{labels}}{The tier labels, lowest rate first.}
-\item{\code{codes}, \code{code_labels}}{Tier number and label of every interval
-in ascending score order, used by \code{\link[=scr_apply]{scr_apply()}} and \code{\link[=scr_sql]{scr_sql()}}.}
+\item{\code{labels}, \code{tier_labels}}{The tier labels, plain and numbered,
+lowest rate first.}
+\item{\code{codes}, \code{code_labels}}{Tier number and plain label of every
+interval in ascending score order, used by \code{\link[=scr_apply]{scr_apply()}} and
+\code{\link[=scr_sql]{scr_sql()}}.}
 \item{\code{method}, \code{criterion}, \code{measure}, \code{n_tiers_requested},
 \code{n_tiers}}{The fit.}
 \item{\code{ledger}}{One row per step: \code{step}, \code{n_tiers}, \code{status} and
@@ -241,13 +245,27 @@ reference volume that keeps its tier).
 \section{Labels}{
 
 
-Tiers are numbered by event rate, lowest first: 3 tiers are labeled
-\code{"low"}, \code{"medium"}, \code{"high"}; 5 tiers \code{"very low"}, \code{"low"},
-\code{"medium"}, \code{"high"}, \code{"very high"}; 7 tiers add \code{"extremely low"} and
-\code{"extremely high"}; any other count \code{"T1"}, \code{"T2"}, ... The labels
+Tiers are numbered by event rate, lowest first: 2 tiers are labeled
+\code{"low"}, \code{"high"}; 3 tiers \code{"low"}, \code{"medium"}, \code{"high"}; 4 tiers
+\code{"low"}, \code{"medium low"}, \code{"medium high"}, \code{"high"}; 5 tiers \code{"very low"},
+\code{"low"}, \code{"medium"}, \code{"high"}, \code{"very high"}; 6 tiers \code{"very low"},
+\code{"low"}, \code{"medium low"}, \code{"medium high"}, \code{"high"}, \code{"very high"}; 7
+tiers add \code{"extremely low"} and \code{"extremely high"} to the five; 1, 8 and 9
+tiers are numbered \code{"T1"}, \code{"T2"}, ... The labels
 describe the event rate, so under \code{objective = "risk"} they read as
 risk and under \code{"propensity"} as propensity (\code{measure}). The table lists
 the event-richest tier first.
+
+For production, every label also exists with its order in front
+(\code{tier_label}): \code{"01."} for the event-richest tier, the first row of the
+table, then \code{"02."}, ... down to the tier with the lowest event rate,
+under every objective and direction, and for labels given in \code{labels}
+too. With five tiers of a credit score, tier 5 is \code{"01.very high"} and
+tier 1 is \code{"05.very low"}: the number \code{tier} rises with the event rate,
+the prefix sorts from the highest rate down. The prefix is zero-padded to
+two digits. \code{\link[=scr_apply]{scr_apply()}} and \code{\link[=scr_sql]{scr_sql()}} return these numbered labels
+(\code{numbered = FALSE} gives the plain ones), so their output joins to the
+table by \code{tier_label}.
 }
 
 \examples{
@@ -286,7 +304,10 @@ the tiers in production.
 
 Other score-studies:
 \code{\link[=scr_bands]{scr_bands()}},
+\code{\link[=scr_claims]{scr_claims()}},
+\code{\link[=scr_operating]{scr_operating()}},
 \code{\link[=scr_rag]{scr_rag()}},
-\code{\link[=scr_rag_plan]{scr_rag_plan()}}
+\code{\link[=scr_rag_plan]{scr_rag_plan()}},
+\code{\link[=scr_score_cross]{scr_score_cross()}}
 }
 \concept{score-studies}

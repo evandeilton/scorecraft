@@ -72,6 +72,18 @@ the presets are listed in \code{\link[=scr_irb_params]{scr_irb_params()}}; users
 checking the tables against the texts in force before any regulatory use.
 }
 
+\section{Score studies}{
+
+
+The score studies, stage 13 of \code{\link[=scr_config_keys]{scr_config_keys()}}, read a score against
+its outcome from one table of counts per score value: \code{\link[=scr_bands]{scr_bands()}}
+(percentile and tail bands frozen on the reference), \code{\link[=scr_tiers]{scr_tiers()}} (a few
+labeled tiers), \code{\link[=scr_rag]{scr_rag()}} (red, amber and green lights against the
+reference), \code{\link[=scr_claims]{scr_claims()}} (tested statements about event rates),
+\code{\link[=scr_operating]{scr_operating()}} (the cut under volume, budget and capacity constraints)
+and \code{\link[=scr_score_cross]{scr_score_cross()}} (two scores on the same rows).
+}
+
 \section{Parallelism}{
 
 

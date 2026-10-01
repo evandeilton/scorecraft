@@ -28,7 +28,7 @@ scr_apply(x, newdata, ...)
 
 \method{scr_apply}{scr_pd}(x, newdata, ...)
 
-\method{scr_apply}{scr_study}(x, newdata, score = "score", ...)
+\method{scr_apply}{scr_study}(x, newdata, score = "score", numbered = TRUE, ...)
 }
 \arguments{
 \item{x}{An object from \code{\link[=scr_select]{scr_select()}} (returns WOE/bin of the approved
@@ -53,6 +53,10 @@ predicted EAD and the floor flag) or \code{"pool"} (pool and measure).}
 
 \item{score}{For \code{scr_study}: name of the score column of \code{newdata}.
 \code{newdata} may also be a numeric vector of scores.}
+
+\item{numbered}{For a tiers study: \code{TRUE} (default) returns the tier
+labels with their order in front (\code{"01.very high"}), \code{FALSE} the plain
+labels. Band labels are intervals and never get a prefix.}
 }
 \value{
 A \code{data.table} with one row per row of \code{newdata}.
@@ -95,6 +99,13 @@ For a score study (\code{\link[=scr_bands]{scr_bands()}}, \code{\link[=scr_tiers
 (as a copy) with \code{tier}, the band or tier number, and \code{tier_label}. The
 intervals are left-closed: \code{score >= cut} is the upper side, and a
 missing score gives a missing tier.
+
+The labels of a tiers study carry their order, \code{"01."} for the tier with
+the highest event rate (the first row of the tiers table) down to the
+tier with the lowest, so they sort from the event-richest tier under any
+objective and direction; \code{tier} is unchanged and still rises with the
+event rate. The result joins to the \code{tier_label} column of the tiers
+table. \code{numbered = FALSE} returns the plain labels (its \code{label} column).
 }
 
 \examples{

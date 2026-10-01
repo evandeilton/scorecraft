@@ -63,6 +63,16 @@
 #' the presets are listed in [scr_irb_params()]; users are responsible for
 #' checking the tables against the texts in force before any regulatory use.
 #'
+#' @section Score studies:
+#'
+#' The score studies, stage 13 of [scr_config_keys()], read a score against
+#' its outcome from one table of counts per score value: [scr_bands()]
+#' (percentile and tail bands frozen on the reference), [scr_tiers()] (a few
+#' labeled tiers), [scr_rag()] (red, amber and green lights against the
+#' reference), [scr_claims()] (tested statements about event rates),
+#' [scr_operating()] (the cut under volume, budget and capacity constraints)
+#' and [scr_score_cross()] (two scores on the same rows).
+#'
 #' @section Parallelism:
 #'
 #' Column-wise work (binning, hold-out revalidation, CSI) and the bootstrap

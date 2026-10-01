@@ -27,6 +27,7 @@ articles:
   - scorecraft
   - coarse-classing
   - alignment-and-portfolio
+  - score-studies
 - title: IRB risk parameters
   navbar: IRB
   contents:
@@ -57,7 +58,7 @@ reference:
   contents:
   - has_concept("metrics")
 - title: Score studies
-  desc: Percentile bands, tiers and red / amber / green lights of a score against its reference.
+  desc: Percentile bands, tiers, red / amber / green lights, claims about event rates, the operating point under constraints and two scores on the same rows.
   contents:
   - has_concept("score-studies")
 - title: Portfolio and database

@@ -38,14 +38,20 @@
 #' `study_bands_<target>.xlsx` or `study_tiers_<target>.xlsx`, with its
 #' summary, its table, the cuts and the settings (plus the ledger and the
 #' stability of the tiers, and the lights of `rag` when given); a set of
-#' lights from [scr_rag()] writes `rag_<target>.xlsx`.
+#' lights from [scr_rag()] writes `rag_<target>.xlsx`; claims from
+#' [scr_claims()] write `claims_<target>.xlsx`; an operating point from
+#' [scr_operating()] writes `operating_<target>.xlsx` (curve, optimum,
+#' constraints); two crossed scores from [scr_score_cross()] write
+#' `score_cross_<score_a>_<score_b>.xlsx` (cross table, overlap, overlap
+#' rates, association).
 #'
 #' The timeline and vintage sheets need the date column of the split; when it
 #' is absent they carry an availability row instead of a fabricated number.
 #'
 #' @param x An object from [scr_select()], [scr_scorecard()],
 #'   [scr_coarse_classing()], [scr_pd()], [scr_lgd()], [scr_ead()],
-#'   [scr_capital()], [scr_bands()], [scr_tiers()] or [scr_rag()].
+#'   [scr_capital()], [scr_bands()], [scr_tiers()], [scr_rag()],
+#'   [scr_claims()], [scr_operating()] or [scr_score_cross()].
 #' @param dir Output directory. Created if it does not exist.
 #' @param stamp If `TRUE` (default), writes to a timestamped subdirectory,
 #'   preserving earlier runs.
