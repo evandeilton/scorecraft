@@ -316,6 +316,30 @@ test_that("numeric groups and segments are listed in numeric order", {
   expect_identical(scr_segments(d, segment = "seg")$table$segment, c("app", "store", "web"))
 })
 
+test_that("a factor segment column is listed in the order of its levels", {
+  d <- seg_df(3000, 21)
+  ref <- scr_segments(d, segment = "seg")
+  d$fac <- factor(d$seg, levels = c("web", "app", "store", "unused"))
+  sg <- scr_segments(d, segment = "fac")
+  # the levels in use, in their order; an unused level is not a segment
+  expect_identical(sg$table$segment, c("web", "app", "store"))
+  # the same rows as the text column, only reordered
+  expect_equal(sg$table[match(ref$table$segment, segment), !"segment"], ref$table[, !"segment"])
+  expect_equal(sg$test, ref$test); expect_equal(sg$pooled, ref$pooled)
+  # within every group of `by`, and with the missing segment last
+  d$fac[1:40] <- NA
+  sb <- scr_segments(d, segment = "fac", by = "per")
+  expect_identical(sb$table$segment, rep(c("web", "app", "store", "(missing)"), 2))
+  # an ordered factor follows its levels too; a factor of numbers is not sorted as numbers
+  d$ord <- factor(d$seg, levels = c("store", "web", "app"), ordered = TRUE)
+  expect_identical(scr_segments(d, segment = "ord")$table$segment, c("store", "web", "app"))
+  d$num <- factor(c(app = 9, store = 10, web = 100)[d$seg], levels = c(100, 9, 10))
+  expect_identical(scr_segments(d, segment = "num")$table$segment, c("100", "9", "10"))
+  # groups keep the order of their labels
+  d$fper <- factor(d$per, levels = c("h2", "h1"))
+  expect_identical(scr_segments(d, segment = "seg", by = "fper")$test$group, c("h1", "h2"))
+})
+
 test_that("under one model for all segments the rules keep their size", {
   skip_on_cran()
   # 200 samples of 4,000 rows from one model: a small segment (250 rows, about 38 events) and four large ones

@@ -222,13 +222,14 @@ scr_strategy <- function(x, breaks = NULL, decisions = NULL, revenue_good = 1, l
   breaks <- breaks %||% x$breaks
   s <- x$samples[[sample]]
   if (is.null(s)) stop("sample '", sample, "' does not exist.", call. = FALSE)
-  band <- cut(s$score, breaks = breaks, include.lowest = TRUE)
-  d <- data.table::data.table(band = band, y = s$y, score = s$score)[
+  # aggregated by the integer band index; the labels are attached to the table
+  b <- .score_band(s$score, breaks)
+  d <- data.table::data.table(band = b$idx, y = s$y, score = s$score)[
     , .(n = .N, events = sum(y), event_rate = mean(y), min_score = min(score), max_score = max(score)), by = band]
   # band richest in the good case first: descending score when the good case sits at the high end
-  d <- if (xor(identical(x$direction, "higher_is_safer"), prop)) d[order(-as.integer(band))] else d[order(band)]
-  idx <- as.integer(d$band)   # band index, kept for the score boundary of the crossing
-  d[, `:=`(id = seq_len(.N), pct = n / sum(n), band = as.character(band))]
+  d <- if (xor(identical(x$direction, "higher_is_safer"), prop)) d[order(-band)] else d[order(band)]
+  idx <- d$band   # band index, kept for the score boundary of the crossing
+  d[, `:=`(id = seq_len(.N), pct = n / sum(n), band = b$labels[band])]
   bw <- .band_woe(d$events, d$n - d$events)
   d[, `:=`(pct_event = bw$pct_event, pct_nonevent = bw$pct_nonevent, odds_event = bw$odds_event, log_odds = bw$log_odds)]
   # EP and break-even on the rate of the bad case; `breakeven` is stored as an event rate
@@ -383,8 +384,9 @@ scr_reject <- function(x, population = NULL, accepted = NULL, multipliers = NULL
   s <- x$samples[[sample]]
   if (is.null(s)) stop("sample '", sample, "' does not exist.", call. = FALSE)
   breaks <- x$breaks
-  band_dev <- cut(s$score, breaks = breaks, include.lowest = TRUE)
-  dev <- data.table::data.table(band = band_dev, y = s$y)[, .(n_dev = .N, events_dev = sum(y), rate_dev = mean(y)), by = band]
+  # bands as integer indices; the labels are attached to the coverage table
+  b_dev <- .score_band(s$score, breaks)
+  dev <- data.table::data.table(band = b_dev$idx, y = s$y)[, .(n_dev = .N, events_dev = sum(y), rate_dev = mean(y)), by = band]
 
   n_pop <- NA_integer_; n_unk <- 0L; pop_tb <- NULL
   if (!is.null(population)) {
@@ -392,20 +394,19 @@ scr_reject <- function(x, population = NULL, accepted = NULL, multipliers = NULL
     acc <- if (is.null(accepted)) rep(FALSE, length(sp)) else as.logical(accepted)
     if (length(acc) != length(sp)) stop("`accepted` must have the length of `population`.", call. = FALSE)
     if (anyNA(acc)) stop("`accepted` must be TRUE or FALSE on every row (no NA).", call. = FALSE)
-    band_pop <- cut(sp, breaks = breaks, include.lowest = TRUE)
-    pop_tb <- data.table::data.table(band = band_pop, acc = acc)[, .(n_pop = .N, n_unknown = sum(!acc)), by = band]
+    pop_tb <- data.table::data.table(band = .score_band(sp, breaks)$idx, acc = acc)[, .(n_pop = .N, n_unknown = sum(!acc)), by = band]
     n_pop <- length(sp); n_unk <- sum(!acc)
   }
-  lv <- levels(band_dev)
-  cov <- data.table::data.table(band = factor(lv, levels = lv))
+  lv <- b_dev$labels
+  cov <- data.table::data.table(band = seq_along(lv))
   cov <- merge(cov, dev, by = "band", all.x = TRUE)
   if (!is.null(pop_tb)) cov <- merge(cov, pop_tb, by = "band", all.x = TRUE) else cov[, `:=`(n_pop = NA_integer_, n_unknown = 0L)]
   for (cn in c("n_dev", "events_dev", "n_unknown")) cov[is.na(get(cn)), (cn) := 0L]
   cov[, coverage := if (all(is.na(n_pop))) NA_real_ else n_dev / pmax(1L, n_pop)]
   cov[, coverage_flag := data.table::fifelse(n_dev == 0L, "no_outcome",
                           data.table::fifelse(events_dev < 30L, "few_events", "ok"))]
-  cov <- if (identical(x$direction, "higher_is_safer")) cov[order(-as.integer(band))] else cov[order(band)]
-  cov[, band := as.character(band)]
+  cov <- if (identical(x$direction, "higher_is_safer")) cov[order(-band)] else cov[order(band)]
+  cov[, band := lv[band]]
 
   sens <- data.table::rbindlist(lapply(multipliers, function(m) {
     r <- data.table::copy(cov)
