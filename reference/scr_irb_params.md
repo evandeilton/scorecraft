@@ -3,9 +3,9 @@
 Returns the numeric tables the internal ratings-based (IRB) functions
 read: probability of default (PD) floors, loss given default (LGD) input
 floors for own estimates, supervisory LGD values of the foundation
-approach, standardised credit conversion factors (CCF),
+approach, standardized credit conversion factors (CCF),
 asset-correlation parameters of the risk-weight function, maturity
-rules, the output floor and the standardised risk weights used for the
+rules, the output floor and the standardized risk weights used for the
 floor comparison. Three presets ship: `"bcb"` (Brazil, BCB Resolutions
 303/2023 and 229/2022), `"basel3_final"` (the consolidated Basel
 Framework in force from 2023) and `"crr3"` (the EU text applicable from
@@ -75,11 +75,11 @@ Other irb-parameters:
 p <- scr_irb_params("bcb")
 p
 #> <scr_irb_params> framework: bcb
-#>   BCB Resolutions 303/2023 (IRB) and 229/2022 (standardised); values as tables, editable
+#>   BCB Resolutions 303/2023 (IRB) and 229/2022 (standardized); values as tables, editable
 #>   PD floors:   corporate 0.05% | bank 0.05% | sovereign none | retail_mortgage 0.05% | qrre_transactor 0.05% | qrre_revolver 0.10% | retail_other 0.05% 
 #>   LGD floors (unsecured):  corporate 25% | retail_mortgage n/a | qrre 50% | retail_other 30% 
 #>   F-IRB LGD: senior_unsecured 75% | priority_claim 45% | subordinated 75% | secured_financial 0% | secured_receivables 20% | secured_real_estate 20% | secured_other 25%
-#>   CCF (standardised): uncond_cancellable 10% | commitment 40% | nif_ruf 50% | direct_substitute 100% | own-estimate floor 50% of the standardised value
+#>   CCF (standardized): uncond_cancellable 10% | commitment 40% | nif_ruf 50% | direct_substitute 100% | own-estimate floor 50% of the standardized value
 #>   correlation: corporate 0.12-0.24 (k=50) | mortgage 0.15 | QRRE 0.04 | other retail 0.03-0.16 (k=35) | FI x1.25 | SME adj 0.04 (BRL m 15-300)
 #>   confidence 0.999 | scaling factor 1 | M default 2.5 in [1, 5] | output floor 72.5% | SA risk weights: 26 rows
 p$pd_floor

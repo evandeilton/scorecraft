@@ -96,7 +96,7 @@ summary(res)             # full text report
 #> - Rows: 4,200 (train 2,800 / hold-out 1,400) - split out-of-time (cut: 2026-05-01)
 #> - Event rate: train 14.25% | hold-out 14.50%
 #> - Convention (objective = "risk"): target = 1 is the BAD case. Score: more points = lower probability of the event (safer).
-#> - Class modelled as the event: `1`
+#> - Class modeled as the event: `1`
 #> - Preset: moderate | seed: 2203 | variables target: 10 to 25 | algorithm: jedi
 #> 
 #> ## Funnel

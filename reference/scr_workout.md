@@ -1,13 +1,13 @@
 # Workout LGD: the reference data set from default events and cash flows
 
-Builds the reference data set (RDS) of realised loss given default, one
+Builds the reference data set (RDS) of realized loss given default, one
 row per default event, from a table of default events and the long table
 of their post-default cash flows. Every cash flow is discounted to the
 default date at the reference rate in force at that date plus
 `lgd_discount_add_on`, with monthly compounding over whole months:
 \$\$\mathrm{PV} = \frac{A}{(1 + r/12)^{t}}\$\$ where `t` is the number
 of whole months between the default date and the cash-flow date. The
-realised LGD is the economic loss \$\$\mathrm{LGD} = \frac{E -
+realized LGD is the economic loss \$\$\mathrm{LGD} = \frac{E -
 \mathrm{PV}(R) + \mathrm{PV}(C) + \mathrm{PV}(D) +
 C^{\mathrm{ind}}}{E}\$\$ with `E` the exposure at default, `R`
 recoveries, `C` direct costs, `D` drawings after default and `C^ind` the
@@ -104,7 +104,7 @@ identifiers, `default_date`, `ead`, `product`, drivers, `status`,
   recovery rate by month in default); an open event at or beyond
   `lgd_t_max` is treated as closed with no further recovery.
 
-- **Bounds.** With `lgd_floor_at_zero` the realised LGD used in the
+- **Bounds.** With `lgd_floor_at_zero` the realized LGD used in the
   averages is floored at zero and with `lgd_cap_at_one` capped at one;
   `lgd_raw` always keeps the unbounded value.
 

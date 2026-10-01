@@ -1,6 +1,6 @@
 # Changelog
 
-## scorecraft (development version)
+## scorecraft 0.3.1
 
 - [`scr_strategy()`](https://evandeilton.github.io/scorecraft/reference/scr_strategy.md)
   reports the event and non-event distributions of each band
@@ -19,6 +19,9 @@
 - The points table and the `Variable_Gains_IV` sheet of
   [`scr_export()`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
   add `pct_event` and `pct_nonevent` per bin.
+- Documentation, messages and comments use American English spelling.
+  Column names, configuration keys and data values are unchanged (for
+  example `utilisation`, `realised` and the `"grey"` traffic light).
 
 ## scorecraft 0.3.0
 

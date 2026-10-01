@@ -76,7 +76,7 @@ An `scr_split` object with `data` (typed), `target`, `train_idx`,
 ## Details
 
 The split prefers out-of-time by `date_col`: it is the only one that
-tests generalisation to a future period. The cut is made on the
+tests generalization to a future period. The cut is made on the
 **distinct** date values, not by row quantile: it picks the smallest set
 of most recent periods that already reaches `ratio` of the population.
 Without a date column, or with a single period, it falls back to random
@@ -88,12 +88,12 @@ left out of both train and hold-out, with a warning in the log.
 
 ## Event orientation
 
-`event_level` changes **what is modelled**. Passing `0` makes class 0
-the event: the sign of every WOE flips, the emitted SQL changes, the
-points change. For a text target, the second level in alphabetical order
-is the event by default, and the choice is always reported. Not to be
-confused with `config$objective`, which only orients the reading and the
-points scale.
+`event_level` changes **what is modeled**. Passing `0` makes class 0 the
+event: the sign of every WOE flips, the emitted SQL changes, the points
+change. For a text target, the second level in alphabetical order is the
+event by default, and the choice is always reported. Not to be confused
+with `config$objective`, which only orients the reading and the points
+scale.
 
 ## See also
 

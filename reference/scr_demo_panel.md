@@ -4,7 +4,7 @@
 whose slip probability depends on a latent risk; arrears are
 proportional to the exposure, with a few obligors whose arrears stay
 below the absolute materiality threshold on purpose; 25 obligors are
-restructured from month 18; `score` is a behavioural score (higher =
+restructured from month 18; `score` is a behavioral score (higher =
 safer) with genuine rank-ordering power. Built for
 [`scr_default()`](https://evandeilton.github.io/scorecraft/reference/scr_default.md),
 [`scr_default_rate()`](https://evandeilton.github.io/scorecraft/reference/scr_default_rate.md)
@@ -46,7 +46,7 @@ A `data.frame` with 21,600 rows and 7 columns:
 
 - `score`:
 
-  Behavioural score, higher is safer.
+  Behavioral score, higher is safer.
 
 ## Source
 

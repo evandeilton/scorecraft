@@ -567,7 +567,7 @@ scr_core(runs, min_targets = 2)
 #> 7:  vl_hist_04         2      10.0 churn, default
 ```
 
-A variable approved on both targets is not an artefact of one target
+A variable approved on both targets is not an artifact of one target
 definition. `relaxation` records whether the consensus loosened its vote
 threshold to reach the minimum number of variables, as it did for
 `churn`. The AUC here is that of the selection-stage models; the
@@ -642,7 +642,7 @@ all.equal(a700$offset + a700$factor * ln_odds, sc_700$samples$holdout$score)
 
 That identity is what “comparable” means: two scorecards are on the same
 scale when the same log-odds gives the same points, and a scorecard is
-rescaled, not remodelled, when only `factor` and `offset` change.
+rescaled, not remodeled, when only `factor` and `offset` change.
 
 ## 9. A checklist for the model committee
 

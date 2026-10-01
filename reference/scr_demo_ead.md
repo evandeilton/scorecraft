@@ -2,13 +2,13 @@
 
 1,200 revolving facilities (cards, overdrafts and revolving lines) of
 950 obligors, observed monthly (snapshots dated the first day of the
-month) over 30 months. Utilisation follows a facility-specific level
+month) over 30 months. Utilization follows a facility-specific level
 with a mild drift; about 10% of the facilities default, with the
-utilisation ramping up over the twelve months before the default month
+utilization ramping up over the twelve months before the default month
 at an intensity that depends on the drivers a CCF model is expected to
-find (utilisation, product, months on book, days past due). Some
+find (utilization, product, months on book, days past due). Some
 defaulters are fully drawn or over the limit at the reference date, some
-repay before default (negative realised CCF), some have their limit cut
+repay before default (negative realized CCF), some have their limit cut
 before default, a share of all facilities gets a limit change and a few
 facilities originate inside the window (fast defaults). Built for
 [`scr_ead_data()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_data.md),
@@ -60,7 +60,7 @@ A `data.frame` with 34,811 rows and 9 columns:
 
 - `defaulted`:
 
-  0/1 flag, 1 from the default month onwards.
+  0/1 flag, 1 from the default month onward.
 
 ## Source
 

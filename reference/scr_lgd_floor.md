@@ -1,7 +1,7 @@
 # Input floor on the downturn LGD per pool
 
 Applies the LGD input floor of the framework's parameter table, blended
-between the unsecured and the collateralised floor with the secured
+between the unsecured and the collateralized floor with the secured
 share of the exposure: \$\$\mathrm{floor} = \mathrm{floor}\_U\\(1 - s) +
 \mathrm{floor}\_S\\s,\qquad \mathrm{LGD}^{\mathrm{final}} =
 \max(\mathrm{LGD}^{DT}, \mathrm{floor})\$\$ A missing unsecured floor

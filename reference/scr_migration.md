@@ -5,7 +5,7 @@ at the second, the row probabilities `p_ij`, the upper and lower matrix
 weighted bandwidths \$\$MWB\_{up} = \frac{\sum\_{i\<j} \|i-j\|\\ N_i\\
 p\_{ij}}{\sum_i \max(\|i-K\|, \|i-1\|)\\ N_i \sum\_{j\>i} p\_{ij}},\$\$
 (and the mirror image for downgrades), the `z` statistic of every
-off-diagonal cell against its neighbour closer to the diagonal (a
+off-diagonal cell against its neighbor closer to the diagonal (a
 significantly positive value means the probability does not decay away
 from the diagonal) and the mobility summary. Values of `grade_t1`
 outside `1..K` count as `default`, `NA` as `closed`; both stay out of

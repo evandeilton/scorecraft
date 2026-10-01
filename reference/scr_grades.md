@@ -7,7 +7,7 @@ boundaries are score cut points, direction-aware: grade 1 is the safest
 [`scr_master_scale()`](https://evandeilton.github.io/scorecraft/reference/scr_master_scale.md)
 between percentiles 1 and 99 of the calibrated PD and converts its PD
 bounds into scores through the calibrated alignment; `"quantile"` cuts
-equal-count score bands (cut points moved half-way between neighbouring
+equal-count score bands (cut points moved half-way between neighboring
 scores, so a boundary never sits on an observed value); `"supplied"`
 grades by the PD bands of a given master scale.
 
@@ -85,7 +85,7 @@ sample), `scorecard`, `sample`, `ct`, `sample_rate`. Also `calibration`
 ## Details
 
 Grades below `min_obligors` obligors or `min_defaults` defaults are
-merged with the neighbour of closer default rate; the sequence of grade
+merged with the neighbor of closer default rate; the sequence of grade
 PDs is then repaired by pool-adjacent-violators when `monotone = TRUE`,
 and every merge is recorded in `repairs`. The grade PD (`pd_be`) is the
 long-run average of the grade default rates when a default-rate series

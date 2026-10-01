@@ -1,7 +1,7 @@
 # Stage 1: descriptive triage and sentinel resolution
 
 Profiles every candidate **on the training rows only**, decides its fate
-and materialises the clean data for train and hold-out with the same
+and materializes the clean data for train and hold-out with the same
 values (training median, `"MISSING"` level). A sentinel or missing mass
 with weight (`special_min_share`) and signal (`special_min_woe`) becomes
 a categorical flag `<column><flag_suffix>`, which the engine bins and

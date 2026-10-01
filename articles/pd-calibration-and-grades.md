@@ -53,7 +53,7 @@ cfg <- scr_config(verbose = FALSE, nthread = 2, use_ranger = FALSE,
 ## 1. The default flag and the default-rate series
 
 `scr_demo_panel` is a monthly panel: 600 obligors over 36 months with
-days past due, arrears, exposure, a restructuring flag and a behavioural
+days past due, arrears, exposure, a restructuring flag and a behavioral
 score.
 [`scr_default()`](https://evandeilton.github.io/scorecraft/reference/scr_default.md)
 runs the definition of default over it as a small state machine per
@@ -209,7 +209,7 @@ PD, with ratio `(p99 / p1)^(1 / (K - 1))` for `K` grades, and whose PD
 boundaries are converted into score cut points through the calibrated
 alignment. Grade 1 is the safest, the highest scores under
 `higher_is_safer`. Grades with fewer than `min_obligors` obligors or
-`min_defaults` defaults are merged with the neighbour of closer default
+`min_defaults` defaults are merged with the neighbor of closer default
 rate; the sequence of grade PDs is then repaired by
 pool-adjacent-violators when it is not monotone. Every merge is recorded
 in `repairs`.
@@ -582,7 +582,7 @@ conservatism as miscalibration; its light is green because every grade
 sits on the conservative side, and the statistic stays in the table so
 that a validator sees both readings. The grade PSI is large because the
 panel is a different population from the development sample: its
-behavioural score puts two thirds of the obligors in grade 1 where the
+behavioral score puts two thirds of the obligors in grade 1 where the
 hold-out had a quarter. That is exactly what the PSI is there to flag; a
 validator would now ask whether the cut points belong on that population
 at all.
@@ -614,10 +614,10 @@ head(v$stability$psi, 3)
 counts the obligors in grade `i` at the cohort start and grade `j`
 twelve months later, with defaults and closed accounts in their own
 columns, and reports the upper and lower matrix-weighted bandwidths, the
-`z` of every off-diagonal cell against its neighbour closer to the
+`z` of every off-diagonal cell against its neighbor closer to the
 diagonal, and the mobility summary. The validation pools it over the
 cohorts whose end date is observed. On this panel the matrix is
-diagonal: the behavioural score of `scr_demo_panel` is constant per
+diagonal: the behavioral score of `scr_demo_panel` is constant per
 obligor, so an obligor either stays in its grade or defaults, and the
 bandwidths are undefined for want of a single move.
 

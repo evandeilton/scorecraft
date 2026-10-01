@@ -22,7 +22,7 @@
   IRB](https://evandeilton.github.io/scorecraft/articles/lgd-and-ead-under-irb.md):
 
   Workout LGD, the two-stage cure and severity model, pools, downturn,
-  floors and in-default estimates; realised CCFs, CCF pools, downturn
+  floors and in-default estimates; realized CCFs, CCF pools, downturn
   and the EAD floor; validation, production SQL and the ledgers.
 
 - [Expected loss and regulatory

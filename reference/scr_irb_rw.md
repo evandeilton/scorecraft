@@ -1,6 +1,6 @@
 # IRB risk weight of one or many exposures
 
-The asymptotic single risk factor function, vectorised over exposures:
+The asymptotic single risk factor function, vectorized over exposures:
 PD floors by asset class, LGD input floors for own estimates
 (`approach = "airb"`; the unsecured column of `params$lgd_floor` unless
 `collateral` names another column, blended with `secured_share`), the

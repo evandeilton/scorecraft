@@ -1,6 +1,6 @@
 # Apply the WOE transformation or the scorecard to new data
 
-Materialises in R exactly what the production SQL does: the frozen Stage
+Materializes in R exactly what the production SQL does: the frozen Stage
 1 pre-processing (training median, special-population flags,
 `"MISSING"`) followed by the frozen Stage 2 binning and, for a
 scorecard, by the points. Nothing is refitted. The two paths, R and SQL,
@@ -115,7 +115,7 @@ str(scr_apply(res, new)[, 1:3])
 #>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...
 #>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...
 #>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...
-#>  - attr(*, ".internal.selfref")=<pointer: 0x564947131a30> 
+#>  - attr(*, ".internal.selfref")=<pointer: 0x5565c2bb4a30> 
 sc <- scr_scorecard(res)
 head(scr_apply(sc, new))
 #>         link       prob    score score_points

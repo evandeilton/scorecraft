@@ -189,7 +189,7 @@ in-default estimates.
 - [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
   : Estimate CCF pools from the reference data set
 - [`scr_ead_data()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_data.md)
-  : Build the realised-CCF reference data set from facility snapshots
+  : Build the realized-CCF reference data set from facility snapshots
 - [`scr_ead_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_downturn.md)
   : Downturn CCF per pool
 - [`scr_ead_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_validate.md)
@@ -209,7 +209,7 @@ in-default estimates.
 - [`scr_pd_stress()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_stress.md)
   : Stressed PD of the one-factor model
 - [`scr_sa_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_sa_rw.md)
-  : Standardised risk weight of an exposure
+  : Standardized risk weight of an exposure
 
 ## Data
 

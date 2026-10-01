@@ -9,7 +9,7 @@ production SQL of
 [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md)
 reproduces R exactly. About 3 % of the exposures are in default with a
 best estimate of expected loss and a provision close to it; the other
-columns feed the standardised comparison and the accounting stage rule
+columns feed the standardized comparison and the accounting stage rule
 of
 [`scr_ecl()`](https://evandeilton.github.io/scorecraft/reference/scr_ecl.md).
 

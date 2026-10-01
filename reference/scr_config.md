@@ -64,7 +64,7 @@ higher chance of engaging.
 | `odds_orientation`  | `safe:event`        | `event:safe`              |
 
 **`objective` does not touch the selection.** It does not change the
-modelled target, the cut points, the IV or the shortlist; it acts on the
+modeled target, the cut points, the IV or the shortlist; it acts on the
 direction of the points scale, on the odds orientation of the alignment
 and on the vocabulary of the reports. To model the other class as the
 event, the argument is `event_level` in

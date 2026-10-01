@@ -1,4 +1,4 @@
-# Standardised risk weight of an exposure
+# Standardized risk weight of an exposure
 
 Lookup in `params$sa_rw`: regulatory retail (`"retail_other"`,
 `"qrre_*"`: 75 %, or the transactor weight), residential mortgages by
@@ -72,7 +72,7 @@ scr_sa_rw(
 
 ## Value
 
-A numeric vector of standardised risk weights (decimals).
+A numeric vector of standardized risk weights (decimals).
 
 ## References
 

@@ -22,7 +22,7 @@ that chains them for the common case:
 
 3.  **Binning and screening**
     ([`scr_bin()`](https://evandeilton.github.io/scorecraft/reference/scr_bin.md)):
-    optimal bins parallelised by column, eight admission rules, hold-out
+    optimal bins parallelized by column, eight admission rules, hold-out
     revalidation with frozen bins, redundancy pruning.
 
 4.  **Multi-strategy selection**
@@ -89,7 +89,7 @@ and
 support the grade structure, the migration analysis and the
 point-in-time bridge. LGD:
 [`scr_workout()`](https://evandeilton.github.io/scorecraft/reference/scr_workout.md)
-discounts recovery cash flows into realised LGD,
+discounts recovery cash flows into realized LGD,
 [`scr_lgd()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd.md)
 fits the cure and severity stages and the pools,
 [`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md),
@@ -102,7 +102,7 @@ and
 [`scr_lgd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_validate.md)
 close the pools and the validation. EAD:
 [`scr_ead_data()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_data.md)
-builds the realised conversion factors from facility snapshots and
+builds the realized conversion factors from facility snapshots and
 [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
 the pools;
 [`scr_ead_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_downturn.md)
@@ -145,8 +145,8 @@ message when the cap applies. Set the option to `Inf` to disable it.
 
 `objective` declares the vocabulary and the direction of the scale
 (`"risk"`: more points, safer; `"propensity"`: more points, more likely)
-and does **not** change what is modelled. `event_level` changes what is
-modelled. Both are documented in
+and does **not** change what is modeled. `event_level` changes what is
+modeled. Both are documented in
 [`scr_config()`](https://evandeilton.github.io/scorecraft/reference/scr_config.md)
 and
 [`scr_split()`](https://evandeilton.github.io/scorecraft/reference/scr_split.md).

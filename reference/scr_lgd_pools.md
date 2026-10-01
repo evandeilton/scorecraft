@@ -1,10 +1,10 @@
 # LGD pools from the predicted LGD
 
 Cuts the training predictions into `n_pools` quantile bands, merges the
-bands with fewer than `min_defaults` defaults into the neighbour with
-the closer long-run average, then merges adjacent bands whose long-run
+bands with fewer than `min_defaults` defaults into the neighbor with the
+closer long-run average, then merges adjacent bands whose long-run
 averages break the increasing order (pool-adjacent violators), so that
-the pools are ordered both in predicted and in realised LGD. Per pool:
+the pools are ordered both in predicted and in realized LGD. Per pool:
 the default-weighted long-run average (the regulatory estimate), the
 exposure-weighted one, the standard error, the category-C margin of
 conservatism (one-sided 95% t interval on the mean) and their sum.

@@ -1,8 +1,8 @@
 # Synthetic monthly reference rate series
 
-A smooth annualised reference rate by month from 2019-01 to 2026-06,
-falling to two per cent in 2020-2021 and rising above thirteen per cent
-in 2022-2023, used by
+A smooth annualized reference rate by month from 2019-01 to 2026-06,
+falling to two percent in 2020-2021 and rising above thirteen percent in
+2022-2023, used by
 [`scr_workout()`](https://evandeilton.github.io/scorecraft/reference/scr_workout.md)
 as the rate at the default date.
 

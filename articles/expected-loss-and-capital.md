@@ -39,7 +39,7 @@ year at the 99.9% quantile of a one-factor model, and charges capital
 for the difference between the loss at that quantile and the expected
 loss. Every number that a regime fixes in that calculation (PD and LGD
 floors, asset correlations, the maturity rule, the confidence level, the
-standardised risk weights that the output floor compares against) lives
+standardized risk weights that the output floor compares against) lives
 in a table returned by
 [`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md)
 and selected by a preset; nothing is hard-coded in the functions that
@@ -49,7 +49,7 @@ built from it.
 ## 2. The parameter tables
 
 [`scr_irb_params()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_params.md)
-returns every regime-specific number as a table; the print summarises
+returns every regime-specific number as a table; the print summarizes
 them.
 
 ``` r
@@ -57,11 +57,11 @@ them.
 p <- scr_irb_params("bcb")
 p
 #> <scr_irb_params> framework: bcb
-#>   BCB Resolutions 303/2023 (IRB) and 229/2022 (standardised); values as tables, editable
+#>   BCB Resolutions 303/2023 (IRB) and 229/2022 (standardized); values as tables, editable
 #>   PD floors:   corporate 0.05% | bank 0.05% | sovereign none | retail_mortgage 0.05% | qrre_transactor 0.05% | qrre_revolver 0.10% | retail_other 0.05% 
 #>   LGD floors (unsecured):  corporate 25% | retail_mortgage n/a | qrre 50% | retail_other 30% 
 #>   F-IRB LGD: senior_unsecured 75% | priority_claim 45% | subordinated 75% | secured_financial 0% | secured_receivables 20% | secured_real_estate 20% | secured_other 25%
-#>   CCF (standardised): uncond_cancellable 10% | commitment 40% | nif_ruf 50% | direct_substitute 100% | own-estimate floor 50% of the standardised value
+#>   CCF (standardized): uncond_cancellable 10% | commitment 40% | nif_ruf 50% | direct_substitute 100% | own-estimate floor 50% of the standardized value
 #>   correlation: corporate 0.12-0.24 (k=50) | mortgage 0.15 | QRRE 0.04 | other retail 0.03-0.16 (k=35) | FI x1.25 | SME adj 0.04 (BRL m 15-300)
 #>   confidence 0.999 | scaling factor 1 | M default 2.5 in [1, 5] | output floor 72.5% | SA risk weights: 26 rows
 p$pd_floor
@@ -225,11 +225,11 @@ scr_irb_rw(0.01, 0.05, asset_class = "retail_other", collateral = "real_estate",
 #> [1] 0.1
 ```
 
-## 4. The standardised comparison
+## 4. The standardized comparison
 
 The output floor compares the IRB result with a fraction of what the
-standardised approach would require, so the same book needs a
-standardised risk weight per exposure.
+standardized approach would require, so the same book needs a
+standardized risk weight per exposure.
 [`scr_sa_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_sa_rw.md)
 looks it up in `params$sa_rw`: regulatory retail, mortgages by
 loan-to-value band, corporates by rating bucket or the SME weight,
@@ -292,7 +292,7 @@ cap <- scr_capital(d, segment = "segment", asset_class = "asset_class", m = "m",
 cap
 #> <scr_capital> bcb | airb | 5,000 exposures in 6 segments
 #>   EAD 1,940,402,792 | EL 31,028,477 (1.60%) | RWA IRB 1,214,315,257 | density 62.6% | capital (8.0%) 97,145,221
-#>   standardised RWA 1,553,528,212 | IRB/SA 0.782 | output floor 72.5%: not binding (headroom 88,007,303)
+#>   standardized RWA 1,553,528,212 | IRB/SA 0.782 | output floor 72.5%: not binding (headroom 88,007,303)
 #>   provisions 43,425,571 vs EL: shortfall 0 | excess 12,397,094 | tier 2 add-back 7,285,892 (cap 7,285,892)
 #>   floors: pd 194 rows, RWA 5,221,058 | lgd 0 rows, RWA         0 | m 0 rows, RWA         0 | HHI 0.00231 (n_eff 433, max share 1.19%)
 #>   top segments by RWA:
@@ -307,7 +307,7 @@ cap
 ### Totals and the reconciliation by segment
 
 Every figure on the print is in `cap$totals`, and `cap$segments` breaks
-it down: EAD-weighted inputs, the IRB and standardised risk-weighted
+it down: EAD-weighted inputs, the IRB and standardized risk-weighted
 assets side by side, expected loss and provisions.
 
 ``` r
@@ -339,12 +339,12 @@ cap$segments[, .(segment, n, ead, pd_mean, lgd_mean, rw, rwa_irb, irb_sa_ratio, 
 ```
 
 The `irb_sa_ratio` column says where the IRB approach saves the most
-against the standardised one; mortgages sit far below the 72.5% line on
+against the standardized one; mortgages sit far below the 72.5% line on
 their own, the large corporate book just above it and the SME book well
 above, and the output floor is applied to the total, not by segment. The
 total here is credit risk only: the regulatory floor compares the whole
 of the risk-weighted assets, market and operational risk included, with
-72.5% of their standardised counterparts, so the figure below is a
+72.5% of their standardized counterparts, so the figure below is a
 credit-portfolio view of the floor, not the bank’s.
 
 ### Floors and the output-floor bridge
@@ -698,7 +698,7 @@ cap$ledger[, .(action, detail)]
 #> 1:                                                       bcb | approach airb | params preset
 #> 2:                  pd: column | lgd: column | ead: column | asset_class: column asset_class
 #> 3:                     pd floor on 194 rows, lgd floor on 0 rows, maturity clipped on 0 rows
-#> 4:                                                72.5% of the standardised RWA: not binding
+#> 4:                                                72.5% of the standardized RWA: not binding
 #> 5: EL 31028477 vs provisions 43425571: shortfall 0, excess 12397094, tier 2 add-back 7285892
 mc <- cap$model_card
 keys <- c("framework", "approach", "params_modified", "pd_source", "n_exposures", "n_defaulted",

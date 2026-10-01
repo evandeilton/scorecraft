@@ -137,9 +137,9 @@ numerically, by an automated test that runs both paths.
 `scr_pd` wraps the scorecard SQL in a common table expression and adds a
 `CASE` on the score cut points that yields `grade` and `pd_final`.
 `scr_lgd` chains the driver bins of both stages, the logits, the pool
-`CASE` and the floored result. `scr_ead` computes the utilisation and
+`CASE` and the floored result. `scr_ead` computes the utilization and
 the undrawn amount, assigns the pool from the frozen cut points and
-applies the greatest of the model, the drawn amount and the standardised
+applies the greatest of the model, the drawn amount and the standardized
 floor. `scr_capital` carries the constants of every pool (PD, LGD, `k`,
 risk weight) in a `pool_params` table joined on segment and grade, so no
 normal quantile is evaluated at run time; `level` chooses the exposure
@@ -165,7 +165,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-09-30 23:30:35
+#> -- Generated on 2026-10-01 00:26:31
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().

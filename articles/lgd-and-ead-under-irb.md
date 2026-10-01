@@ -233,7 +233,7 @@ fits `LGD = P(cure) LGD_cure + (1 - P(cure)) E[LGD | no cure]`. The cure
 stage is a binary model on `is_cure` with the scorecard machinery:
 optimal binning on the training cohorts, WOE, hold-out revalidation, a
 logistic regression on the WOE columns with the sign check. The severity
-stage bins the same drivers against the realised LGD of the non-cures
+stage bins the same drivers against the realized LGD of the non-cures
 with the continuous binner and fits a fractional logit on the bin means.
 The split is by cohort of default: the last 30% of the default dates are
 the hold-out.
@@ -311,7 +311,7 @@ m$severity$sign_check
 ```
 
 Metrics on both samples come with a bootstrap interval on Somers’ D (the
-generalised AUC is `(D + 1) / 2`) and on the loss capture ratio.
+generalized AUC is `(D + 1) / 2`) and on the loss capture ratio.
 
 ``` r
 
@@ -327,7 +327,7 @@ m$metrics[, .(sample, n, rmse, r2, spearman, gauc, gauc_lo, gauc_hi, lcr)]
 ```
 
 The pools cut the training predictions into quantile bands, merge the
-bands with fewer than `lgd_min_defaults_bin` defaults into the neighbour
+bands with fewer than `lgd_min_defaults_bin` defaults into the neighbor
 with the closer long-run average, then merge adjacent bands whose
 averages break the increasing order. With 620 training defaults and a
 minimum of 100 per pool, the seven target bands collapse to three. Per
@@ -360,7 +360,7 @@ m$pools[, .(pool, pred_lo, pred_hi, n, lra, lra_ew, se, moc_c, lgd_dt, floor, lg
 
 [`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md)
 quantifies the downturn per pool from user-supplied periods. Under
-`"type1"` the downturn value is the realised LGD of the training
+`"type1"` the downturn value is the realized LGD of the training
 defaults whose default date falls in the periods (a pool with fewer than
 ten such defaults falls back to the add-on); the reference value, the
 mean of the two worst calendar years of the pool’s training defaults, is
@@ -370,7 +370,7 @@ for capital is `min(1, max(LRA + MoC, DT + MoC))`. The cap at one is the
 package’s choice; the EBA guidelines cap the type-3 estimate at 105%, so
 a pool that loses more than its exposure in a downturn needs a decision
 the cap does not take. The reference rate of the demo rises above
-thirteen per cent in 2022 and 2023, which is the reason recorded.
+thirteen percent in 2022 and 2023, which is the reason recorded.
 
 ``` r
 
@@ -439,7 +439,7 @@ The floor binds in none of the three pools on this data, and that fact
 is what the ledger records.
 [`scr_elbe()`](https://evandeilton.github.io/scorecraft/reference/scr_elbe.md)
 derives the in-default grid: for every pool and every age since default,
-the expected loss best estimate (ELBE) is the mean realised LGD of the
+the expected loss best estimate (ELBE) is the mean realized LGD of the
 training defaults still in workout at that age, and the in-default LGD
 adds the unexpected-loss increment `(LGD_DT - LRA)` scaled by the share
 of the recoveries still to come, read from the recovery profile. At age
@@ -533,7 +533,7 @@ all.equal(got$lgd_final, ap$lgd_final)
 runs on the hold-out (or on new data) against the training reference:
 calibration per pool and for the portfolio (one-sided t-test where
 under-estimation is the failure, loss shortfall, coverage of the
-realised mean by the downturn LGD), discrimination against the training
+realized mean by the downturn LGD), discrimination against the training
 gAUC, stability of the pool and driver-bin distributions, and the
 homogeneity within and heterogeneity between pools. The lights use the
 p-value thresholds of `pd_lights` and the fixed PSI thresholds.
@@ -543,7 +543,7 @@ p-value thresholds of `pd_lights` and the fixed PSI thresholds.
 v <- scr_lgd_validate(m)
 v
 #> <scr_lgd_validation> sample holdout | n 265
-#>   calibration: realised 41.7% vs estimate 39.1% | t 1.33 p 0.092 [green] | loss shortfall -1.1% | downturn covers: TRUE
+#>   calibration: realized 41.7% vs estimate 39.1% | t 1.33 p 0.092 [green] | loss shortfall -1.1% | downturn covers: TRUE
 #>   discrimination: gAUC 0.693 [0.655, 0.728] vs initial 0.672 (S -1.10, p 0.865) [green] | Spearman 0.536 | LCR 0.460
 #>   stability: pool PSI 0.0056 (stable; adjusted stable) | drivers: prior_dpd_max_cure 0.009, months_on_book_cure 0.001, region_cure 0.029, product_sev 0.001, prior_dpd_max_sev 0.001, months_on_book_sev 0.002
 #>   calibration_portfolio_t        green  
@@ -568,9 +568,9 @@ between the two halves of each pool, split at its median prediction,
 finds that the halves still differ, so the pools are not yet
 homogeneous. That is what the battery is for; the fix is more defaults
 or a lower minimum per pool, and either is a ledger row. Two ambers sit
-beside it: one pool realises a little more than it estimates (the
+beside it: one pool realizes a little more than it estimates (the
 one-sided t-test at p = 0.04), and the loss shortfall says the portfolio
-estimate is slightly below the realised loss; `dt_covers` is `TRUE` in
+estimate is slightly below the realized loss; `dt_covers` is `TRUE` in
 every pool, which is what the downturn add-on and the margin are there
 for.
 
@@ -589,31 +589,31 @@ basename(unlist(scr_export(m, out, stamp = FALSE, validation = v, elbe = e)$file
 
 ## Part B: exposure at default
 
-### Realised conversion factors
+### Realized conversion factors
 
 Write `R` for the reference date, `D` for the default date, `E` for the
-drawn amount and `L` for the limit. The realised credit conversion
+drawn amount and `L` for the limit. The realized credit conversion
 factor of a default event is the share of the undrawn amount at the
 reference date that was drawn by the default date,
-`CCF = (E_D - E_R) / (L_R - E_R)`, and the realised EAD is the drawn
+`CCF = (E_D - E_R) / (L_R - E_R)`, and the realized EAD is the drawn
 amount at the default date, never capped at the limit. The reference
 date is one horizon before the default (twelve months here under the
 fixed approach; the start of the calendar cohort under the cohort
 approach). The CCF is only meaningful while the undrawn part is
-material: when the utilisation at the reference date is at or above
+material: when the utilization at the reference date is at or above
 `ccf_u_star`, when nothing is undrawn, or when the facility is over its
 limit, the denominator is small or negative and the row is routed to the
 limit factor `LF = E_D / L_R` instead of being dropped; a facility with
 no usable limit uses the exposure factor `E_D / E_R`. Two floors apply
-at different places: the realised CCF is floored at zero for the
+at different places: the realized CCF is floored at zero for the
 averages (a facility that repaid before default; the raw value is kept),
 and the applied CCF of an own estimate is floored at a fraction of the
-standardised CCF, one half of `ccf_sa_ccf` here, while the predicted EAD
+standardized CCF, one half of `ccf_sa_ccf` here, while the predicted EAD
 is never below the drawn amount. The default `ccf_sa_ccf = 0.40` is the
-standardised CCF of a commitment; unconditionally cancellable retail
-lines, which include most credit cards, carry 10% under the standardised
+standardized CCF of a commitment; unconditionally cancelable retail
+lines, which include most credit cards, carry 10% under the standardized
 approach, which would put the floor at 0.05. Set `ccf_sa_ccf` to the
-standardised CCF of the product being modelled.
+standardized CCF of the product being modeled.
 
 ### The reference data set: `scr_ead_data()`
 
@@ -621,7 +621,7 @@ standardised CCF of the product being modelled.
 months with a 0/1 default flag; every run of ones opens a default event
 at its first month.
 [`scr_ead_data()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_data.md)
-finds the reference snapshot of every event, computes the realised
+finds the reference snapshot of every event, computes the realized
 measure and applies the funnel rules.
 
 ``` r
@@ -646,7 +646,7 @@ ed
 The funnel keeps everything it can and names what it did: a facility
 younger than the horizon is kept from its first snapshot and flagged
 `FAST_DEFAULT`; an over-limit facility is routed to the limit factor; a
-negative realised CCF (the facility repaid before defaulting) is floored
+negative realized CCF (the facility repaid before defaulting) is floored
 at zero; a CCF above one (a limit raised or a drawing beyond the limit)
 is kept as observed because no cap is configured.
 
@@ -702,7 +702,7 @@ ed$summary
 
 [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md)
 splits by reference date (the most recent dates are the hold-out), bins
-every candidate driver against the realised CCF on the training rows
+every candidate driver against the realized CCF on the training rows
 with the continuous binner, revalidates the frozen bins on the hold-out,
 and admits a driver only when it passes four named rules: enough
 defaults in every bin, separation of the bin means (an F-test), the
@@ -739,15 +739,15 @@ m_ead$drivers[, .(feature, n_bins, eta2, direction, p_anova, eta2_holdout, psi_f
 #> 4:   stable    FALSE NO_SEPARATION
 ```
 
-Only the utilisation at the reference date is admitted: the product does
+Only the utilization at the reference date is admitted: the product does
 not separate the means, the months on book reverse their order on the
 hold-out and the days past due collapse to one bin. Two pools follow the
-two utilisation bins, the lower utilisation drawing the larger share of
+two utilization bins, the lower utilization drawing the larger share of
 its undrawn amount. Per pool: the long-run average, `moc_est`, a
 one-sided normal estimation-error margin at `ccf_moc_alpha`;
 `ccf_final = max(lra, ccf_dt) + moc_est`; the floor `0.5 * 0.40 = 0.20`;
 and `ccf_applied = max(ccf_final, ccf_floor)`. The `LF` pool has no
-scalar floor because its floor depends on the utilisation of the row.
+scalar floor because its floor depends on the utilization of the row.
 
 ``` r
 
@@ -766,7 +766,7 @@ m_ead$pools[, .(pool, measure, n, lra, lra_ew, se, moc_est, ccf_dt, ccf_final, c
 
 [`scr_ead_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_downturn.md)
 takes the periods and a mandatory reason. Under `"type1"` the downturn
-value of a pool is `max(lra, observed)`, the default-weighted realised
+value of a pool is `max(lra, observed)`, the default-weighted realized
 CCF of the events whose default date falls in the periods; the applied
 CCF is recomputed and the ledger records periods, method and reason. The
 observed value is computed on the training rows only, like the long-run
@@ -776,7 +776,7 @@ training events in the periods (the `LF` pool here, with four) should be
 read with care.
 
 The period chosen covers the first three quarters of 2024, when the
-realised CCFs of the training rows run above their long-run average in
+realized CCFs of the training rows run above their long-run average in
 every pool; the table shows the observed value above `lra` in each.
 
 ``` r
@@ -800,7 +800,7 @@ m_ead$downturn$table
 
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
 needs the limit, the drawn amount and the raw drivers of the admitted
-set; the utilisation is derived. It returns the pool, the measure, the
+set; the utilization is derived. It returns the pool, the measure, the
 applied CCF, the model EAD, the floor EAD (`drawn + 0.20 * undrawn`),
 the predicted EAD as the greatest of the drawn amount, the model and the
 floor, and whether the floor is the binding term. The five rows below
@@ -839,7 +839,7 @@ ap_ead
 
 The floor never binds here because every applied CCF is above 0.20; the
 column is there for the pool where it would. The SQL has four blocks:
-utilisation and undrawn amount, the driver bin index from the frozen cut
+utilization and undrawn amount, the driver bin index from the frozen cut
 points, the pool from the cells with the `LF` branch, and the applied
 CCF with the predicted EAD as a `GREATEST` of the three terms.
 
@@ -882,9 +882,9 @@ all.equal(got_ead$ead_predicted, ap_ead$ead_predicted)
 ```
 
 [`scr_ead_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_validate.md)
-compares realised and predicted on the hold-out per pool and in total:
-the one-sided t-test of realised above predicted, the EAD adequacy ratio
-(realised over predicted EAD), the gAUC against the development value,
+compares realized and predicted on the hold-out per pool and in total:
+the one-sided t-test of realized above predicted, the EAD adequacy ratio
+(realized over predicted EAD), the gAUC against the development value,
 the back-test by cohort and the stability of the pool and bin
 distributions. The numeric limits of the lights are a convention of the
 package and the summary says so in its last column.
@@ -917,9 +917,9 @@ v_ead$backtest[, .(cohort, n, realised, predicted, p, adequacy, light_adequacy)]
 ```
 
 Every calibration light is green because the estimate sits above the
-realised values on the hold-out: the margin and the downturn push the
+realized values on the hold-out: the margin and the downturn push the
 applied CCF up, and an adequacy ratio below one means the predicted EAD
-covers the realised one. The discrimination light is green only because
+covers the realized one. The discrimination light is green only because
 the hold-out gAUC does not fall below the development value; the level
 itself is weak, 0.57 with an interval that reaches down to 0.50, so the
 single admitted driver separates the pools little better than chance. On
@@ -977,7 +977,7 @@ m$ledger[, .(action, detail, reason)]
 #>  8:                                                                                                                 OK
 #>  9:                                                                                               fractional_logit: OK
 #> 10:                                                                                                                ltv
-#> 11:                                         4 band(s) below 100 defaults merged into the neighbour with the closer LRA
+#> 11:                                          4 band(s) below 100 defaults merged into the neighbor with the closer LRA
 #> 12:                                 provisional: type 3 add-on 15.0%; run scr_lgd_downturn() with the downturn periods
 #> 13:                                            type1; add-on 15.0%; periods 2022-01-01 to 2023-12-31; mean impact 4.1%
 #> 14:         bcb retail_other: unsecured 30.0%, real_estate 10.0%, secured share 40.0%; binding in 0.0% of the defaults

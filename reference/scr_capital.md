@@ -3,7 +3,7 @@
 Runs
 [`scr_irb_rw()`](https://evandeilton.github.io/scorecraft/reference/scr_irb_rw.md)
 on every exposure, aggregates by segment, compares the IRB result with
-the standardised approach for the output floor, reconciles regulatory
+the standardized approach for the output floor, reconciles regulatory
 expected loss with the provision stock (shortfall deducted from capital;
 excess eligible as tier 2 up to 0.6 % of the IRB risk-weighted assets),
 measures the impact of each input floor, runs a fixed sensitivity grid
@@ -78,7 +78,7 @@ scr_capital(
 - granular:
 
   `TRUE`, `FALSE` or a column name: whether the retail exposures belong
-  to a granular regulatory retail pool (the standardised comparison uses
+  to a granular regulatory retail pool (the standardized comparison uses
   the non-granular weight otherwise).
 
 - params:
@@ -169,7 +169,7 @@ cap <- scr_capital(scr_demo_portfolio, segment = "segment", asset_class = "asset
 cap
 #> <scr_capital> bcb | airb | 5,000 exposures in 6 segments
 #>   EAD 1,940,402,792 | EL 31,028,477 (1.60%) | RWA IRB 1,214,315,257 | density 62.6% | capital (8.0%) 97,145,221
-#>   standardised RWA 1,553,528,212 | IRB/SA 0.782 | output floor 72.5%: not binding (headroom 88,007,303)
+#>   standardized RWA 1,553,528,212 | IRB/SA 0.782 | output floor 72.5%: not binding (headroom 88,007,303)
 #>   provisions 43,425,571 vs EL: shortfall 0 | excess 12,397,094 | tier 2 add-back 7,285,892 (cap 7,285,892)
 #>   floors: pd 194 rows, RWA 5,221,058 | lgd 0 rows, RWA         0 | m 0 rows, RWA         0 | HHI 0.00231 (n_eff 433, max share 1.19%)
 #>   top segments by RWA:

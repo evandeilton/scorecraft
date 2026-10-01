@@ -1,7 +1,7 @@
 # Variables that cross several targets
 
 Which variables were approved on how many targets. A stable core across
-targets is the best argument in favour of a variable.
+targets is the best argument in favor of a variable.
 
 ## Usage
 

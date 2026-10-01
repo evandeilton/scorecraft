@@ -3,7 +3,7 @@
 For each row of `newdata`, the `k` variables whose contribution in
 points fell furthest below the reference. The reference is the mean
 points of the variable on the training population (`"mean"`, the
-Regulation B safe harbour referenced to the average) or the maximum
+Regulation B safe harbor referenced to the average) or the maximum
 points of the variable (`"max"`). Only applies to the additive
 scorecard; a tree challenger has no reason codes.
 

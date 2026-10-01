@@ -34,12 +34,12 @@ An object of class `scr_lgd_validation`: `calibration` (per pool),
 ## Details
 
 - **Calibration.** Per pool and for the portfolio, the one-sided t-test
-  of realised against estimated LGD (the pool long-run average), where
+  of realized against estimated LGD (the pool long-run average), where
   under-estimation is the failure: `p = 1 - Phi(t)`; the loss shortfall
-  `1 - sum(LGD_real E) / sum(LGD_pred E)`; the coverage of the realised
-  mean by the downturn LGD; the regression of realised on predicted.
+  `1 - sum(LGD_real E) / sum(LGD_pred E)`; the coverage of the realized
+  mean by the downturn LGD; the regression of realized on predicted.
 
-- **Discrimination.** Somers' D / generalised AUC of the prediction with
+- **Discrimination.** Somers' D / generalized AUC of the prediction with
   its bootstrap interval, compared with the training value through
   `S = (gAUC_init - gAUC_curr) / sigma_curr`; Spearman rho; the loss
   capture ratio; R-squared.
@@ -75,7 +75,7 @@ m <- scr_lgd(wo, drivers = c("product", "ltv", "prior_dpd_max"), config = cfg)
 v <- scr_lgd_validate(m)
 v
 #> <scr_lgd_validation> sample holdout | n 265
-#>   calibration: realised 41.7% vs estimate 39.7% | t 1.03 p 0.152 [green] | loss shortfall -0.9% | downturn covers: TRUE
+#>   calibration: realized 41.7% vs estimate 39.7% | t 1.03 p 0.152 [green] | loss shortfall -0.9% | downturn covers: TRUE
 #>   discrimination: gAUC 0.686 [0.647, 0.726] vs initial 0.655 (S -1.53, p 0.937) [green] | Spearman 0.530 | LCR 0.473
 #>   stability: pool PSI 0.0014 (stable; adjusted stable) | drivers: prior_dpd_max_cure 0.009, product_sev 0.001, prior_dpd_max_sev 0.001
 #>   calibration_portfolio_t        green  

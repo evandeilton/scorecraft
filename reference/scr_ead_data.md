@@ -1,9 +1,9 @@
-# Build the realised-CCF reference data set from facility snapshots
+# Build the realized-CCF reference data set from facility snapshots
 
 One row per default event (or per event and reference date under the
 variable-horizon comparison), with the facility as it stood at the
-reference date and the realised exposure at default (EAD) at the default
-date, from which the realised credit conversion factor (CCF) follows.
+reference date and the realized exposure at default (EAD) at the default
+date, from which the realized credit conversion factor (CCF) follows.
 The reference date follows `config$ccf_horizon`: `"fixed"` takes the
 snapshot `ccf_horizon_months` before the default month (the nearest
 earlier snapshot when that month is missing; the first snapshot for a
@@ -90,15 +90,15 @@ exposure-weighted averages by cohort and measure, with a total row),
 
 ## Details
 
-The realised measure per row follows `config$ccf_measure`: under
-`"auto"` the undrawn-limit factor (CCF) when the utilisation at the
+The realized measure per row follows `config$ccf_measure`: under
+`"auto"` the undrawn-limit factor (CCF) when the utilization at the
 reference date is below `ccf_u_star` and the limit factor (LF) at or
 above it; rows with nothing undrawn or over the limit at the reference
 date are always routed to the limit factor (`ZERO_UNDRAWN`,
-`OVER_LIMIT_AT_REF`), never dropped. The raw realised value is kept in
+`OVER_LIMIT_AT_REF`), never dropped. The raw realized value is kept in
 `ccf_raw`; `ccf` carries the value after the optional floor
 (`ccf_floor_realised`) and cap (`ccf_cap_realised`), both logged in the
-funnel (`NEGATIVE_CCF_FLOORED`, `CCF_ABOVE_ONE`). The realised EAD is
+funnel (`NEGATIVE_CCF_FLOORED`, `CCF_ABOVE_ONE`). The realized EAD is
 the drawn amount at the default date, uncapped; with
 `post_default_drawings_in = "ccf"` it is the maximum drawn amount over
 the default event when `defaulted` is given.

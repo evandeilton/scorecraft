@@ -1,7 +1,7 @@
 # Estimate CCF pools from the reference data set
 
 Splits the reference data set by reference date (the most recent cohorts
-form the hold-out), bins every driver against the realised CCF with the
+form the hold-out), bins every driver against the realized CCF with the
 continuous binner
 ([`scr_bin_continuous()`](https://evandeilton.github.io/scorecraft/reference/scr_bin_continuous.md))
 on the training rows, revalidates the frozen bins on the hold-out and
@@ -62,14 +62,14 @@ the data set); `metrics` also carries `n`, `n_main`, `gauc_se`,
 ## Details
 
 Per pool the estimate is the long-run (default-weighted) average of the
-realised values on the training rows, `lra`; `moc_est` is the one-sided
+realized values on the training rows, `lra`; `moc_est` is the one-sided
 normal estimation-error margin at `config$ccf_moc_alpha`; `ccf_dt` is
 the downturn value (equal to `lra` until
 [`scr_ead_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_ead_downturn.md)
 is run); `ccf_final = max(lra, ccf_dt) + moc_est`;
 `ccf_floor = params$ccf_floor_fraction * config$ccf_sa_ccf`; and
 `ccf_applied = max(ccf_final, ccf_floor)`. For the `LF` pool the floor
-depends on the utilisation and is applied per row by
+depends on the utilization and is applied per row by
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md).
 
 ## See also

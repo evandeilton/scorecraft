@@ -1,7 +1,7 @@
 # Downturn LGD per pool
 
 Quantifies the downturn per pool from user-supplied downturn periods.
-`method = "type1"` (observed impact): the default-weighted realised LGD
+`method = "type1"` (observed impact): the default-weighted realized LGD
 of the training defaults whose default date falls inside the periods; a
 pool with fewer than ten such defaults falls back to type 3.
 `method = "type3"`: the long-run average plus `add_on`.

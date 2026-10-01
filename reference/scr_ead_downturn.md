@@ -2,7 +2,7 @@
 
 Quantifies the downturn component of the CCF from user-supplied downturn
 periods. `"type1"` (observed impact) takes, per pool, the
-default-weighted average of the realised values of the training events
+default-weighted average of the realized values of the training events
 whose default date falls in the periods (the hold-out stays independent)
 and sets `ccf_dt = max(lra, observed)`; `"type3"` (long-run average plus
 add-on) sets `ccf_dt = lra + add_on`; `"none"` resets `ccf_dt = lra`.

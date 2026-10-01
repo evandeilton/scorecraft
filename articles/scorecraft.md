@@ -303,7 +303,7 @@ rate of 14.5%, yet a positive expected profit: declining it would look
 prudent and lose money. The cumulative profit peaks at that band.
 `loss_bad` is a flat loss per bad account here; in an IRB setting it is
 the product of the exposure at default and the loss given default,
-modelled in the article on [LGD and
+modeled in the article on [LGD and
 EAD](https://evandeilton.github.io/scorecraft/articles/lgd-and-ead-under-irb.html)
 and combined in [expected loss and
 capital](https://evandeilton.github.io/scorecraft/articles/expected-loss-and-capital.html).
@@ -351,7 +351,7 @@ band: the prudent cut that loses money.
 ## 5. Reject inference
 
 The scorecard is fitted on accounts that were accepted and therefore
-have an outcome. Classical reject inference (parcelling, augmentation,
+have an outcome. Classical reject inference (parceling, augmentation,
 extrapolation) assigns outcomes to the declined applicants, and it
 cannot be validated on the data at hand: every method rests on an
 assumption about the rejects that the accepts cannot test (Hand and
@@ -657,7 +657,7 @@ identical(mo3$psi$flag_adjusted, mo$psi$flag_adjusted)
 #> [1] TRUE
 ```
 
-Every sheet is sanitised before it is written (a cell starting with `=`,
+Every sheet is sanitized before it is written (a cell starting with `=`,
 `+`, `-` or `@` cannot become a formula), and each workbook is verified
 after writing.
 [`?scr_export`](https://evandeilton.github.io/scorecraft/reference/scr_export.md)
@@ -702,11 +702,11 @@ d$ref_date <- as.character(d$ref_date)
 DBI::dbWriteTable(con, "dtm", d)
 nrow(scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42))
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.5
-#> [1] 2072
+#> [1] 2017
 nrow(scr_fetch(con, "dtm", max_rows = 1000))
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.23809523809523808
-#> [1] 963
+#> [1] 994
 ```
 
 [`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)

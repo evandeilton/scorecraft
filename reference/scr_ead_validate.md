@@ -1,10 +1,10 @@
 # Validate CCF pools: calibration, discrimination, back-testing and stability
 
-Per pool and in total, compares realised and predicted values on the
+Per pool and in total, compares realized and predicted values on the
 validation rows (the hold-out of the model by default): simple and
-exposure-weighted averages, the one-sided t-test of realised above
+exposure-weighted averages, the one-sided t-test of realized above
 predicted (under-estimation) with its p-value, the EAD adequacy ratio
-(sum of realised EAD over sum of predicted EAD) and traffic lights (red
+(sum of realized EAD over sum of predicted EAD) and traffic lights (red
 at or below `lights[1]`, amber at or below `lights[2]`, green above;
 adequacy green at or below `adequacy_lights[1]`, amber up to
 `adequacy_lights[2]`, red above). Adds the discrimination block (gAUC

@@ -9,14 +9,14 @@ x)\big)\\\mathrm{E}\[\mathrm{LGD}\mid \mathrm{no\\ cure}, x\]\$\$ The
 machinery: optimal binning of the drivers on the training cohorts, WOE,
 hold-out revalidation with frozen bins and a logistic regression on the
 WOE columns with the sign check (every coefficient positive). The
-**severity stage** bins the same drivers against the realised LGD of the
+**severity stage** bins the same drivers against the realized LGD of the
 non-cures with
 [`scr_bin_continuous()`](https://evandeilton.github.io/scorecraft/reference/scr_bin_continuous.md)
 (bin means, monotone, at least `lgd_min_defaults_bin` defaults per bin,
 hold-out revalidated) and fits a fractional logit (`glm` with a
 quasi-binomial family on the bin means) or, with
 `lgd_severity = "beta"`, a beta regression through the `betareg`
-package. `LGD^cure` is the mean realised LGD of the cures on train
+package. `LGD^cure` is the mean realized LGD of the cures on train
 (costs and the discount effect, never zero by decree).
 
 ## Usage
@@ -64,7 +64,7 @@ An object of class `scr_lgd`: `split`, `drivers`, `cure` (fit, features,
 coef, sign_check, bins, holdout), `severity` (fit, features, coef,
 engine, sign_check, bins), `lgd_cure`, `has_cures`, `scored` (one row
 per default: `sample`, `p_cure`, `severity`, `lgd_pred`, `pool`,
-`lgd_real`), `bins_idx`, `samples` (predicted vs realised by decile of
+`lgd_real`), `bins_idx`, `samples` (predicted vs realized by decile of
 the prediction), `metrics`, `pools`, `downturn`, `floors`, `workout`
 (the profile and summary of the RDS), `model_card`, `ledger`, `config`.
 
@@ -73,7 +73,7 @@ the prediction), `metrics`, `pools`, `downturn`, `floors`, `workout`
 The split is by cohort of default: the last `holdout` share of the
 default dates is the hold-out. Metrics on both samples: RMSE, MAE,
 R-squared, Spearman rho, Somers' D of the prediction with respect to the
-realised LGD (generalised AUC `(D + 1) / 2`) with a bootstrap confidence
+realized LGD (generalized AUC `(D + 1) / 2`) with a bootstrap confidence
 interval, and the loss capture ratio. Pools come from
 [`scr_lgd_pools()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_pools.md).
 The object carries a provisional downturn (type 3 add-on, or none, by
