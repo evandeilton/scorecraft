@@ -33,7 +33,7 @@ scr_apply(x, newdata, what = c("pool", "lgd", "all"), ...)
 scr_apply(x, newdata, ...)
 
 # S3 method for class 'scr_study'
-scr_apply(x, newdata, score = "score", ...)
+scr_apply(x, newdata, score = "score", numbered = TRUE, ...)
 ```
 
 ## Arguments
@@ -78,6 +78,12 @@ scr_apply(x, newdata, score = "score", ...)
   For `scr_study`: name of the score column of `newdata`. `newdata` may
   also be a numeric vector of scores.
 
+- numbered:
+
+  For a tiers study: `TRUE` (default) returns the tier labels with their
+  order in front (`"01.very high"`), `FALSE` the plain labels. Band
+  labels are intervals and never get a prefix.
+
 ## Value
 
 A `data.table` with one row per row of `newdata`.
@@ -113,6 +119,13 @@ For a score study
 and `tier_label`. The intervals are left-closed: `score >= cut` is the
 upper side, and a missing score gives a missing tier.
 
+The labels of a tiers study carry their order, `"01."` for the tier with
+the highest event rate (the first row of the tiers table) down to the
+tier with the lowest, so they sort from the event-richest tier under any
+objective and direction; `tier` is unchanged and still rises with the
+event rate. The result joins to the `tier_label` column of the tiers
+table. `numbered = FALSE` returns the plain labels (its `label` column).
+
 ## See also
 
 Other production:
@@ -136,7 +149,7 @@ str(scr_apply(res, new)[, 1:3])
 #>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...
 #>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...
 #>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...
-#>  - attr(*, ".internal.selfref")=<pointer: 0x55ed5c694a30> 
+#>  - attr(*, ".internal.selfref")=<pointer: 0x555a21063a30> 
 sc <- scr_scorecard(res)
 head(scr_apply(sc, new))
 #>         link       prob    score score_points

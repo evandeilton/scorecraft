@@ -125,6 +125,25 @@ behind the presets are listed in
 users are responsible for checking the tables against the texts in force
 before any regulatory use.
 
+## Score studies
+
+The score studies, stage 13 of
+[`scr_config_keys()`](https://evandeilton.github.io/scorecraft/reference/scr_config_keys.md),
+read a score against its outcome from one table of counts per score
+value:
+[`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md)
+(percentile and tail bands frozen on the reference),
+[`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
+(a few labeled tiers),
+[`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md)
+(red, amber and green lights against the reference),
+[`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md)
+(tested statements about event rates),
+[`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md)
+(the cut under volume, budget and capacity constraints) and
+[`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md)
+(two scores on the same rows).
+
 ## Parallelism
 
 Column-wise work (binning, hold-out revalidation, CSI) and the bootstrap

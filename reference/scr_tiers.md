@@ -134,7 +134,7 @@ scr_tiers(
 - labels:
 
   Optional labels, one per tier achieved, in ascending order of the
-  event rate.
+  event rate. They get the order prefix of `tier_label` too.
 
 - round_to:
 
@@ -208,10 +208,12 @@ An object of class `c("scr_study_tiers", "scr_study", "list")`:
 - `table`:
 
   One row per sample and tier, event-richest tier first: `sample`,
-  `tier`, `label`, `score_lo`, `score_hi`, `n`, `pct`, `events`, `rate`,
-  `rate_lo`, `rate_hi`, `lift`, `pct_event`, `pct_nonevent`, `woe`,
-  `p_adjacent` (one-sided Fisher exact test that the tier has a higher
-  event rate than the next lower tier) and `p_adjacent_adj` (Holm).
+  `tier`, `label`, `tier_label` (the label with its order in front,
+  `"01."` for the event-richest tier; see the section Labels),
+  `score_lo`, `score_hi`, `n`, `pct`, `events`, `rate`, `rate_lo`,
+  `rate_hi`, `lift`, `pct_event`, `pct_nonevent`, `woe`, `p_adjacent`
+  (one-sided Fisher exact test that the tier has a higher event rate
+  than the next lower tier) and `p_adjacent_adj` (Holm).
 
 - `summary`:
 
@@ -225,14 +227,14 @@ An object of class `c("scr_study_tiers", "scr_study", "list")`:
   The cuts in use (rounded when `round_to` is given) and the fitted
   ones.
 
-- `labels`:
+- `labels`, `tier_labels`:
 
-  The tier labels, lowest rate first.
+  The tier labels, plain and numbered, lowest rate first.
 
 - `codes`, `code_labels`:
 
-  Tier number and label of every interval in ascending score order, used
-  by
+  Tier number and plain label of every interval in ascending score
+  order, used by
   [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
   and
   [`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md).
@@ -320,13 +322,30 @@ reference volume that keeps its tier).
 
 ## Labels
 
-Tiers are numbered by event rate, lowest first: 3 tiers are labeled
-`"low"`, `"medium"`, `"high"`; 5 tiers `"very low"`, `"low"`,
-`"medium"`, `"high"`, `"very high"`; 7 tiers add `"extremely low"` and
-`"extremely high"`; any other count `"T1"`, `"T2"`, ... The labels
+Tiers are numbered by event rate, lowest first: 2 tiers are labeled
+`"low"`, `"high"`; 3 tiers `"low"`, `"medium"`, `"high"`; 4 tiers
+`"low"`, `"medium low"`, `"medium high"`, `"high"`; 5 tiers
+`"very low"`, `"low"`, `"medium"`, `"high"`, `"very high"`; 6 tiers
+`"very low"`, `"low"`, `"medium low"`, `"medium high"`, `"high"`,
+`"very high"`; 7 tiers add `"extremely low"` and `"extremely high"` to
+the five; 1, 8 and 9 tiers are numbered `"T1"`, `"T2"`, ... The labels
 describe the event rate, so under `objective = "risk"` they read as risk
 and under `"propensity"` as propensity (`measure`). The table lists the
 event-richest tier first.
+
+For production, every label also exists with its order in front
+(`tier_label`): `"01."` for the event-richest tier, the first row of the
+table, then `"02."`, ... down to the tier with the lowest event rate,
+under every objective and direction, and for labels given in `labels`
+too. With five tiers of a credit score, tier 5 is `"01.very high"` and
+tier 1 is `"05.very low"`: the number `tier` rises with the event rate,
+the prefix sorts from the highest rate down. The prefix is zero-padded
+to two digits.
+[`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md)
+and
+[`scr_sql()`](https://evandeilton.github.io/scorecraft/reference/scr_sql.md)
+return these numbered labels (`numbered = FALSE` gives the plain ones),
+so their output joins to the table by `tier_label`.
 
 ## References
 
@@ -352,8 +371,11 @@ assign the tiers in production.
 
 Other score-studies:
 [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
+[`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md),
+[`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md),
 [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md),
-[`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md)
+[`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md),
+[`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md)
 
 ## Examples
 
@@ -373,12 +395,12 @@ tr
 #>   holdout        1,400       203   14.50%  0.744  0.0019      5       yes        no
 #> 
 #> Tiers on 'holdout' (event-richest first)
-#>   tier label           score                        pct     rate [95% CI]               p_adj
-#>      5 very high       [-Inf, 502.3609)            6.3%   36.36% [26.88%, 46.72%]       0.487
-#>      4 high            [502.3609, 516.075)         6.9%   35.05% [26.11%, 44.87%]       0.033
-#>      3 medium          [516.075, 538.0089)        20.6%   23.18% [18.60%, 28.30%]       0.001
-#>      2 low             [538.0089, 555.0927)       22.4%   12.46% [9.15%, 16.46%]        0.000
-#>      1 very low        [555.0927, Inf)            43.8%    5.06% [3.53%, 7.01%]             -
+#>   tier label              score                        pct     rate [95% CI]               p_adj
+#>      5 01.very high       [-Inf, 502.3609)            6.3%   36.36% [26.88%, 46.72%]       0.487
+#>      4 02.high            [502.3609, 516.075)         6.9%   35.05% [26.11%, 44.87%]       0.033
+#>      3 03.medium          [516.075, 538.0089)        20.6%   23.18% [18.60%, 28.30%]       0.001
+#>      2 04.low             [538.0089, 555.0927)       22.4%   12.46% [9.15%, 16.46%]        0.000
+#>      1 05.very low        [555.0927, Inf)            43.8%    5.06% [3.53%, 7.01%]             -
 tr$table[sample == "holdout", .(tier, label, score_lo, score_hi, pct, rate)]
 #>     tier     label score_lo score_hi        pct       rate
 #>    <int>    <char>    <num>    <num>      <num>      <num>
@@ -395,9 +417,9 @@ tr10$cuts
 head(scr_apply(tr10, c(480, 530, 600)))
 #>    score  tier tier_label
 #>    <num> <int>     <char>
-#> 1:   480     3       high
-#> 2:   530     2     medium
-#> 3:   600     1        low
+#> 1:   480     3    01.high
+#> 2:   530     2  02.medium
+#> 3:   600     1     03.low
 
 # anchors on the event rate: below, around and above the overall rate
 scr_tiers(sc, method = "anchored", anchors = c(0.08, "overall", 0.25))$summary

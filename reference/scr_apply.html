@@ -31,6 +31,7 @@ same numbers, and a test guarantees it.'><meta property="og:image" content="http
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
     <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scaling, alignment and challengers</a></li>
+    <li><a class="dropdown-item" href="../articles/score-studies.html">Score studies</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -88,7 +89,7 @@ same numbers, and a test guarantees it.</p>
 <span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">x</span>, <span class="va">newdata</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'scr_study'</span></span>
-<span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">x</span>, <span class="va">newdata</span>, score <span class="op">=</span> <span class="st">"score"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">x</span>, <span class="va">newdata</span>, score <span class="op">=</span> <span class="st">"score"</span>, numbered <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -128,6 +129,12 @@ predicted EAD and the floor flag) or <code>"pool"</code> (pool and measure).</p>
 <dt id="arg-score">score<a class="anchor" aria-label="anchor" href="#arg-score"></a></dt>
 <dd><p>For <code>scr_study</code>: name of the score column of <code>newdata</code>.
 <code>newdata</code> may also be a numeric vector of scores.</p></dd>
+
+
+<dt id="arg-numbered">numbered<a class="anchor" aria-label="anchor" href="#arg-numbered"></a></dt>
+<dd><p>For a tiers study: <code>TRUE</code> (default) returns the tier
+labels with their order in front (<code>"01.very high"</code>), <code>FALSE</code> the plain
+labels. Band labels are intervals and never get a prefix.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -169,6 +176,12 @@ the drawn amount. <code><a href="scr_capital.html">scr_capital()</a></code> read
 (as a copy) with <code>tier</code>, the band or tier number, and <code>tier_label</code>. The
 intervals are left-closed: <code>score &gt;= cut</code> is the upper side, and a
 missing score gives a missing tier.</p>
+<p>The labels of a tiers study carry their order, <code>"01."</code> for the tier with
+the highest event rate (the first row of the tiers table) down to the
+tier with the lowest, so they sort from the event-richest tier under any
+objective and direction; <code>tier</code> is unchanged and still rises with the
+event rate. The result joins to the <code>tier_label</code> column of the tiers
+table. <code>numbered = FALSE</code> returns the plain labels (its <code>label</code> column).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -193,7 +206,7 @@ missing score gives a missing tier.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_01_woe: num  0.7039 -0.6581 0.0398 0.0398 0.0398 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_02_woe: num  0.572 -0.77 -0.824 0.382 0.572 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ vl_score_04_woe: num  -0.8932 0.304 -0.0558 -0.0558 -0.0558 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, ".internal.selfref")=&lt;pointer: 0x55ed5c694a30&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, ".internal.selfref")=&lt;pointer: 0x555a21063a30&gt; </span>
 <span class="r-in"><span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="scr_scorecard.html">scr_scorecard</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">scr_apply</span><span class="op">(</span><span class="va">sc</span>, <span class="va">new</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         link       prob    score score_points</span>

@@ -13,6 +13,9 @@ scr_export(x, dir, stamp = TRUE, ...)
 # S3 method for class 'scr_capital'
 scr_export(x, dir, stamp = TRUE, ...)
 
+# S3 method for class 'scr_claims'
+scr_export(x, dir, stamp = TRUE, ...)
+
 # S3 method for class 'scr_classing'
 scr_export(x, dir, stamp = TRUE, ...)
 
@@ -36,10 +39,16 @@ scr_export(
   ...
 )
 
+# S3 method for class 'scr_operating'
+scr_export(x, dir, stamp = TRUE, ...)
+
 # S3 method for class 'scr_pd'
 scr_export(x, dir, stamp = TRUE, validation = NULL, ...)
 
 # S3 method for class 'scr_rag'
+scr_export(x, dir, stamp = TRUE, ...)
+
+# S3 method for class 'scr_score_cross'
 scr_export(x, dir, stamp = TRUE, ...)
 
 # S3 method for class 'scr_study'
@@ -59,9 +68,12 @@ scr_export(x, dir, stamp = TRUE, rag = NULL, ...)
   [`scr_ead()`](https://evandeilton.github.io/scorecraft/reference/scr_ead.md),
   [`scr_capital()`](https://evandeilton.github.io/scorecraft/reference/scr_capital.md),
   [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
-  [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
+  [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md),
+  [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md),
+  [`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md),
+  [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md)
   or
-  [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md).
+  [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md).
 
 - dir:
 
@@ -145,7 +157,15 @@ writes one workbook, `study_bands_<target>.xlsx` or
 the settings (plus the ledger and the stability of the tiers, and the
 lights of `rag` when given); a set of lights from
 [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md)
-writes `rag_<target>.xlsx`.
+writes `rag_<target>.xlsx`; claims from
+[`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md)
+write `claims_<target>.xlsx`; an operating point from
+[`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md)
+writes `operating_<target>.xlsx` (curve, optimum, constraints); two
+crossed scores from
+[`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md)
+write `score_cross_<score_a>_<score_b>.xlsx` (cross table, overlap,
+overlap rates, association).
 
 The timeline and vintage sheets need the date column of the split; when
 it is absent they carry an availability row instead of a fabricated

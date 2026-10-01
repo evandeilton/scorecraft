@@ -113,15 +113,22 @@ Scoring in R, production SQL, deliverables.
 
 ## Score studies
 
-Percentile bands, tiers and red / amber / green lights of a score
-against its reference.
+Percentile bands, tiers, red / amber / green lights, claims about event
+rates, the operating point under constraints and two scores on the same
+rows.
 
 - [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md)
   : Percentile study of a score
+- [`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md)
+  : Probability statements about the event rate of score groups
+- [`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md)
+  : Operating point of a score under constraints
 - [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md)
   : Red / amber / green lights of a score against its reference
 - [`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md)
   : Thresholds of the red / amber / green lights
+- [`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md)
+  : Two scores on the same rows
 - [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
   : Tiers of a score: a few labeled levels of risk or propensity
 

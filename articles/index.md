@@ -8,6 +8,8 @@
   trail](https://evandeilton.github.io/scorecraft/articles/coarse-classing.md):
 - [Scaling, alignment and
   challengers](https://evandeilton.github.io/scorecraft/articles/alignment-and-portfolio.md):
+- [Score
+  studies](https://evandeilton.github.io/scorecraft/articles/score-studies.md):
 
 ### IRB risk parameters
 

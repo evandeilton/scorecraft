@@ -23,6 +23,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
     <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scaling, alignment and challengers</a></li>
+    <li><a class="dropdown-item" href="../articles/score-studies.html">Score studies</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -51,11 +52,18 @@
 <ul><li>
 <code><a href="../reference/scr_bands.html">scr_bands()</a></code> cuts a score into percentile or tail bands frozen on a reference sample and reports, per band and sample, the event rate with a Jeffreys interval, lift, capture, KS, WOE, IV, PSI and a one-sided Fisher exact test of rank order, plus the AUC, Gini and KS with a bootstrap interval. Accepts a scorecard, a data.frame (with weights, a value column and sample labels) or pre-aggregated counts.</li>
 <li>
-<code><a href="../reference/scr_tiers.html">scr_tiers()</a></code> fits 3, 5 or 7 labeled tiers (from “very low” to “very high”) by an exact dynamic program under share, event and distinctness constraints, by event-rate anchors or by equal shares; <code>round_to</code> gives policy-friendly cuts, and <code>n_boot</code> measures the stability of the cuts. An infeasible tier count falls back and is recorded in a ledger.</li>
+<code><a href="../reference/scr_tiers.html">scr_tiers()</a></code> fits 2 to 9 tiers (labeled from “low” to “high”, with words for 2 to 7 tiers) by an exact dynamic program under share, event and distinctness constraints, by event-rate anchors or by equal shares; <code>round_to</code> gives policy-friendly cuts, and <code>n_boot</code> measures the stability of the cuts. An infeasible tier count falls back and is recorded in a ledger.</li>
 <li>
 <code><a href="../reference/scr_rag.html">scr_rag()</a></code> lights discrimination, calibration, stability and, for a scorecard, the variables red, amber or green, per period or segment with <code>by</code>; the thresholds are an editable table from <code><a href="../reference/scr_rag_plan.html">scr_rag_plan()</a></code>.</li>
 <li>
-<code><a href="../reference/scr_apply.html">scr_apply()</a></code>, <code><a href="../reference/scr_sql.html">scr_sql()</a></code> and <code><a href="../reference/scr_export.html">scr_export()</a></code> assign the bands or tiers in R and in SQL and write the study to a workbook.</li>
+<code><a href="../reference/scr_apply.html">scr_apply()</a></code>, <code><a href="../reference/scr_sql.html">scr_sql()</a></code> and <code><a href="../reference/scr_export.html">scr_export()</a></code> assign the bands or tiers in R and in SQL and write the study to a workbook. Tier labels carry their order in production (<code>"01.very high"</code> for the tier with the highest event rate, down to <code>"05.very low"</code>), so they sort from the event-richest tier; the tiers table has the same value in <code>tier_label</code>, and <code>numbered = FALSE</code> gives the plain labels.</li>
+<li>
+<code><a href="../reference/scr_claims.html">scr_claims()</a></code> tests statements such as “rate &gt;= 60% for scores of 625 or more” on a band, a tier or a score range, with an exact one-sided binomial test, a one-sided Jeffreys bound and a Holm adjustment, and writes each verdict (“supported”, “refuted” or “not proven”) as one sentence. <code>type = "floor"</code> tests the weakest end of the group under a monotone fit of the rate instead of its average.</li>
+<li>
+<code><a href="../reference/scr_operating.html">scr_operating()</a></code> finds the cut that maximizes the value of targeting, alerting or approval under volume, share, budget, event-rate and daily capacity constraints, and reports the binding constraint and its shadow price.</li>
+<li>
+<code><a href="../reference/scr_score_cross.html">scr_score_cross()</a></code> crosses two scores on the same rows: the table of their bands with one or two outcomes, Spearman’s rho and Kendall’s tau-b, and the overlap of the rows each selects, with the swap-in and swap-out rates.</li>
+<li>The three write a workbook with <code><a href="../reference/scr_export.html">scr_export()</a></code>; the vignette “Score studies” walks through them on credit, fraud and churn scores.</li>
 </ul></li>
 <li>New configuration keys for the score studies (stage 13): <code>study_bands</code>, <code>study_level</code>, <code>tier_min_pct</code>, <code>tier_min_events</code> and <code>tier_max_bins</code>.</li>
 <li>

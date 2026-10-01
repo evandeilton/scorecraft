@@ -33,6 +33,7 @@ that).'><meta property="og:image" content="https://evandeilton.github.io/scorecr
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/coarse-classing.html">Coarse classing with an audit trail</a></li>
     <li><a class="dropdown-item" href="../articles/alignment-and-portfolio.html">Scaling, alignment and challengers</a></li>
+    <li><a class="dropdown-item" href="../articles/score-studies.html">Score studies</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>IRB</h6></li>
     <li><a class="dropdown-item" href="../articles/pd-calibration-and-grades.html">PD calibration and rating grades</a></li>
@@ -189,7 +190,7 @@ uses <code>config$tier_max_bins</code> (100).</p></dd>
 
 <dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
 <dd><p>Optional labels, one per tier achieved, in ascending order
-of the event rate.</p></dd>
+of the event rate. They get the order prefix of <code>tier_label</code> too.</p></dd>
 
 
 <dt id="arg-round-to">round_to<a class="anchor" aria-label="anchor" href="#arg-round-to"></a></dt>
@@ -263,7 +264,9 @@ and <code>value_events</code>).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>c("scr_study_tiers", "scr_study", "list")</code>:</p><dl><dt><code>table</code></dt>
 <dd><p>One row per sample and tier, event-richest tier first:
-<code>sample</code>, <code>tier</code>, <code>label</code>, <code>score_lo</code>, <code>score_hi</code>, <code>n</code>, <code>pct</code>,
+<code>sample</code>, <code>tier</code>, <code>label</code>, <code>tier_label</code> (the label with its order
+in front, <code>"01."</code> for the event-richest tier; see the section
+Labels), <code>score_lo</code>, <code>score_hi</code>, <code>n</code>, <code>pct</code>,
 <code>events</code>, <code>rate</code>, <code>rate_lo</code>, <code>rate_hi</code>, <code>lift</code>, <code>pct_event</code>,
 <code>pct_nonevent</code>, <code>woe</code>, <code>p_adjacent</code> (one-sided Fisher exact test
 that the tier has a higher event rate than the next lower tier) and
@@ -279,12 +282,14 @@ mix against the reference).</p></dd>
 <dd><p>The cuts in use (rounded when <code>round_to</code> is
 given) and the fitted ones.</p></dd>
 
-<dt><code>labels</code></dt>
-<dd><p>The tier labels, lowest rate first.</p></dd>
+<dt><code>labels</code>, <code>tier_labels</code></dt>
+<dd><p>The tier labels, plain and numbered,
+lowest rate first.</p></dd>
 
 <dt><code>codes</code>, <code>code_labels</code></dt>
-<dd><p>Tier number and label of every interval
-in ascending score order, used by <code><a href="scr_apply.html">scr_apply()</a></code> and <code><a href="scr_sql.html">scr_sql()</a></code>.</p></dd>
+<dd><p>Tier number and plain label of every
+interval in ascending score order, used by <code><a href="scr_apply.html">scr_apply()</a></code> and
+<code><a href="scr_sql.html">scr_sql()</a></code>.</p></dd>
 
 <dt><code>method</code>, <code>criterion</code>, <code>measure</code>, <code>n_tiers_requested</code>,
 <code>n_tiers</code></dt>
@@ -366,13 +371,26 @@ reference volume that keeps its tier).</p>
 
 
 
-<p>Tiers are numbered by event rate, lowest first: 3 tiers are labeled
-<code>"low"</code>, <code>"medium"</code>, <code>"high"</code>; 5 tiers <code>"very low"</code>, <code>"low"</code>,
-<code>"medium"</code>, <code>"high"</code>, <code>"very high"</code>; 7 tiers add <code>"extremely low"</code> and
-<code>"extremely high"</code>; any other count <code>"T1"</code>, <code>"T2"</code>, ... The labels
+<p>Tiers are numbered by event rate, lowest first: 2 tiers are labeled
+<code>"low"</code>, <code>"high"</code>; 3 tiers <code>"low"</code>, <code>"medium"</code>, <code>"high"</code>; 4 tiers
+<code>"low"</code>, <code>"medium low"</code>, <code>"medium high"</code>, <code>"high"</code>; 5 tiers <code>"very low"</code>,
+<code>"low"</code>, <code>"medium"</code>, <code>"high"</code>, <code>"very high"</code>; 6 tiers <code>"very low"</code>,
+<code>"low"</code>, <code>"medium low"</code>, <code>"medium high"</code>, <code>"high"</code>, <code>"very high"</code>; 7
+tiers add <code>"extremely low"</code> and <code>"extremely high"</code> to the five; 1, 8 and 9
+tiers are numbered <code>"T1"</code>, <code>"T2"</code>, ... The labels
 describe the event rate, so under <code>objective = "risk"</code> they read as
 risk and under <code>"propensity"</code> as propensity (<code>measure</code>). The table lists
 the event-richest tier first.</p>
+<p>For production, every label also exists with its order in front
+(<code>tier_label</code>): <code>"01."</code> for the event-richest tier, the first row of the
+table, then <code>"02."</code>, ... down to the tier with the lowest event rate,
+under every objective and direction, and for labels given in <code>labels</code>
+too. With five tiers of a credit score, tier 5 is <code>"01.very high"</code> and
+tier 1 is <code>"05.very low"</code>: the number <code>tier</code> rises with the event rate,
+the prefix sorts from the highest rate down. The prefix is zero-padded to
+two digits. <code><a href="scr_apply.html">scr_apply()</a></code> and <code><a href="scr_sql.html">scr_sql()</a></code> return these numbered labels
+(<code>numbered = FALSE</code> gives the plain ones), so their output joins to the
+table by <code>tier_label</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -391,8 +409,11 @@ population stability index. <em>Journal of Risk Model Validation</em>, 14(4),
 the tiers in production.</p>
 <p>Other score-studies:
 <code><a href="scr_bands.html">scr_bands()</a></code>,
+<code><a href="scr_claims.html">scr_claims()</a></code>,
+<code><a href="scr_operating.html">scr_operating()</a></code>,
 <code><a href="scr_rag.html">scr_rag()</a></code>,
-<code><a href="scr_rag_plan.html">scr_rag_plan()</a></code></p></div>
+<code><a href="scr_rag_plan.html">scr_rag_plan()</a></code>,
+<code><a href="scr_score_cross.html">scr_score_cross()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -412,12 +433,12 @@ the tiers in production.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   holdout        1,400       203   14.50%  0.744  0.0019      5       yes        no</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Tiers on 'holdout' (event-richest first)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   tier label           score                        pct     rate [95% CI]               p_adj</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      5 very high       [-Inf, 502.3609)            6.3%   36.36% [26.88%, 46.72%]       0.487</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      4 high            [502.3609, 516.075)         6.9%   35.05% [26.11%, 44.87%]       0.033</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      3 medium          [516.075, 538.0089)        20.6%   23.18% [18.60%, 28.30%]       0.001</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      2 low             [538.0089, 555.0927)       22.4%   12.46% [9.15%, 16.46%]        0.000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1 very low        [555.0927, Inf)            43.8%    5.06% [3.53%, 7.01%]             -</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   tier label              score                        pct     rate [95% CI]               p_adj</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      5 01.very high       [-Inf, 502.3609)            6.3%   36.36% [26.88%, 46.72%]       0.487</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      4 02.high            [502.3609, 516.075)         6.9%   35.05% [26.11%, 44.87%]       0.033</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      3 03.medium          [516.075, 538.0089)        20.6%   23.18% [18.60%, 28.30%]       0.001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      2 04.low             [538.0089, 555.0927)       22.4%   12.46% [9.15%, 16.46%]        0.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      1 05.very low        [555.0927, Inf)            43.8%    5.06% [3.53%, 7.01%]             -</span>
 <span class="r-in"><span><span class="va">tr</span><span class="op">$</span><span class="va">table</span><span class="op">[</span><span class="va">sample</span> <span class="op">==</span> <span class="st">"holdout"</span>, <span class="fu">.</span><span class="op">(</span><span class="va">tier</span>, <span class="va">label</span>, <span class="va">score_lo</span>, <span class="va">score_hi</span>, <span class="va">pct</span>, <span class="va">rate</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     tier     label score_lo score_hi        pct       rate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;int&gt;    &lt;char&gt;    &lt;num&gt;    &lt;num&gt;      &lt;num&gt;      &lt;num&gt;</span>
@@ -434,9 +455,9 @@ the tiers in production.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="scr_apply.html">scr_apply</a></span><span class="op">(</span><span class="va">tr10</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">480</span>, <span class="fl">530</span>, <span class="fl">600</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    score  tier tier_label</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    &lt;num&gt; &lt;int&gt;     &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   480     3       high</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   530     2     medium</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   600     1        low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:   480     3    01.high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   530     2  02.medium</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   600     1     03.low</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># anchors on the event rate: below, around and above the overall rate</span></span></span>
 <span class="r-in"><span><span class="fu">scr_tiers</span><span class="op">(</span><span class="va">sc</span>, method <span class="op">=</span> <span class="st">"anchored"</span>, anchors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.08</span>, <span class="st">"overall"</span>, <span class="fl">0.25</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">summary</span></span></span>

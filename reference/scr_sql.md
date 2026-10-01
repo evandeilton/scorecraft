@@ -42,7 +42,15 @@ scr_sql(
 )
 
 # S3 method for class 'scr_study'
-scr_sql(x, table = NULL, dialect = NULL, file = NULL, score = "score", ...)
+scr_sql(
+  x,
+  table = NULL,
+  dialect = NULL,
+  file = NULL,
+  score = "score",
+  numbered = TRUE,
+  ...
+)
 ```
 
 ## Arguments
@@ -110,6 +118,11 @@ scr_sql(x, table = NULL, dialect = NULL, file = NULL, score = "score", ...)
 
   For `scr_study`: name of the score column of `table`.
 
+- numbered:
+
+  For a tiers study: `TRUE` (default) emits the tier labels with their
+  order in front, `FALSE` the plain labels.
+
 ## Value
 
 A character vector with the SQL (invisibly, when `file` is given).
@@ -167,6 +180,13 @@ to `"your_table"` and `"ansi"`. The tiers computed by the SQL match
 [`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
 by an automated test.
 
+The labels of a tiers study carry their order, `'01.very high'` for the
+tier with the highest event rate down to the tier with the lowest, as in
+[`scr_apply()`](https://evandeilton.github.io/scorecraft/reference/scr_apply.md),
+so `ORDER BY tier_label` lists the event-richest tier first;
+`numbered = FALSE` emits the plain labels. Band labels are intervals and
+never get a prefix.
+
 ## See also
 
 Other production:
@@ -187,7 +207,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = "id",
 cat(head(scr_sql(res, table = "prd.customers", dialect = "databricks"), 20), sep = "\n")
 #> -- =============================================================
 #> -- scorecraft | target: default | 12 approved variables | dialect: databricks
-#> -- Generated on 2026-10-01 04:11:33
+#> -- Generated on 2026-10-01 18:57:46
 #> -- Block 1 (CTE base_scr): Stage 1 pre-processing - imputation of missing
 #> --   and sentinel values by the TRAINING median, special-population flags.
 #> -- Block 2: WOE/BIN transformation emitted by OptimalBinningWoE::obwoe_sql().

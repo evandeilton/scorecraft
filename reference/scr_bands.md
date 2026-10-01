@@ -325,8 +325,11 @@ and
 to assign the bands in production.
 
 Other score-studies:
+[`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md),
+[`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md),
 [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md),
 [`scr_rag_plan()`](https://evandeilton.github.io/scorecraft/reference/scr_rag_plan.md),
+[`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md),
 [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
 
 ## Examples
@@ -345,18 +348,18 @@ b
 #>   train          2,800       399   14.25% 0.7856 [0.764, 0.813]  0.571  0.441  1.136       -         0
 #>   holdout        1,400       203   14.50% 0.7394 [0.715, 0.763]  0.479  0.389  0.804  0.0069         0
 #> 
-#> Bands on 'holdout' (event-richest first)
-#>   band score                        pct     rate   rate_hi    lift  capture     KS    p_rev
-#>      1 [-Inf, 509.8922)            9.1%   35.43%    44.00%    2.44    22.2%  0.153        -
-#>      2 [509.8922, 523.5026)        9.1%   27.34%    35.51%    1.89    39.4%  0.248    1.000
-#>      3 [523.5026, 533.3684)        9.9%   26.62%    34.39%    1.84    57.6%  0.345    1.000
-#>      4 [533.3684, 542.0923)       10.6%   17.45%    24.14%    1.20    70.4%  0.370    1.000
-#>      5 [542.0923, 550.3612)       10.8%   11.26%    17.03%    0.78    78.8%  0.342    1.000
-#>      6 [550.3612, 557.7648)       10.6%   12.16%    18.15%    0.84    87.7%  0.322    1.000
-#>      7 [557.7648, 566.5601)       10.6%    7.38%    12.41%    0.51    93.1%  0.261    1.000
-#>      8 [566.5601, 576.5187)        9.1%    3.91%     8.35%    0.27    95.6%  0.183    1.000
-#>      9 [576.5187, 590.2783)        8.9%    3.23%     7.49%    0.22    97.5%  0.102    1.000
-#>     10 [590.2783, Inf)            11.2%    3.18%     6.84%    0.22   100.0%  0.000    1.000
+#> Bands on 'holdout' (event-richest first; 95% Jeffreys interval of the rate)
+#>   band score                        pct rate [lo, hi]                 lift  capture     KS p_rev_adj
+#>      1 [-Inf, 509.8922)            9.1% 35.43% [27.52%, 44.00%]       2.44    22.2%  0.153         -
+#>      2 [509.8922, 523.5026)        9.1% 27.34% [20.19%, 35.51%]       1.89    39.4%  0.248     1.000
+#>      3 [523.5026, 533.3684)        9.9% 26.62% [19.81%, 34.39%]       1.84    57.6%  0.345     1.000
+#>      4 [533.3684, 542.0923)       10.6% 17.45% [12.01%, 24.14%]       1.20    70.4%  0.370     1.000
+#>      5 [542.0923, 550.3612)       10.8% 11.26% [6.96%, 17.03%]        0.78    78.8%  0.342     1.000
+#>      6 [550.3612, 557.7648)       10.6% 12.16% [7.64%, 18.15%]        0.84    87.7%  0.322     1.000
+#>      7 [557.7648, 566.5601)       10.6% 7.38% [3.99%, 12.41%]         0.51    93.1%  0.261     1.000
+#>      8 [566.5601, 576.5187)        9.1% 3.91% [1.51%, 8.35%]          0.27    95.6%  0.183     1.000
+#>      9 [576.5187, 590.2783)        8.9% 3.23% [1.10%, 7.49%]          0.22    97.5%  0.102     1.000
+#>     10 [590.2783, Inf)            11.2% 3.18% [1.23%, 6.84%]          0.22   100.0%  0.000     1.000
 b$table[sample == "holdout", .(band, label, n, rate, lift, capture, ks)]
 #>      band                label     n       rate      lift   capture        ks
 #>     <int>               <char> <num>      <num>     <num>     <num>     <num>

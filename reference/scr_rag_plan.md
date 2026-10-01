@@ -100,7 +100,10 @@ population stability index. *Journal of Risk Model Validation*, 14(4),
 
 Other score-studies:
 [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md),
+[`scr_claims()`](https://evandeilton.github.io/scorecraft/reference/scr_claims.md),
+[`scr_operating()`](https://evandeilton.github.io/scorecraft/reference/scr_operating.md),
 [`scr_rag()`](https://evandeilton.github.io/scorecraft/reference/scr_rag.md),
+[`scr_score_cross()`](https://evandeilton.github.io/scorecraft/reference/scr_score_cross.md),
 [`scr_tiers()`](https://evandeilton.github.io/scorecraft/reference/scr_tiers.md)
 
 ## Examples

@@ -103,7 +103,7 @@ res <- scr_select(scr_demo, "default", config = cfg, drop = c("id", "churn"),
 res
 #> <scr_result> target "default"
 #>   4,200 rows (train 2,800 / hold-out 1,400) | split out-of-time at 2026-05-01
-#>   event: 14.25% on train, 14.50% on hold-out | 0.6s
+#>   event: 14.25% on train, 14.50% on hold-out | 0.8s
 #>   convention: risk (target=1 is the bad case)
 #> 
 #> Funnel
@@ -702,11 +702,11 @@ d$ref_date <- as.character(d$ref_date)
 DBI::dbWriteTable(con, "dtm", d)
 nrow(scr_fetch(con, "dtm", sample_frac = 0.5, seed = 42))
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.5
-#> [1] 2141
+#> [1] 2064
 nrow(scr_fetch(con, "dtm", max_rows = 1000))
 #>   cap of 1,000 rows: fraction reduced from 1.0000 to 0.2381 (table has 4,200)
 #> SQL: select * from dtm where ((abs(random()) % 1000000) / 1000000.0) <= 0.23809523809523808
-#> [1] 982
+#> [1] 1000
 ```
 
 [`scr_fetch()`](https://evandeilton.github.io/scorecraft/reference/scr_fetch.md)
