@@ -470,7 +470,7 @@ ol.pipe li.grp { padding-left: 0; }
   <p class="fn"><code><b>scr_gains</b>(res)</code> Bin-level gains of the approved variables.</p>
   <p class="fn"><code><b>scr_leakage</b>(res, threshold = NULL)</code> Suspicious IV and degenerate bins.</p>
   <p class="fn"><code><b>scr_score_metrics</b>(sc)</code> AUC, KS and Gini per sample, with bootstrap CI.</p>
-  <p class="fn"><code><b>scr_score_gains</b>(sc, sample = "holdout")</code> Gains per score band frozen on train.</p>
+  <p class="fn"><code><b>scr_score_gains</b>(sc, sample = "holdout")</code> Gains per score band frozen on train: KS, lift, <code class="inl">pct_event</code>, <code class="inl">pct_nonevent</code> and <code class="inl">woe</code> = ln(pct_event / pct_nonevent), &gt; 0 when the band rate is above the overall rate; <code class="inl">odds</code> in the scale orientation.</p>
   <p class="fn"><code><b>summary</b>(res)</code>, <code><b>plot</b>(res)</code>, <code><b>as.data.frame</b>(res)</code> Executive summary, funnel bar chart, funnel table.</p>
 </section>
 
@@ -519,9 +519,9 @@ sc$alignment   <span class="cm"># the fitted scale map</span></pre>
 <section style="--c: var(--c-decide)">
   <h2>Decide <small>stage 6</small></h2>
   <p class="fn"><code><b>scr_cutoff</b>(sc, n_cuts = NULL, cuts = NULL)</code> Approval, event rate on each side, events avoided and KS at each cut. Cuts are train quantiles applied frozen to the hold-out.</p>
-  <p class="fn"><code><b>scr_strategy</b>(sc, revenue_good = 1080, loss_bad = 4500)</code> Bands with volume, event rate, decision and expected profit per account:</p>
+  <p class="fn"><code><b>scr_strategy</b>(sc, revenue_good = 1080, loss_bad = 4500)</code> Bands with volume, event rate, <code class="inl">odds_event</code>, <code class="inl">log_odds</code>, decision and expected profit per account:</p>
   <div class="eq">EP = (1 &minus; p)&middot;revenue_good &minus; p&middot;loss_bad<br>p* = revenue_good / (revenue_good + loss_bad)</div>
-  <svg class="fig" viewBox="0 0 250 46" role="img" aria-label="Strategy bands: approve below break-even, review up to 25 percent above, decline the rest">
+  <svg class="fig" viewBox="0 0 250 46" style="max-height:11.2mm" role="img" aria-label="Strategy bands: approve below break-even, review up to 25 percent above, decline the rest">
     <g>
       <rect x="4" y="38" width="16" height="6" fill="#16a34a"/><rect x="23" y="36" width="16" height="8" fill="#16a34a"/>
       <rect x="42" y="33" width="16" height="11" fill="#16a34a"/><rect x="61" y="30" width="16" height="14" fill="#16a34a"/>
@@ -536,6 +536,7 @@ sc$alignment   <span class="cm"># the fitted scale map</span></pre>
       <text x="162" y="42" fill="#b91c1c" font-weight="700">decline</text>
     </g>
   </svg>
+  <p class="fn"><code><b>scr_strategy</b>(sc, rule = "crossing")</code> Cut where the event and non-event distributions cross (max KS, <code class="inl">st$crossing</code>). Propensity: most likely band first; <b>target</b>, <b>review</b>, <b>skip</b>.</p>
   <p class="fn"><code><b>scr_reject</b>(sc, population = NULL, accepted = NULL)</code> Honest reject inference: population scope, outcome coverage per band and a <b>sensitivity band</b> (the rejects 2, 4 or 8 times worse), never a single invented multiplier.</p>
 </section>
 
