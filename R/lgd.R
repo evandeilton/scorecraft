@@ -1277,8 +1277,8 @@ scr_sql.scr_lgd <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
 #'   (Welch test; a large p-value means pools that do not differ).
 #'
 #' Traffic lights use the p-value thresholds of `config$pd_lights` (shared
-#' with the PD validation) (red below the
-#' first, amber below the second) and the fixed PSI thresholds.
+#' with the PD validation) (red at or below the
+#' first, amber at or below the second) and the fixed PSI thresholds.
 #'
 #' @param x An [scr_lgd()] object.
 #' @param newdata `NULL` (the hold-out), an [scr_workout()] object or a
@@ -1286,8 +1286,10 @@ scr_sql.scr_lgd <- function(x, table = NULL, dialect = NULL, file = NULL, ...) {
 #'
 #' @return An object of class `scr_lgd_validation`: `calibration` (per
 #'   pool), `portfolio`, `discrimination`, `stability` (`pools`, `drivers`),
-#'   `homogeneity`, `heterogeneity`, `summary` (test, statistic, p, light),
-#'   `sample`, `n`.
+#'   `homogeneity`, `heterogeneity`, `summary` (test, statistic, p, light;
+#'   the light is `"grey"` when the test has no result, and a row that sums
+#'   up several pools or drivers is the worst of their lights: red, then
+#'   amber, then green, otherwise grey), `sample`, `n`.
 #'
 #' @family irb-lgd
 #' @examples
@@ -1401,7 +1403,8 @@ scr_lgd_validate <- function(x, newdata = NULL) {
                            light = data.table::fifelse(is.na(p), "grey", data.table::fifelse(p <= 0.05, "green", data.table::fifelse(p <= 0.10, "amber", "red"))))
   })) else data.table::data.table(pool_a = integer(), pool_b = integer(), n_a = integer(), n_b = integer(), mean_a = numeric(), mean_b = numeric(), p = numeric(), light = character())
 
-  worst <- function(l) if (!length(l) || all(is.na(l))) "grey" else if ("red" %in% l) "red" else if ("amber" %in% l) "amber" else "green"
+  # grey (no testable result) never rolls up to green: all grey, or none, stays grey
+  worst <- function(l) if ("red" %in% l) "red" else if ("amber" %in% l) "amber" else if ("green" %in% l) "green" else "grey"
   summary <- data.table::rbindlist(list(
     data.table::data.table(test = "calibration_portfolio_t", statistic = portfolio$t, p = portfolio$p, light = portfolio$light),
     data.table::data.table(test = "calibration_pools_t", statistic = suppressWarnings(max(calib$t, na.rm = TRUE)), p = suppressWarnings(min(calib$p, na.rm = TRUE)), light = worst(calib$light)),

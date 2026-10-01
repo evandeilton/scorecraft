@@ -126,6 +126,19 @@ test_that("a propensity scorecard targets the most likely bands first", {
   expect_output(print(st), "target at or above")
 })
 
+# band edge of the crossing (the upper edge of the lower of the two rows
+# around it) and the training scores on either side of it
+crossing_edge <- function(st, breaks) {
+  d <- st$table; k <- match(st$crossing$after_band, d$band)
+  lower <- if (d$max_score[k] < d$min_score[k + 1L]) k else k + 1L
+  min(breaks[breaks >= d$max_score[lower]])
+}
+frozen_cut <- function(x, edge) {
+  tr <- x$samples$train$score
+  lo <- max(tr[tr <= edge]); hi <- min(tr[tr > edge])
+  list(lo = lo, hi = hi, cut = (lo + hi) / 2)
+}
+
 test_that("the crossing rule cuts at the KS boundary with contiguous decisions", {
   sc <- sc_demo()
   st <- scr_strategy(sc, rule = "crossing")
@@ -133,10 +146,14 @@ test_that("the crossing rule cuts at the KS boundary with contiguous decisions",
   k <- match(cr$after_band, d$band)
   expect_identical(d$decision, rep(c("approve", "decline"), c(k, nrow(d) - k)))
   expect_equal(cr$ks, max(scr_score_gains(sc, "holdout")$ks))
-  expect_true(cr$cut %in% sc$breaks && is.finite(cr$cut))
-  # higher_is_safer: the approved bands sit above the cut, the declined ones at or below it
-  expect_true(all(d$min_score[seq_len(k)] > cr$cut))
-  expect_true(all(d$max_score[-seq_len(k)] <= cr$cut))
+  expect_true(is.finite(cr$cut))
+  # higher_is_safer: the approved bands sit above the band edge, the declined ones at or below it;
+  # the cut is frozen on the training scores on either side of that edge
+  e <- crossing_edge(st, sc$breaks); f <- frozen_cut(sc, e)
+  expect_true(all(d$min_score[seq_len(k)] > e))
+  expect_true(all(d$max_score[-seq_len(k)] <= e))
+  expect_equal(cr$cut, f$cut)
+  expect_true(f$lo <= e && e < f$hi && f$lo < cr$cut && cr$cut <= f$hi)
   expect_type(cr$single_crossing, "logical")
   # computed under either rule; decisions override the rule
   expect_identical(scr_strategy(sc)$crossing, cr)
@@ -151,19 +168,23 @@ test_that("the crossing rule cuts at the KS boundary with contiguous decisions",
   kp <- match(stp$crossing$after_band, stp$table$band)
   expect_identical(stp$table$decision, rep(c("target", "skip"), c(kp, nrow(stp$table) - kp)))
   expect_equal(stp$crossing$ks, max(scr_score_gains(sp, "holdout")$ks))
-  expect_true(stp$crossing$cut %in% sp$breaks)
+  # high score first: the targeted bands sit above the band edge
+  ep <- crossing_edge(stp, sp$breaks)
+  expect_true(all(stp$table$min_score[seq_len(kp)] > ep))
+  expect_equal(stp$crossing$cut, frozen_cut(sp, ep)$cut)
 })
 
 test_that("the crossing handles an empty band, several sign changes and degenerate samples", {
   sc <- sc_demo()
   br <- c(-Inf, 10, 20, 30, Inf)
-  # the band (10,20] is empty: the cut is the upper edge of the lower band
+  # the band (10,20] is empty and no training score lies below the edge 10:
+  # the cut is midway between the bands on either side, on the hold-out
   s2 <- sc
   s2$samples$holdout <- data.table::data.table(score = rep(c(40, 25, 5), each = 50),
                                                y = c(rep(0, 45), rep(1, 5), rep(0, 40), rep(1, 10), rep(0, 10), rep(1, 40)))
   st <- scr_strategy(s2, breaks = br, rule = "crossing")
   expect_equal(nrow(st$table), 3L)
-  expect_equal(st$crossing$cut, 10)
+  expect_equal(st$crossing$cut, 15)
   expect_identical(st$crossing$after_band, "(20,30]")
   expect_true(st$crossing$single_crossing)
   expect_identical(st$table$decision, c("approve", "approve", "decline"))
@@ -191,6 +212,73 @@ test_that("the crossing handles an empty band, several sign changes and degenera
   expect_true(all(st1$table$decision == "approve"))
   expect_true(is.na(st1$crossing$ks))
   expect_error(scr_strategy(s1, rule = "crossing"), "both classes")
+})
+
+test_that("the crossing cut is frozen on train and scr_cutoff() at it splits as the crossing rule", {
+  lab_good <- c("approve", "target"); lab_bad <- c("decline", "skip")
+  # exact agreement on the sample of the strategy: the KS and both sides
+  check <- function(x, st) {
+    ct <- scr_cutoff(x, cuts = st$crossing$cut)
+    h <- ct$table[sample == st$sample]
+    expect_equal(h$ks_at_cut, st$crossing$ks, tolerance = 1e-12)
+    n_good <- sum(st$table$n[st$table$decision %in% lab_good])
+    n_bad <- sum(st$table$n[st$table$decision %in% lab_bad])
+    expect_equal(n_good + n_bad, sum(st$table$n))
+    # the safe side of scr_cutoff() is the good side under risk and the non-targeted side under propensity
+    sides <- if (identical(st$objective, "propensity")) c(n_bad, n_good) else c(n_good, n_bad)
+    expect_identical(c(h$n_safe, sum(st$table$n) - h$n_safe), sides)
+    # the upper side is score >= cut
+    s <- x$samples[[st$sample]]$score
+    up <- if (st$table$min_score[1] > st$table$max_score[nrow(st$table)]) n_good else n_bad
+    expect_identical(sum(s >= st$crossing$cut), as.integer(up))
+  }
+  # credit, fraud-like (risk, higher_is_riskier) and propensity
+  for (x in list(sc_demo(), sc_fraud_demo(), sc_prop_demo())) {
+    tr <- x$samples$train$score; s <- x$samples$holdout$score
+    st_tr <- scr_strategy(x, sample = "train", rule = "crossing")
+    check(x, st_tr)
+    # the hold-out cut depends only on its band edge and the training scores
+    st_ho <- scr_strategy(x, rule = "crossing")
+    e <- crossing_edge(st_ho, x$breaks); f <- frozen_cut(x, e)
+    expect_equal(st_ho$crossing$cut, f$cut)
+    if (crossing_edge(st_tr, x$breaks) == e) expect_identical(st_ho$crossing$cut, st_tr$crossing$cut)
+    # score >= cut reproduces the band split on train and on every score seen in training
+    expect_identical(tr >= st_ho$crossing$cut, tr > e)
+    off <- (s >= st_ho$crossing$cut) != (s > e)
+    expect_false(any(off & s %in% tr))
+    # on the hold-out a row changes side only strictly between the two training scores
+    between <- s > f$lo & s < f$hi
+    expect_true(all(between[off]))
+    expect_lte(sum(off), sum(between))
+    expect_identical(sum(s > e), sum(st_ho$table$n[st_ho$table$min_score > e]))
+    if (!any(between)) check(x, st_ho)
+  }
+  # mass points on the band edges: a row at a right-closed edge belongs to the lower band
+  s5 <- sc_demo()
+  for (nm in c("train", "holdout")) {
+    s5$samples[[nm]] <- data.table::data.table(score = rep(c(5, 10, 20, 30), each = 50),
+                                               y = rep(rep(c(1, 0), 4), c(40, 10, 30, 20, 8, 42, 4, 46)))
+  }
+  st5 <- scr_strategy(s5, breaks = c(-Inf, 10, 20, Inf), rule = "crossing")
+  expect_identical(st5$table$decision, c("approve", "approve", "decline"))
+  expect_equal(st5$crossing$cut, 15)
+  check(s5, st5)
+  # a cut at the band edge (10) moves the rows scored 10 to the upper side
+  expect_false(isTRUE(all.equal(scr_cutoff(s5, cuts = 10)$table[sample == "holdout"]$ks_at_cut, st5$crossing$ks)))
+  # hold-out scores never seen in training, strictly between the training scores 10 and 20: the cut
+  # stays at 15 (the hold-out midpoint would be 8.5) and those 50 rows fall on the other side
+  s7 <- s5
+  s7$samples$holdout <- data.table::copy(s5$samples$holdout)[score == 10, score := 12]
+  st7 <- scr_strategy(s7, breaks = c(-Inf, 10, 20, Inf), rule = "crossing")
+  expect_identical(st7$table$decision, c("approve", "approve", "decline"))
+  expect_equal(st7$crossing$cut, 15)
+  h7 <- scr_cutoff(s7, cuts = st7$crossing$cut)$table[sample == "holdout"]
+  expect_equal(h7$n_safe, sum(st7$table$n[st7$table$decision == "approve"]) - 50L)
+  # `breaks` as a number of intervals: the edges come from the sample, and so does the cut
+  sc <- sc_demo()
+  st6 <- scr_strategy(sc, breaks = 4, rule = "crossing")
+  expect_true(is.finite(st6$crossing$cut))
+  check(sc, st6)
 })
 
 test_that("under the crossing rule, scores outside the breaks get no decision", {

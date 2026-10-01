@@ -10,8 +10,9 @@
 #' score on train and hold-out with a bootstrap CI (always), builds the
 #' gains with bands **frozen on train**, the score PSI and the CSI per
 #' variable (fixed and n-adjusted thresholds), the
-#' calibration and the rank-order diagnostics. Optionally fits a tree
-#' challenger on the same WOE columns, aligned to the same scale, with an
+#' calibration and the rank-order diagnostics (a one-sided Fisher exact
+#' test of each band against the previous, riskier one). Optionally fits a
+#' tree challenger on the same WOE columns, aligned to the same scale, with an
 #' explicit `supports_scorecard = FALSE`: it compares, it never
 #' produces points or reason codes.
 #'
@@ -141,6 +142,10 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   for (i in seq_len(nrow(metrics))) msg("  %-8s AUC %.4f [%.4f, %.4f]  KS %.4f  Gini %.4f", metrics$sample[i],
                                         metrics$auc[i], metrics$auc_lo[i], metrics$auc_hi[i], metrics$ks[i], metrics$gini[i])
   breaks <- .score_breaks(samples$train$score, cfg$score_groups)
+  # tied training scores merge quantiles: report the bands actually kept
+  if (length(breaks) - 1L < cfg$score_groups) {
+    msg("  score bands: %d of %d requested (ties in the training score)", length(breaks) - 1L, cfg$score_groups)
+  }
   gains  <- data.table::rbindlist(lapply(names(samples), function(nm)
     data.table::data.table(sample = nm, .score_gains(samples[[nm]]$score, samples[[nm]]$y, breaks, dir))))
   stability <- .scorecard_stability(samples, w_tr, w_ho, pts, breaks, cfg)
@@ -381,18 +386,18 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
        table = tb[])
 }
 
-#' Rank-order breaks between adjacent bands, with a binomial test
+#' Rank-order breaks between adjacent bands, with a one-sided Fisher exact test
 #' @keywords internal
 #' @noRd
 .rank_order <- function(g) {
   g <- data.table::copy(g)[order(id)]
-  g[, `:=`(prev_rate = data.table::shift(event_rate), monotone = NA, p_value = NA_real_)]
-  for (i in seq_len(nrow(g))[-1]) {
-    # expected: the event rate does not rise while moving from the risky to the safe side
-    g$monotone[i] <- g$event_rate[i] <= g$prev_rate[i]
-    # P(observe >= events | rate of the previous band): a small value is a significant break
-    g$p_value[i] <- stats::pbinom(g$events[i] - 1L, g$n[i], g$prev_rate[i], lower.tail = FALSE)
-  }
+  n_prev <- data.table::shift(g$n); e_prev <- data.table::shift(g$events)
+  # expected: the event rate does not rise while moving from the risky to the safe side
+  g[, `:=`(prev_rate = data.table::shift(event_rate), monotone = event_rate <= data.table::shift(event_rate))]
+  # one-sided Fisher exact test, H1: band i has a higher event rate than band
+  # i - 1 (both rates estimated); P(X >= events) under the hypergeometric,
+  # 1 when the pair has no events, NA on the first band
+  g[, p_value := stats::phyper(events - 1L, n, n_prev, events + e_prev, lower.tail = FALSE)]
   g[, break_flag := !(monotone %in% TRUE) & p_value < 0.05]
   g[, .(id, band, n, events, event_rate, prev_rate, monotone, p_value, break_flag)]
 }

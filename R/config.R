@@ -489,7 +489,7 @@ scr_config <- function(preset = c("moderate", "aggressive", "lazy"), ...) {
   .scr_num1(cfg$ccf_sa_ccf, "ccf_sa_ccf", lower = 0, upper = 1)
   .scr_num1(cfg$capital_target_ratio, "capital_target_ratio", lower = 0, upper = 1)
   if (length(cfg$pd_lights) != 2L || any(!is.finite(cfg$pd_lights)) || cfg$pd_lights[1] >= cfg$pd_lights[2]) {
-    stop("`pd_lights` must be two increasing p-value thresholds (red below the first, amber below the second).", call. = FALSE)
+    stop("`pd_lights` must be two increasing p-value thresholds (red at or below the first, amber at or below the second).", call. = FALSE)
   }
   structure(cfg, class = c("scr_config", "list"))
 }

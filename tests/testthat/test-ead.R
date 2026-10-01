@@ -298,6 +298,27 @@ test_that("the validation battery reports calibration, discrimination, back-test
   expect_error(scr_ead_validate(m, newdata = data.frame(x = 1)), "lacks")
 })
 
+test_that("an EAD light without a testable result is grey, and grey never rolls up to green", {
+  m <- ead_model(); r <- ead_demo()$rds
+  # one row: no t-test, no gAUC, and two pools without rows
+  v1 <- scr_ead_validate(m, newdata = r[measure == m$meta$main_measure][1])
+  c1 <- v1$calibration
+  expect_identical(c1[pool == "TOTAL", light_p], "grey")
+  expect_identical(c1$light_adequacy[c1$n == 0L], rep("grey", sum(c1$n == 0L)))
+  expect_identical(v1$discrimination$light, "grey")
+  expect_false(anyNA(v1$summary$light))
+  expect_true(all(c(v1$summary$light, c1$light_p, c1$light_adequacy, v1$stability$light) %in% c("red", "amber", "green", "grey")))
+  sl <- v1$summary$light[v1$summary$light != "grey"]
+  expect_identical(v1$light, if ("red" %in% sl) "red" else if ("amber" %in% sl) "amber" else "green")
+  # no row: every light is grey, and so is the overall one
+  v0 <- scr_ead_validate(m, newdata = r[0])
+  expect_identical(v0$summary$light, rep("grey", 4L))
+  expect_identical(v0$light, "grey")
+  expect_output(print(v0), "overall light: GREY")
+  # the full hold-out keeps its tested lights
+  expect_true(scr_ead_validate(m)$light %in% c("red", "amber", "green"))
+})
+
 test_that("R and SQL agree on pool, applied CCF and predicted EAD (DuckDB), in every dialect", {
   m <- ead_model()
   dialects <- c("ansi", "databricks", "spark", "hive", "mysql", "mariadb", "sqlserver", "bigquery", "postgres",

@@ -44,12 +44,20 @@ An \code{scr_strategy} object with
 \code{ep_per_account}, \code{band_profit}, \code{cum_pct}, \code{cum_event_rate} and
 \code{cum_profit}.}
 \item{\code{breakeven}}{The break-even event rate.}
-\item{\code{crossing}}{A list: \code{cut}, the score boundary of the crossing
-rule; \code{ks}, the distance \eqn{D_k} at it; \code{after_band}, the last
-band on the good side; \code{single_crossing}, whether \code{log_odds}
-changes sign exactly once along the table. All \code{NA} when
-undefined; only \code{cut} is \code{NA} when \code{breaks} is a single number (a
-count of intervals, whose edges are not kept).}
+\item{\code{crossing}}{A list: \code{cut}, the score where the upper side of
+the crossing starts (\code{score >= cut}, the convention of
+\code{\link[=scr_cutoff]{scr_cutoff()}}), frozen on the training scores like the bands:
+midway between the largest training score at or below the band
+edge of the crossing and the smallest training score above it.
+\code{score >= cut} then reproduces the split of the bands on train and
+on any score seen in training; a score of another sample strictly
+between those two training scores can fall on the other side. When
+\code{breaks} is a number of intervals (whose edges come from \code{sample}),
+or no training score lies on one side of the edge, the cut is the
+midpoint between the bands on \code{sample}; \code{ks}, the distance
+\eqn{D_k} at it; \code{after_band}, the last band on the good side;
+\code{single_crossing}, whether \code{log_odds} changes sign exactly once
+along the table. All \code{NA} when undefined.}
 \item{\code{objective}, \code{rule}}{The objective of the scorecard and the
 rule used.}
 \item{\code{revenue_good}, \code{loss_bad}, \code{sample}, \code{direction}, \code{target}}{

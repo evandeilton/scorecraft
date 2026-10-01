@@ -25,7 +25,9 @@ first, amber at or below the second.}
 \value{
 An object of class \code{scr_ead_validation}: \code{calibration},
 \code{discrimination}, \code{backtest}, \code{stability}, \code{summary} (test,
-statistic, p, light), \code{n}, \code{source}.
+statistic, p, light; the light is \code{"grey"} when the test has no
+result), \code{light} (the worst light of the summary: red, then amber,
+then green; \code{"grey"} when no test has a result), \code{n}, \code{source}.
 }
 \description{
 Per pool and in total, compares realized and predicted values on the
@@ -35,7 +37,7 @@ predicted (under-estimation) with its p-value, the EAD adequacy ratio
 (sum of realized EAD over sum of predicted EAD) and traffic lights
 (red at or below \code{lights[1]}, amber at or below \code{lights[2]}, green above;
 adequacy green at or below \code{adequacy_lights[1]}, amber up to
-\code{adequacy_lights[2]}, red above). Adds the
+\code{adequacy_lights[2]}, red above; grey when the value is missing). Adds the
 discrimination block (gAUC with a bootstrap interval against the
 development value, Spearman correlation, cumulative EAD accuracy
 ratio), the back-test by cohort and the stability of the pool

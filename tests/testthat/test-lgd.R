@@ -303,6 +303,23 @@ test_that("the validation battery runs on the hold-out and on new data with traf
   expect_error(scr_lgd_validate(m, newdata = scr_demo_lgd), "lacks column")
 })
 
+test_that("an LGD summary row over untestable pools is grey, never green", {
+  m <- lgd_final()
+  # one hold-out default per pool: no t-test, no Welch test in any pool or pair
+  ids <- m$scored[sample == "holdout", .SD[1], by = pool]$default_id
+  nd <- wo_demo()$rds[as.character(default_id) %in% as.character(ids)]
+  v <- scr_lgd_validate(m, newdata = nd)
+  expect_equal(v$calibration$n, rep(1L, nrow(m$pools)))
+  expect_true(all(c(v$calibration$light, v$homogeneity$light, v$heterogeneity$light) == "grey"))
+  rows <- c("calibration_pools_t", "homogeneity_within_pools", "heterogeneity_between_pools")
+  expect_identical(v$summary[match(rows, test), light], rep("grey", 3L))
+  # next to a tested light, grey gives way: red, then amber, then green
+  v0 <- scr_lgd_validate(m)
+  roll <- function(l) if ("red" %in% l) "red" else if ("amber" %in% l) "amber" else if ("green" %in% l) "green" else "grey"
+  expect_identical(v0$summary[test == "calibration_pools_t", light], roll(v0$calibration$light))
+  expect_identical(v0$summary[test == "psi_drivers", light], roll(v0$stability$drivers$light))
+})
+
 test_that("results are identical under the serial and the PSOCK backend", {
   s <- lgd_demo()$scored[sample == "train"]
   m_ser <- withr::with_options(list(scorecraft.parallel = "serial"), .lgd_metrics(s$lgd_pred, s$lgd_real, s$ead, n_boot = 12L, seed = 7L, nthread = 2L))
