@@ -101,7 +101,8 @@
 #' With `by` (a period, a sample label), the analysis is repeated within
 #' each group: the pooled reference of a segment is the whole of its group.
 #' The bands are frozen once, on all rows. Groups and segments are listed in
-#' the order of their labels; numeric columns in numeric order.
+#' the order of their labels; numeric columns in numeric order, and a factor
+#' segment column in the order of its levels.
 #'
 #' @inheritParams scr_bands
 #' @param x A `data.frame` with one row per scored case, or an object from
@@ -109,7 +110,8 @@
 #' @param newdata For a scorecard: the rows to score with [scr_apply()],
 #'   holding the candidate variables, the target and the segment column.
 #' @param segment Name of the segment column. A missing segment is the
-#'   segment `"(missing)"`.
+#'   segment `"(missing)"`. The segments of a factor column are listed in
+#'   the order of its levels.
 #' @param by Optional name of a column of periods or groups.
 #' @param target For a scorecard: the outcome column of `newdata`; `NULL`
 #'   uses the target of the scorecard.
@@ -323,7 +325,8 @@ scr_segments.scr_scorecard <- function(x, newdata, segment, by = NULL, n_bands =
   sg <- as.character(seg); sg[is.na(sg)] <- "(missing)"
   gv <- if (is.null(byv)) rep("all", length(sg)) else as.character(byv)
   if (anyNA(gv)) stop(fn, "(): the column '", by, "' has missing values.", call. = FALSE)
-  seg_lv <- .seg_levels(seg, sg, "(missing)")
+  # a factor segment in the order of its levels, the missing segment last
+  seg_lv <- if (is.factor(seg)) unique(c(.study_levels(seg), "(missing)")) else .seg_levels(seg, sg, "(missing)")
   grp_lv <- if (is.null(byv)) "all" else .seg_levels(byv, gv)
   h <- .study_hist(score, y, w = w, by = list(sample = sg, group = gv), max_cells = max_cells, fn = fn)
   if (!nrow(h)) stop(fn, "(): no row has a score (and a positive weight).", call. = FALSE)

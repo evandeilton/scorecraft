@@ -310,16 +310,39 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
   unique(c(-Inf, stats::quantile(score, probs = probs, na.rm = TRUE, names = FALSE), Inf))
 }
 
+#' Band index of every score and the band labels, without a factor per row
+#'
+#' The intervals and the labels of `cut(score, breaks, include.lowest =
+#' TRUE)`: right-closed bands, the lowest edge included, `NA` outside the
+#' breaks. The labels are formatted once, from the breaks alone. A single
+#' number of intervals takes its edges from the scores, so it goes through
+#' cut() itself.
+#' @keywords internal
+#' @noRd
+.score_band <- function(score, breaks) {
+  if (length(breaks) == 1L) {
+    f <- cut(score, breaks = breaks, include.lowest = TRUE)
+    return(list(idx = as.integer(f), labels = levels(f)))
+  }
+  labels <- levels(cut(numeric(0), breaks = breaks, include.lowest = TRUE))
+  # cut() sorts the breaks and drops the missing ones
+  br <- sort.int(as.double(breaks))
+  idx <- findInterval(score, br, left.open = TRUE, rightmost.closed = TRUE)
+  idx[which(idx < 1L | idx >= length(br))] <- NA_integer_
+  list(idx = idx, labels = labels)
+}
+
 #' Score gains per frozen band, from the risky side to the safe side
 #' @keywords internal
 #' @noRd
 .score_gains <- function(score, y, breaks, direction) {
-  band <- cut(score, breaks = breaks, include.lowest = TRUE)
-  d <- data.table::data.table(band = band, score = score, y = as.integer(y))[
+  # aggregated by the integer band index; the labels are attached at the end
+  b <- .score_band(score, breaks)
+  d <- data.table::data.table(band = b$idx, score = score, y = as.integer(y))[
     , .(n = .N, events = sum(y), min_score = min(score), mean_score = mean(score), max_score = max(score)),
     by = band]
   # riskiest band first: low score under higher_is_safer, high under higher_is_riskier
-  d <- if (identical(direction, "higher_is_safer")) d[order(band)] else d[order(-as.integer(band))]
+  d <- if (identical(direction, "higher_is_safer")) d[order(band)] else d[order(-band)]
   n_tot <- sum(d$n); e_tot <- sum(d$events); ne_tot <- n_tot - e_tot
   d[, `:=`(id = seq_len(.N), pct = n / n_tot, event_rate = events / n, non_events = n - events)]
   # event-oriented band WOE, the same values as log_odds in scr_strategy()
@@ -339,7 +362,7 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
                                "pct_event", "pct_nonevent", "woe",
                                "min_score", "mean_score", "max_score", "cum_pct", "cum_event_pct",
                                "cum_nonevent_pct", "ks", "lift", "cum_lift", "odds", "log_odds"))
-  d[, band := as.character(band)]
+  d[, band := b$labels[band]]
   d[]
 }
 
@@ -369,12 +392,12 @@ scr_scorecard <- function(x, features = NULL, base_score = NULL, base_odds = NUL
 .calibration <- function(s, breaks, al) {
   p <- .score_to_prob(al, s$score)
   y <- s$y
-  band <- cut(s$score, breaks = breaks, include.lowest = TRUE)
-  # ordered by the band factor (numeric order), not by its label: "(1e+03,Inf]"
+  b <- .score_band(s$score, breaks)
+  # ordered by the band index (numeric order), not by its label: "(1e+03,Inf]"
   # would otherwise sort before "(512,530]"
-  tb <- data.table::data.table(band = band, p = p, y = y)[
+  tb <- data.table::data.table(band = b$idx, p = p, y = y)[
     , .(n = .N, expected = mean(p), observed = mean(y)), by = band][order(band)]
-  tb[, band := as.character(band)]
+  tb[, band := b$labels[band]]
   tb[, gap := observed - expected]
   ece <- sum(tb$n / sum(tb$n) * abs(tb$gap))
   lo <- suppressWarnings(stats::glm(y ~ stats::qlogis(pmin(pmax(p, 1e-6), 1 - 1e-6)), family = stats::binomial()))

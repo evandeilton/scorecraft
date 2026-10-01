@@ -1294,7 +1294,7 @@ print.scr_migration <- function(x, ...) {
 #' @noRd
 .pd_light <- function(p, lights) ifelse(is.na(p), "grey", ifelse(p <= lights[1], "red", ifelse(p <= lights[2], "amber", "green")))
 
-#' DeLong standard error of an AUC, from mid-ranks
+#' DeLong standard error of an AUC, from the counts per score value
 #'
 #' The structural components of DeLong et al. (1988): for every event
 #' V10_i is the share of non-events it outranks (ties count one half), for
@@ -1302,7 +1302,9 @@ print.scr_migration <- function(x, ...) {
 #' Var(AUC) = var(V10) / n1 + var(V01) / n0. This is the estimator of the
 #' ECB instructions for reporting validation results (current AUC against
 #' the initial one) and, unlike the Hanley-McNeil approximation, it holds
-#' under heavy ties (a grade scale).
+#' under heavy ties (a grade scale). The components are constant within a
+#' score value, so the rows are tabulated once and the variances come from
+#' the counts (`.study_delong_counts()`).
 #' @keywords internal
 #' @noRd
 .pd_auc_se <- function(score, y, higher_is_event = TRUE) {
@@ -1311,10 +1313,10 @@ print.scr_migration <- function(x, ...) {
   if (!higher_is_event) s <- -s
   e <- y == 1L; n1 <- sum(e); n0 <- sum(!e)
   if (n1 < 2L || n0 < 2L) return(NA_real_)
-  r <- data.table::frank(s, ties.method = "average")
-  v10 <- (r[e] - data.table::frank(s[e], ties.method = "average")) / n0
-  v01 <- 1 - (r[!e] - data.table::frank(s[!e], ties.method = "average")) / n1
-  sqrt(stats::var(v10) / n1 + stats::var(v01) / n0)
+  # event and non-event counts per distinct score, in ascending order
+  idx <- data.table::frank(s, ties.method = "dense")
+  K <- max(idx)
+  .study_delong_counts(tabulate(idx[e], K), tabulate(idx[!e], K))
 }
 
 #' Validate a PD model on a cohort panel

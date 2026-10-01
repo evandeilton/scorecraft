@@ -54,7 +54,8 @@ scr_segments(x, ...)
 \item{...}{Passed on to the methods; an unknown argument is an error.}
 
 \item{segment}{Name of the segment column. A missing segment is the
-segment \code{"(missing)"}.}
+segment \code{"(missing)"}. The segments of a factor column are listed in
+the order of its levels.}
 
 \item{by}{Optional name of a column of periods or groups.}
 
@@ -214,7 +215,8 @@ force.
 With \code{by} (a period, a sample label), the analysis is repeated within
 each group: the pooled reference of a segment is the whole of its group.
 The bands are frozen once, on all rows. Groups and segments are listed in
-the order of their labels; numeric columns in numeric order.
+the order of their labels; numeric columns in numeric order, and a factor
+segment column in the order of its levels.
 }
 
 \examples{
