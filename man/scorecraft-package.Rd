@@ -81,7 +81,13 @@ its outcome from one table of counts per score value: \code{\link[=scr_bands]{sc
 labeled tiers), \code{\link[=scr_rag]{scr_rag()}} (red, amber and green lights against the
 reference), \code{\link[=scr_claims]{scr_claims()}} (tested statements about event rates),
 \code{\link[=scr_operating]{scr_operating()}} (the cut under volume, budget and capacity constraints)
-and \code{\link[=scr_score_cross]{scr_score_cross()}} (two scores on the same rows).
+and \code{\link[=scr_score_cross]{scr_score_cross()}} (two scores on the same rows). Six more read the
+score against a second dimension: \code{\link[=scr_mix_shift]{scr_mix_shift()}} (a change of the
+event rate split into mix and rate effects), \code{\link[=scr_segments]{scr_segments()}} (one score
+on many segments), \code{\link[=scr_maturity]{scr_maturity()}} (events over time by band, with
+censoring), \code{\link[=scr_uplift]{scr_uplift()}} (a treated against a control group),
+\code{\link[=scr_overlap]{scr_overlap()}} (rules against the alerts of a score) and
+\code{\link[=scr_detection]{scr_detection()}} (time to detection of fraud episodes).
 }
 
 \section{Parallelism}{

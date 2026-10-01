@@ -98,7 +98,8 @@
 #'   labels, or `NULL` (all rows are one sample, reference and study at once).
 #' @param reference For a scorecard: the sample the bands are frozen on
 #'   (`"train"`). For a data.frame: the label of the reference sample;
-#'   `NULL` takes the first level of the `sample` column.
+#'   `NULL` takes the first level of the `sample` column (the levels of a
+#'   factor in their order, numbers in numeric order, text sorted).
 #' @param breaks Explicit ascending cut points; overrides `n_bands` and
 #'   `spacing`. Infinite values are ignored.
 #' @param level Confidence level of the intervals. For a scorecard, `NULL`

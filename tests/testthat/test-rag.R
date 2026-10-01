@@ -348,3 +348,24 @@ test_that("scr_export writes the lights, alone or with a study", {
   expect_true(all(c("Bands", "Lights", "Light_Summary") %in% openxlsx::getSheetNames(eb$files$xlsx)))
   expect_error(scr_export(b, out, stamp = FALSE, rag = b), "scr_rag")
 })
+
+test_that("the groups of a numeric `by` are listed in numeric order", {
+  d <- rag_df(6000)
+  set.seed(3)
+  d$k <- sample(c(9, 10, 100), nrow(d), TRUE)
+  rg <- scr_rag(d, prob = "prob", sample = "smp", by = "k", n_boot = 0)
+  expect_identical(rg$summary$group, c("9", "10", "100"))
+  expect_identical(unique(rg$table$group), c("9", "10", "100"))
+  # text labels keep their order; the checks of each group are the same
+  d$kc <- as.character(d$k)
+  rc <- scr_rag(d, prob = "prob", sample = "smp", by = "kc", n_boot = 0)
+  expect_identical(rc$summary$group, c("10", "100", "9"))
+  for (g in c("9", "10", "100")) {
+    expect_equal(rg$table[group == g, value], rc$table[group == g, value])
+    expect_identical(rg$summary[group == g, overall], rc$summary[group == g, overall])
+  }
+  # without a sample column, and for the dates of a scorecard, the order is unchanged
+  expect_identical(scr_rag(d, prob = "prob", by = "k", n_boot = 0)$summary$group, c("9", "10", "100"))
+  rb <- scr_rag(sc_demo(), by = "date", n_boot = 0)
+  expect_identical(rb$summary$group, sort(rb$summary$group))
+})
