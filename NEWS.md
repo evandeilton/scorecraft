@@ -87,14 +87,16 @@
 * `scr_scorecard()` says when ties in the training score give fewer score
   bands than `score_groups`.
 * `scr_metrics()` draws its bootstrap on the counts per score value when
-  the score has many ties (at most one distinct value for every two rows:
+  the score has many ties (at most one distinct value for every ten rows:
   scorecard points, a grade scale, a WOE score on a large sample), so the
   cost of a resample follows the number of distinct scores, not of rows.
   The intervals of such scores keep their distribution but change for a
   given seed, wherever they are reported; scores with fewer ties keep the
   row resampling and their intervals. The band tables of the scorecard,
   `scr_strategy()`, `scr_reject()` and `scr_psi()` assign the bands as
-  integer indices, without a factor per row. No other result changes.
+  integer indices, without a factor per row. The DeLong standard error of
+  `scr_pd_validate()` is computed from the counts and can differ in the
+  last digits (about 1e-16). No other result changes.
 * The cheat sheet gains a third page on the score studies.
 
 # scorecraft 0.3.1

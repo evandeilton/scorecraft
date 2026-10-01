@@ -510,7 +510,9 @@
     m <- min(chunk, n_boot - done)
     C1 <- stats::rmultinom(m, size1, p1)
     C0 <- stats::rmultinom(m, size0, p0)
-    r <- .study_auc_cols(C1, C0)
+    # a single resample goes through the vector kernel: the same values
+    # without the column-wise passes over a one-column matrix
+    r <- if (m == 1L) .auc_ks_counts(C1, C0) else .study_auc_cols(C1, C0)
     auc[done + seq_len(m)] <- r$auc + shift_auc; ks[done + seq_len(m)] <- r$ks + shift_ks
     done <- done + m
   }

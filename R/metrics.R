@@ -19,7 +19,7 @@
 #'
 #' The resamples are drawn in one of two ways. With \eqn{K} distinct scores
 #' in the \eqn{n} rows used (those with a score and an outcome) and
-#' \eqn{K \le n / 2} (many ties: scorecard points, a grade scale, a WOE
+#' \eqn{K \le n / 10} (many ties: scorecard points, a grade scale, a WOE
 #' score on a large sample), each class is redrawn on the counts, as a
 #' multinomial over the score values with its observed shares, at a cost
 #' of \eqn{O(K)} per resample. Otherwise the rows of each class are
@@ -90,25 +90,28 @@ scr_metrics <- function(score, y, higher_is_event = TRUE, ci = TRUE, n_boot = 20
   idx <- data.table::frank(score, ties.method = "dense")
   K <- max(idx)
   idx1 <- idx[y == 1L]; idx0 <- idx[y == 0L]
-  c1 <- tabulate(idx1, K); c0 <- tabulate(idx0, K)
-  pt <- .auc_ks_counts(c1, c0)
+  pt <- .auc_ks_counts(tabulate(idx1, K), tabulate(idx0, K))
   out <- empty
   out$auc <- pt$auc; out$ks <- pt$ks; out$gini <- pt$gini
   out$n <- length(y); out$events <- n1
 
-  if (isTRUE(ci) && n_boot >= 2L && K <= length(y) / 2) {
+  # one distinct score for every ten rows is where the counts start to pay,
+  # also against the rows resampled over the default two workers; the switch
+  # does not look at `nthread`, so the result never depends on it
+  if (isTRUE(ci) && n_boot >= 2L && K <= length(y) / 10) {
     # many ties: each class is redrawn on the counts, as a multinomial over
     # the score values, O(K) per resample and without pooling. `seed` is
     # local to the kernel, which restores the user's random stream
-    b <- .study_auc_boot(c1, c0, as.integer(n_boot), level, seed = seed, boot_cells = Inf)
+    b <- .study_auc_boot(tabulate(idx1, K), tabulate(idx0, K), as.integer(n_boot), level,
+                         seed = seed, boot_cells = Inf)
     out$auc_lo <- b$auc_lo; out$auc_hi <- b$auc_hi
     out$ks_lo <- b$ks_lo;   out$ks_hi <- b$ks_hi
     out$gini_lo <- b$gini_lo; out$gini_hi <- b$gini_hi
     out$n_boot <- as.integer(n_boot)
   } else if (isTRUE(ci) && n_boot >= 2L) {
-    # few ties: the counts save nothing, the rows are resampled, O(n) per
-    # resample. `seed` is local to this call: the user's random stream is
-    # restored on exit
+    # fewer ties: the rows are resampled, O(n) per resample, and no count
+    # vector is kept alive across the resamples. `seed` is local to this
+    # call: the user's random stream is restored on exit
     .scr_local_seed(seed)
     # The seed of every resample is drawn HERE, in the main process, so the
     # result is identical with 1 or N workers.

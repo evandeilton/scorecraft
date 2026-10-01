@@ -146,18 +146,7 @@ ref_psi <- function(base, compare, breaks = NULL, n_groups = 10L, alpha = 0.05, 
   .psi_counts(tabulate(match(gb, lv), nbins = length(lv)), tabulate(match(gc, lv), nbins = length(lv)), lv, alpha, thresholds)
 }
 
-# DeLong standard error from the mid-ranks of the rows
-ref_auc_se <- function(score, y, higher_is_event = TRUE) {
-  ok <- !is.na(score) & !is.na(y)
-  s <- as.double(score[ok]); y <- as.integer(y[ok])
-  if (!higher_is_event) s <- -s
-  e <- y == 1L; n1 <- sum(e); n0 <- sum(!e)
-  if (n1 < 2L || n0 < 2L) return(NA_real_)
-  r <- data.table::frank(s, ties.method = "average")
-  v10 <- (r[e] - data.table::frank(s[e], ties.method = "average")) / n0
-  v01 <- 1 - (r[!e] - data.table::frank(s[!e], ties.method = "average")) / n1
-  sqrt(stats::var(v10) / n1 + stats::var(v01) / n0)
-}
+# the row-level DeLong error, ref_auc_se(), is in helper-scorecraft.R
 
 # scr_metrics() as it was: the bootstrap on the rows for any score, with the
 # seed of every resample drawn in the main process
@@ -458,27 +447,41 @@ test_that("the point estimates of scr_metrics() are those of the previous versio
   expect_identical(scr_metrics(numeric(), integer()), ref_metrics(numeric(), integer()))
 })
 
-test_that("the bootstrap runs on the counts up to one distinct score per two rows, on the rows above", {
-  for (n in c(200L, 201L)) {
-    half <- n %/% 2L
-    # K = floor(n / 2): the counts
-    d <- ce_ties(n, half)
-    expect_identical(data.table::uniqueN(d$s), half)
+test_that("the bootstrap runs on the counts up to one distinct score per ten rows, on the rows above", {
+  for (n in c(200L, 205L)) {
+    tenth <- n %/% 10L
+    # K = floor(n / 10): the counts
+    d <- ce_ties(n, tenth)
+    expect_identical(data.table::uniqueN(d$s), tenth)
     m <- scr_metrics(d$s, d$y, n_boot = 30, seed = 6)
     expect_identical(unlist(unclass(m)[bounds]), unlist(ref_metrics_counts(d$s, d$y, 30, seed = 6)[bounds]))
     expect_false(identical(unclass(m)[bounds], unclass(ref_metrics(d$s, d$y, n_boot = 30, seed = 6))[bounds]))
     # one distinct score more: the rows, as before
-    d <- ce_ties(n, half + 1L)
+    d <- ce_ties(n, tenth + 1L)
     m <- scr_metrics(d$s, d$y, n_boot = 30, seed = 6)
     expect_identical(m, ref_metrics(d$s, d$y, n_boot = 30, seed = 6))
     expect_false(identical(unlist(unclass(m)[bounds]), unlist(ref_metrics_counts(d$s, d$y, 30, seed = 6)[bounds])))
   }
-  # the rows that count are those with a score and an outcome: 100 distinct
+  # between one distinct score per ten rows and one per two: the rows
+  for (K in c(50L, 100L)) {
+    d <- ce_ties(200L, K)
+    expect_identical(scr_metrics(d$s, d$y, n_boot = 30, seed = 6), ref_metrics(d$s, d$y, n_boot = 30, seed = 6))
+  }
+  # the rows that count are those with a score and an outcome: 20 distinct
   # scores in 200 valid rows run on the counts, whatever the rows dropped
-  d <- ce_ties(200L, 100L)
+  d <- ce_ties(200L, 20L)
   s <- c(d$s, NA, Inf, 1001:1050 / 7); y <- c(d$y, 1, 0, rep(NA, 50))
   expect_identical(unlist(unclass(scr_metrics(s, y, n_boot = 30, seed = 6))[bounds]),
                    unlist(ref_metrics_counts(d$s, d$y, 30, seed = 6)[bounds]))
+  # and 21 distinct scores in 200 valid rows run on the rows, although the
+  # dropped rows would bring the share of distinct scores under one in ten
+  d <- ce_ties(200L, 21L)
+  s <- c(d$s, rep(NA, 100)); y <- c(d$y, rep(1, 100))
+  expect_identical(unclass(scr_metrics(s, y, n_boot = 30, seed = 6))[bounds],
+                   unclass(ref_metrics(d$s, d$y, n_boot = 30, seed = 6))[bounds])
+  # the switch does not look at nthread
+  d <- ce_ties(200L, 20L)
+  expect_identical(scr_metrics(d$s, d$y, n_boot = 30, seed = 6, nthread = 2L), scr_metrics(d$s, d$y, n_boot = 30, seed = 6))
   # every score tied: one cell, on the counts
   tied <- scr_metrics(rep(1, 50), rep(0:1, 25), n_boot = 20, seed = 1)
   expect_identical(c(tied$auc_lo, tied$auc_hi, tied$ks_lo, tied$ks_hi), c(0.5, 0.5, 0, 0))
@@ -489,7 +492,7 @@ test_that("the bootstrap runs on the counts up to one distinct score per two row
 test_that("on scores with few ties the intervals are those of the previous version, bit for bit", {
   sets <- ce_scores()
   s <- sets$continuous$s; y <- sets$continuous$y
-  expect_gt(data.table::uniqueN(s), length(s) / 2)
+  expect_gt(data.table::uniqueN(s), length(s) / 10)
   for (sd in c(1, 7, 2026)) {
     expect_identical(scr_metrics(s, y, higher_is_event = FALSE, n_boot = 40, seed = sd),
                      ref_metrics(s, y, higher_is_event = FALSE, n_boot = 40, seed = sd))
@@ -503,7 +506,7 @@ test_that("on scores with few ties the intervals are those of the previous versi
   for (sc in ce_cards()) {
     hie <- identical(sc$direction, "higher_is_riskier")
     for (smp in sc$samples) {
-      if (data.table::uniqueN(smp$score) > nrow(smp) / 2) {
+      if (data.table::uniqueN(smp$score) > nrow(smp) / 10) {
         expect_identical(scr_metrics(smp$score, smp$y, higher_is_event = hie, n_boot = 20, seed = 2),
                          ref_metrics(smp$score, smp$y, higher_is_event = hie, n_boot = 20, seed = 2))
       }
@@ -536,7 +539,7 @@ test_that("on the counts the interval bounds have the law of the row bootstrap",
   n <- 400
   s <- round(stats::rnorm(n) * 3)
   y <- stats::rbinom(n, 1, stats::plogis(-1 + 0.35 * s))
-  expect_lte(data.table::uniqueN(s), n / 2)
+  expect_lte(data.table::uniqueN(s), n / 10)
   R <- 300; B <- 100
   bd <- c("auc_lo", "auc_hi", "ks_lo", "ks_hi")
   new <- vapply(seq_len(R), function(r) unlist(scr_metrics(s, y, n_boot = B, seed = r)[bd]), numeric(4))
@@ -558,7 +561,7 @@ test_that("on the counts the bootstrap is seeded locally and ignores nthread", {
   set.seed(5)
   y <- stats::rbinom(600, 1, 0.3)
   s <- round(2 * y + 3 * stats::rnorm(600))
-  expect_lte(data.table::uniqueN(s), 300)
+  expect_lte(data.table::uniqueN(s), 60)
   set.seed(42); before <- .Random.seed
   m1 <- scr_metrics(s, y, n_boot = 40, seed = 9)
   expect_identical(.Random.seed, before)
@@ -584,11 +587,11 @@ test_that("on the counts the bootstrap is seeded locally and ignores nthread", {
 
 test_that("on the counts the bootstrap is exact above the pooling size of the studies", {
   set.seed(8)
-  n <- 30000
+  n <- 120000
   s <- sample.int(12000, n, replace = TRUE)
   y <- stats::rbinom(n, 1, stats::plogis(-1 + (s - 6000) / 3000))
   K <- data.table::uniqueN(s)
-  expect_gt(K, 1e4); expect_lte(K, n / 2)
+  expect_gt(K, 1e4); expect_lte(K, n / 10)
   m <- scr_metrics(s, y, n_boot = 30, seed = 3)
   ex <- ref_metrics_counts(s, y, 30, seed = 3)
   expect_identical(unlist(unclass(m)[c("auc", "ks", bounds)]), unlist(ex[c("auc", "ks", bounds)]))
@@ -596,4 +599,25 @@ test_that("on the counts the bootstrap is exact above the pooling size of the st
   idx <- data.table::frank(s, ties.method = "dense")
   po <- .study_auc_boot(tabulate(idx[y == 1], K), tabulate(idx[y == 0], K), 30L, 0.95, seed = 3)
   expect_false(identical(m$auc_lo, po$auc_lo))
+})
+
+test_that("a chunk of one resample goes through the vector kernel with the same values", {
+  set.seed(21)
+  K <- 1000L
+  c1 <- as.double(stats::rpois(K, 3)); c0 <- as.double(stats::rpois(K, 20))
+  n1 <- sum(c1); n0 <- sum(c0)
+  # 1001 resamples over 1000 cells run as chunks of 1000 and of 1
+  full <- .study_auc_boot(c1, c0, 1001L, seed = 4, keep = TRUE)
+  # the same draws by hand, the last one through the column kernel
+  old <- if (exists(".Random.seed", envir = globalenv())) get(".Random.seed", envir = globalenv()) else NULL
+  set.seed(4)
+  A1 <- stats::rmultinom(1000, n1, c1 / n1); A0 <- stats::rmultinom(1000, n0, c0 / n0)
+  B1 <- stats::rmultinom(1, n1, c1 / n1);    B0 <- stats::rmultinom(1, n0, c0 / n0)
+  if (is.null(old)) rm(".Random.seed", envir = globalenv()) else assign(".Random.seed", old, envir = globalenv())
+  first <- .study_auc_cols(A1, A0); last <- .study_auc_cols(B1, B0)
+  expect_identical(full$boot_auc, c(first$auc, last$auc))
+  expect_identical(full$boot_ks, c(first$ks, last$ks))
+  # and the vector kernel agrees with the column kernel on that single draw
+  v <- .auc_ks_counts(B1, B0)
+  expect_identical(c(v$auc, v$ks), c(last$auc, last$ks))
 })

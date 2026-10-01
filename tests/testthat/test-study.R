@@ -289,7 +289,7 @@ test_that("the DeLong standard error from counts equals the row estimator", {
   set.seed(31)
   s <- round(stats::rnorm(500) * 3); y <- stats::rbinom(500, 1, stats::plogis(0.4 * s))
   idx <- data.table::frank(s, ties.method = "dense"); K <- max(idx)
-  expect_equal(.study_delong_counts(tabulate(idx[y == 1], K), tabulate(idx[y == 0], K)), .pd_auc_se(s, y))
+  expect_equal(.study_delong_counts(tabulate(idx[y == 1], K), tabulate(idx[y == 0], K)), ref_auc_se(s, y), tolerance = 1e-12)
   expect_true(is.na(.study_delong_counts(c(1, 0), c(5, 5))))
 })
 

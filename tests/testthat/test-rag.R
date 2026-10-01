@@ -112,7 +112,7 @@ test_that("the values follow independent formulas", {
   t <- rg$table
   expect_equal(t[metric == "gini_ratio", value], m_n$gini / m_r$gini)
   expect_equal(t[metric == "gini_ratio", benchmark], m_r$gini)
-  se <- sqrt(.pd_auc_se(new$score, new$y, higher_is_event = FALSE)^2 + .pd_auc_se(ref$score, ref$y, higher_is_event = FALSE)^2)
+  se <- sqrt(ref_auc_se(new$score, new$y, higher_is_event = FALSE)^2 + ref_auc_se(ref$score, ref$y, higher_is_event = FALSE)^2)
   expect_equal(t[metric == "auc_change_p", value], stats::pnorm((m_r$auc - m_n$auc) / se, lower.tail = FALSE))
   expect_equal(t[metric == "ks", value], m_n$ks)
   expect_identical(t[metric == "ks", light], "none")
