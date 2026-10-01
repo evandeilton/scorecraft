@@ -34,12 +34,18 @@
 #' `lgd_<tag>.xlsx`, `ead_<tag>.xlsx`, `capital_<framework>.xlsx`), with the
 #' validation, the ledger and the model card as sheets.
 #'
+#' A score study ([scr_bands()], [scr_tiers()]) writes one workbook,
+#' `study_bands_<target>.xlsx` or `study_tiers_<target>.xlsx`, with its
+#' summary, its table, the cuts and the settings (plus the ledger and the
+#' stability of the tiers, and the lights of `rag` when given); a set of
+#' lights from [scr_rag()] writes `rag_<target>.xlsx`.
+#'
 #' The timeline and vintage sheets need the date column of the split; when it
 #' is absent they carry an availability row instead of a fabricated number.
 #'
 #' @param x An object from [scr_select()], [scr_scorecard()],
-#'   [scr_coarse_classing()], [scr_pd()], [scr_lgd()], [scr_ead()] or
-#'   [scr_capital()].
+#'   [scr_coarse_classing()], [scr_pd()], [scr_lgd()], [scr_ead()],
+#'   [scr_capital()], [scr_bands()], [scr_tiers()] or [scr_rag()].
 #' @param dir Output directory. Created if it does not exist.
 #' @param stamp If `TRUE` (default), writes to a timestamped subdirectory,
 #'   preserving earlier runs.

@@ -11,7 +11,9 @@
 #' same numbers, and a test guarantees it.
 #'
 #' @param x An object from [scr_select()] (returns WOE/bin of the approved
-#'   variables) or from [scr_scorecard()] (returns score and points).
+#'   variables), from [scr_scorecard()] (returns score and points), or a
+#'   score study from [scr_bands()] or [scr_tiers()] (returns the band or
+#'   tier of a score).
 #' @param newdata New table with the source columns of the requested
 #'   variables. The target column is not needed.
 #' @param ... Passed on to the methods.

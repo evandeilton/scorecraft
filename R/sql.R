@@ -50,7 +50,8 @@
 #' or the portfolio output.
 #'
 #' @param x An object from [scr_select()], [scr_scorecard()], [scr_pd()],
-#'   [scr_lgd()], [scr_ead()] or [scr_capital()].
+#'   [scr_lgd()], [scr_ead()], [scr_capital()], [scr_bands()] or
+#'   [scr_tiers()].
 #' @param table Source table name, written verbatim (it may be qualified,
 #'   `schema.table`, and is never quoted: pass only a trusted name). `NULL`
 #'   uses `config$sql_table`.

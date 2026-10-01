@@ -56,6 +56,10 @@ reference:
 - title: Metrics
   contents:
   - has_concept("metrics")
+- title: Score studies
+  desc: Percentile bands, tiers and red / amber / green lights of a score against its reference.
+  contents:
+  - has_concept("score-studies")
 - title: Portfolio and database
   contents:
   - has_concept("portfolio")

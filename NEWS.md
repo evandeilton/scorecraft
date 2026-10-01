@@ -1,5 +1,26 @@
 # scorecraft (development version)
 
+* New score studies, computed from one pass over the scored rows into a
+  table of counts per score value:
+  * `scr_bands()` cuts a score into percentile or tail bands frozen on a
+    reference sample and reports, per band and sample, the event rate with
+    a Jeffreys interval, lift, capture, KS, WOE, IV, PSI and a one-sided
+    Fisher exact test of rank order, plus the AUC, Gini and KS with a
+    bootstrap interval. Accepts a scorecard, a data.frame (with weights,
+    a value column and sample labels) or pre-aggregated counts.
+  * `scr_tiers()` fits 3, 5 or 7 labeled tiers (from "very low" to "very
+    high") by an exact dynamic program under share, event and
+    distinctness constraints, by event-rate anchors or by equal shares;
+    `round_to` gives policy-friendly cuts, and `n_boot` measures the
+    stability of the cuts. An infeasible tier count falls back and is
+    recorded in a ledger.
+  * `scr_rag()` lights discrimination, calibration, stability and, for a
+    scorecard, the variables red, amber or green, per period or segment
+    with `by`; the thresholds are an editable table from `scr_rag_plan()`.
+  * `scr_apply()`, `scr_sql()` and `scr_export()` assign the bands or tiers
+    in R and in SQL and write the study to a workbook.
+* New configuration keys for the score studies (stage 13): `study_bands`,
+  `study_level`, `tier_min_pct`, `tier_min_events` and `tier_max_bins`.
 * `scr_pd_validate()` gives the light `"grey"` to a row without a testable
   result (a missing p-value) instead of `NA`, and the overall light is
   `"grey"`, not `"green"`, when no row has a testable result.
