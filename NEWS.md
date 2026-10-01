@@ -95,6 +95,7 @@
   row resampling and their intervals. The band tables of the scorecard,
   `scr_strategy()`, `scr_reject()` and `scr_psi()` assign the bands as
   integer indices, without a factor per row. No other result changes.
+* The cheat sheet gains a third page on the score studies.
 
 # scorecraft 0.3.1
 
