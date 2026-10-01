@@ -119,7 +119,15 @@ test_that("scr_tiers optimal: monotone, distinct, labeled by event rate, event-r
   t7 <- scr_tiers(d, sample = "smp", n_tiers = 7, criterion = "iv", min_pct = 0.02)
   expect_identical(t7$labels[c(1, 7)], c("extremely low", "extremely high"))
   expect_identical(t7$criterion, "iv")
-  expect_identical(scr_tiers(d, sample = "smp", n_tiers = 4)$labels, paste0("T", 1:4))
+  # even counts have no "medium"; 8 and 9 tiers are numbered
+  expect_identical(scr_tiers(d, sample = "smp", n_tiers = 4)$labels, c("low", "medium low", "medium high", "high"))
+  expect_identical(scr_tiers(d, sample = "smp", n_tiers = 2)$labels, c("low", "high"))
+  expect_identical(.tier_labels(6), c("very low", "low", "medium low", "medium high", "high", "very high"))
+  expect_identical(.tier_labels(8), paste0("T", 1:8))
+  expect_identical(.tier_labels(9), paste0("T", 1:9))
+  expect_identical(.tier_labels(1), "T1")
+  t4 <- scr_tiers(d, sample = "smp", n_tiers = 4)
+  expect_output(print(t4), "medium high")
   expect_identical(scr_tiers(d, sample = "smp", n_tiers = 3, labels = c("A", "B", "C"))$labels, c("A", "B", "C"))
   expect_error(scr_tiers(d, sample = "smp", n_tiers = 3, labels = c("A", "B")), "tiers were achieved")
   expect_output(print(tr), "scr_study_tiers")
@@ -276,6 +284,20 @@ test_that("R and SQL tiers agree on DuckDB, NULL score included", {
   expect_identical(as.integer(got$tier), exp$tier)
   expect_identical(got$tier_label, exp$tier_label)
   expect_true(is.na(got$tier[2]))
+  # the labels carry their order in both: credit with 5 tiers, tier 5 is "01.very high"
+  expect_true(any(grepl("'01.very high'", sql, fixed = TRUE)))
+  expect_true(any(grepl("ELSE '05.very low'", sql, fixed = TRUE)))
+  expect_identical(got$tier_label[!is.na(got$tier)], tr$tier_labels[got$tier[!is.na(got$tier)]])
+  expect_true(is.na(got$tier_label[2]))
+  # numbered = FALSE: the plain labels, the same in R and SQL
+  sql0 <- scr_sql(tr, table = "scores", dialect = "duckdb", numbered = FALSE)
+  expect_false(any(grepl("'0[0-9]\\.", sql0)))
+  expect_true(any(grepl("ELSE 'very low'", sql0, fixed = TRUE)))
+  got0 <- DBI::dbGetQuery(con, paste(sql0, collapse = "\n"))
+  exp0 <- scr_apply(tr, d, numbered = FALSE)
+  expect_identical(got0$tier_label, exp0$tier_label)
+  expect_identical(as.integer(got0$tier), exp$tier)
+  expect_identical(exp0$tier_label, tr$code_labels[findInterval(d$score, tr$cuts) + 1L])
   # a score on a cut is on the upper side
   expect_identical(exp$tier[3], tr$codes[3])
   tmp <- tempfile(fileext = ".sql")
@@ -292,4 +314,84 @@ test_that("scr_export writes the tiers, the ledger and the stability", {
   ex <- scr_export(tr, out, stamp = FALSE)
   expect_identical(openxlsx::getSheetNames(ex$files$xlsx),
                    c("Summary", "Tiers", "Cuts", "Settings", "Ledger", "Stability"))
+})
+
+test_that("production labels carry their order: 01 is the event-richest tier under every direction", {
+  fx <- list(credit = sc_demo(), fraud = sc_fraud_demo(), propensity = sc_prop_demo())
+  for (nm in names(fx)) {
+    sc <- fx[[nm]]
+    tr <- suppressWarnings(scr_tiers(sc, n_tiers = 5))
+    L <- tr$n_tiers
+    expect_gte(L, 2L)
+    expect_identical(tr$tier_labels, sprintf("%02d.%s", rev(seq_len(L)), tr$labels))
+    for (smp in c("train", "holdout")) {
+      t <- tr$table[sample == smp]
+      # the table lists the event-richest tier first: its rows read 01, 02, ..., and sort that way
+      expect_identical(t$tier_label, sprintf("%02d.%s", seq_len(L), t$label))
+      expect_identical(sort(t$tier_label), t$tier_label)
+      expect_identical(t$tier, rev(seq_len(L)))   # the tier number still rises with the event rate
+    }
+    ref <- tr$table[sample == "train"]
+    expect_identical(which.max(ref$rate), 1L)
+    expect_match(ref$tier_label[1], "^01\\.")
+    # scr_apply: numbered by default, plain on request, and joins to the table
+    ho <- sc$samples$holdout
+    a <- scr_apply(tr, ho)
+    expect_identical(a$tier, tr$codes[findInterval(ho$score, tr$cuts) + 1L])
+    expect_identical(a$tier_label, tr$tier_labels[a$tier])
+    expect_identical(scr_apply(tr, ho, numbered = FALSE)$tier_label, tr$labels[a$tier])
+    th <- tr$table[sample == "holdout"]
+    j <- match(a$tier_label, th$tier_label)
+    expect_false(anyNA(j))
+    expect_identical(th$tier[j], a$tier)
+    expect_equal(as.numeric(table(factor(a$tier_label, th$tier_label))), th$n)
+    # the event-rich end of the score gets "01.": the low scores for credit, the high ones otherwise
+    rich <- if (identical(tr$direction, "higher_is_safer")) min(ho$score) else max(ho$score)
+    expect_match(scr_apply(tr, rich)$tier_label, "^01\\.")
+    sql <- scr_sql(tr, dialect = "ansi")
+    expect_true(any(grepl(sprintf("'%s'", tr$tier_labels[L]), sql, fixed = TRUE)))
+  }
+  # credit and fraud-like are mirror scales of the same model: the same labels, opposite score ends
+  expect_identical(scr_tiers(fx$credit, n_tiers = 3)$tier_labels, c("03.low", "02.medium", "01.high"))
+  expect_identical(scr_tiers(fx$fraud, n_tiers = 3)$tier_labels, c("03.low", "02.medium", "01.high"))
+})
+
+test_that("numbered labels for 2 to 9 tiers, user labels and older objects", {
+  d <- tier_df()
+  for (L in 2:9) {
+    tq <- scr_tiers(d, sample = "smp", method = "quantile", n_tiers = L)
+    expect_identical(tq$n_tiers, L)
+    expect_identical(tq$tier_labels, sprintf("%02d.%s", L:1, .tier_labels(L)))
+    t <- tq$table[sample == "dev"]
+    expect_identical(t$tier_label[1], paste0("01.", .tier_labels(L)[L]))
+    expect_identical(t$tier_label[L], sprintf("%02d.%s", L, .tier_labels(L)[1]))
+    a <- scr_apply(tq, d)
+    expect_setequal(unique(a$tier_label), t$tier_label)
+    expect_identical(a$tier_label, tq$tier_labels[a$tier])
+  }
+  # the prefix is padded to at least two digits, more when the count needs it
+  expect_identical(.tier_numbered(c("a", "b")), c("02.a", "01.b"))
+  expect_identical(.tier_numbered(letters[1:12])[c(1, 12)], c("12.a", "01.l"))
+  expect_identical(.tier_numbered(as.character(1:100))[c(1, 100)], c("100.1", "001.100"))
+  expect_identical(.tier_numbered(character()), character())
+  # user labels get the prefix too
+  tu <- scr_tiers(d, sample = "smp", n_tiers = 3, labels = c("A", "B", "C"))
+  expect_identical(tu$tier_labels, c("03.A", "02.B", "01.C"))
+  expect_identical(tu$table[sample == "dev", tier_label], c("01.C", "02.B", "03.A"))
+  expect_identical(sort(unique(scr_apply(tu, d)$tier_label)), c("01.C", "02.B", "03.A"))
+  expect_true(any(grepl("ELSE '03.A'", scr_sql(tu), fixed = TRUE)))
+  expect_setequal(unique(scr_apply(tu, d, numbered = FALSE)$tier_label), c("A", "B", "C"))
+  expect_output(print(tu), "01.C")
+  # a study fitted before the numbered labels existed still gets them
+  old <- tu; old$tier_labels <- NULL; old$table <- old$table[, -"tier_label"]
+  expect_identical(scr_apply(old, d)$tier_label, scr_apply(tu, d)$tier_label)
+  expect_identical(scr_sql(old)[-3], scr_sql(tu)[-3])
+  expect_output(print(old), "scr_study_tiers")
+  # bands keep their interval labels, with or without the argument
+  b <- scr_bands(d, sample = "smp", n_bands = 4, n_boot = 0)
+  expect_identical(scr_apply(b, d)$tier_label, scr_apply(b, d, numbered = FALSE)$tier_label)
+  expect_identical(scr_apply(b, d)$tier_label, b$code_labels[findInterval(d$score, b$cuts) + 1L])
+  expect_identical(scr_sql(b)[-3], scr_sql(b, numbered = FALSE)[-3])
+  expect_error(scr_apply(tu, d, numbered = NA), "`numbered`")
+  expect_error(scr_sql(tu, numbered = "yes"), "`numbered`")
 })

@@ -8,9 +8,9 @@
     Fisher exact test of rank order, plus the AUC, Gini and KS with a
     bootstrap interval. Accepts a scorecard, a data.frame (with weights,
     a value column and sample labels) or pre-aggregated counts.
-  * `scr_tiers()` fits 3, 5 or 7 labeled tiers (from "very low" to "very
-    high") by an exact dynamic program under share, event and
-    distinctness constraints, by event-rate anchors or by equal shares;
+  * `scr_tiers()` fits 2 to 9 tiers (labeled from "low" to "high", with
+    words for 2 to 7 tiers) by an exact dynamic program under share, event
+    and distinctness constraints, by event-rate anchors or by equal shares;
     `round_to` gives policy-friendly cuts, and `n_boot` measures the
     stability of the cuts. An infeasible tier count falls back and is
     recorded in a ledger.
@@ -18,7 +18,27 @@
     scorecard, the variables red, amber or green, per period or segment
     with `by`; the thresholds are an editable table from `scr_rag_plan()`.
   * `scr_apply()`, `scr_sql()` and `scr_export()` assign the bands or tiers
-    in R and in SQL and write the study to a workbook.
+    in R and in SQL and write the study to a workbook. Tier labels carry
+    their order in production (`"01.very high"` for the tier with the
+    highest event rate, down to `"05.very low"`), so they sort from the
+    event-richest tier; the tiers table has the same value in `tier_label`,
+    and `numbered = FALSE` gives the plain labels.
+  * `scr_claims()` tests statements such as "rate >= 60% for scores of 625
+    or more" on a band, a tier or a score range, with an exact one-sided
+    binomial test, a one-sided Jeffreys bound and a Holm adjustment, and
+    writes each verdict ("supported", "refuted" or "not proven") as one
+    sentence. `type = "floor"` tests the weakest end of the group under a
+    monotone fit of the rate instead of its average.
+  * `scr_operating()` finds the cut that maximizes the value of targeting,
+    alerting or approval under volume, share, budget, event-rate and daily
+    capacity constraints, and reports the binding constraint and its
+    shadow price.
+  * `scr_score_cross()` crosses two scores on the same rows: the table of
+    their bands with one or two outcomes, Spearman's rho and Kendall's
+    tau-b, and the overlap of the rows each selects, with the swap-in and
+    swap-out rates.
+  * The three write a workbook with `scr_export()`; the vignette
+    "Score studies" walks through them on credit, fraud and churn scores.
 * New configuration keys for the score studies (stage 13): `study_bands`,
   `study_level`, `tier_min_pct`, `tier_min_events` and `tier_max_bins`.
 * `scr_pd_validate()` gives the light `"grey"` to a row without a testable

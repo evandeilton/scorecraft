@@ -771,16 +771,27 @@
 
 #' @param score For `scr_study`: name of the score column of `newdata`.
 #'   `newdata` may also be a numeric vector of scores.
+#' @param numbered For a tiers study: `TRUE` (default) returns the tier
+#'   labels with their order in front (`"01.very high"`), `FALSE` the plain
+#'   labels. Band labels are intervals and never get a prefix.
 #' @section Score studies:
 #'
 #' For a score study ([scr_bands()], [scr_tiers()]), `newdata` is returned
 #' (as a copy) with `tier`, the band or tier number, and `tier_label`. The
 #' intervals are left-closed: `score >= cut` is the upper side, and a
 #' missing score gives a missing tier.
+#'
+#' The labels of a tiers study carry their order, `"01."` for the tier with
+#' the highest event rate (the first row of the tiers table) down to the
+#' tier with the lowest, so they sort from the event-richest tier under any
+#' objective and direction; `tier` is unchanged and still rises with the
+#' event rate. The result joins to the `tier_label` column of the tiers
+#' table. `numbered = FALSE` returns the plain labels (its `label` column).
 #' @rdname scr_apply
 #' @export
-scr_apply.scr_study <- function(x, newdata, score = "score", ...) {
+scr_apply.scr_study <- function(x, newdata, score = "score", numbered = TRUE, ...) {
   .study_dots(list(...), "scr_apply")
+  labs <- .study_code_labels(x, numbered, "scr_apply")
   if (is.numeric(newdata) && is.null(dim(newdata))) {
     newdata <- data.table::data.table(score = newdata)
     score <- "score"
@@ -793,8 +804,25 @@ scr_apply.scr_study <- function(x, newdata, score = "score", ...) {
   out <- data.table::copy(data.table::as.data.table(newdata))
   i <- findInterval(as.double(out[[score]]), x$cuts) + 1L
   data.table::set(out, j = "tier", value = x$codes[i])
-  data.table::set(out, j = "tier_label", value = x$code_labels[i])
+  data.table::set(out, j = "tier_label", value = labs[i])
   out[]
+}
+
+#' Label of every ascending interval, as the production methods assign it
+#'
+#' Tier labels with their order in front when `numbered`; the plain labels
+#' otherwise, and always for a bands study (interval labels). The prefix is
+#' rebuilt from the tier labels, so a study fitted before the numbered
+#' labels existed gets them too.
+#' @keywords internal
+#' @noRd
+.study_code_labels <- function(x, numbered, fn) {
+  if (!is.logical(numbered) || length(numbered) != 1L || is.na(numbered)) {
+    stop(fn, "(): `numbered` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!numbered || !inherits(x, "scr_study_tiers")) return(x$code_labels)
+  # `labels` are in tier order and `codes` gives the tier of every interval
+  .tier_numbered(x$labels)[x$codes]
 }
 
 #' @section Score studies:
@@ -805,11 +833,21 @@ scr_apply.scr_study <- function(x, newdata, score = "score", ...) {
 #' `NULL` tier). `table` and `dialect` default to the configuration of the
 #' scorecard the study came from, else to `"your_table"` and `"ansi"`. The
 #' tiers computed by the SQL match [scr_apply()], by an automated test.
+#'
+#' The labels of a tiers study carry their order, `'01.very high'` for the
+#' tier with the highest event rate down to the tier with the lowest, as in
+#' [scr_apply()], so `ORDER BY tier_label` lists the event-richest tier
+#' first; `numbered = FALSE` emits the plain labels. Band labels are
+#' intervals and never get a prefix.
 #' @param score For `scr_study`: name of the score column of `table`.
+#' @param numbered For a tiers study: `TRUE` (default) emits the tier
+#'   labels with their order in front, `FALSE` the plain labels.
 #' @rdname scr_sql
 #' @export
-scr_sql.scr_study <- function(x, table = NULL, dialect = NULL, file = NULL, score = "score", ...) {
+scr_sql.scr_study <- function(x, table = NULL, dialect = NULL, file = NULL, score = "score", numbered = TRUE,
+                              ...) {
   .study_dots(list(...), "scr_sql")
+  labs <- .study_code_labels(x, numbered, "scr_sql")
   table <- table %||% x$sql_table %||% "your_table"
   .study_chr1(table, "table", "scr_sql"); .study_chr1(score, "score", "scr_sql")
   # the dialects of scr_sql() for a scorecard, with the same error
@@ -830,7 +868,7 @@ scr_sql.scr_study <- function(x, table = NULL, dialect = NULL, file = NULL, scor
            "-- =============================================================", "",
            "SELECT", "    s.*,",
            sprintf("    CASE %s END AS tier,", whens(as.character(x$codes))),
-           sprintf("    CASE %s END AS tier_label", whens(.sql_str(x$code_labels, dialect))),
+           sprintf("    CASE %s END AS tier_label", whens(.sql_str(labs, dialect))),
            sprintf("FROM %s s;", table))
   .sql_out(.sql_lines(out), file)
 }

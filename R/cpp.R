@@ -114,6 +114,26 @@ NULL
   cc[["cmd"]] / den
 }
 
+#' Kendall's tau-b of two scores
+#'
+#' `(C - D) / sqrt((n0 - T_a)(n0 - T_b))` with `n0 = n(n-1)/2` and `T_a`,
+#' `T_b` the pairs tied on each score: the pair counts of
+#' `cpp_concordance()` (Knight 1966), exact and `O(n log n)`. Pairs tied on
+#' either score count neither way, so this is the tau-b of
+#' `cor(method = "kendall")`. `NA` with fewer than two rows or a constant
+#' score.
+#' @keywords internal
+#' @noRd
+.scr_kendall_tau_b <- function(a, b) {
+  ok <- is.finite(a) & is.finite(b)
+  a <- as.double(a[ok]); b <- as.double(b[ok])
+  if (length(a) < 2L) return(NA_real_)
+  cc <- cpp_concordance(a, b)
+  den <- (cc[["pairs"]] - cc[["ties_p"]]) * (cc[["pairs"]] - cc[["ties_r"]])
+  if (!(den > 0)) return(NA_real_)
+  cc[["cmd"]] / sqrt(den)
+}
+
 #' @keywords internal
 #' @noRd
 .onUnload <- function(libpath) {

@@ -266,8 +266,11 @@ for traffic lights, \code{\link[=scr_apply]{scr_apply()}} and \code{\link[=scr_s
 production.
 
 Other score-studies:
+\code{\link[=scr_claims]{scr_claims()}},
+\code{\link[=scr_operating]{scr_operating()}},
 \code{\link[=scr_rag]{scr_rag()}},
 \code{\link[=scr_rag_plan]{scr_rag_plan()}},
+\code{\link[=scr_score_cross]{scr_score_cross()}},
 \code{\link[=scr_tiers]{scr_tiers()}}
 }
 \concept{score-studies}
