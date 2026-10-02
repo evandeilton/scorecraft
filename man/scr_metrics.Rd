@@ -62,7 +62,7 @@ covers KS.
 
 The resamples are drawn in one of two ways. With \eqn{K} distinct scores
 in the \eqn{n} rows used (those with a score and an outcome) and
-\eqn{K \le n / 2} (many ties: scorecard points, a grade scale, a WOE
+\eqn{K \le n / 10} (many ties: scorecard points, a grade scale, a WOE
 score on a large sample), each class is redrawn on the counts, as a
 multinomial over the score values with its observed shares, at a cost
 of \eqn{O(K)} per resample. Otherwise the rows of each class are

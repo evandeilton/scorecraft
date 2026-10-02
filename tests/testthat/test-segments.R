@@ -24,7 +24,7 @@ test_that("AUC, KS and the DeLong error equal the row-level estimators", {
     # higher_is_safer: the events sit at the low scores
     m <- .auc_ks(-r$score, r$y)
     expect_equal(row$auc, m$auc); expect_equal(row$ks, m$ks); expect_equal(row$gini, 2 * m$auc - 1)
-    se <- .pd_auc_se(r$score, r$y, higher_is_event = FALSE)
+    se <- ref_auc_se(r$score, r$y, higher_is_event = FALSE)
     expect_equal(row$auc_se, se)
     expect_equal(row$auc_lo, m$auc - z * se); expect_equal(row$auc_hi, m$auc + z * se)
     expect_equal(row$n, nrow(r)); expect_equal(row$events, sum(r$y)); expect_equal(row$rate, mean(r$y))
@@ -32,7 +32,7 @@ test_that("AUC, KS and the DeLong error equal the row-level estimators", {
   # the pooled rows
   p <- sg$pooled
   expect_equal(p$auc, .auc_ks(-d$score, d$y)$auc)
-  expect_equal(p$auc_se, .pd_auc_se(d$score, d$y, higher_is_event = FALSE))
+  expect_equal(p$auc_se, ref_auc_se(d$score, d$y, higher_is_event = FALSE))
   expect_equal(p$n, nrow(d)); expect_equal(p$rate, mean(d$y))
   # a score read the other way has the mirrored AUC and the same error
   f <- d; f$score <- -f$score
@@ -126,7 +126,7 @@ test_that("the test of equal AUC is the inverse-variance chi-square", {
   sn <- c("app", "store", "web")
   for (k in 1:3) {
     r <- d[d$seg == sn[k], ]
-    auc[k] <- .auc_ks(-r$score, r$y)$auc; se[k] <- .pd_auc_se(r$score, r$y, higher_is_event = FALSE)
+    auc[k] <- .auc_ks(-r$score, r$y)$auc; se[k] <- ref_auc_se(r$score, r$y, higher_is_event = FALSE)
   }
   w <- 1 / se^2
   aw <- sum(w * auc) / sum(w)

@@ -40,3 +40,17 @@ sc_prop_demo <- function() {
   }
   .fx$sc_prop
 }
+
+# DeLong standard error of an AUC from the mid-ranks of the rows: the
+# row-level reference for the count version used by the package
+ref_auc_se <- function(score, y, higher_is_event = TRUE) {
+  ok <- !is.na(score) & !is.na(y)
+  s <- as.double(score[ok]); y <- as.integer(y[ok])
+  if (!higher_is_event) s <- -s
+  e <- y == 1L; n1 <- sum(e); n0 <- sum(!e)
+  if (n1 < 2L || n0 < 2L) return(NA_real_)
+  r <- data.table::frank(s, ties.method = "average")
+  v10 <- (r[e] - data.table::frank(s[e], ties.method = "average")) / n0
+  v01 <- 1 - (r[!e] - data.table::frank(s[!e], ties.method = "average")) / n1
+  sqrt(stats::var(v10) / n1 + stats::var(v01) / n0)
+}
