@@ -137,7 +137,7 @@ not used: the interval is a stratified percentile bootstrap, which also
 covers KS.</p>
 <p>The resamples are drawn in one of two ways. With \(K\) distinct scores
 in the \(n\) rows used (those with a score and an outcome) and
-\(K \le n / 2\) (many ties: scorecard points, a grade scale, a WOE
+\(K \le n / 10\) (many ties: scorecard points, a grade scale, a WOE
 score on a large sample), each class is redrawn on the counts, as a
 multinomial over the score values with its observed shares, at a cost
 of \(O(K)\) per resample. Otherwise the rows of each class are

@@ -121,7 +121,7 @@
   `score_groups`.
 - [`scr_metrics()`](https://evandeilton.github.io/scorecraft/reference/scr_metrics.md)
   draws its bootstrap on the counts per score value when the score has
-  many ties (at most one distinct value for every two rows: scorecard
+  many ties (at most one distinct value for every ten rows: scorecard
   points, a grade scale, a WOE score on a large sample), so the cost of
   a resample follows the number of distinct scores, not of rows. The
   intervals of such scores keep their distribution but change for a
@@ -132,8 +132,11 @@
   [`scr_reject()`](https://evandeilton.github.io/scorecraft/reference/scr_reject.md)
   and
   [`scr_psi()`](https://evandeilton.github.io/scorecraft/reference/scr_psi.md)
-  assign the bands as integer indices, without a factor per row. No
-  other result changes.
+  assign the bands as integer indices, without a factor per row. The
+  DeLong standard error of
+  [`scr_pd_validate()`](https://evandeilton.github.io/scorecraft/reference/scr_pd_validate.md)
+  is computed from the counts and can differ in the last digits (about
+  1e-16). No other result changes.
 - The cheat sheet gains a third page on the score studies.
 
 ## scorecraft 0.3.1
