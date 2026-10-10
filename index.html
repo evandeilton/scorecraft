@@ -78,7 +78,6 @@
 
 <p>A production-grade scorecard engine for binary targets (credit risk, fraud, propensity), built on <a href="https://CRAN.R-project.org/package=OptimalBinningWoE" class="external-link">OptimalBinningWoE</a>. It selects variables through optimal binning and a multi-strategy consensus, fits the points scorecard with an explicit and auditable <strong>scale alignment</strong>, sweeps cut-offs with frozen cuts, performs honest reject inference, monitors PSI/CSI with both the fixed and the sample-size-adjusted threshold, and emits <strong>production SQL</strong> whose output is verified against R by test. An IRB layer takes the scorecard to regulatory parameters: default definition, PD calibration with rating grades and margins of conservatism, workout LGD, EAD conversion factors, expected loss, risk weights, capital and ECL, with the same ledgers, SQL and workbooks.</p>
 <p>Every stage is an exported function; <code><a href="reference/scr_select.html">scr_select()</a></code> and <code><a href="reference/scr_scorecard.html">scr_scorecard()</a></code> are the shortcuts that chain them.</p>
-<p>On CRAN: <a href="https://CRAN.R-project.org/package=scorecraft" class="external-link uri">https://CRAN.R-project.org/package=scorecraft</a>. Documentation site: <a href="https://evandeilton.github.io/scorecraft/" class="uri">https://evandeilton.github.io/scorecraft/</a>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>

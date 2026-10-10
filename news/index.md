@@ -2,6 +2,8 @@
 
 ## scorecraft 0.3.2
 
+CRAN release: 2026-10-10
+
 - New score studies, computed from one pass over the scored rows into a
   table of counts per score value:
   - [`scr_bands()`](https://evandeilton.github.io/scorecraft/reference/scr_bands.md)

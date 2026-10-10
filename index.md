@@ -20,9 +20,6 @@ and
 [`scr_scorecard()`](https://evandeilton.github.io/scorecraft/reference/scr_scorecard.md)
 are the shortcuts that chain them.
 
-On CRAN: <https://CRAN.R-project.org/package=scorecraft>. Documentation
-site: <https://evandeilton.github.io/scorecraft/>.
-
 ## Installation
 
 ``` r
