@@ -14,3 +14,5 @@ src/*.o
 src/*.so
 src/*.dll
 tests/testthat/testthat-problems.rds
+# written by devtools::submit_cran()
+/CRAN-SUBMISSION
