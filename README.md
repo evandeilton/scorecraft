@@ -23,9 +23,6 @@ and ECL, with the same ledgers, SQL and workbooks.
 Every stage is an exported function; `scr_select()` and `scr_scorecard()`
 are the shortcuts that chain them.
 
-On CRAN: <https://CRAN.R-project.org/package=scorecraft>. Documentation site:
-<https://evandeilton.github.io/scorecraft/>.
-
 ## Installation
 
 ```r
