@@ -1,6 +1,6 @@
 # Changelog
 
-## scorecraft (development version)
+## scorecraft 0.3.2
 
 - New score studies, computed from one pass over the scored rows into a
   table of counts per score value:
@@ -163,6 +163,8 @@
   example `utilisation`, `realised` and the `"grey"` traffic light).
 
 ## scorecraft 0.3.0
+
+CRAN release: 2026-10-06
 
 - [`scr_lgd_downturn()`](https://evandeilton.github.io/scorecraft/reference/scr_lgd_downturn.md)
   and
