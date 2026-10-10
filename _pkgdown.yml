@@ -8,7 +8,7 @@ home:
   title: scorecraft - scorecard engine with scale alignment, cut-off strategy, IRB risk parameters and production SQL
   links:
   - text: Binning engine (OptimalBinningWoE)
-    href: https://github.com/evandeilton/OptimalBinningWoE
+    href: https://CRAN.R-project.org/package=OptimalBinningWoE
 
 navbar:
   bg: dark
