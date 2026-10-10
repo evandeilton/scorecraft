@@ -1,12 +1,14 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note
 
-* This is an update of scorecraft 0.3.0. It fixes the noLD additional issue:
-  a test parsed 17-digit SQL literals back with `as.numeric()`, which is off by
-  one ulp without long double. The test now compares the literals as text.
-* It also adds the score studies (`scr_bands()`, `scr_tiers()`, `scr_rag()` and
-  related functions); see NEWS.md.
+* checking CRAN incoming feasibility: "Days since last update: 3". This
+  update fixes the noLD additional issue reported by the CRAN team (deadline
+  2026-10-30): a test parsed 17-digit SQL literals back with `as.numeric()`,
+  which is off by one ulp without long double. The test now compares the
+  literals as text.
+* The update also adds the score studies (`scr_bands()`, `scr_tiers()`,
+  `scr_rag()` and related functions); see NEWS.md.
 
 ## Test environments
 
