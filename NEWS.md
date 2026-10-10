@@ -1,4 +1,4 @@
-# scorecraft (development version)
+# scorecraft 0.3.2
 
 * New score studies, computed from one pass over the scored rows into a
   table of counts per score value:

@@ -1,0 +1,37 @@
+# Tests without long double: the CRAN "noLD" additional check, run in the
+# R-hub container (R-devel configured with --disable-long-double). Run it by
+# hand before a release.
+on:
+  workflow_dispatch:
+
+name: noLD.yaml
+
+permissions: read-all
+
+jobs:
+  noLD:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    container:
+      image: ghcr.io/r-hub/containers/nold:latest
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      MAKEFLAGS: -j4
+      # R-devel has no binaries, so the heavy optional Suggests are left out
+      # (their tests skip themselves)
+      _R_CHECK_FORCE_SUGGESTS_: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Install dependencies
+        run: |
+          R -q -e 'pak::pkg_install(c("deps::.", "any::rcmdcheck", "duckdb=?ignore", "lightgbm=?ignore"), dependencies = TRUE)'
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          error-on: '"error"'
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'

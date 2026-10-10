@@ -1,6 +1,6 @@
 Package: scorecraft
 Title: Scorecard Development and Internal Ratings-Based Risk Parameters
-Version: 0.3.1.9000
+Version: 0.3.2
 Authors@R: c(
     person("Jose Evandeilton", "Lopes", email = "evandeilton@gmail.com",
            role = c("aut", "cre", "cph"))
@@ -33,7 +33,7 @@ Description: Builds points scorecards for binary targets (credit risk, fraud,
     <doi:10.1002/9781119282396> and Thomas et al. (2017)
     <doi:10.1137/1.9781611974560>.
 License: MIT + file LICENSE
-URL: https://github.com/evandeilton/scorecraft
+URL: https://github.com/evandeilton/scorecraft, https://evandeilton.github.io/scorecraft/
 BugReports: https://github.com/evandeilton/scorecraft/issues
 Encoding: UTF-8
 Language: en-US
