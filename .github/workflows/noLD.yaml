@@ -1,7 +1,7 @@
 # Tests without long double: the CRAN "noLD" additional check, run in the
-# R-hub container (R-devel configured with --disable-long-double).
+# R-hub container (R-devel configured with --disable-long-double). Run it by
+# hand before a release.
 on:
-  pull_request:
   workflow_dispatch:
 
 name: noLD.yaml
